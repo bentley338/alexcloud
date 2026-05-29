@@ -1,0 +1,94 @@
+<% currentPage = 'orders'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-shopping-cart"></i> Kelola Order</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<!-- Filter Tabs -->
+<div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.5rem;" id="filterTabs">
+  <button onclick="filterOrders('all')" class="btn-action btn-confirm" id="tab-all" style="border-radius:50px;">Semua (<%= orders.length %>)</button>
+  <button onclick="filterOrders('pending')" class="btn-action" id="tab-pending" style="border-radius:50px; background:rgba(255,200,0,0.1); color:#ffd700;">Pending (<%= orders.filter(o=>o.status==='pending').length %>)</button>
+  <button onclick="filterOrders('confirmed')" class="btn-action" id="tab-confirmed" style="border-radius:50px; background:rgba(0,255,136,0.1); color:var(--accent-green);">Confirmed (<%= orders.filter(o=>o.status==='confirmed').length %>)</button>
+  <button onclick="filterOrders('rejected')" class="btn-action" id="tab-rejected" style="border-radius:50px; background:rgba(255,68,68,0.1); color:#ff6666;">Rejected (<%= orders.filter(o=>o.status==='rejected').length %>)</button>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>User</th>
+          <th>Paket</th>
+          <th>Harga</th>
+          <th>Status</th>
+          <th>Waktu Order</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTable">
+        <% if (orders.length === 0) { %>
+        <tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-muted);">Belum ada order.</td></tr>
+        <% } %>
+        <% orders.forEach(order => { %>
+        <tr class="order-row" data-status="<%= order.status %>">
+          <td>
+            <span style="font-family:var(--font-display); font-size:0.8rem; color:var(--accent-blue)"><%= order.orderId %></span>
+          </td>
+          <td>
+            <div style="font-family:var(--font-ui); font-weight:600;"><%= order.userName %></div>
+            <div style="font-size:0.78rem; color:var(--text-muted)"><%= order.userEmail %></div>
+          </td>
+          <td style="font-family:var(--font-ui);"><%= order.planName %></td>
+          <td style="color:var(--accent-green); font-family:var(--font-ui); font-weight:700;">Rp <%= order.price.toLocaleString('id-ID') %></td>
+          <td>
+            <span class="status-badge status-<%= order.status %>">
+              <%= order.status === 'pending' ? '⏳ Pending' : order.status === 'confirmed' ? '✅ Confirmed' : '❌ Rejected' %>
+            </span>
+          </td>
+          <td style="font-size:0.85rem; color:var(--text-muted)">
+            <%= moment(order.createdAt).format('DD/MM/YYYY HH:mm') %>
+          </td>
+          <td>
+            <% if (order.status === 'pending') { %>
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <form action="/admin/orders/<%= order.id %>/confirm" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-confirm">
+                  <i class="fas fa-check"></i> Konfirmasi
+                </button>
+              </form>
+              <form action="/admin/orders/<%= order.id %>/reject" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-reject"
+                  onclick="return confirm('Tolak order <%= order.orderId %>?')">
+                  <i class="fas fa-times"></i> Tolak
+                </button>
+              </form>
+            </div>
+            <% } else { %>
+            <span style="color:var(--text-muted); font-size:0.85rem;">
+              <%= order.status === 'confirmed' ? '✅ Done' : '❌ Rejected' %>
+            </span>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function filterOrders(status) {
+  document.querySelectorAll('.order-row').forEach(row => {
+    row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+  });
+}
+</script>
+
+<%- include('layout-footer') %>

@@ -1,0 +1,121 @@
+<% currentPage = 'dashboard'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-tachometer-alt"></i> Dashboard Admin</h1>
+
+<div class="admin-stats-grid">
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-blue)"><%= stats.totalUsers %></div>
+    <div class="admin-stat-label"><i class="fas fa-users"></i> Total User</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:#ffd700"><%= stats.totalOrders %></div>
+    <div class="admin-stat-label"><i class="fas fa-shopping-cart"></i> Total Order</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-orange)"><%= stats.pendingOrders %></div>
+    <div class="admin-stat-label"><i class="fas fa-clock"></i> Order Pending</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-green)"><%= stats.activeSubscriptions %></div>
+    <div class="admin-stat-label"><i class="fas fa-id-card"></i> Subscription Aktif</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:#a855f7; font-size:1.4rem;">Rp <%= stats.totalRevenue.toLocaleString('id-ID') %></div>
+    <div class="admin-stat-label"><i class="fas fa-money-bill"></i> Total Revenue</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-blue)"><%= stats.totalGames %></div>
+    <div class="admin-stat-label"><i class="fas fa-gamepad"></i> Total Game</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-green)"><%= stats.activePromos %></div>
+    <div class="admin-stat-label"><i class="fas fa-tag"></i> Promo Aktif</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:#ffd700"><%= stats.totalTestimonials %></div>
+    <div class="admin-stat-label"><i class="fas fa-star"></i> Total Testimoni</div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-bottom:2rem;">
+  <a href="/admin/promo" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-tag"></i> Buat Promo</a>
+  <a href="/admin/testimonials" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-star"></i> Tambah Testimoni</a>
+  <a href="/admin/plans" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-dollar-sign"></i> Edit Harga</a>
+  <a href="/admin/games" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-gamepad"></i> Kelola Game</a>
+</div>
+
+<!-- Pending Orders Alert -->
+<% if (stats.pendingOrders > 0) { %>
+<div style="background:rgba(255,200,0,0.08); border:1px solid rgba(255,200,0,0.3); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:2rem; display:flex; align-items:center; gap:0.75rem; font-family:var(--font-ui);">
+  <i class="fas fa-bell" style="color:#ffd700; font-size:1.1rem;"></i>
+  <span>Ada <strong style="color:#ffd700"><%= stats.pendingOrders %> order</strong> yang menunggu konfirmasi!</span>
+  <a href="/admin/orders" style="margin-left:auto; color:var(--accent-blue); text-decoration:none; font-weight:600;">Konfirmasi Sekarang →</a>
+</div>
+<% } %>
+
+<!-- Recent Orders -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-history"></i> Order Terbaru</div>
+    <a href="/admin/orders" class="btn-action btn-confirm">Lihat Semua</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>User</th>
+          <th>Paket</th>
+          <th>Harga</th>
+          <th>Promo</th>
+          <th>Status</th>
+          <th>Tanggal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (recentOrders.length === 0) { %>
+        <tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Belum ada order</td></tr>
+        <% } %>
+        <% recentOrders.forEach(order => { %>
+        <tr>
+          <td><span style="font-family:var(--font-display); font-size:0.8rem; color:var(--accent-blue)"><%= order.orderId %></span></td>
+          <td>
+            <div style="font-family:var(--font-ui); font-size:0.9rem;"><%= order.userName %></div>
+            <div style="font-size:0.78rem; color:var(--text-muted)"><%= order.userEmail %></div>
+          </td>
+          <td><%= order.planName %></td>
+          <td style="color:var(--accent-green); font-family:var(--font-ui); font-weight:600;">Rp <%= order.price.toLocaleString('id-ID') %></td>
+          <td>
+            <% if (order.promoCode) { %>
+              <span style="background:rgba(0,212,255,0.1); color:var(--accent-blue); border:1px solid rgba(0,212,255,0.3); padding:0.15rem 0.4rem; border-radius:4px; font-size:0.75rem; font-family:var(--font-display);"><%= order.promoCode %></span>
+            <% } else { %><span style="color:var(--text-muted); font-size:0.8rem;">—</span><% } %>
+          </td>
+          <td><span class="status-badge status-<%= order.status %>">
+            <%= order.status === 'pending' ? '⏳ Pending' : order.status === 'confirmed' ? '✅ Confirmed' : '❌ Rejected' %>
+          </span></td>
+          <td style="font-size:0.85rem; color:var(--text-muted)"><%= moment(order.createdAt).format('DD/MM/YY HH:mm') %></td>
+          <td>
+            <% if (order.status === 'pending') { %>
+            <div style="display:flex; gap:0.4rem;">
+              <form action="/admin/orders/<%= order.id %>/confirm" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-confirm" title="Konfirmasi">✅</button>
+              </form>
+              <form action="/admin/orders/<%= order.id %>/reject" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-reject" title="Tolak">❌</button>
+              </form>
+            </div>
+            <% } else { %>
+            <span style="color:var(--text-muted); font-size:0.85rem;">—</span>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('layout-footer') %>

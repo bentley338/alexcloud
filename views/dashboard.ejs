@@ -1,0 +1,163 @@
+<%- include('partials/header') %>
+
+<div class="dashboard-page">
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <div>
+        <p style="color:var(--text-muted); font-family:var(--font-ui); margin-bottom:0.25rem;">Dashboard</p>
+        <h1 class="dashboard-greeting">Halo, <span class="name"><%= user.name.split(' ')[0] %></span> 👋</h1>
+        <!-- Session info badge -->
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.35rem; flex-wrap:wrap;">
+          <span style="display:inline-flex; align-items:center; gap:0.35rem; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); color:var(--accent-green); font-family:var(--font-ui); font-size:0.75rem; font-weight:600; padding:0.2rem 0.6rem; border-radius:100px;">
+            <i class="fas fa-shield-check"></i>
+            <% if (user.googleId) { %>
+              Login via Google
+            <% } else { %>
+              Login via Email
+            <% } %>
+          </span>
+          <% if (rememberMe) { %>
+          <span style="display:inline-flex; align-items:center; gap:0.35rem; background:rgba(0,212,255,0.07); border:1px solid rgba(0,212,255,0.15); color:var(--accent-blue); font-family:var(--font-ui); font-size:0.75rem; font-weight:600; padding:0.2rem 0.6rem; border-radius:100px;">
+            <i class="fas fa-sync-alt"></i> Sesi tersimpan 30 hari
+          </span>
+          <% } %>
+        </div>
+      </div>
+      <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+        <% if (user.role === 'admin') { %>
+        <a href="/admin" class="btn-secondary" style="font-family:var(--font-ui)">
+          <i class="fas fa-cog"></i> Admin Panel
+        </a>
+        <% } %>
+        <a href="/pricing" class="btn-primary"><i class="fas fa-plus"></i> Order Paket</a>
+      </div>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-box"></i></div>
+        <div class="stat-info">
+          <div class="label">Total Order</div>
+          <div class="value"><%= orders.length %></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-gamepad"></i></div>
+        <div class="stat-info">
+          <div class="label">Status Akun</div>
+          <div class="value" style="font-size:1rem; color:<%= subscription ? 'var(--accent-green)' : '#888' %>">
+            <%= subscription ? '✅ Aktif' : '❌ Tidak Aktif' %>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-calendar"></i></div>
+        <div class="stat-info">
+          <div class="label">Sisa Hari</div>
+          <div class="value"><%= subscription ? subscription.daysLeft + ' hari' : '-' %></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-tag"></i></div>
+        <div class="stat-info">
+          <div class="label">Paket Aktif</div>
+          <div class="value" style="font-size:0.9rem"><%= subscription ? subscription.planName : 'Tidak Ada' %></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-grid">
+      <!-- Orders Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-history"></i> Riwayat Order</div>
+          <a href="/pricing" class="btn-action btn-confirm"><i class="fas fa-plus"></i> Order Baru</a>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <% if (orders.length === 0) { %>
+          <div style="text-align:center; padding:3rem; color:var(--text-muted);">
+            <i class="fas fa-inbox" style="font-size:2rem; margin-bottom:1rem;"></i>
+            <p>Belum ada order. <a href="/pricing" style="color:var(--accent-blue)">Order sekarang!</a></p>
+          </div>
+          <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Paket</th>
+                  <th>Harga</th>
+                  <th>Status</th>
+                  <th>Tanggal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% orders.forEach(order => { %>
+                <tr>
+                  <td><span style="font-family:var(--font-display);font-size:0.8rem;color:var(--accent-blue)"><%= order.orderId %></span></td>
+                  <td><%= order.planName %></td>
+                  <td style="color:var(--accent-green)">Rp <%= order.price.toLocaleString('id-ID') %></td>
+                  <td>
+                    <span class="status-badge status-<%= order.status %>">
+                      <%= order.status === 'pending' ? '⏳ Menunggu' : order.status === 'confirmed' ? '✅ Dikonfirmasi' : '❌ Ditolak' %>
+                    </span>
+                  </td>
+                  <td style="color:var(--text-muted); font-size:0.85rem;"><%= moment(order.createdAt).format('DD/MM/YY') %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Sub Info + Plans -->
+      <div>
+        <% if (subscription) { %>
+        <div class="sub-card" style="margin-bottom:1.5rem;">
+          <div class="sub-active-label">✅ Subscription Aktif</div>
+          <div class="sub-plan-name"><%= subscription.planName %></div>
+          <div class="sub-expires">Berakhir: <%= subscription.expiryFormatted %></div>
+          <div class="sub-days-badge"><%= subscription.daysLeft %> hari tersisa</div>
+        </div>
+        <% } else { %>
+        <div class="no-sub card" style="margin-bottom:1.5rem;">
+          <div class="card-body" style="text-align:center; padding:2rem;">
+            <i class="fas fa-lock" style="font-size:2.5rem; color:var(--text-muted); margin-bottom:1rem;"></i>
+            <p style="color:var(--text-muted); margin-bottom:1.25rem;">Kamu belum memiliki subscription aktif</p>
+            <a href="/pricing" class="btn-primary"><i class="fas fa-gamepad"></i> Subscribe Sekarang</a>
+          </div>
+        </div>
+        <% } %>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-tags"></i> Pilih Paket</div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+              <% plans.forEach(plan => { %>
+              <a href="/order/<%= plan.id %>" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; text-decoration:none; transition:var(--transition);"
+                onmouseover="this.style.borderColor='var(--accent-blue)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div>
+                  <div style="font-family:var(--font-ui); font-weight:700; color:var(--text-primary)"><%= plan.name %></div>
+                  <div style="font-size:0.8rem; color:var(--text-muted)"><%= plan.duration %> hari akses</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-family:var(--font-display); font-weight:700; color:<%= plan.popular ? 'var(--accent-blue)' : 'var(--text-primary)' %>"><%= plan.priceDisplay %></div>
+                  <% if (plan.popular) { %><div style="font-size:0.7rem; color:var(--accent-blue)">POPULER</div><% } %>
+                </div>
+              </a>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

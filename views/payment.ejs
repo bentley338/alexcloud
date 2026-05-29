@@ -1,0 +1,775 @@
+<%- include('partials/header') %>
+
+<div class="payment-page">
+  <div class="payment-container">
+
+    <!-- Header -->
+    <div class="pay-header">
+      <a href="/dashboard" class="pay-back"><i class="fas fa-arrow-left"></i></a>
+      <div class="pay-header-info">
+        <div class="pay-header-title">Pembayaran</div>
+        <div class="pay-header-sub">Order #<%= order.orderId %></div>
+      </div>
+      <div class="pay-logo">⚡</div>
+    </div>
+
+    <% if (fr3Success) { %>
+    <!-- ======= FR3 QRIS PAYMENT ======= -->
+    <div class="pay-card qris-card">
+
+      <!-- Status bar -->
+      <div class="pay-status-bar" id="statusBar">
+        <div class="pay-status-dot pending" id="statusDot"></div>
+        <span id="statusText">Menunggu pembayaran...</span>
+        <span class="pay-timer" id="payTimer">09:59</span>
+      </div>
+
+      <!-- QR Code Section -->
+      <div class="qr-section">
+        <div class="qr-brand-row">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/QRIS_logo.svg/200px-QRIS_logo.svg.png" alt="QRIS" style="height:28px;">
+          <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); border-left:1px solid var(--border); padding-left:0.75rem; margin-left:0.25rem;">Scan dengan semua e-wallet</span>
+        </div>
+
+        <!-- QR Code rendered from qr_string -->
+        <div class="qr-box" id="qrBox">
+          <!-- Primary: render via QR server API (100% reliable) -->
+          <% if (order.fr3QrString) { %>
+          <img 
+            id="qrImg"
+            src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=<%= encodeURIComponent(order.fr3QrString) %>"
+            width="220" height="220"
+            alt="QRIS Payment Code"
+            style="border-radius:8px; display:block;"
+            onerror="this.onerror=null; renderQRFallback();"
+          >
+          <% } else { %>
+          <div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;">
+            <div style="color:#999;font-size:0.8rem;text-align:center;"><i class="fas fa-exclamation-circle"></i><br>QR tidak tersedia</div>
+          </div>
+          <% } %>
+          <div class="qr-overlay" id="qrExpired" style="display:none;">
+            <div class="qr-expired-inner">
+              <i class="fas fa-clock" style="font-size:2rem; color:#ff6666; margin-bottom:0.5rem;"></i>
+              <div style="font-weight:700; color:#ff6666;">QR Kadaluarsa</div>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">Buat order baru</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">
+          Bayar sejumlah tepat:
+        </div>
+        <div class="pay-total-amount">
+          Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %>
+          <% if (order.fr3UniqueCode > 0) { %>
+          <span class="unique-code-badge">+<%= order.fr3UniqueCode %> kode unik</span>
+          <% } %>
+        </div>
+        <% if (order.fr3UniqueCode > 0) { %>
+        <div class="unique-code-note">
+          <i class="fas fa-info-circle"></i>
+          Bayar tepat <strong>Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %></strong> (termasuk kode unik). Kode unik akan dikembalikan otomatis.
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="pay-summary">
+        <div class="pay-sum-row">
+          <span>Paket</span>
+          <span><strong><%= plan.name %></strong></span>
+        </div>
+        <div class="pay-sum-row">
+          <span>Harga Paket</span>
+          <span><%= priceDisplay %></span>
+        </div>
+        <% if (discount > 0) { %>
+        <div class="pay-sum-row" style="color:var(--accent-green);">
+          <span>Diskon Promo</span>
+          <span>- Rp <%= discount.toLocaleString('id-ID') %></span>
+        </div>
+        <% } %>
+        <% if (order.fr3UniqueCode > 0) { %>
+        <div class="pay-sum-row" style="color:var(--accent-blue);">
+          <span>Kode Unik</span>
+          <span>+ Rp <%= order.fr3UniqueCode %></span>
+        </div>
+        <% } %>
+        <div class="pay-sum-row total-row">
+          <span>Total Bayar</span>
+          <span class="total-val">Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %></span>
+        </div>
+      </div>
+
+      <!-- Supported wallets -->
+      <div class="wallet-row">
+        <div class="wallet-item">GoPay</div>
+        <div class="wallet-item">OVO</div>
+        <div class="wallet-item">DANA</div>
+        <div class="wallet-item">ShopeePay</div>
+        <div class="wallet-item">m-Banking</div>
+        <div class="wallet-item">LinkAja</div>
+      </div>
+
+      <!-- Cancel -->
+      <button class="cancel-btn" id="cancelBtn" onclick="cancelPayment()">
+        <i class="fas fa-times"></i> Batalkan Pembayaran
+      </button>
+
+      <!-- Success state (hidden, shown on payment success) -->
+      <div id="successState" style="display:none;" class="success-state">
+        <div class="success-icon-wrap">
+          <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="success-burst"></div>
+        </div>
+        <div class="success-title">Pembayaran Berhasil! 🎉</div>
+        <div class="success-sub">Transaksi kamu sudah terkonfirmasi otomatis oleh sistem.</div>
+
+        <!-- Order recap -->
+        <div class="success-recap">
+          <div class="success-recap-row">
+            <span><i class="fas fa-box"></i> Paket</span>
+            <span><%= plan.name %></span>
+          </div>
+          <div class="success-recap-row">
+            <span><i class="fas fa-receipt"></i> Order ID</span>
+            <span style="font-family:var(--font-display); color:var(--accent-blue)">#<%= order.orderId %></span>
+          </div>
+          <div class="success-recap-row">
+            <span><i class="fas fa-money-bill"></i> Total Bayar</span>
+            <span style="color:var(--accent-green); font-weight:700;">Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %></span>
+          </div>
+        </div>
+
+        <!-- WA Confirmation Step -->
+        <div class="wa-step-box">
+          <div class="wa-step-title">
+            <i class="fas fa-exclamation-circle" style="color:#ffd700;"></i>
+            Langkah Terakhir!
+          </div>
+          <div class="wa-step-desc">
+            Klik tombol di bawah untuk konfirmasi ke Admin via WhatsApp agar akun cloud gaming kamu segera dikirimkan. 
+            <strong style="color:white;">Jangan lewatkan langkah ini!</strong>
+          </div>
+          <a id="waConfirmBtn" href="#" target="_blank" class="wa-confirm-final">
+            <i class="fab fa-whatsapp"></i>
+            Konfirmasi & Minta Akun ke Admin
+          </a>
+          <div class="wa-step-note">
+            <i class="fas fa-clock"></i>
+            Akun akan dikirim dalam <strong>1–15 menit</strong> setelah konfirmasi WA
+          </div>
+        </div>
+
+        <a href="/dashboard" class="success-dashboard-link">
+          <i class="fas fa-tachometer-alt"></i> Lihat Dashboard
+        </a>
+      </div>
+    </div>
+
+    <% } else { %>
+    <!-- ======= FALLBACK: Manual Payment ======= -->
+    <div class="pay-card">
+      <% if (fr3Error) { %>
+      <div class="fr3-error-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Tidak dapat membuat QRIS otomatis</strong><br>
+          <span style="font-size:0.82rem;">Silakan bayar manual via WhatsApp Admin.</span>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="qr-section">
+        <% if (qrisImage) { %>
+        <img src="<%= qrisImage %>" alt="QRIS" class="manual-qr-img">
+        <% } %>
+        <div class="pay-total-amount"><%= priceDisplay %></div>
+      </div>
+
+      <div class="pay-summary">
+        <div class="pay-sum-row">
+          <span>Paket</span>
+          <span><strong><%= plan.name %></strong></span>
+        </div>
+        <div class="pay-sum-row total-row">
+          <span>Total</span>
+          <span class="total-val"><%= priceDisplay %></span>
+        </div>
+      </div>
+
+      <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud!\n\nSaya mau bayar:\n- Order: ' + order.orderId + '\n- Paket: ' + plan.name + '\n- Harga: ' + priceDisplay) %>" target="_blank" class="wa-confirm-btn">
+        <i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp
+      </a>
+    </div>
+    <% } %>
+
+    <!-- Info box -->
+    <div class="pay-info-box">
+      <i class="fas fa-shield-alt" style="color:var(--accent-blue); margin-top:2px;"></i>
+      <div>
+        <% if (fr3Success) { %>
+        Pembayaran diproses otomatis. Akun akan diaktifkan dalam <strong>hitungan detik</strong> setelah pembayaran sukses. QRIS berlaku <strong>10 menit</strong>.
+        <% } else { %>
+        Setelah transfer, kirim bukti ke admin WhatsApp untuk konfirmasi. Akun aktif dalam 1–15 menit.
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.payment-page {
+  min-height: 100vh;
+  padding: 5rem 1rem 3rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: radial-gradient(ellipse at top, rgba(0,212,255,0.04), transparent 60%);
+}
+.payment-container { width: 100%; max-width: 480px; }
+
+.pay-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.pay-back {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+.pay-back:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+.pay-header-info { flex: 1; }
+.pay-header-title { font-family: var(--font-ui); font-weight: 800; font-size: 1.1rem; }
+.pay-header-sub { font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); }
+.pay-logo { font-size: 1.5rem; }
+
+.pay-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.pay-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(255,215,0,0.05);
+  border-bottom: 1px solid rgba(255,215,0,0.1);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.pay-status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  animation: statusPulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.pay-status-dot.pending { background: #ffd700; box-shadow: 0 0 8px #ffd700; }
+.pay-status-dot.success { background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); animation: none; }
+.pay-status-dot.expired { background: #ff4444; box-shadow: 0 0 8px #ff4444; animation: none; }
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.pay-timer {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--accent-blue);
+  font-weight: 700;
+  background: rgba(0,212,255,0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0,212,255,0.2);
+}
+
+.qr-section { padding: 1.5rem; text-align: center; border-bottom: 1px solid var(--border); }
+.qr-brand-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
+.qr-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 16px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+#qrCanvas { display: block; }
+.qr-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.8);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qr-expired-inner { text-align: center; }
+.pay-total-amount {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.25rem;
+}
+.unique-code-badge {
+  font-size: 0.8rem;
+  background: rgba(0,212,255,0.1);
+  color: var(--accent-blue);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0,212,255,0.2);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  -webkit-text-fill-color: var(--accent-blue);
+  vertical-align: middle;
+}
+.unique-code-note {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.1);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.pay-summary {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.pay-sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+  color: var(--text-secondary);
+}
+.total-row {
+  border-top: 1px solid var(--border);
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+.total-val {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--accent-blue);
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.wallet-row {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.85rem 1.5rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+}
+.wallet-item {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  color: var(--text-muted);
+}
+
+.cancel-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: none;
+  border: none;
+  color: rgba(255,100,100,0.7);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.cancel-btn:hover { color: #ff6666; }
+
+.success-state {
+  padding: 1.75rem;
+  text-align: center;
+  border-top: 1px solid rgba(0,255,136,0.15);
+  background: rgba(0,255,136,0.02);
+}
+.success-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+.success-icon {
+  font-size: 3.5rem;
+  color: var(--accent-green);
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+  z-index: 1;
+}
+.success-burst {
+  position: absolute;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,255,136,0.25) 0%, transparent 70%);
+  animation: burst 0.6s ease-out forwards;
+}
+@keyframes burst { from { transform: scale(0); opacity: 1; } to { transform: scale(2.5); opacity: 0; } }
+@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+  color: var(--accent-green);
+}
+.success-sub {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+/* Order recap inside success */
+.success-recap {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+.success-recap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.success-recap-row:last-child { border-bottom: none; }
+.success-recap-row span:first-child { display: flex; align-items: center; gap: 0.4rem; }
+.success-recap-row i { width: 14px; text-align: center; color: var(--accent-blue); }
+
+/* WA Step Box */
+.wa-step-box {
+  background: linear-gradient(135deg, rgba(37,211,102,0.08), rgba(18,140,126,0.06));
+  border: 1.5px solid rgba(37,211,102,0.25);
+  border-radius: 18px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.wa-step-title {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.wa-step-desc {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.wa-confirm-final {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+  border-radius: 14px;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: 0.2s;
+  box-shadow: 0 6px 24px rgba(37,211,102,0.35);
+  animation: waPulse 2s ease-in-out infinite;
+  margin-bottom: 0.75rem;
+}
+.wa-confirm-final:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(37,211,102,0.5);
+  animation: none;
+  color: white;
+}
+.wa-confirm-final i { font-size: 1.2rem; }
+@keyframes waPulse {
+  0%, 100% { box-shadow: 0 6px 24px rgba(37,211,102,0.35); }
+  50% { box-shadow: 0 6px 36px rgba(37,211,102,0.6); }
+}
+.wa-step-note {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.success-dashboard-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: 0.2s;
+}
+.success-dashboard-link:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+
+.fr3-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255,100,100,0.07);
+  border-bottom: 1px solid rgba(255,100,100,0.15);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: #ff8888;
+}
+.manual-qr-img { max-width: 220px; border-radius: 12px; margin-bottom: 1rem; }
+.wa-confirm-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 1.25rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+  border-radius: 14px;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: 0.2s;
+}
+.wa-confirm-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.pay-info-box {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.1);
+  border-radius: 14px;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+</style>
+
+<% if (fr3Success) { %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const ORDER_ID = <%- JSON.stringify(order.orderId) %>;
+const QR_STRING = <%- JSON.stringify(order.fr3QrString || '') %>;
+const EXPIRY = <%- order.fr3Expiry || (Date.now() + 10 * 60 * 1000) %>;
+
+let pollInterval;
+let timerInterval;
+let cancelled = false;
+
+// Fallback jika img dari qrserver.com gagal load
+function renderQRFallback() {
+  if (!QR_STRING) return;
+  const qrBox = document.getElementById('qrBox');
+  const oldImg = document.getElementById('qrImg');
+  if (oldImg) oldImg.remove();
+
+  const qrDiv = document.createElement('div');
+  qrDiv.id = 'qrDiv';
+  const overlay = document.getElementById('qrExpired');
+  qrBox.insertBefore(qrDiv, overlay);
+
+  if (typeof QRCode !== 'undefined') {
+    try {
+      new QRCode(qrDiv, {
+        text: QR_STRING,
+        width: 220, height: 220,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch(e) {
+      qrDiv.innerHTML = '<img src="https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl=' + encodeURIComponent(QR_STRING) + '" width="220" height="220">';
+    }
+  } else {
+    qrDiv.innerHTML = '<img src="https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl=' + encodeURIComponent(QR_STRING) + '" width="220" height="220">';
+  }
+}
+
+// Countdown timer
+function startTimer() {
+  timerInterval = setInterval(() => {
+    const remaining = EXPIRY - Date.now();
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      clearInterval(pollInterval);
+      document.getElementById('payTimer').textContent = '00:00';
+      document.getElementById('qrExpired').style.display = 'flex';
+      document.getElementById('statusDot').className = 'pay-status-dot expired';
+      document.getElementById('statusText').textContent = 'QRIS Kadaluarsa';
+      document.getElementById('cancelBtn').style.display = 'none';
+      return;
+    }
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('payTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }, 1000);
+}
+
+// Poll payment status every 5 seconds
+function startPolling() {
+  pollInterval = setInterval(checkStatus, 5000);
+}
+
+async function checkStatus() {
+  if (cancelled) return;
+  try {
+    const r = await fetch(`/api/payment/status/${ORDER_ID}`);
+    const data = await r.json();
+
+    if (data.fr3Status === 'SUCCESS' || data.status === 'confirmed') {
+      clearInterval(pollInterval);
+      clearInterval(timerInterval);
+      showSuccess();
+    } else if (data.fr3Status === 'EXPIRED' || data.status === 'expired') {
+      clearInterval(pollInterval);
+      clearInterval(timerInterval);
+      document.getElementById('qrExpired').style.display = 'flex';
+      document.getElementById('statusDot').className = 'pay-status-dot expired';
+      document.getElementById('statusText').textContent = 'Pembayaran Kadaluarsa';
+    }
+  } catch(e) {
+    console.warn('Status check failed:', e);
+  }
+}
+
+function showSuccess() {
+  // Update status bar
+  document.getElementById('statusBar').style.background = 'rgba(0,255,136,0.06)';
+  document.getElementById('statusBar').style.borderColor = 'rgba(0,255,136,0.15)';
+  document.getElementById('statusDot').className = 'pay-status-dot success';
+  document.getElementById('statusText').textContent = '✅ Pembayaran Dikonfirmasi!';
+  document.getElementById('payTimer').style.display = 'none';
+  document.getElementById('cancelBtn').style.display = 'none';
+
+  // Generate WhatsApp link dengan info order
+  const waNumber = <%- JSON.stringify(waNumber || '82328437656') %>;
+  const userName = <%- JSON.stringify(user.name || '') %>;
+  const userEmail = <%- JSON.stringify(user.email || '') %>;
+  const planName = <%- JSON.stringify(plan.name || '') %>;
+  const orderId = ORDER_ID;
+  const totalBayar = 'Rp ' + <%- order.fr3TotalTransfer %>.toLocaleString('id-ID');
+
+  const waMsg = [
+    '✅ *KONFIRMASI PEMBAYARAN*',
+    '',
+    `📋 Order ID: *${orderId}*`,
+    `👤 Nama: ${userName}`,
+    `📧 Email: ${userEmail}`,
+    `📦 Paket: *${planName}*`,
+    `💰 Total Bayar: ${totalBayar}`,
+    `💳 Metode: QRIS (FR3 Gateway)`,
+    '',
+    '✅ Pembayaran sudah terkonfirmasi otomatis.',
+    'Mohon segera kirimkan akun cloud gaming saya.',
+    'Terima kasih! 🙏'
+  ].join('\n');
+
+  const waLink = `https://wa.me/62${waNumber.replace(/^0/, '')}?text=${encodeURIComponent(waMsg)}`;
+  document.getElementById('waConfirmBtn').href = waLink;
+
+  // Show success state
+  document.getElementById('successState').style.display = 'block';
+  document.getElementById('successState').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function cancelPayment() {
+  if (!confirm('Batalkan pembayaran ini?')) return;
+  cancelled = true;
+  clearInterval(pollInterval);
+  clearInterval(timerInterval);
+  const btn = document.getElementById('cancelBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membatalkan...';
+  try {
+    const r = await fetch(`/api/payment/cancel/${ORDER_ID}`, { method: 'POST' });
+    const data = await r.json();
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-times"></i> Batalkan Pembayaran';
+      alert('Gagal membatalkan: ' + (data.error || 'Unknown error'));
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-times"></i> Batalkan Pembayaran';
+  }
+}
+
+// Start
+startTimer();
+startPolling();
+// Check once immediately after 2 seconds
+setTimeout(checkStatus, 2000);
+</script>
+<% } %>
+
+<%- include('partials/footer') %>

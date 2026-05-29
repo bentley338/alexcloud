@@ -1,0 +1,149 @@
+<% currentPage = 'promo'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-tag"></i> Kelola Kode Promo</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<!-- Add Promo Form -->
+<div class="card" style="margin-bottom:2rem;">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-plus-circle"></i> Buat Kode Promo Baru</div>
+    <button onclick="togglePromoForm()" class="btn-action btn-confirm">+ Buat Promo</button>
+  </div>
+  <div id="addPromoForm" style="display:none; padding:1.5rem; border-top:1px solid var(--border);">
+    <form action="/admin/promo" method="POST">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Kode Promo *</label>
+          <input type="text" name="code" class="form-input" placeholder="PROMO10" required style="text-transform:uppercase;" oninput="this.value = this.value.toUpperCase()">
+          <small style="color:var(--text-muted); font-size:0.78rem;">Huruf kapital, tanpa spasi</small>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Tipe Diskon *</label>
+          <select name="discountType" class="form-input" required>
+            <option value="percent">Persen (%)</option>
+            <option value="fixed">Nominal Tetap (Rp)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Nilai Diskon *</label>
+          <input type="number" name="discountValue" class="form-input" placeholder="10 (untuk 10%) atau 5000" min="1" required>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Maks. Penggunaan</label>
+          <input type="number" name="maxUses" class="form-input" placeholder="Kosong = unlimited" min="1">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Berlaku Hingga</label>
+          <input type="datetime-local" name="expiresAt" class="form-input">
+          <small style="color:var(--text-muted); font-size:0.78rem;">Kosongkan = tidak ada batas</small>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Deskripsi / Catatan</label>
+          <input type="text" name="description" class="form-input" placeholder="Opsional...">
+        </div>
+      </div>
+      <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Buat Kode Promo</button>
+    </form>
+  </div>
+</div>
+
+<!-- Promo List -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-list"></i> Daftar Kode Promo (<%= promoCodes.length %>)</div>
+  </div>
+  <% if (promoCodes.length === 0) { %>
+  <div style="padding:2rem; text-align:center; color:var(--text-muted);">
+    <i class="fas fa-tag" style="font-size:2rem; opacity:0.3; margin-bottom:0.5rem; display:block;"></i>
+    Belum ada kode promo. Buat sekarang!
+  </div>
+  <% } else { %>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Kode</th>
+          <th>Diskon</th>
+          <th>Digunakan</th>
+          <th>Maks.</th>
+          <th>Berlaku</th>
+          <th>Status</th>
+          <th>Dibuat</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% promoCodes.forEach(p => { %>
+        <tr>
+          <td>
+            <span style="font-family:var(--font-display); font-size:1rem; color:var(--accent-blue); letter-spacing:2px; font-weight:700;"><%= p.code %></span>
+            <% if (p.description) { %><br><small style="color:var(--text-muted); font-size:0.78rem;"><%= p.description %></small><% } %>
+          </td>
+          <td>
+            <span style="color:var(--accent-green); font-weight:700; font-family:var(--font-ui);">
+              <% if (p.discountType === 'percent') { %>
+                <%= p.discountValue %>%
+              <% } else { %>
+                Rp <%= p.discountValue.toLocaleString('id-ID') %>
+              <% } %>
+            </span>
+          </td>
+          <td style="font-family:var(--font-ui); text-align:center;"><%= p.usedCount || 0 %>x</td>
+          <td style="font-family:var(--font-ui); text-align:center; color:var(--text-muted);">
+            <%= p.maxUses ? p.maxUses + 'x' : '∞' %>
+          </td>
+          <td style="font-size:0.82rem; color:var(--text-muted);">
+            <% if (p.expiresAt) { %>
+              <% const exp = new Date(p.expiresAt); const now = new Date(); %>
+              <span style="color:<%= exp < now ? '#ff4444' : '#00d4ff' %>">
+                <%= moment(p.expiresAt).format('DD/MM/YYYY HH:mm') %>
+                <% if (exp < now) { %> <br><small style="color:#ff4444;">Kadaluarsa</small><% } %>
+              </span>
+            <% } else { %>
+              <span style="color:var(--accent-green);">Tidak ada batas</span>
+            <% } %>
+          </td>
+          <td>
+            <span class="status-badge <%= p.isActive ? 'status-active' : 'status-rejected' %>">
+              <%= p.isActive ? '✅ Aktif' : '❌ Nonaktif' %>
+            </span>
+          </td>
+          <td style="font-size:0.82rem; color:var(--text-muted)"><%= moment(p.createdAt).format('DD/MM/YY') %></td>
+          <td>
+            <div style="display:flex; gap:0.4rem;">
+              <form action="/admin/promo/<%= p.id %>/toggle" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action <%= p.isActive ? 'btn-reject' : 'btn-confirm' %>">
+                  <%= p.isActive ? 'Nonaktifkan' : 'Aktifkan' %>
+                </button>
+              </form>
+              <form action="/admin/promo/<%= p.id %>/delete" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-danger"
+                  onclick="return confirm('Hapus promo <%= p.code %>?')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<script>
+function togglePromoForm() {
+  const form = document.getElementById('addPromoForm');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+<%- include('layout-footer') %>

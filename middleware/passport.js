@@ -1,0 +1,53 @@
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const { db } = require('../database/db');
+
+passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
+  const user = db.get('users').find({ email: email.toLowerCase() }).value();
+  if (!user) return done(null, false, { message: 'Email tidak terdaftar.' });
+  if (!user.password) return done(null, false, { message: 'Akun ini menggunakan login Google.' });
+  if (!bcrypt.compareSync(password, user.password)) return done(null, false, { message: 'Password salah.' });
+  if (!user.isActive) return done(null, false, { message: 'Akun dinonaktifkan.' });
+  return done(null, user);
+}));
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: process.env.GOOGLE_CALLBACK_URL
+}, (accessToken, refreshToken, profile, done) => {
+  let user = db.get('users').find({ googleId: profile.id }).value();
+  if (!user) {
+    user = db.get('users').find({ email: profile.emails[0].value.toLowerCase() }).value();
+    if (user) {
+      db.get('users').find({ id: user.id }).assign({ googleId: profile.id }).write();
+      user = db.get('users').find({ id: user.id }).value();
+    } else {
+      const newUser = {
+        id: uuidv4(),
+        name: profile.displayName,
+        email: profile.emails[0].value.toLowerCase(),
+        password: null,
+        role: 'user',
+        avatar: profile.photos[0]?.value || null,
+        googleId: profile.id,
+        createdAt: new Date().toISOString(),
+        isActive: true
+      };
+      db.get('users').push(newUser).write();
+      user = newUser;
+    }
+  }
+  return done(null, user);
+}));
+
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser((id, done) => {
+  const user = db.get('users').find({ id }).value();
+  done(null, user || null);
+});
+
+module.exports = passport;

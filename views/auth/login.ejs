@@ -1,0 +1,165 @@
+<%- include('../partials/header') %>
+
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <a href="/" class="nav-logo" style="justify-content:center; margin-bottom:0.5rem;">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
+      </a>
+      <p class="auth-tagline">Platform Cloud Gaming #1 Indonesia</p>
+    </div>
+
+    <% if (error && error.length > 0) { %>
+    <div class="auth-alert error">
+      <i class="fas fa-exclamation-circle"></i> <%= error %>
+    </div>
+    <% } %>
+    <% if (success && success.length > 0) { %>
+    <div class="auth-alert success">
+      <i class="fas fa-check-circle"></i> <%= success %>
+    </div>
+    <% } %>
+
+    <h1 class="auth-title">Selamat Datang Kembali</h1>
+    <p class="auth-subtitle">Login untuk akses pengalaman gaming premium</p>
+
+    <!-- Google Login -->
+    <a href="/auth/google" class="btn-google-login">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Lanjutkan dengan Google
+    </a>
+
+    <div class="auth-divider">
+      <span>atau masuk dengan email</span>
+    </div>
+
+    <form action="/login" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="email" class="form-label"><i class="fas fa-envelope"></i> Email</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="email@contoh.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="password" class="form-label"><i class="fas fa-lock"></i> Password</label>
+        <div class="input-password-wrap">
+          <input type="password" id="password" name="password" class="form-input" placeholder="Password kamu" required autocomplete="current-password">
+          <button type="button" class="toggle-pass" onclick="togglePassword('password', this)">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Remember Me -->
+      <div class="remember-me-row">
+        <label class="remember-me-label" for="rememberMe">
+          <input type="checkbox" id="rememberMe" name="rememberMe" class="remember-me-check">
+          <span class="remember-me-toggle"></span>
+          <span class="remember-me-text">
+            <i class="fas fa-shield-alt"></i>
+            Ingat saya selama <strong>30 hari</strong>
+          </span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn-auth-submit">
+        <i class="fas fa-sign-in-alt"></i> Login Sekarang
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Belum punya akun? <a href="/register">Daftar Gratis</a>
+    </p>
+  </div>
+</div>
+
+<style>
+.remember-me-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.remember-me-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+}
+.remember-me-check {
+  display: none;
+}
+.remember-me-toggle {
+  width: 40px;
+  height: 22px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 100px;
+  position: relative;
+  transition: 0.25s;
+  flex-shrink: 0;
+}
+.remember-me-toggle::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: 0.25s;
+}
+.remember-me-check:checked + .remember-me-toggle {
+  background: linear-gradient(90deg, #00d4ff, #7b2fff);
+  border-color: transparent;
+}
+.remember-me-check:checked + .remember-me-toggle::after {
+  left: 20px;
+  background: #fff;
+}
+.remember-me-text {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.2s;
+}
+.remember-me-label:has(.remember-me-check:checked) .remember-me-text {
+  color: var(--accent-blue);
+}
+.remember-me-text i {
+  font-size: 0.8rem;
+  color: var(--accent-blue);
+}
+</style>
+
+<script>
+function togglePassword(id, btn) {
+  const input = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fas fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fas fa-eye';
+  }
+}
+
+// Auto-check Remember Me jika sebelumnya pernah dicentang
+(function() {
+  const cb = document.getElementById('rememberMe');
+  if (cb && localStorage.getItem('alexcloud_remember') === '1') {
+    cb.checked = true;
+  }
+  if (cb) {
+    cb.addEventListener('change', () => {
+      localStorage.setItem('alexcloud_remember', cb.checked ? '1' : '0');
+    });
+  }
+})();
+</script>
+
+<%- include('../partials/footer') %>

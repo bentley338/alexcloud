@@ -1,0 +1,653 @@
+<%- include('partials/header') %>
+
+<!-- PAGE HERO -->
+<div style="padding: 5rem 0 2rem; background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%); text-align:center;">
+  <div class="container">
+    <div class="section-tag" style="margin-bottom:1rem;"><i class="fas fa-question-circle"></i> FAQ</div>
+    <h1 class="section-title">Pertanyaan yang Sering <span class="accent">Ditanyakan</span></h1>
+    <p class="section-desc" style="max-width:600px; margin:0 auto 2rem;">
+      Temukan jawaban lengkap seputar cloud gaming, AlexCloud, cara berlangganan, teknis, dan masih banyak lagi.
+    </p>
+    <!-- Search FAQ -->
+    <div style="max-width:480px; margin:0 auto; position:relative;">
+      <i class="fas fa-search" style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
+      <input type="text" id="faqSearch" placeholder="Cari pertanyaan..." oninput="filterFAQ(this.value)"
+        style="width:100%; padding:0.9rem 1rem 0.9rem 2.75rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); color:var(--text-primary); font-family:var(--font-ui); font-size:0.95rem; outline:none; transition:0.2s; box-sizing:border-box;"
+        onfocus="this.style.borderColor='var(--accent-blue)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+  </div>
+</div>
+
+<div class="container" style="max-width:860px; padding-bottom:5rem;">
+
+  <!-- Kategori Tab -->
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:2.5rem;" id="faqTabs">
+    <button class="faq-tab active" onclick="filterTab('all')">🔥 Semua</button>
+    <button class="faq-tab" onclick="filterTab('umum')">💡 Umum</button>
+    <button class="faq-tab" onclick="filterTab('teknis')">⚙️ Teknis</button>
+    <button class="faq-tab" onclick="filterTab('bayar')">💳 Pembayaran</button>
+    <button class="faq-tab" onclick="filterTab('akun')">👤 Akun</button>
+    <button class="faq-tab" onclick="filterTab('game')">🎮 Game</button>
+  </div>
+
+  <!-- FAQ ITEMS -->
+  <div id="faqContainer">
+
+    <!-- ====== UMUM ====== -->
+    <div class="faq-section-title" data-cat="umum">💡 Pertanyaan Umum</div>
+
+    <div class="faq-item" data-cat="umum" data-keywords="cloud gaming itu apa pengertian definisi cara kerja">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apa itu Cloud Gaming?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Cloud Gaming adalah teknologi yang memungkinkan kamu bermain game <strong>tanpa perlu PC atau konsol gaming mahal</strong>. Game berjalan di server powerful milik AlexCloud, dan hasilnya di-<em>stream</em> langsung ke perangkat kamu via internet.</p>
+        <p style="margin-top:0.75rem;">Analogi mudahnya: seperti <strong>Netflix tapi untuk game</strong>. Kamu tidak perlu download atau install — buka browser, login, dan langsung main!</p>
+        <div class="faq-highlight">
+          <i class="fas fa-lightbulb"></i>
+          <span>Yang kamu butuhkan hanya: browser modern + koneksi internet minimal 10 Mbps</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="umum" data-keywords="alexcloud apa bedanya keunggulan kenapa pilih">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Kenapa harus pilih AlexCloud?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-compare-grid">
+          <div class="faq-compare-col good">
+            <div class="faq-compare-header">✅ AlexCloud</div>
+            <ul>
+              <li>Server lokal Indonesia (latency &lt;30ms)</li>
+              <li>Harga mulai Rp 40.000/minggu</li>
+              <li>Bayar dengan QRIS/e-wallet lokal</li>
+              <li>Support bahasa Indonesia 24/7</li>
+              <li>100+ game premium</li>
+              <li>Tidak perlu hardware mahal</li>
+            </ul>
+          </div>
+          <div class="faq-compare-col bad">
+            <div class="faq-compare-header">❌ Beli PC Gaming</div>
+            <ul>
+              <li>Biaya Rp 15–50 juta</li>
+              <li>Perlu upgrade berkala</li>
+              <li>Tidak bisa dibawa ke mana saja</li>
+              <li>Mati listrik = game mati</li>
+              <li>Panas & berisik</li>
+              <li>Beli game per judul</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="umum" data-keywords="perangkat hp laptop tablet bisa main di mana">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Perangkat apa saja yang bisa digunakan?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>AlexCloud bisa diakses dari hampir semua perangkat modern:</p>
+        <div class="faq-device-grid">
+          <div class="faq-device-item"><i class="fas fa-laptop"></i><span>Laptop & PC<br><small>Windows / Mac / Linux</small></span></div>
+          <div class="faq-device-item"><i class="fas fa-mobile-alt"></i><span>Smartphone<br><small>Android & iOS</small></span></div>
+          <div class="faq-device-item"><i class="fas fa-tablet-alt"></i><span>Tablet<br><small>iPad & Android</small></span></div>
+          <div class="faq-device-item"><i class="fas fa-tv"></i><span>Smart TV<br><small>Dengan browser</small></span></div>
+        </div>
+        <div class="faq-highlight">
+          <i class="fas fa-info-circle"></i>
+          <span>Syarat: Browser modern (Chrome/Edge/Firefox/Safari) + internet minimal 10 Mbps</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="umum" data-keywords="berapa game ada library judul koleksi">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Ada berapa game di AlexCloud?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Saat ini AlexCloud memiliki <strong>16+ game premium</strong> yang terus bertambah setiap bulan. Kategori game meliputi:</p>
+        <div class="faq-tag-list">
+          <span class="faq-tag">🏆 Action/Open World</span>
+          <span class="faq-tag">⚔️ RPG</span>
+          <span class="faq-tag">🔫 FPS/Shooter</span>
+          <span class="faq-tag">⚽ Sports</span>
+          <span class="faq-tag">🏍️ Racing</span>
+          <span class="faq-tag">🎭 Horror</span>
+          <span class="faq-tag">🗺️ Adventure</span>
+        </div>
+        <p style="margin-top:0.75rem;">Beberapa game populer: GTA VI, Elden Ring, God of War Ragnarök, EA FC 26, COD Black Ops 6, Alan Wake 2, dan masih banyak lagi!</p>
+      </div>
+    </div>
+
+    <!-- ====== TEKNIS ====== -->
+    <div class="faq-section-title" data-cat="teknis">⚙️ Teknis & Performa</div>
+
+    <div class="faq-item" data-cat="teknis" data-keywords="internet speed mbps koneksi butuh berapa wifi">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Berapa kecepatan internet yang dibutuhkan?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <table class="faq-table">
+          <thead><tr><th>Kualitas</th><th>Kecepatan Min</th><th>Resolusi</th><th>FPS</th></tr></thead>
+          <tbody>
+            <tr><td>🟡 Minimum</td><td>5 Mbps</td><td>720p</td><td>30fps</td></tr>
+            <tr><td>🟢 Standar</td><td>10 Mbps</td><td>1080p</td><td>60fps</td></tr>
+            <tr><td>🔵 HD</td><td>15 Mbps</td><td>1440p</td><td>60fps</td></tr>
+            <tr class="highlight-row"><td>⭐ Ultra 4K</td><td>25 Mbps</td><td>4K</td><td>60fps</td></tr>
+          </tbody>
+        </table>
+        <div class="faq-highlight" style="margin-top:1rem;">
+          <i class="fas fa-wifi"></i>
+          <span>Mau test kecepatan internetmu? Cek di <a href="/network-test" style="color:var(--accent-blue); text-decoration:none; font-weight:700;">Network Speed Test</a> kami!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="teknis" data-keywords="lag latency ping delay input ngelag slow">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apakah ada input lag atau delay saat bermain?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Input lag sangat minimal — rata-rata <strong>15–30ms</strong> untuk server Indonesia. Ini setara dengan:</p>
+        <ul class="faq-list">
+          <li>Monitor gaming 60Hz: ~16ms</li>
+          <li>Monitor gaming 144Hz: ~7ms</li>
+          <li>AlexCloud server Jakarta: <strong>15–30ms</strong> ✅</li>
+        </ul>
+        <p style="margin-top:0.75rem;">Untuk game <strong>single-player, RPG, sports, dan racing</strong> — hampir tidak terasa sama sekali. Untuk game <strong>competitive FPS</strong> yang butuh reaksi sangat cepat, kami sarankan koneksi LAN.</p>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="teknis" data-keywords="browser terbaik chrome firefox edge safari aplikasi app">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Browser apa yang paling direkomendasikan?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="faq-browser-card best"><i class="fab fa-chrome"></i><span>Chrome</span><small>⭐ Terbaik</small></div>
+          <div class="faq-browser-card good"><i class="fab fa-edge"></i><span>Edge</span><small>✅ Sangat Bagus</small></div>
+          <div class="faq-browser-card good"><i class="fab fa-firefox"></i><span>Firefox</span><small>✅ Bagus</small></div>
+          <div class="faq-browser-card ok"><i class="fab fa-safari"></i><span>Safari</span><small>⚠️ Mac/iOS</small></div>
+        </div>
+        <div class="faq-highlight">
+          <i class="fas fa-exclamation-triangle" style="color:#ffd700;"></i>
+          <span>Selalu update browser ke versi terbaru. Matikan ekstensi berat saat gaming untuk performa optimal.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="teknis" data-keywords="controller joystick gamepad keyboard mouse input cara pakai">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apakah bisa pakai controller/gamepad?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Ya! AlexCloud mendukung berbagai jenis input:</p>
+        <ul class="faq-list">
+          <li>⌨️ <strong>Keyboard + Mouse</strong> — Langsung plug-and-play</li>
+          <li>🎮 <strong>Xbox Controller</strong> — Paling direkomendasikan, otomatis terdeteksi</li>
+          <li>🎮 <strong>PS4/PS5 DualShock</strong> — Via kabel USB atau DS4Windows</li>
+          <li>🕹️ <strong>Gamepad Generic USB</strong> — Plug-and-play di Chrome/Edge</li>
+          <li>📱 <strong>Touch Screen</strong> — Untuk game yang mendukung</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="teknis" data-keywords="error masalah tidak bisa akses login troubleshoot solusi">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apa solusi jika game lag atau tidak smooth?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Ikuti langkah troubleshooting berikut secara berurutan:</p>
+        <ol class="faq-ol">
+          <li><strong>Cek kecepatan internet</strong> — minimal 10 Mbps (<a href="/network-test" style="color:var(--accent-blue);">test di sini</a>)</li>
+          <li><strong>Tutup tab/app lain</strong> yang menggunakan internet</li>
+          <li><strong>Gunakan kabel LAN</strong> jika memungkinkan (lebih stabil dari WiFi)</li>
+          <li><strong>Pindah ke WiFi 5GHz</strong> (bukan 2.4GHz yang lebih lambat)</li>
+          <li><strong>Restart browser</strong> dan hapus cache (Ctrl+Shift+Delete)</li>
+          <li><strong>Coba jam berbeda</strong> — hindari jam sibuk (malam)</li>
+          <li>Jika masih bermasalah, hubungi <strong>support WhatsApp</strong></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="teknis" data-keywords="cloud save simpan progress lanjut beda perangkat ganti hp">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apakah progress game tersimpan jika ganti perangkat?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Ya! AlexCloud menggunakan sistem <strong>Cloud Save otomatis</strong>. Progress game tersimpan di server kami, bukan di perangkat lokal kamu.</p>
+        <p style="margin-top:0.75rem;"><strong>Artinya kamu bisa:</strong></p>
+        <ul class="faq-list">
+          <li>Main pagi di smartphone → lanjut siang di laptop → lanjut malam di PC</li>
+          <li>Progress tetap sama persis tanpa perlu sync manual</li>
+          <li>Tidak ada risiko data hilang karena kerusakan perangkat</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ====== PEMBAYARAN ====== -->
+    <div class="faq-section-title" data-cat="bayar">💳 Pembayaran & Harga</div>
+
+    <div class="faq-item" data-cat="bayar" data-keywords="harga paket berapa biaya murah terjangkau">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Berapa harga paket AlexCloud?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <table class="faq-table">
+          <thead><tr><th>Paket</th><th>Harga</th><th>Per Hari</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>1 Minggu</td><td><strong>Rp 40.000</strong></td><td>~Rp 5.700</td><td>Cocok untuk coba</td></tr>
+            <tr class="highlight-row"><td>1 Bulan ⭐</td><td><strong>Rp 60.000</strong></td><td>~Rp 2.000</td><td>Paling Populer!</td></tr>
+            <tr><td>2 Bulan</td><td><strong>Rp 100.000</strong></td><td>~Rp 1.600</td><td>Hemat Rp 20.000</td></tr>
+            <tr><td>3 Bulan</td><td><strong>Rp 150.000</strong></td><td>~Rp 1.600</td><td>Hemat Rp 30.000</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:0.75rem; color:var(--text-muted); font-size:0.85rem;">Semua paket termasuk akses ke seluruh library game. Tidak ada biaya tambahan per judul game!</p>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="bayar" data-keywords="cara bayar metode pembayaran qris gopay ovo dana transfer">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Metode pembayaran apa yang tersedia?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Saat ini AlexCloud menerima pembayaran via <strong>QRIS</strong> yang mencakup:</p>
+        <div class="faq-tag-list">
+          <span class="faq-tag">💚 GoPay</span>
+          <span class="faq-tag">💜 OVO</span>
+          <span class="faq-tag">💙 DANA</span>
+          <span class="faq-tag">🧡 ShopeePay</span>
+          <span class="faq-tag">🔵 LinkAja</span>
+          <span class="faq-tag">🏦 M-Banking</span>
+          <span class="faq-tag">💳 Semua e-wallet QRIS</span>
+        </div>
+        <p style="margin-top:0.75rem;">Scan QRIS satu kali, langsung bayar dari semua aplikasi tersebut!</p>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="bayar" data-keywords="berapa lama aktivasi aktif setelah bayar konfirmasi">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Berapa lama akun aktif setelah pembayaran?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Akun biasanya diaktifkan dalam <strong>1–15 menit</strong> setelah konfirmasi pembayaran.</p>
+        <p style="margin-top:0.75rem;"><strong>Langkah aktivasi:</strong></p>
+        <ol class="faq-ol">
+          <li>Selesaikan pembayaran via QRIS</li>
+          <li>Screenshot/foto bukti pembayaran</li>
+          <li>Kirim bukti ke admin via <strong>WhatsApp</strong></li>
+          <li>Admin konfirmasi dan aktifkan akun</li>
+          <li>Kamu langsung bisa bermain! 🎮</li>
+        </ol>
+        <div class="faq-highlight">
+          <i class="fas fa-clock"></i>
+          <span>Kami beroperasi 24/7 — tapi jika di luar jam aktif, maksimal 15 menit setelah pesan dibaca.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="bayar" data-keywords="kode promo diskon voucher cara pakai darimana">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Bagaimana cara menggunakan kode promo?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <ol class="faq-ol">
+          <li>Pilih paket berlangganan di halaman <strong>Harga</strong></li>
+          <li>Klik "Pilih Paket Ini" (harus login)</li>
+          <li>Di halaman Order, cari kolom <strong>"Punya Kode Promo?"</strong></li>
+          <li>Ketik kode promo dan klik <strong>"Pakai"</strong></li>
+          <li>Diskon akan langsung dipotong dari total harga</li>
+          <li>Selesaikan pembayaran</li>
+        </ol>
+        <div class="faq-highlight">
+          <i class="fas fa-tag"></i>
+          <span>Dapatkan kode promo dari event AlexCloud, media sosial, atau tanya langsung admin WA!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="bayar" data-keywords="refund batal uang kembali cancel pembatalan">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apakah ada kebijakan refund?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Karena sifat layanan digital, refund tidak tersedia secara otomatis. Namun kami selalu mengutamakan kepuasan pelanggan:</p>
+        <ul class="faq-list">
+          <li>✅ Jika akun <strong>belum diaktifkan</strong> setelah 24 jam — refund penuh</li>
+          <li>✅ Jika ada <strong>gangguan server</strong> dari pihak kami — kompensasi waktu</li>
+          <li>⚠️ Jika sudah aktif dan sudah digunakan — tidak bisa refund</li>
+        </ul>
+        <p style="margin-top:0.75rem;">Hubungi admin WhatsApp untuk diskusi lebih lanjut tentang kasus spesifik kamu.</p>
+      </div>
+    </div>
+
+    <!-- ====== AKUN ====== -->
+    <div class="faq-section-title" data-cat="akun">👤 Akun & Login</div>
+
+    <div class="faq-item" data-cat="akun" data-keywords="cara daftar register buat akun signup google">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Bagaimana cara mendaftar akun?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Ada <strong>2 cara daftar</strong> yang bisa kamu pilih:</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.5rem;">
+          <div style="background:rgba(66,133,244,0.08); border:1px solid rgba(66,133,244,0.2); border-radius:var(--radius); padding:1rem;">
+            <div style="font-weight:700; margin-bottom:0.5rem; font-family:var(--font-ui);">⚡ Via Google (Tercepat)</div>
+            <ol class="faq-ol" style="margin:0; padding-left:1.2rem; font-size:0.85rem;">
+              <li>Klik "Daftar Gratis"</li>
+              <li>Pilih "Daftar dengan Google"</li>
+              <li>Pilih akun Google</li>
+              <li>Langsung aktif! ✅</li>
+            </ol>
+          </div>
+          <div style="background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:var(--radius); padding:1rem;">
+            <div style="font-weight:700; margin-bottom:0.5rem; font-family:var(--font-ui);">📧 Via Email</div>
+            <ol class="faq-ol" style="margin:0; padding-left:1.2rem; font-size:0.85rem;">
+              <li>Klik "Daftar Gratis"</li>
+              <li>Isi nama, email, password</li>
+              <li>Klik "Daftar Sekarang"</li>
+              <li>Login dan pilih paket ✅</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="akun" data-keywords="lupa password reset ganti password tidak bisa login">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apa yang harus dilakukan jika lupa password?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <ul class="faq-list">
+          <li>Jika login via <strong>Google</strong> — gunakan tombol "Login dengan Google", tidak perlu password</li>
+          <li>Jika lupa password email — hubungi admin WhatsApp untuk reset password</li>
+          <li>Admin akan memberikan password sementara yang bisa diubah setelah login</li>
+        </ul>
+        <div class="faq-highlight">
+          <i class="fab fa-whatsapp" style="color:#25d366;"></i>
+          <span>Hubungi admin WhatsApp untuk reset password dengan cepat!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="akun" data-keywords="berapa akun perangkat login serentak bersamaan multi device">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Bisakah login di beberapa perangkat sekaligus?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Satu akun hanya untuk <strong>satu sesi aktif</strong> dalam satu waktu. Jika login di perangkat lain, sesi sebelumnya akan otomatis logout.</p>
+        <p style="margin-top:0.75rem;">Ini untuk menjaga kualitas dan keadilan layanan untuk semua pengguna.</p>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="akun" data-keywords="aman keamanan privasi data akun google password">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apakah data akun saya aman?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Keamanan data kamu adalah prioritas kami:</p>
+        <ul class="faq-list">
+          <li>🔐 Password di-enkripsi dengan <strong>bcrypt</strong> — tidak bisa dibaca siapapun</li>
+          <li>🔑 Login Google menggunakan <strong>OAuth resmi Google</strong> — kami tidak menyimpan password Google kamu</li>
+          <li>🍪 Session menggunakan <strong>HttpOnly cookies</strong> yang aman dari XSS</li>
+          <li>📵 Tidak ada penyimpanan data kartu kredit/debit</li>
+          <li>🛡️ Data tidak dijual ke pihak ketiga</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ====== GAME ====== -->
+    <div class="faq-section-title" data-cat="game">🎮 Seputar Game</div>
+
+    <div class="faq-item" data-cat="game" data-keywords="game baru tambah update kapan library bertambah">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Seberapa sering game baru ditambahkan?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Kami secara rutin menambahkan game baru ke library AlexCloud, biasanya <strong>1–3 game per bulan</strong>. Prioritas kami adalah game-game AAA terbaru dan yang paling banyak diminta pengguna.</p>
+        <p style="margin-top:0.75rem;">Punya request game tertentu? Hubungi admin WhatsApp — kami perhatikan setiap request!</p>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="game" data-keywords="request minta game judul tertentu wishlist">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Bisakah request game yang ingin dimainkan?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Tentu saja! Kami sangat mendengarkan request dari pengguna. Cara request:</p>
+        <ol class="faq-ol">
+          <li>Hubungi admin via <strong>WhatsApp</strong></li>
+          <li>Sebutkan nama game yang ingin dimainkan</li>
+          <li>Admin akan mencatat dan evaluasi request</li>
+          <li>Jika sudah tersedia, kamu akan diberitahu!</li>
+        </ol>
+        <p style="margin-top:0.5rem; color:var(--text-muted); font-size:0.85rem;">*Ketersediaan game bergantung pada lisensi dan kompatibilitas teknis.</p>
+      </div>
+    </div>
+
+    <div class="faq-item" data-cat="game" data-keywords="game multiplayer online bareng teman pvp">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        <span>Apakah bisa main multiplayer/online dengan teman?</span>
+        <i class="fas fa-chevron-down faq-icon"></i>
+      </button>
+      <div class="faq-answer">
+        <p>Ini tergantung pada game yang dimainkan:</p>
+        <ul class="faq-list">
+          <li>✅ <strong>Game dengan mode online built-in</strong> (COD, EA FC, dll) — bisa langsung main online</li>
+          <li>✅ <strong>Co-op campaign</strong> — bisa jika game mendukung</li>
+          <li>⚠️ <strong>Local multiplayer</strong> — tidak bisa karena berbasis cloud</li>
+        </ul>
+        <p style="margin-top:0.75rem;">Untuk detail per game, tanyakan ke admin WhatsApp.</p>
+      </div>
+    </div>
+
+  </div><!-- /faqContainer -->
+
+  <!-- Tidak ada hasil search -->
+  <div id="faqEmpty" style="display:none; text-align:center; padding:3rem; color:var(--text-muted);">
+    <i class="fas fa-search" style="font-size:2.5rem; opacity:0.2; margin-bottom:1rem; display:block;"></i>
+    <p>Pertanyaan tidak ditemukan. Coba kata kunci lain atau tanya langsung ke kami!</p>
+    <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="btn-primary" style="margin-top:1rem; display:inline-flex;">
+      <i class="fab fa-whatsapp"></i> Tanya Admin WhatsApp
+    </a>
+  </div>
+
+  <!-- CTA -->
+  <div style="margin-top:4rem; background:linear-gradient(135deg, rgba(0,212,255,0.08), rgba(123,47,255,0.08)); border:1px solid rgba(0,212,255,0.15); border-radius:var(--radius-lg); padding:2.5rem; text-align:center;">
+    <h3 style="font-family:var(--font-display); margin-bottom:0.5rem;">Masih ada pertanyaan?</h3>
+    <p style="color:var(--text-muted); font-family:var(--font-ui); margin-bottom:1.5rem;">Tim kami siap membantu 24/7 via WhatsApp atau AI Chat</p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="btn-primary">
+        <i class="fab fa-whatsapp"></i> Chat WhatsApp
+      </a>
+      <button onclick="if(typeof toggleAIChat==='function')toggleAIChat()" class="btn-secondary" style="cursor:pointer;">
+        <i class="fas fa-robot"></i> Tanya AlexBot AI
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.faq-tab {
+  padding: 0.5rem 1.25rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.faq-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.08); }
+.faq-tab.active { background: var(--gradient-main); color: #000; border-color: transparent; }
+
+.faq-section-title {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  padding: 0.5rem 0;
+  margin: 2rem 0 0.75rem;
+  border-bottom: 1px solid rgba(0,212,255,0.12);
+}
+.faq-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  transition: 0.2s;
+}
+.faq-item:hover { border-color: var(--border-hover); }
+.faq-item.open { border-color: rgba(0,212,255,0.25); }
+
+.faq-question {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 1.1rem 1.5rem; background: none; border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 0.97rem; font-weight: 600;
+  color: var(--text-primary); text-align: left; gap: 1rem;
+  transition: 0.2s;
+}
+.faq-question:hover { color: var(--accent-blue); }
+.faq-icon { flex-shrink: 0; color: var(--text-muted); transition: transform 0.3s ease; font-size: 0.85rem; }
+.faq-item.open .faq-icon { transform: rotate(180deg); color: var(--accent-blue); }
+
+.faq-answer {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+  padding: 0 1.5rem;
+  font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7;
+}
+.faq-item.open .faq-answer {
+  max-height: 800px;
+  padding: 0 1.5rem 1.25rem;
+}
+.faq-highlight {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.15);
+  border-radius: var(--radius); padding: 0.75rem 1rem; margin-top: 0.75rem;
+  font-size: 0.85rem; color: var(--text-secondary);
+}
+.faq-highlight i { color: var(--accent-blue); margin-top: 2px; flex-shrink: 0; }
+
+.faq-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+.faq-list li { padding: 0.3rem 0; display: flex; align-items: flex-start; gap: 0.5rem; }
+.faq-ol { padding-left: 1.2rem; margin: 0.5rem 0; }
+.faq-ol li { padding: 0.25rem 0; }
+
+.faq-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.faq-table th { background: rgba(0,212,255,0.08); padding: 0.5rem 0.75rem; text-align: left; font-family: var(--font-ui); font-weight: 700; color: var(--accent-blue); border-bottom: 1px solid rgba(0,212,255,0.15); }
+.faq-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.faq-table tr.highlight-row td { background: rgba(0,255,136,0.04); color: var(--accent-green); font-weight: 700; }
+
+.faq-tag-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.faq-tag { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.15); color: var(--accent-blue); padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.8rem; font-family: var(--font-ui); font-weight: 600; }
+
+.faq-device-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin: 0.75rem 0; }
+.faq-device-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; text-align: center; font-family: var(--font-ui); font-size: 0.82rem; }
+.faq-device-item i { display: block; font-size: 1.5rem; color: var(--accent-blue); margin-bottom: 0.4rem; }
+.faq-device-item small { color: var(--text-muted); }
+@media (max-width: 600px) { .faq-device-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.faq-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 0.5rem 0; }
+@media (max-width: 600px) { .faq-compare-grid { grid-template-columns: 1fr; } }
+.faq-compare-col { border-radius: var(--radius); padding: 0.75rem 1rem; }
+.faq-compare-col.good { background: rgba(0,255,136,0.05); border: 1px solid rgba(0,255,136,0.2); }
+.faq-compare-col.bad { background: rgba(255,68,68,0.05); border: 1px solid rgba(255,68,68,0.15); }
+.faq-compare-header { font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem; }
+.faq-compare-col.good .faq-compare-header { color: var(--accent-green); }
+.faq-compare-col.bad .faq-compare-header { color: #ff6666; }
+.faq-compare-col ul { list-style: none; padding: 0; margin: 0; }
+.faq-compare-col ul li { padding: 0.2rem 0; font-size: 0.83rem; color: var(--text-secondary); }
+
+.faq-browser-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; text-align: center; font-family: var(--font-ui); }
+.faq-browser-card i { font-size: 1.8rem; display: block; margin-bottom: 0.3rem; }
+.faq-browser-card span { display: block; font-weight: 700; font-size: 0.9rem; }
+.faq-browser-card small { color: var(--text-muted); font-size: 0.75rem; }
+.faq-browser-card.best { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.04); }
+.faq-browser-card.best i { color: #4285F4; }
+.faq-browser-card.good i { color: var(--accent-blue); }
+.faq-browser-card.ok i { color: #ffd700; }
+
+.faq-hidden { display: none !important; }
+</style>
+
+<script>
+function toggleFAQ(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+function filterTab(cat) {
+  // Update active tab
+  document.querySelectorAll('.faq-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  document.getElementById('faqSearch').value = '';
+
+  document.querySelectorAll('.faq-item, .faq-section-title').forEach(el => {
+    if (cat === 'all') {
+      el.classList.remove('faq-hidden');
+    } else {
+      el.classList.toggle('faq-hidden', el.dataset.cat !== cat);
+    }
+  });
+  checkEmpty();
+}
+
+function filterFAQ(q) {
+  q = q.toLowerCase().trim();
+  // Reset tabs
+  document.querySelectorAll('.faq-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.faq-tab').classList.add('active');
+
+  if (!q) {
+    document.querySelectorAll('.faq-item, .faq-section-title').forEach(el => el.classList.remove('faq-hidden'));
+    checkEmpty();
+    return;
+  }
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const text = (item.querySelector('.faq-question span').textContent + ' ' + (item.dataset.keywords || '') + ' ' + item.textContent).toLowerCase();
+    item.classList.toggle('faq-hidden', !text.includes(q));
+  });
+  // Hide section titles
+  document.querySelectorAll('.faq-section-title').forEach(t => t.classList.add('faq-hidden'));
+  checkEmpty();
+}
+
+function checkEmpty() {
+  const visible = document.querySelectorAll('.faq-item:not(.faq-hidden)').length;
+  document.getElementById('faqEmpty').style.display = visible === 0 ? 'block' : 'none';
+}
+</script>
+
+<%- include('partials/footer') %>

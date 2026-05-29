@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+
+<div style="min-height:100vh; padding:7rem 2rem 4rem;">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div class="section-header" style="margin-bottom:3rem;">
+      <div class="section-tag">⭐ Dari Gamer Nyata</div>
+      <h1 class="section-title">Semua <span class="accent">Testimoni</span></h1>
+      <p class="section-desc">Ribuan gamer Indonesia telah merasakan perbedaan AlexCloud</p>
+    </div>
+
+    <% if (testimonials && testimonials.length > 0) { %>
+    <div class="testi-grid-full">
+      <% testimonials.forEach(t => { %>
+      <div class="testi-card-full">
+        <% if (t.image) { %>
+          <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-full-img">
+        <% } %>
+        <div class="testi-content">
+          <div class="testi-stars">
+            <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < t.rating ? '#ffd700' : '#333' %>"></i><%}%>
+          </div>
+          <p class="testi-text">"<%= t.text %>"</p>
+          <div class="testi-author">
+            <img src="<%= t.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(t.name) %>" alt="<%= t.name %>" class="testi-avatar">
+            <div>
+              <div class="testi-name"><%= t.name %></div>
+              <div class="testi-role"><%= t.role %></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } else { %>
+    <div style="text-align:center; padding:4rem; color:var(--text-muted);">
+      <i class="fas fa-star" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i>
+      <p>Belum ada testimoni tersedia.</p>
+    </div>
+    <% } %>
+
+    <div style="text-align:center; margin-top:3rem;">
+      <a href="/" class="btn-secondary"><i class="fas fa-home"></i> Kembali ke Beranda</a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

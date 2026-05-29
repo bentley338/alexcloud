@@ -1,0 +1,89 @@
+<%- include('partials/header') %>
+
+<div class="page-wrap">
+  <div style="padding: 4rem 0 3rem; background: linear-gradient(180deg, rgba(123,47,255,0.04) 0%, transparent 100%);">
+    <div class="container text-center">
+      <div class="section-tag" style="margin-bottom:1rem;">Harga</div>
+      <h1 class="section-title">Paket <span class="accent">Terjangkau</span></h1>
+      <p class="section-desc">Pilih paket yang sesuai kebutuhanmu. Semakin lama, semakin hemat!</p>
+    </div>
+  </div>
+
+  <section class="pricing-section" style="padding-top: 2rem;">
+    <div class="pricing-container">
+      <div class="pricing-grid">
+        <% plans.forEach(plan => { %>
+        <div class="plan-card <%= plan.popular ? 'popular' : '' %>">
+          <% if (plan.popular) { %><div class="popular-badge">⭐ PALING POPULER</div><% } %>
+          <div class="plan-name"><%= plan.name %></div>
+          <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>"><%= plan.priceDisplay %></div>
+          <div class="plan-period">akses selama <%= plan.duration %> hari</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
+            <li><i class="fas fa-check"></i> Streaming 4K / 60fps</li>
+            <li><i class="fas fa-check"></i> Cloud Save Progress</li>
+            <li><i class="fas fa-check"></i> Multi-device Support</li>
+            <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
+            <% if (plan.duration >= 30) { %>
+            <li><i class="fas fa-check"></i> Prioritas Antrian Server</li>
+            <li><i class="fas fa-check"></i> Akses Beta Game Baru</li>
+            <% } %>
+            <% if (plan.duration >= 60) { %>
+            <li><i class="fas fa-check"></i> 🔥 Bonus 5 Hari Gratis</li>
+            <li><i class="fas fa-check"></i> Custom Game Request</li>
+            <% } %>
+            <% if (plan.duration >= 90) { %>
+            <li><i class="fas fa-star" style="color:#ffd700"></i> Akses Game Early Release</li>
+            <li><i class="fas fa-star" style="color:#ffd700"></i> VIP Support Priority</li>
+            <% } %>
+          </ul>
+          <% if (typeof user !== 'undefined' && user) { %>
+            <a href="/order/<%= plan.id %>" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+              <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
+            </a>
+          <% } else { %>
+            <a href="/login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+              Login untuk Order
+            </a>
+          <% } %>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- FAQ / Info -->
+      <div style="margin-top:4rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem;">
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
+          <div style="font-size:1.5rem; margin-bottom:0.75rem;">💳</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Metode Pembayaran</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">QRIS (GoPay, OVO, DANA, ShopeePay, M-Banking, dan semua e-wallet yang mendukung QRIS)</p>
+        </div>
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
+          <div style="font-size:1.5rem; margin-bottom:0.75rem;">⚡</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Aktivasi Cepat</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Akun diaktifkan dalam 1-15 menit setelah konfirmasi pembayaran via WhatsApp.</p>
+        </div>
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
+          <div style="font-size:1.5rem; margin-bottom:0.75rem;">🔄</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Perpanjangan Mudah</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Perpanjang kapanpun lewat dashboard. Order baru otomatis menggantikan subscription lama.</p>
+        </div>
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
+          <div style="font-size:1.5rem; margin-bottom:0.75rem;">🎮</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Semua Game Termasuk</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Satu paket untuk semua game. Tidak ada biaya tambahan per game!</p>
+        </div>
+      </div>
+
+      <!-- CTA WhatsApp -->
+      <div style="text-align:center; margin-top:3rem; padding:2.5rem; background:rgba(37,211,102,0.05); border:1px solid rgba(37,211,102,0.2); border-radius:var(--radius-lg);">
+        <h3 style="font-family:var(--font-display); margin-bottom:0.5rem;">Ada Pertanyaan?</h3>
+        <p style="color:var(--text-muted); margin-bottom:1.5rem;">Chat langsung dengan admin AlexCloud via WhatsApp</p>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/,'') : '82328437656' %>" target="_blank" class="wa-btn" style="display:inline-flex; width:auto; padding:0.85rem 2rem;">
+          <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Chat Admin WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

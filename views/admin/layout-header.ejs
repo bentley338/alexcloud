@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Admin - AlexCloud' %></title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
+      </a>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:1rem;">
+        <span style="font-family:var(--font-ui); font-size:0.85rem; color:var(--accent-orange); background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.3); padding:0.3rem 0.8rem; border-radius:50px;">
+          ⚙ Admin Panel
+        </span>
+        <div class="nav-user-menu">
+          <button class="nav-user-btn" onclick="toggleUserMenu()">
+            <div class="nav-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
+            <span><%= user.name.split(' ')[0] %></span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="/dashboard"><i class="fas fa-chart-line"></i> Dashboard User</a>
+            <a href="/profile"><i class="fas fa-user"></i> Profil</a>
+            <hr>
+            <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Overview</div>
+        <a href="/admin" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Management</div>
+        <a href="/admin/orders" class="sidebar-link <%= currentPage === 'orders' ? 'active' : '' %>">
+          <i class="fas fa-shopping-cart"></i> Kelola Order
+        </a>
+        <a href="/admin/subscriptions" class="sidebar-link <%= currentPage === 'subscriptions' ? 'active' : '' %>">
+          <i class="fas fa-id-card"></i> Subscriptions
+        </a>
+        <a href="/admin/users" class="sidebar-link <%= currentPage === 'users' ? 'active' : '' %>">
+          <i class="fas fa-users"></i> Kelola User
+        </a>
+        <a href="/admin/games" class="sidebar-link <%= currentPage === 'games' ? 'active' : '' %>">
+          <i class="fas fa-gamepad"></i> Kelola Game
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Marketing</div>
+        <a href="/admin/promo" class="sidebar-link <%= currentPage === 'promo' ? 'active' : '' %>">
+          <i class="fas fa-tag"></i> Kode Promo
+        </a>
+        <a href="/admin/plans" class="sidebar-link <%= currentPage === 'plans' ? 'active' : '' %>">
+          <i class="fas fa-dollar-sign"></i> Edit Harga Paket
+        </a>
+        <a href="/admin/testimonials" class="sidebar-link <%= currentPage === 'testimonials' ? 'active' : '' %>">
+          <i class="fas fa-star"></i> Kelola Testimoni
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Site</div>
+        <a href="/" class="sidebar-link" target="_blank">
+          <i class="fas fa-external-link-alt"></i> Lihat Website
+        </a>
+        <a href="/logout" class="sidebar-link" style="color:#ff6666;">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-content">

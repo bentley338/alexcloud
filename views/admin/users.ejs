@@ -1,0 +1,121 @@
+<% currentPage = 'users'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-users"></i> Kelola User</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-users"></i> Daftar User (<%= users.filter(u => u.role !== 'admin').length %> member)</div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Login Via</th>
+          <th>Status</th>
+          <th>Ban</th>
+          <th>Bergabung</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(u => { %>
+        <tr class="<%= u.isBanned ? 'row-banned' : '' %>">
+          <td>
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <% if (u.avatar) { %>
+              <img src="<%= u.avatar %>" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+              <% } else { %>
+              <div style="width:28px; height:28px; border-radius:50%; background:var(--gradient-main); display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:#000; flex-shrink:0">
+                <%= u.name.charAt(0).toUpperCase() %>
+              </div>
+              <% } %>
+              <span style="font-family:var(--font-ui); font-weight:600;"><%= u.name %></span>
+            </div>
+          </td>
+          <td style="font-size:0.85rem; color:var(--text-muted);"><%= u.email %></td>
+          <td>
+            <span class="status-badge <%= u.role === 'admin' ? 'status-confirmed' : 'status-active' %>">
+              <%= u.role === 'admin' ? '⚙ Admin' : '👤 Member' %>
+            </span>
+          </td>
+          <td style="font-size:0.85rem;">
+            <% if (u.googleId) { %>
+            <span style="color:#4285f4; font-family:var(--font-ui)">🔗 Google</span>
+            <% } else { %>
+            <span style="color:var(--text-muted); font-family:var(--font-ui)">📧 Email</span>
+            <% } %>
+          </td>
+          <td>
+            <span class="status-badge <%= u.isActive && !u.isBanned ? 'status-active' : 'status-rejected' %>">
+              <%= u.isBanned ? '🚫 BANNED' : (u.isActive ? '✅ Aktif' : '❌ Nonaktif') %>
+            </span>
+          </td>
+          <td>
+            <% if (u.isBanned) { %>
+              <span class="ban-badge">🚫 BANNED</span>
+            <% } else { %>
+              <span style="color:var(--accent-green); font-size:0.8rem; font-family:var(--font-ui)">✅ OK</span>
+            <% } %>
+          </td>
+          <td style="font-size:0.82rem; color:var(--text-muted)"><%= moment(u.createdAt).format('DD/MM/YYYY') %></td>
+          <td>
+            <% if (u.role !== 'admin') { %>
+            <div style="display:flex; flex-direction:column; gap:0.4rem; min-width:140px;">
+              <!-- Ban / Unban -->
+              <% if (!u.isBanned) { %>
+              <form action="/admin/users/<%= u.id %>/ban" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-reject" style="width:100%;"
+                  onclick="return confirm('Ban user <%= u.name %>? Mereka tidak bisa login.')">
+                  🚫 Ban User
+                </button>
+              </form>
+              <% } else { %>
+              <form action="/admin/users/<%= u.id %>/unban" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-confirm" style="width:100%;"
+                  onclick="return confirm('Unban user <%= u.name %>?')">
+                  ✅ Unban User
+                </button>
+              </form>
+              <% } %>
+
+              <!-- Reset Password -->
+              <% if (!u.googleId) { %>
+              <form action="/admin/users/<%= u.id %>/reset-password" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action" style="width:100%; background:rgba(255,170,0,0.15); color:#ffaa00; border:1px solid rgba(255,170,0,0.3);"
+                  onclick="return confirm('Reset password <%= u.name %>? Password baru akan ditampilkan di halaman ini.')">
+                  🔑 Reset Password
+                </button>
+              </form>
+              <% } %>
+
+              <!-- Toggle Active -->
+              <form action="/admin/users/<%= u.id %>/toggle" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action <%= u.isActive ? 'btn-reject' : 'btn-confirm' %>" style="width:100%; opacity:0.7;"
+                  onclick="return confirm('<%= u.isActive ? 'Nonaktifkan' : 'Aktifkan' %> user <%= u.name %>?')">
+                  <%= u.isActive ? '🔒 Nonaktifkan' : '🔓 Aktifkan' %>
+                </button>
+              </form>
+            </div>
+            <% } else { %>
+            <span style="color:var(--text-muted); font-size:0.85rem;">—</span>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('layout-footer') %>

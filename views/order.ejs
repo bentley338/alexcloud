@@ -1,0 +1,131 @@
+<%- include('partials/header') %>
+
+<div style="min-height:100vh; padding:7rem 2rem 4rem;">
+  <div style="max-width:640px; margin:0 auto;">
+    <a href="/pricing" style="color:var(--text-muted); text-decoration:none; font-family:var(--font-ui); font-size:0.9rem; display:inline-block; margin-bottom:2rem;">
+      <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+    <h1 style="font-family:var(--font-display); font-size:2rem; margin-bottom:0.5rem;">
+      Konfirmasi Order
+    </h1>
+    <p style="color:var(--text-muted); margin-bottom:2rem; font-family:var(--font-ui)">
+      Kamu memesan paket <strong style="color:var(--accent-blue)"><%= plan.name %></strong>
+    </p>
+
+    <div style="background:var(--bg-card); border:1px solid var(--border-hover); border-radius:var(--radius-lg); padding:2rem; margin-bottom:1.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted); font-family:var(--font-ui)">Paket</span>
+        <span style="font-family:var(--font-ui); font-weight:700;"><%= plan.name %></span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted); font-family:var(--font-ui)">Durasi</span>
+        <span style="font-family:var(--font-ui); font-weight:700;"><%= plan.duration %> Hari</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted); font-family:var(--font-ui)">Akun</span>
+        <span style="font-family:var(--font-ui); font-weight:700; font-size:0.9rem;"><%= user.email %></span>
+      </div>
+      <div id="priceRow" style="display:flex; justify-content:space-between; align-items:center; padding:1rem 0 0;">
+        <span style="font-family:var(--font-ui); font-weight:700;">Total</span>
+        <span id="totalDisplay" style="font-family:var(--font-display); font-size:1.5rem; font-weight:700; color:var(--accent-green);"><%= plan.priceDisplay %></span>
+      </div>
+      <div id="discountRow" style="display:none; margin-top:0.5rem;">
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-muted); font-family:var(--font-ui); margin-bottom:0.25rem;">
+          <span>Harga Normal</span>
+          <span style="text-decoration:line-through;" id="originalPriceDisplay"><%= plan.priceDisplay %></span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.9rem; color:var(--accent-green); font-family:var(--font-ui);">
+          <span>Hemat (Promo 🎉)</span>
+          <span id="discountDisplay">-Rp 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KODE PROMO (OPSIONAL) -->
+    <div class="promo-input-card">
+      <div class="promo-input-header">
+        <i class="fas fa-tag"></i>
+        <span>Punya Kode Promo? (Opsional)</span>
+      </div>
+      <div class="promo-input-wrap">
+        <input type="text" id="promoInput" class="promo-text-input" placeholder="Masukkan kode promo..." maxlength="30" oninput="this.value = this.value.toUpperCase()">
+        <button class="promo-apply-btn" onclick="applyPromo()">
+          <i class="fas fa-check"></i> Pakai
+        </button>
+      </div>
+      <div id="promoStatus" class="promo-status"></div>
+    </div>
+
+    <div style="background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; font-family:var(--font-ui); font-size:0.9rem; color:var(--text-secondary);">
+      <i class="fas fa-info-circle" style="color:var(--accent-blue)"></i>
+      Setelah order dibuat, kamu akan diarahkan ke halaman pembayaran QRIS dan konfirmasi WhatsApp.
+    </div>
+
+    <form action="/order" method="POST" id="orderForm">
+      <input type="hidden" name="planId" value="<%= plan.id %>">
+      <input type="hidden" name="promoCode" id="hiddenPromoCode" value="">
+      <input type="hidden" name="promoId" id="hiddenPromoId" value="">
+      <input type="hidden" name="finalPrice" id="hiddenFinalPrice" value="<%= plan.price %>">
+      <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:1rem; font-size:1.05rem;">
+        <i class="fas fa-shopping-cart"></i> Buat Order & Lanjut Bayar
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+const planPrice = <%= plan.price %>;
+const planId = '<%= plan.id %>';
+let appliedPromoId = '';
+let appliedPromoCode = '';
+
+async function applyPromo() {
+  const code = document.getElementById('promoInput').value.trim();
+  const status = document.getElementById('promoStatus');
+  if (!code) {
+    status.innerHTML = '<span class="promo-error"><i class="fas fa-times-circle"></i> Masukkan kode promo terlebih dahulu.</span>';
+    return;
+  }
+  status.innerHTML = '<span style="color:var(--text-muted)"><i class="fas fa-spinner fa-spin"></i> Memvalidasi...</span>';
+  try {
+    const resp = await fetch('/api/promo/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, planId })
+    });
+    const data = await resp.json();
+    if (data.valid) {
+      status.innerHTML = `<span class="promo-success"><i class="fas fa-check-circle"></i> ${data.message}</span>`;
+      document.getElementById('totalDisplay').textContent = data.finalPriceDisplay;
+      document.getElementById('discountRow').style.display = 'block';
+      document.getElementById('discountDisplay').textContent = '- Rp ' + data.discount.toLocaleString('id-ID');
+      document.getElementById('hiddenPromoCode').value = code;
+      document.getElementById('hiddenPromoId').value = data.promoId;
+      document.getElementById('hiddenFinalPrice').value = data.finalPrice;
+      appliedPromoId = data.promoId;
+      appliedPromoCode = code;
+    } else {
+      status.innerHTML = `<span class="promo-error"><i class="fas fa-times-circle"></i> ${data.message}</span>`;
+      resetPromo();
+    }
+  } catch(e) {
+    status.innerHTML = '<span class="promo-error"><i class="fas fa-exclamation-triangle"></i> Terjadi kesalahan. Coba lagi.</span>';
+  }
+}
+
+function resetPromo() {
+  document.getElementById('totalDisplay').textContent = '<%= plan.priceDisplay %>';
+  document.getElementById('discountRow').style.display = 'none';
+  document.getElementById('hiddenPromoCode').value = '';
+  document.getElementById('hiddenPromoId').value = '';
+  document.getElementById('hiddenFinalPrice').value = planPrice;
+  appliedPromoId = '';
+  appliedPromoCode = '';
+}
+
+document.getElementById('promoInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') applyPromo();
+});
+</script>
+
+<%- include('partials/footer') %>

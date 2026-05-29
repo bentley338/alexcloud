@@ -1,0 +1,65 @@
+<%- include('partials/header') %>
+
+<div class="page-wrap">
+  <div style="padding: 4rem 0 3rem; background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%);">
+    <div class="container">
+      <div class="section-tag" style="margin-bottom:1rem;">Game Library</div>
+      <h1 class="section-title"><span class="accent">Semua Game</span> Tersedia</h1>
+      <p class="section-desc"><%= games.length %> game siap dimainkan di AlexCloud!</p>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <!-- Genre Filter -->
+    <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:2.5rem;">
+      <a href="/games" class="btn-action <%= activeGenre === 'all' ? 'btn-confirm' : '' %>"
+        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === 'all' ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === 'all' ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === 'all' ? 'rgba(0,212,255,0.3)' : 'var(--border)' %>">
+        Semua (<%= (genres.length > 0 ? games.length : 0) + (activeGenre === 'all' ? games.length : 0) %>)
+      </a>
+      <% genres.forEach(genre => { %>
+      <a href="/games?genre=<%= encodeURIComponent(genre) %>" class="btn-action"
+        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === genre ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === genre ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === genre ? 'rgba(0,212,255,0.3)' : 'var(--border)' %>">
+        <%= genre %>
+      </a>
+      <% }) %>
+    </div>
+
+    <div class="games-grid">
+      <% games.forEach(game => { %>
+      <div class="game-card">
+        <div class="game-img-wrap">
+          <img src="<%= game.image %>" alt="<%= game.name %>" loading="lazy">
+          <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
+        </div>
+        <div class="game-body">
+          <div class="game-title"><%= game.name %></div>
+          <div class="game-genre"><i class="fas fa-tag"></i> <%= game.genre %></div>
+          <p class="game-desc"><%= game.description %></p>
+        </div>
+        <div class="game-footer">
+          <div class="game-rating"><i class="fas fa-star"></i> <%= game.rating %></div>
+          <span class="game-platform"><i class="fas fa-cloud"></i> Cloud</span>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <% if (games.length === 0) { %>
+    <div style="text-align:center; padding:5rem; color:var(--text-muted);">
+      <i class="fas fa-gamepad" style="font-size:3rem; margin-bottom:1rem;"></i>
+      <p>Tidak ada game di kategori ini.</p>
+      <a href="/games" class="btn-primary" style="margin-top:1rem; display:inline-flex;">Lihat Semua Game</a>
+    </div>
+    <% } %>
+
+    <div style="text-align:center; margin-top:4rem; padding:3rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg);">
+      <h3 style="font-family:var(--font-display); margin-bottom:0.75rem;">Siap Main?</h3>
+      <p style="color:var(--text-muted); margin-bottom:1.5rem;">Subscribe sekarang dan mainkan semua game ini!</p>
+      <a href="<%= typeof user !== 'undefined' && user ? '/pricing' : '/register' %>" class="btn-primary">
+        <i class="fas fa-gamepad"></i> <%= typeof user !== 'undefined' && user ? 'Pilih Paket' : 'Daftar Sekarang' %>
+      </a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

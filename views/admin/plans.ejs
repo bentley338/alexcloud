@@ -1,0 +1,58 @@
+<% currentPage = 'plans'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-dollar-sign"></i> Edit Harga Paket</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+  <% plans.forEach(plan => { %>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="fas fa-box"></i> <%= plan.name %>
+        <% if (plan.popular) { %><span class="status-badge status-active" style="margin-left:0.5rem; font-size:0.7rem;">⭐ POPULER</span><% } %>
+      </div>
+    </div>
+    <div style="padding:1.5rem;">
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <div style="font-family:var(--font-display); font-size:2rem; color:var(--accent-blue);">
+          <%= plan.priceDisplay %>
+        </div>
+        <div style="color:var(--text-muted); font-size:0.85rem; font-family:var(--font-ui);">
+          Durasi: <%= plan.duration %> hari
+        </div>
+      </div>
+      <form action="/admin/plans/<%= plan.id %>/edit" method="POST">
+        <div class="form-group">
+          <label class="form-label">Nama Paket</label>
+          <input type="text" name="name" class="form-input" value="<%= plan.name %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Harga (Rp)</label>
+          <input type="number" name="price" class="form-input" value="<%= plan.price %>" min="1000" step="1000" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Durasi (Hari)</label>
+          <input type="number" name="duration" class="form-input" value="<%= plan.duration %>" min="1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" name="popular" <%= plan.popular ? 'checked' : '' %>> Tandai sebagai POPULER
+          </label>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
+          <i class="fas fa-save"></i> Simpan Perubahan
+        </button>
+      </form>
+    </div>
+  </div>
+  <% }) %>
+</div>
+
+<%- include('layout-footer') %>

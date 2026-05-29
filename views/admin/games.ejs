@@ -1,0 +1,195 @@
+<% currentPage = 'games'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-gamepad"></i> Kelola Game</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<!-- Add Game Form -->
+<div class="card" style="margin-bottom:2rem;">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-plus-circle"></i> Tambah Game Baru</div>
+    <button onclick="toggleAddForm()" class="btn-action btn-confirm">+ Tambah</button>
+  </div>
+  <div id="addGameForm" style="display:none; padding:1.5rem; border-top:1px solid var(--border);">
+    <form action="/admin/games" method="POST">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Nama Game *</label>
+          <input type="text" name="name" class="form-input" placeholder="Contoh: EA FC 27" required>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Genre *</label>
+          <input type="text" name="genre" class="form-input" placeholder="Sports / RPG / FPS / Racing">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Rating (1-5)</label>
+          <input type="number" name="rating" class="form-input" min="1" max="5" step="0.1" value="4.5">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Tag Badge</label>
+          <input type="text" name="tag" class="form-input" placeholder="NEW / HOT / POPULAR / dll">
+        </div>
+        <div class="form-group" style="margin:0; grid-column:1/-1;">
+          <label class="form-label">URL Gambar</label>
+          <input type="text" name="image" class="form-input" placeholder="https://...gambar.jpg (kosongkan untuk auto-generate)">
+        </div>
+        <div class="form-group" style="margin:0; grid-column:1/-1;">
+          <label class="form-label">Deskripsi</label>
+          <input type="text" name="description" class="form-input" placeholder="Deskripsi singkat game...">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" name="popular"> Tampil di Halaman Populer
+          </label>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan Game</button>
+    </form>
+  </div>
+</div>
+
+<!-- Games List -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-list"></i> Daftar Game (<%= games.length %>)</div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Game</th>
+          <th>Genre</th>
+          <th>Rating</th>
+          <th>Tag</th>
+          <th>Populer</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% games.forEach(game => { %>
+        <tr>
+          <td>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <img src="<%= game.image %>" alt="<%= game.name %>" style="width:60px; height:34px; object-fit:cover; border-radius:6px; border:1px solid var(--border);">
+              <span style="font-family:var(--font-ui); font-weight:600;"><%= game.name %></span>
+            </div>
+          </td>
+          <td style="color:var(--accent-blue); font-family:var(--font-ui); font-size:0.85rem;"><%= game.genre %></td>
+          <td>
+            <span style="color:#ffd700; font-family:var(--font-ui);">⭐ <%= game.rating %></span>
+          </td>
+          <td>
+            <% if (game.tag) { %>
+            <span style="background:var(--gradient-main); color:#000; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.75rem; font-family:var(--font-ui); font-weight:700;"><%= game.tag %></span>
+            <% } else { %><span style="color:var(--text-muted)">—</span><% } %>
+          </td>
+          <td>
+            <span class="status-badge <%= game.popular ? 'status-active' : 'status-expired' %>">
+              <%= game.popular ? '✅ Ya' : '❌ Tidak' %>
+            </span>
+          </td>
+          <td>
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <!-- Edit Produk Lengkap -->
+              <a href="/admin/games/<%= game.id %>/edit"
+                class="btn-action" style="background:rgba(123,47,255,0.12); color:#a855f7; border:1px solid rgba(123,47,255,0.3); text-decoration:none;">
+                <i class="fas fa-store"></i> Edit Produk
+              </a>
+              <!-- Quick Edit Modal -->
+              <button onclick="openEditModal(<%- JSON.stringify(game.id) %>, <%- JSON.stringify(game.name) %>, <%- JSON.stringify(game.genre) %>, <%- JSON.stringify(String(game.rating)) %>, <%- JSON.stringify(game.tag || '') %>, <%- JSON.stringify(game.popular ? 'on' : '') %>, <%- JSON.stringify(game.description || '') %>, <%- JSON.stringify(game.image || '') %>)"
+                class="btn-action" style="background:rgba(0,212,255,0.1); color:var(--accent-blue); border-color:rgba(0,212,255,0.3);">
+                <i class="fas fa-bolt"></i> Quick Edit
+              </button>
+              <!-- Delete Button -->
+              <form action="/admin/games/<%= game.id %>/delete" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action btn-danger"
+                  onclick="return confirm('Hapus game <%= game.name %>?')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Edit Game Modal -->
+<div id="editGameModal" class="admin-modal-overlay" style="display:none;" onclick="closeEditModal(event)">
+  <div class="admin-modal">
+    <div class="admin-modal-header">
+      <h3><i class="fas fa-edit"></i> Edit Game</h3>
+      <button onclick="document.getElementById('editGameModal').style.display='none'"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="editGameForm" method="POST">
+      <input type="hidden" name="_method" value="POST">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Nama Game</label>
+          <input type="text" name="name" id="editName" class="form-input" required>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Genre</label>
+          <input type="text" name="genre" id="editGenre" class="form-input">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Rating (1-5)</label>
+          <input type="number" name="rating" id="editRating" class="form-input" min="1" max="5" step="0.1">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Tag Badge</label>
+          <input type="text" name="tag" id="editTag" class="form-input">
+        </div>
+        <div class="form-group" style="margin:0; grid-column:1/-1;">
+          <label class="form-label">URL Gambar</label>
+          <input type="text" name="image" id="editImage" class="form-input">
+        </div>
+        <div class="form-group" style="margin:0; grid-column:1/-1;">
+          <label class="form-label">Deskripsi</label>
+          <input type="text" name="description" id="editDesc" class="form-input">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" name="popular" id="editPopular"> Tampil di Halaman Populer
+          </label>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleAddForm() {
+  const form = document.getElementById('addGameForm');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function openEditModal(id, name, genre, rating, tag, popular, desc, image) {
+  document.getElementById('editGameForm').action = '/admin/games/' + id + '/edit';
+  document.getElementById('editName').value = name;
+  document.getElementById('editGenre').value = genre;
+  document.getElementById('editRating').value = rating;
+  document.getElementById('editTag').value = tag;
+  document.getElementById('editPopular').checked = popular === 'on';
+  document.getElementById('editDesc').value = desc;
+  document.getElementById('editImage').value = image;
+  document.getElementById('editGameModal').style.display = 'flex';
+}
+
+function closeEditModal(e) {
+  if (e.target === document.getElementById('editGameModal')) {
+    document.getElementById('editGameModal').style.display = 'none';
+  }
+}
+</script>
+
+<%- include('layout-footer') %>

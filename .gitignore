@@ -1,0 +1,7 @@
+node_modules/
+database/db.json
+.env
+*.log
+.DS_Store
+
+sessions/

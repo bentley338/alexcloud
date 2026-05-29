@@ -1,0 +1,303 @@
+<%- include('partials/header') %>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-overlay"></div>
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="fas fa-bolt"></i>
+        <span>Platform Cloud Gaming #1 Indonesia</span>
+      </div>
+      <h1 class="hero-title">
+        Main Game AAA<br><span class="accent">Tanpa PC Mahal</span>
+      </h1>
+      <p class="hero-subtitle">
+        AlexCloud menghadirkan pengalaman gaming premium langsung dari cloud. 
+        Akses ratusan game terbaru dengan koneksi internet biasa. 
+        Mulai dari Rp 40.000/minggu!
+      </p>
+      <div class="hero-actions">
+        <a href="/pricing" class="btn-primary">
+          <i class="fas fa-gamepad"></i> Mulai Sekarang
+        </a>
+        <a href="/games" class="btn-secondary">
+          <i class="fas fa-th-large"></i> Lihat Game
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num"><%= allGames.length %>+</span>
+          <span class="stat-label">Game Tersedia</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">4K</span>
+          <span class="stat-label">Resolusi Max</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">60fps</span>
+          <span class="stat-label">Smooth Gaming</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">24/7</span>
+          <span class="stat-label">Support</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-stack">
+        <div class="floating-badge badge-price">🔥 Mulai Rp 40.000</div>
+        <div class="hero-main-card">
+          <div class="hero-card-header">
+            <div class="hero-card-icon">🎮</div>
+            <div>
+              <div class="hero-card-title">AlexCloud Gaming</div>
+              <div class="hero-card-sub">Server Online • Low Latency</div>
+            </div>
+          </div>
+          <div class="hero-game-list">
+            <% games.slice(0, 4).forEach((game, i) => { %>
+            <div class="hero-game-item">
+              <div class="game-dot <%= ['blue','purple','green','orange'][i % 4] %>"></div>
+              <span class="game-name"><%= game.name %></span>
+              <span class="game-status">● Online</span>
+            </div>
+            <% }) %>
+          </div>
+        </div>
+        <div class="floating-badge badge-users">👥 Ribuan Gamer Aktif</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI TRENDING SECTION -->
+<section class="trending-section">
+  <div class="trending-container">
+    <div class="section-header">
+      <div class="section-tag">🤖 AI Trending</div>
+      <h2 class="section-title">Game <span class="accent">Trending Minggu Ini</span></h2>
+      <p class="section-desc">Rekomendasi cerdas AI berdasarkan rating & popularitas terkini</p>
+    </div>
+    <div class="trending-scroll">
+      <% trendingGames.forEach((game, idx) => { %>
+      <div class="trending-card">
+        <div class="trending-rank">#<%= idx + 1 %></div>
+        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img">
+        <div class="trending-info">
+          <div class="trending-name"><%= game.name %></div>
+          <div class="trending-genre"><%= game.genre %></div>
+          <div class="trending-rating">
+            <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < Math.floor(game.rating) ? '#ffd700' : '#333' %>;font-size:0.65rem;"></i><%}%>
+            <span><%= game.rating %></span>
+          </div>
+        </div>
+        <span class="trending-tag"><%= game.tag %></span>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="features-container">
+    <div class="section-header">
+      <div class="section-tag">Kenapa AlexCloud?</div>
+      <h2 class="section-title">Gaming <span class="accent">Tanpa Batas</span></h2>
+      <p class="section-desc">Nikmati game AAA terbaru dengan kualitas terbaik tanpa perlu investasi hardware mahal.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon blue"><i class="fas fa-bolt" style="color:var(--accent-blue)"></i></div>
+        <div class="feature-title">Latency Ultra Rendah</div>
+        <p class="feature-desc">Server dioptimalkan untuk Indonesia dengan ping di bawah 30ms untuk pengalaman gaming yang mulus.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple"><i class="fas fa-gamepad" style="color:#a855f7"></i></div>
+        <div class="feature-title">100+ Game Premium</div>
+        <p class="feature-desc">Akses game AAA terbaru seperti EA FC 26, MotoGP 25, Hogwarts Legacy, dan masih banyak lagi.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green"><i class="fas fa-tv" style="color:var(--accent-green)"></i></div>
+        <div class="feature-title">Streaming 4K / 60fps</div>
+        <p class="feature-desc">Kualitas visual maksimal dengan resolusi hingga 4K dan framerate stabil 60fps bahkan di HP.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon orange"><i class="fas fa-robot" style="color:var(--accent-orange)"></i></div>
+        <div class="feature-title">AI Assistant 24/7</div>
+        <p class="feature-desc">AlexBot AI siap menjawab pertanyaanmu, merekomendasikan game, dan membantu masalah kapanpun.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue"><i class="fas fa-save" style="color:var(--accent-blue)"></i></div>
+        <div class="feature-title">Cloud Save</div>
+        <p class="feature-desc">Progress game tersimpan di cloud. Main di HP, lanjut di TV, atau sebaliknya tanpa kehilangan data.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple"><i class="fas fa-tags" style="color:#a855f7"></i></div>
+        <div class="feature-title">Harga Terjangkau</div>
+        <p class="feature-desc">Mulai dari Rp 40.000/minggu saja! Jauh lebih hemat dibanding beli PC gaming jutaan rupiah.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR GAMES with View Mode Toggle -->
+<section class="games-section" id="games-section">
+  <div class="games-container">
+    <div class="section-header">
+      <div class="section-tag">Game Terpopuler</div>
+      <h2 class="section-title">Pilihan <span class="accent">Game Terbaik</span></h2>
+      <p class="section-desc">Dari sepak bola, balap, hingga RPG epik — semua ada di AlexCloud!</p>
+    </div>
+
+    <!-- View Mode Toggle -->
+    <div class="view-mode-bar">
+      <span class="view-mode-label"><i class="fas fa-eye"></i> Mode Tampilan:</span>
+      <div class="view-mode-btns">
+        <button class="view-mode-btn active" id="btn-grid" onclick="setViewMode('grid')" title="Grid View">
+          <i class="fas fa-th-large"></i> Grid
+        </button>
+        <button class="view-mode-btn" id="btn-list" onclick="setViewMode('list')" title="List View">
+          <i class="fas fa-list"></i> List
+        </button>
+        <button class="view-mode-btn" id="btn-compact" onclick="setViewMode('compact')" title="Compact View">
+          <i class="fas fa-grip-horizontal"></i> Compact
+        </button>
+      </div>
+    </div>
+
+    <div class="games-grid" id="gamesDisplay">
+      <% games.slice(0, 8).forEach(game => { %>
+      <div class="game-card">
+        <div class="game-img-wrap">
+          <img src="<%= game.image %>" alt="<%= game.name %>" loading="lazy">
+          <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
+        </div>
+        <div class="game-body">
+          <div class="game-title"><%= game.name %></div>
+          <div class="game-genre"><i class="fas fa-tag"></i> <%= game.genre %></div>
+          <p class="game-desc"><%= game.description %></p>
+        </div>
+        <div class="game-footer">
+          <div class="game-rating"><i class="fas fa-star"></i> <%= game.rating %></div>
+          <span class="game-platform"><i class="fas fa-cloud"></i> Cloud</span>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <div class="games-cta">
+      <a href="/games" class="btn-primary"><i class="fas fa-th-large"></i> Lihat Semua Game</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-container">
+    <div class="section-header">
+      <div class="section-tag">Harga</div>
+      <h2 class="section-title">Pilih <span class="accent">Paket Terbaik</span></h2>
+      <p class="section-desc">Harga bersahabat untuk semua kalangan gamer. Semakin lama, semakin hemat!</p>
+    </div>
+    <div class="pricing-grid">
+      <% plans.forEach(plan => { %>
+      <div class="plan-card <%= plan.popular ? 'popular' : '' %>">
+        <% if (plan.popular) { %><div class="popular-badge">⭐ PALING POPULER</div><% } %>
+        <div class="plan-name"><%= plan.name %></div>
+        <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>"><%= plan.priceDisplay %></div>
+        <div class="plan-period">per <%= plan.name.toLowerCase() %></div>
+        <ul class="plan-features">
+          <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
+          <li><i class="fas fa-check"></i> Streaming 4K / 60fps</li>
+          <li><i class="fas fa-check"></i> Cloud Save</li>
+          <li><i class="fas fa-check"></i> AI Assistant 24/7</li>
+          <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
+          <% if (plan.duration >= 30) { %><li><i class="fas fa-check"></i> Prioritas Antrian Server</li><% } %>
+          <% if (plan.duration >= 60) { %><li><i class="fas fa-check"></i> 🔥 Bonus 5 Hari Gratis</li><% } %>
+          <% if (plan.duration >= 90) { %><li><i class="fas fa-star" style="color:#ffd700"></i> Akses Game Baru Early</li><% } %>
+        </ul>
+        <% if (typeof user !== 'undefined' && user) { %>
+          <a href="/order/<%= plan.id %>" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+            Pilih Paket Ini
+          </a>
+        <% } else { %>
+          <a href="/login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+            Login untuk Order
+          </a>
+        <% } %>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS SECTION -->
+<section class="testimonials-section" id="testimonials">
+  <div class="testi-container">
+    <div class="section-header">
+      <div class="section-tag">⭐ Testimoni</div>
+      <h2 class="section-title">Apa Kata <span class="accent">Gamer Kita?</span></h2>
+      <p class="section-desc">Ribuan gamer puas bermain bersama AlexCloud. Ini cerita mereka.</p>
+    </div>
+    <% if (testimonials && testimonials.length > 0) { %>
+    <div class="testi-slider-wrap">
+      <button class="testi-nav testi-prev" onclick="testiPrev()"><i class="fas fa-chevron-left"></i></button>
+      <div class="testi-slider" id="testiSlider">
+        <% testimonials.forEach((t, idx) => { %>
+        <div class="testi-card <%= idx === 0 ? 'active' : '' %>" data-idx="<%= idx %>">
+          <% if (t.image) { %>
+            <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-img">
+          <% } %>
+          <div class="testi-content">
+            <div class="testi-stars">
+              <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < t.rating ? '#ffd700' : '#333' %>"></i><%}%>
+            </div>
+            <p class="testi-text">"<%= t.text %>"</p>
+            <div class="testi-author">
+              <img src="<%= t.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(t.name) %>" alt="<%= t.name %>" class="testi-avatar">
+              <div>
+                <div class="testi-name"><%= t.name %></div>
+                <div class="testi-role"><%= t.role %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <button class="testi-nav testi-next" onclick="testiNext()"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="testi-dots" id="testiDots">
+      <% testimonials.forEach((t, idx) => { %>
+      <span class="testi-dot <%= idx === 0 ? 'active' : '' %>" onclick="goToTesti(<%= idx %>)"></span>
+      <% }) %>
+    </div>
+    <% } %>
+    <div class="testi-cta">
+      <a href="/testimonials" class="btn-secondary"><i class="fas fa-star"></i> Lihat Semua Testimoni</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding: 5rem 0; text-align: center; position: relative; z-index: 1;">
+  <div class="container">
+    <div style="background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(123,47,255,0.1) 100%); border: 1px solid rgba(0,212,255,0.2); border-radius: 24px; padding: 4rem 2rem; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,212,255,0.05) 0%, transparent 70%);"></div>
+      <div style="position: relative; z-index: 1;">
+        <div class="section-tag" style="margin-bottom: 1.5rem;">Mulai Sekarang</div>
+        <h2 class="section-title">Siap Masuk ke Dunia <span class="accent">Cloud Gaming?</span></h2>
+        <p class="section-desc" style="margin-bottom: 2rem;">Daftar gratis sekarang dan nikmati pengalaman gaming premium tanpa batas!</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/register" class="btn-primary"><i class="fas fa-user-plus"></i> Daftar Gratis</a>
+          <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="btn-secondary">
+            <i class="fab fa-whatsapp"></i> Hubungi Admin
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

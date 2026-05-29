@@ -1,0 +1,139 @@
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="/" class="nav-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
+        </a>
+        <p>Platform cloud gaming terbaik di Indonesia. Main game AAA tanpa perlu PC mahal!</p>
+        <div class="footer-social">
+          <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="social-link wa">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="#" class="social-link ig"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link tg"><i class="fab fa-telegram"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navigasi</h4>
+        <a href="/">Beranda</a>
+        <a href="/games">Game Library</a>
+        <a href="/pricing">Harga</a>
+        <a href="/testimonials">Testimoni</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="footer-links">
+        <h4>Support</h4>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank">WhatsApp Admin</a>
+        <a href="/faq">FAQ Lengkap</a>
+        <a href="/network-test"><i class="fas fa-wifi" style="font-size:0.75rem;"></i> Speed Test</a>
+        <a href="/pricing">Cek Harga</a>
+        <a href="/register">Daftar Sekarang</a>
+      </div>
+      <div class="footer-links">
+        <h4>Paket</h4>
+        <a href="/pricing">1 Minggu</a>
+        <a href="/pricing">1 Bulan</a>
+        <a href="/pricing">2 Bulan</a>
+        <a href="/pricing">3 Bulan</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© <%= new Date().getFullYear() %> AlexCloud. All rights reserved. | Made with ❤️ for Gamers Indonesia</p>
+    </div>
+  </footer>
+
+  <!-- ============================================ -->
+  <!-- 🎵 MUSIC PLAYER FLOATING                     -->
+  <!-- ============================================ -->
+  <div class="music-player-floating" id="musicPlayer">
+    <div class="music-player-header" onclick="toggleMusicPlayer()">
+      <div class="music-eq-bars">
+        <span class="eq-bar"></span>
+        <span class="eq-bar"></span>
+        <span class="eq-bar"></span>
+        <span class="eq-bar"></span>
+      </div>
+      <span class="music-player-title" id="musicTitle">🎵 Gaming Vibes</span>
+      <button class="music-minimize-btn" id="musicMinBtn"><i class="fas fa-chevron-down"></i></button>
+    </div>
+    <div class="music-player-body" id="musicPlayerBody">
+      <div class="music-track-info">
+        <div class="music-album-art" id="musicAlbumArt">🎮</div>
+        <div class="music-meta">
+          <div class="music-track-name" id="musicTrackName">Epic Gaming Mix</div>
+          <div class="music-artist" id="musicArtist">AlexCloud Radio</div>
+        </div>
+      </div>
+      <div class="music-progress-wrap">
+        <span class="music-time" id="musicCurrentTime">0:00</span>
+        <div class="music-progress-bar" id="musicProgressBar" onclick="seekMusic(event)">
+          <div class="music-progress-fill" id="musicProgressFill"></div>
+        </div>
+        <span class="music-time" id="musicDuration">0:00</span>
+      </div>
+      <div class="music-controls">
+        <button class="music-btn" onclick="prevTrack()" title="Sebelumnya"><i class="fas fa-backward"></i></button>
+        <button class="music-btn play-btn" id="playPauseBtn" onclick="togglePlay()">
+          <i class="fas fa-play" id="playIcon"></i>
+        </button>
+        <button class="music-btn" onclick="nextTrack()" title="Berikutnya"><i class="fas fa-forward"></i></button>
+        <button class="music-btn" onclick="toggleMute()" id="muteBtn" title="Mute"><i class="fas fa-volume-up" id="volumeIcon"></i></button>
+      </div>
+      <div class="music-volume-wrap">
+        <i class="fas fa-volume-down" style="color:var(--text-muted);font-size:0.7rem;"></i>
+        <input type="range" class="music-volume-slider" id="volumeSlider" min="0" max="100" value="60" oninput="setVolume(this.value)">
+        <i class="fas fa-volume-up" style="color:var(--text-muted);font-size:0.7rem;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 🤖 AI CHATBOT ASSISTANT                      -->
+  <!-- ============================================ -->
+  <div class="ai-chatbot-widget" id="aiChatbot">
+    <div class="ai-chat-toggle" id="aiChatToggle" onclick="toggleAIChat()">
+      <div class="ai-pulse-ring"></div>
+      <i class="fas fa-robot"></i>
+      <span class="ai-badge-dot"></span>
+    </div>
+    <div class="ai-chat-window" id="aiChatWindow">
+      <div class="ai-chat-header">
+        <div class="ai-header-info">
+          <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+          <div>
+            <div class="ai-name">AlexBot AI</div>
+            <div class="ai-status"><span class="ai-online-dot"></span> Online & Siap Bantu</div>
+          </div>
+        </div>
+        <div class="ai-header-actions">
+          <button onclick="clearChat()" title="Clear"><i class="fas fa-trash"></i></button>
+          <button onclick="toggleAIChat()" title="Tutup"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+      <div class="ai-chat-messages" id="aiMessages">
+        <div class="ai-message bot">
+          <div class="ai-msg-avatar"><i class="fas fa-robot"></i></div>
+          <div class="ai-msg-bubble">
+            Halo! Saya <strong>AlexBot</strong> 🤖 — asisten AI AlexCloud.<br><br>
+            Saya bisa bantu kamu:
+            <div class="ai-quick-chips">
+              <button onclick="askAI('rekomendasi game terbaik')">🎮 Rekomendasi Game</button>
+              <button onclick="askAI('harga paket berlangganan')">💰 Info Harga</button>
+              <button onclick="askAI('cara bayar dan aktifkan akun')">💳 Cara Bayar</button>
+              <button onclick="askAI('fitur alexcloud')">⚡ Fitur AlexCloud</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ai-chat-input-wrap">
+        <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Tanya apa saja..." onkeypress="handleChatEnter(event)">
+        <button class="ai-send-btn" onclick="sendAIMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/ai-engine.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

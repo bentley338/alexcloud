@@ -1,0 +1,285 @@
+<% currentPage = 'games'; %>
+<%- include('layout-header') %>
+
+<div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+  <a href="/admin/games" style="color:var(--text-muted); text-decoration:none; font-family:var(--font-ui); font-size:0.9rem; display:flex; align-items:center; gap:0.4rem; transition:color 0.2s;" onmouseover="this.style.color='var(--accent-blue)'" onmouseout="this.style.color='var(--text-muted)'">
+    <i class="fas fa-arrow-left"></i> Kembali ke Daftar Game
+  </a>
+  <span style="color:var(--border-hover);">›</span>
+  <span style="font-family:var(--font-ui); color:var(--text-muted); font-size:0.9rem;">Edit Game</span>
+</div>
+
+<h1 class="admin-page-title" style="margin-bottom:0.5rem;"><i class="fas fa-edit"></i> Edit Halaman Produk Game</h1>
+<p style="color:var(--text-muted); font-family:var(--font-ui); margin-bottom:2rem;">
+  Semua info yang diisi di sini akan tampil di halaman detail game yang dilihat pelanggan.
+</p>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<form action="/admin/games/<%= game.id %>/edit" method="POST" id="gameEditForm">
+  <div style="display:grid; grid-template-columns:1fr 380px; gap:2rem; align-items:start;">
+
+    <!-- KOLOM KIRI: Form Detail -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+      <!-- Info Dasar -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-info-circle"></i> Informasi Dasar</div>
+        </div>
+        <div style="padding:1.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div class="form-group" style="margin:0; grid-column:1/-1;">
+            <label class="form-label">Nama Game *</label>
+            <input type="text" name="name" class="form-input" value="<%= game.name %>" required placeholder="Nama game...">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Genre *</label>
+            <input type="text" name="genre" class="form-input" value="<%= game.genre %>" required placeholder="Sports / RPG / FPS / Racing">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Rating (1-5)</label>
+            <input type="number" name="rating" class="form-input" value="<%= game.rating %>" min="1" max="5" step="0.1">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Developer / Publisher</label>
+            <input type="text" name="developer" class="form-input" value="<%= game.developer || '' %>" placeholder="EA Sports / Rockstar / dll">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Tahun Rilis</label>
+            <input type="text" name="releaseYear" class="form-input" value="<%= game.releaseYear || '' %>" placeholder="2024">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Platform</label>
+            <input type="text" name="platform" class="form-input" value="<%= game.platform || 'Cloud Gaming' %>" placeholder="Cloud / PC / PS5">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Tag Badge</label>
+            <input type="text" name="tag" class="form-input" value="<%= game.tag || '' %>" placeholder="NEW / HOT / POPULAR / TOP">
+          </div>
+          <div class="form-group" style="margin:0; display:flex; align-items:center; padding-top:1.5rem;">
+            <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-family:var(--font-ui); font-size:0.95rem;">
+              <input type="checkbox" name="popular" <%= game.popular ? 'checked' : '' %> style="width:16px; height:16px;">
+              <span>⭐ Tampil di Halaman Populer</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foto Utama -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-image"></i> Foto Utama (Cover)</div>
+        </div>
+        <div style="padding:1.5rem;">
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">URL Gambar Cover *</label>
+            <input type="text" name="image" id="coverUrlInput" class="form-input"
+              value="<%= game.image %>"
+              placeholder="https://... / https://upload.wikimedia.org/..."
+              oninput="previewCover(this.value)">
+            <small style="color:var(--text-muted); font-size:0.78rem; margin-top:0.3rem; display:block;">
+              💡 Sarankan resolusi 600×340px (16:9). Bisa pakai link dari Google Images, Wikipedia, RAWG.io, dll.
+            </small>
+          </div>
+          <!-- Preview -->
+          <div id="coverPreviewWrap" style="border:2px dashed var(--border); border-radius:var(--radius); overflow:hidden; aspect-ratio:16/9; background:rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center; max-width:400px;">
+            <img id="coverPreviewImg" src="<%= game.image %>" alt="Preview" 
+              style="width:100%; height:100%; object-fit:cover; display:<%= game.image ? 'block' : 'none' %>;"
+              onerror="this.style.display='none'; document.getElementById('coverPlaceholder').style.display='flex'">
+            <div id="coverPlaceholder" style="display:<%= game.image ? 'none' : 'flex' %>; flex-direction:column; align-items:center; color:var(--text-muted); gap:0.5rem; font-family:var(--font-ui); font-size:0.85rem;">
+              <i class="fas fa-image" style="font-size:2rem; opacity:0.3;"></i>
+              <span>Preview akan muncul di sini</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screenshot Gallery -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-images"></i> Screenshot Gallery</div>
+          <button type="button" onclick="addScreenshotField()" class="btn-action btn-confirm">
+            <i class="fas fa-plus"></i> Tambah URL
+          </button>
+        </div>
+        <div style="padding:1.5rem;">
+          <p style="color:var(--text-muted); font-family:var(--font-ui); font-size:0.85rem; margin-bottom:1rem;">
+            Tambahkan URL gambar screenshot untuk galeri di halaman detail game. Maks. 6 screenshot.
+          </p>
+          <div id="screenshotFields">
+            <% const screenshots = game.screenshots || []; %>
+            <% if (screenshots.length === 0) { %>
+            <div class="screenshot-field-row" style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+              <input type="text" name="screenshotUrls" class="form-input" placeholder="https://...screenshot1.jpg" oninput="previewScreenshot(this)" style="flex:1;">
+              <button type="button" onclick="removeScreenshotField(this)" class="btn-action btn-danger"><i class="fas fa-times"></i></button>
+            </div>
+            <% } else { %>
+            <% screenshots.forEach((url, i) => { %>
+            <div class="screenshot-field-row" style="display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center;">
+              <input type="text" name="screenshotUrls" class="form-input" value="<%= url %>" placeholder="https://...screenshot.jpg" oninput="previewScreenshot(this)" style="flex:1;">
+              <% if (url) { %>
+              <img src="<%= url %>" style="width:60px; height:36px; object-fit:cover; border-radius:6px; border:1px solid var(--border); flex-shrink:0;" onerror="this.style.display='none'">
+              <% } %>
+              <button type="button" onclick="removeScreenshotField(this)" class="btn-action btn-danger"><i class="fas fa-times"></i></button>
+            </div>
+            <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deskripsi -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-align-left"></i> Deskripsi Game</div>
+        </div>
+        <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Deskripsi Singkat <small style="color:var(--text-muted)">(tampil di card game)</small></label>
+            <textarea name="description" class="form-input" rows="2" placeholder="Deskripsi pendek yang tampil di kartu game..." style="resize:vertical;"><%= game.description || '' %></textarea>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Deskripsi Lengkap <small style="color:var(--text-muted)">(tampil di halaman detail game)</small></label>
+            <textarea name="detailDesc" class="form-input" rows="6" placeholder="Tulis deskripsi lengkap game ini, fitur utama, cerita singkat, kenapa harus dimainkan, dll..." style="resize:vertical; font-size:0.9rem; line-height:1.6;"><%= game.detailDesc || '' %></textarea>
+            <small style="color:var(--text-muted); font-size:0.78rem; display:block; margin-top:0.3rem;">
+              💡 Bisa gunakan format: ✅ Fitur 1\n✅ Fitur 2\n🎮 Cerita singkat...
+            </small>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Minimum Requirements / Syarat Akses</label>
+            <textarea name="minRequirements" class="form-input" rows="3" placeholder="Browser modern (Chrome/Firefox/Edge), Koneksi internet 10 Mbps, RAM 4GB..." style="resize:vertical;"><%= game.minRequirements || '' %></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KOLOM KANAN: Preview & Tombol Simpan -->
+    <div style="position:sticky; top:80px; display:flex; flex-direction:column; gap:1.5rem;">
+
+      <!-- Preview Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-eye"></i> Preview Card</div>
+        </div>
+        <div style="padding:1rem;">
+          <div class="game-card" style="cursor:default; pointer-events:none;">
+            <div class="game-img-wrap">
+              <img id="previewCardImg" src="<%= game.image %>" alt="<%= game.name %>" onerror="this.src='https://placehold.co/400x220/0d1428/00d4ff?text=Game+Image&font=montserrat'">
+              <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
+            </div>
+            <div class="game-body">
+              <div class="game-title"><%= game.name %></div>
+              <div class="game-genre"><%= game.genre %></div>
+              <div class="game-desc"><%= game.description || 'Belum ada deskripsi.' %></div>
+            </div>
+            <div class="game-footer">
+              <span class="game-rating"><i class="fas fa-star"></i> <%= game.rating %></span>
+              <span class="game-platform">☁ Cloud</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Game Singkat -->
+      <div class="card">
+        <div style="padding:1.25rem;">
+          <div style="display:flex; flex-direction:column; gap:0.6rem; font-family:var(--font-ui); font-size:0.85rem;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Developer</span>
+              <span style="color:var(--text-primary); font-weight:600;"><%= game.developer || '—' %></span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Rilis</span>
+              <span style="color:var(--text-primary); font-weight:600;"><%= game.releaseYear || '—' %></span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Platform</span>
+              <span style="color:var(--accent-blue); font-weight:600;"><%= game.platform || 'Cloud' %></span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Rating</span>
+              <span style="color:#ffd700; font-weight:700;">⭐ <%= game.rating %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol Simpan -->
+      <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:1rem; font-size:1rem;">
+        <i class="fas fa-save"></i> Simpan Semua Perubahan
+      </button>
+      <a href="/admin/games" class="btn-secondary" style="width:100%; justify-content:center; padding:0.85rem; text-align:center;">
+        <i class="fas fa-times"></i> Batal
+      </a>
+      <form action="/admin/games/<%= game.id %>/delete" method="POST" onsubmit="return confirm('Yakin hapus game <%= game.name %>? Tidak bisa dibatalkan!')">
+        <button type="submit" style="width:100%; padding:0.75rem; background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.3); color:#ff6666; border-radius:var(--radius); font-family:var(--font-ui); font-size:0.9rem; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(255,68,68,0.2)'" onmouseout="this.style.background='rgba(255,68,68,0.1)'">
+          <i class="fas fa-trash"></i> Hapus Game Ini
+        </button>
+      </form>
+    </div>
+
+  </div><!-- /grid -->
+</form>
+
+<script>
+function previewCover(url) {
+  const img = document.getElementById('coverPreviewImg');
+  const ph = document.getElementById('coverPlaceholder');
+  const cardImg = document.getElementById('previewCardImg');
+  if (url) {
+    img.src = url;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    img.onerror = () => {
+      img.style.display = 'none';
+      ph.style.display = 'flex';
+    };
+    cardImg.src = url;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'flex';
+  }
+}
+
+function addScreenshotField() {
+  const container = document.getElementById('screenshotFields');
+  const existing = container.querySelectorAll('.screenshot-field-row').length;
+  if (existing >= 6) {
+    alert('Maksimal 6 screenshot.');
+    return;
+  }
+  const row = document.createElement('div');
+  row.className = 'screenshot-field-row';
+  row.style.cssText = 'display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center;';
+  row.innerHTML = `
+    <input type="text" name="screenshotUrls" class="form-input" placeholder="https://...screenshot.jpg" oninput="previewScreenshot(this)" style="flex:1;">
+    <button type="button" onclick="removeScreenshotField(this)" class="btn-action btn-danger"><i class="fas fa-times"></i></button>
+  `;
+  container.appendChild(row);
+}
+
+function removeScreenshotField(btn) {
+  btn.closest('.screenshot-field-row').remove();
+}
+
+function previewScreenshot(input) {
+  const row = input.closest('.screenshot-field-row');
+  let img = row.querySelector('img');
+  if (!img) {
+    img = document.createElement('img');
+    img.style.cssText = 'width:60px; height:36px; object-fit:cover; border-radius:6px; border:1px solid var(--border); flex-shrink:0;';
+    const btn = row.querySelector('button');
+    row.insertBefore(img, btn);
+  }
+  img.src = input.value;
+  img.style.display = 'block';
+  img.onerror = () => img.style.display = 'none';
+}
+</script>
+
+<%- include('layout-footer') %>

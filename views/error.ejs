@@ -1,0 +1,12 @@
+<%- include('partials/header') %>
+
+<div style="min-height:80vh; display:flex; align-items:center; justify-content:center; text-align:center; padding:2rem;">
+  <div>
+    <div style="font-size:5rem; margin-bottom:1rem;">⚠️</div>
+    <h1 style="font-family:var(--font-display); font-size:2rem; margin-bottom:1rem; color:var(--accent-orange);">Akses Ditolak</h1>
+    <p style="color:var(--text-muted); margin-bottom:2rem;"><%= typeof message !== 'undefined' ? message : 'Halaman tidak ditemukan.' %></p>
+    <a href="/" class="btn-primary"><i class="fas fa-home"></i> Kembali ke Beranda</a>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

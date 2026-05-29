@@ -1,0 +1,73 @@
+<% currentPage = 'subscriptions'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-id-card"></i> Subscriptions</h1>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:1rem; margin-bottom:2rem;">
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-green)"><%= subscriptions.filter(s=>s.status==='active').length %></div>
+    <div class="admin-stat-label">Aktif</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:#888"><%= subscriptions.filter(s=>s.status==='expired').length %></div>
+    <div class="admin-stat-label">Expired</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-blue)"><%= subscriptions.length %></div>
+    <div class="admin-stat-label">Total</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Paket</th>
+          <th>Status</th>
+          <th>Mulai</th>
+          <th>Berakhir</th>
+          <th>Sisa Hari</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (subscriptions.length === 0) { %>
+        <tr><td colspan="6" style="text-align:center; padding:3rem; color:var(--text-muted);">Belum ada subscription.</td></tr>
+        <% } %>
+        <% subscriptions.forEach(sub => { %>
+        <% const daysLeft = sub.status === 'active' ? Math.max(0, Math.ceil((new Date(sub.expiresAt) - new Date()) / (1000*60*60*24))) : 0; %>
+        <tr>
+          <td>
+            <% if (sub.user) { %>
+            <div style="font-family:var(--font-ui); font-weight:600;"><%= sub.user.name %></div>
+            <div style="font-size:0.78rem; color:var(--text-muted)"><%= sub.user.email %></div>
+            <% } else { %>
+            <span style="color:var(--text-muted)">User tidak ditemukan</span>
+            <% } %>
+          </td>
+          <td style="font-family:var(--font-ui);"><%= sub.planName %></td>
+          <td>
+            <span class="status-badge status-<%= sub.status === 'active' ? 'active' : 'expired' %>">
+              <%= sub.status === 'active' ? '✅ Aktif' : sub.status === 'expired' ? '⏰ Expired' : '🔄 Replaced' %>
+            </span>
+          </td>
+          <td style="font-size:0.82rem; color:var(--text-muted)"><%= moment(sub.startedAt).format('DD/MM/YYYY') %></td>
+          <td style="font-size:0.82rem; color:var(--text-muted)"><%= moment(sub.expiresAt).format('DD/MM/YYYY') %></td>
+          <td>
+            <% if (sub.status === 'active') { %>
+            <span style="color:<%= daysLeft <= 3 ? 'var(--accent-orange)' : 'var(--accent-green)' %>; font-family:var(--font-display); font-weight:700;">
+              <%= daysLeft %> hari
+            </span>
+            <% } else { %>
+            <span style="color:var(--text-muted)">—</span>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('layout-footer') %>
