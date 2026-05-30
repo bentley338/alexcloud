@@ -391,34 +391,46 @@ router.get('/testimonials', ensureAdmin, (req, res) => {
 });
 
 // POST tambah testimoni — support upload PNG atau URL
-router.post('/testimonials', ensureAdmin, testiUpload.single('imageFile'), (req, res) => {
-  const { name, role, text, rating, imageUrl, avatar } = req.body;
-  if (!name || !text) {
-    req.flash('error', 'Nama dan teks testimoni wajib diisi.');
-    return res.redirect('/admin/testimonials');
-  }
+router.post('/testimonials', ensureAdmin, (req, res) => {
+  testiUpload.single('imageFile')(req, res, function (err) {
+    if (err) {
+      console.error('[Upload Error]', err);
+      let msg = err.message || 'Terjadi kesalahan saat mengunggah';
+      if (msg.includes('unauthorized') || msg.includes('Access Denied')) {
+        msg = 'Akses Ditolak ke Cloudinary. Silakan periksa apakah CLOUDINARY_URL Anda sudah benar.';
+      }
+      req.flash('error', `Gagal mengunggah gambar: ${msg}`);
+      return res.redirect('/admin/testimonials');
+    }
 
-  // Prioritas: file upload > URL manual
-  let finalImage = null;
-  if (req.file) {
-    finalImage = req.file.path.startsWith('http') ? req.file.path : `/uploads/testimonials/${req.file.filename}`;
-  } else if (imageUrl && imageUrl.trim()) {
-    finalImage = imageUrl.trim();
-  }
+    const { name, role, text, rating, imageUrl, avatar } = req.body;
+    if (!name || !text) {
+      req.flash('error', 'Nama dan teks testimoni wajib diisi.');
+      return res.redirect('/admin/testimonials');
+    }
 
-  db.get('testimonials').push({
-    id: uuidv4(),
-    name,
-    role: role || 'Gamer',
-    text,
-    rating: parseInt(rating) || 5,
-    image: finalImage,
-    avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-    createdAt: new Date().toISOString(),
-    approved: true
-  }).write();
-  req.flash('success', `Testimoni dari "${name}" berhasil ditambahkan!`);
-  res.redirect('/admin/testimonials');
+    // Prioritas: file upload > URL manual
+    let finalImage = null;
+    if (req.file) {
+      finalImage = req.file.path.startsWith('http') ? req.file.path : `/uploads/testimonials/${req.file.filename}`;
+    } else if (imageUrl && imageUrl.trim()) {
+      finalImage = imageUrl.trim();
+    }
+
+    db.get('testimonials').push({
+      id: uuidv4(),
+      name,
+      role: role || 'Gamer',
+      text,
+      rating: parseInt(rating) || 5,
+      image: finalImage,
+      avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+      createdAt: new Date().toISOString(),
+      approved: true
+    }).write();
+    req.flash('success', `Testimoni dari "${name}" berhasil ditambahkan!`);
+    res.redirect('/admin/testimonials');
+  });
 });
 
 // Toggle testimoni tampil/hidden
@@ -456,41 +468,53 @@ router.get('/testimonials/:id/edit', ensureAdmin, (req, res) => {
 });
 
 // Edit testimoni — simpan perubahan
-router.post('/testimonials/:id/edit', ensureAdmin, testiUpload.single('imageFile'), (req, res) => {
+router.post('/testimonials/:id/edit', ensureAdmin, (req, res) => {
   const testi = db.get('testimonials').find({ id: req.params.id }).value();
   if (!testi) { req.flash('error', 'Testimoni tidak ditemukan.'); return res.redirect('/admin/testimonials'); }
 
-  const { name, role, text, rating, imageUrl, avatar } = req.body;
-  if (!name || !text) {
-    req.flash('error', 'Nama dan teks testimoni wajib diisi.');
-    return res.redirect(`/admin/testimonials/${req.params.id}/edit`);
-  }
-
-  // Gambar: file baru > URL baru > gambar lama
-  let finalImage = testi.image;
-  if (req.file) {
-    // Hapus file lama jika ada
-    if (testi.image && testi.image.startsWith('/uploads/')) {
-      const oldPath = path.join(__dirname, '../public', testi.image);
-      try { if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath); } catch (e) {}
+  testiUpload.single('imageFile')(req, res, function (err) {
+    if (err) {
+      console.error('[Upload Edit Error]', err);
+      let msg = err.message || 'Terjadi kesalahan saat mengunggah';
+      if (msg.includes('unauthorized') || msg.includes('Access Denied')) {
+        msg = 'Akses Ditolak ke Cloudinary. Silakan periksa apakah CLOUDINARY_URL Anda sudah benar.';
+      }
+      req.flash('error', `Gagal mengunggah gambar: ${msg}`);
+      return res.redirect(`/admin/testimonials/${req.params.id}/edit`);
     }
-    finalImage = req.file.path.startsWith('http') ? req.file.path : `/uploads/testimonials/${req.file.filename}`;
-  } else if (imageUrl && imageUrl.trim()) {
-    finalImage = imageUrl.trim();
-  }
 
-  db.get('testimonials').find({ id: req.params.id }).assign({
-    name: name.trim(),
-    role: role || 'Gamer',
-    text: text.trim(),
-    rating: parseInt(rating) || 5,
-    image: finalImage,
-    avatar: avatar || testi.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-    updatedAt: new Date().toISOString()
-  }).write();
+    const { name, role, text, rating, imageUrl, avatar } = req.body;
+    if (!name || !text) {
+      req.flash('error', 'Nama dan teks testimoni wajib diisi.');
+      return res.redirect(`/admin/testimonials/${req.params.id}/edit`);
+    }
 
-  req.flash('success', `Testimoni dari "${name}" berhasil diperbarui!`);
-  res.redirect('/admin/testimonials');
+    // Gambar: file baru > URL baru > gambar lama
+    let finalImage = testi.image;
+    if (req.file) {
+      // Hapus file lama jika ada
+      if (testi.image && testi.image.startsWith('/uploads/')) {
+        const oldPath = path.join(__dirname, '../public', testi.image);
+        try { if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath); } catch (e) {}
+      }
+      finalImage = req.file.path.startsWith('http') ? req.file.path : `/uploads/testimonials/${req.file.filename}`;
+    } else if (imageUrl && imageUrl.trim()) {
+      finalImage = imageUrl.trim();
+    }
+
+    db.get('testimonials').find({ id: req.params.id }).assign({
+      name: name.trim(),
+      role: role || 'Gamer',
+      text: text.trim(),
+      rating: parseInt(rating) || 5,
+      image: finalImage,
+      avatar: avatar || testi.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+      updatedAt: new Date().toISOString()
+    }).write();
+
+    req.flash('success', `Testimoni dari "${name}" berhasil diperbarui!`);
+    res.redirect('/admin/testimonials');
+  });
 });
 
 module.exports = router;
