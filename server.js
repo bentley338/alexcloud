@@ -1,4 +1,10 @@
 require('dotenv').config();
+
+// Fix common copy-paste mistake for CLOUDINARY_URL env var
+if (process.env.CLOUDINARY_URL && process.env.CLOUDINARY_URL.startsWith('CLOUDINARY_URL=')) {
+  process.env.CLOUDINARY_URL = process.env.CLOUDINARY_URL.replace('CLOUDINARY_URL=', '');
+}
+
 const express = require('express');
 const session = require('express-session');
 const flash = require('express-flash');
