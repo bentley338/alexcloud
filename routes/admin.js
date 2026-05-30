@@ -426,4 +426,53 @@ router.post('/testimonials/:id/delete', ensureAdmin, (req, res) => {
   res.redirect('/admin/testimonials');
 });
 
+// Edit testimoni — tampilkan form
+router.get('/testimonials/:id/edit', ensureAdmin, (req, res) => {
+  const testi = db.get('testimonials').find({ id: req.params.id }).value();
+  if (!testi) { req.flash('error', 'Testimoni tidak ditemukan.'); return res.redirect('/admin/testimonials'); }
+  res.render('admin/testimonials-edit', {
+    title: 'Edit Testimoni - AlexCloud Admin',
+    user: req.user, testi,
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
+// Edit testimoni — simpan perubahan
+router.post('/testimonials/:id/edit', ensureAdmin, testiUpload.single('imageFile'), (req, res) => {
+  const testi = db.get('testimonials').find({ id: req.params.id }).value();
+  if (!testi) { req.flash('error', 'Testimoni tidak ditemukan.'); return res.redirect('/admin/testimonials'); }
+
+  const { name, role, text, rating, imageUrl, avatar } = req.body;
+  if (!name || !text) {
+    req.flash('error', 'Nama dan teks testimoni wajib diisi.');
+    return res.redirect(`/admin/testimonials/${req.params.id}/edit`);
+  }
+
+  // Gambar: file baru > URL baru > gambar lama
+  let finalImage = testi.image;
+  if (req.file) {
+    // Hapus file lama jika ada
+    if (testi.image && testi.image.startsWith('/uploads/')) {
+      const oldPath = path.join(__dirname, '../public', testi.image);
+      try { if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath); } catch (e) {}
+    }
+    finalImage = `/uploads/testimonials/${req.file.filename}`;
+  } else if (imageUrl && imageUrl.trim()) {
+    finalImage = imageUrl.trim();
+  }
+
+  db.get('testimonials').find({ id: req.params.id }).assign({
+    name: name.trim(),
+    role: role || 'Gamer',
+    text: text.trim(),
+    rating: parseInt(rating) || 5,
+    image: finalImage,
+    avatar: avatar || testi.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+    updatedAt: new Date().toISOString()
+  }).write();
+
+  req.flash('success', `Testimoni dari "${name}" berhasil diperbarui!`);
+  res.redirect('/admin/testimonials');
+});
+
 module.exports = router;

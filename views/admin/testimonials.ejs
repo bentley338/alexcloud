@@ -176,6 +176,9 @@
 
       <!-- Actions -->
       <div style="display:flex; gap:0.4rem;">
+        <a href="/admin/testimonials/<%= t.id %>/edit" class="btn-action btn-edit" style="flex:1; text-align:center; font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:0.3rem; text-decoration:none;">
+          <i class="fas fa-edit"></i> Edit
+        </a>
         <form action="/admin/testimonials/<%= t.id %>/toggle" method="POST" style="flex:1;">
           <button type="submit" class="btn-action <%= t.approved ? 'btn-reject' : 'btn-confirm' %>" style="width:100%; font-size:0.8rem;">
             <%= t.approved ? '🙈 Sembunyikan' : '✅ Tampilkan' %>
@@ -183,7 +186,7 @@
         </form>
         <form action="/admin/testimonials/<%= t.id %>/delete" method="POST">
           <button type="submit" class="btn-action btn-danger" style="font-size:0.8rem;"
-            onclick="return confirm('Hapus testimoni dari <%= t.name %>? Foto yang diupload juga akan dihapus.')">
+            onclick="return confirm('Hapus testimoni dari <%= t.name %>?')">
             <i class="fas fa-trash"></i>
           </button>
         </form>

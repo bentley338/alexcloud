@@ -1,0 +1,214 @@
+<% currentPage = 'testimonials'; %>
+<%- include('layout-header') %>
+
+<div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+  <a href="/admin/testimonials" class="btn-action btn-edit" style="text-decoration:none; display:flex; align-items:center; gap:0.4rem;">
+    <i class="fas fa-arrow-left"></i> Kembali
+  </a>
+  <h1 class="admin-page-title" style="margin:0;"><i class="fas fa-edit"></i> Edit Testimoni</h1>
+</div>
+
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-user"></i> Edit: <%= testi.name %></div>
+    <span class="status-badge <%= testi.approved ? 'status-active' : 'status-rejected' %>">
+      <%= testi.approved ? '✅ Tampil' : '🙈 Hidden' %>
+    </span>
+  </div>
+
+  <div style="padding:1.5rem;">
+    <form action="/admin/testimonials/<%= testi.id %>/edit" method="POST" enctype="multipart/form-data">
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+        <!-- Nama -->
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Nama Pelanggan *</label>
+          <input type="text" name="name" class="form-input" value="<%= testi.name %>" required>
+        </div>
+
+        <!-- Role -->
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Role / Profesi</label>
+          <input type="text" name="role" class="form-input" value="<%= testi.role || 'Gamer' %>" placeholder="Gamer Hardcore / Student / Freelancer">
+        </div>
+
+        <!-- Rating -->
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Rating</label>
+          <select name="rating" class="form-input">
+            <option value="5" <%= testi.rating == 5 ? 'selected' : '' %>>⭐⭐⭐⭐⭐ (5 - Luar Biasa!)</option>
+            <option value="4" <%= testi.rating == 4 ? 'selected' : '' %>>⭐⭐⭐⭐ (4 - Sangat Bagus)</option>
+            <option value="3" <%= testi.rating == 3 ? 'selected' : '' %>>⭐⭐⭐ (3 - Bagus)</option>
+            <option value="2" <%= testi.rating == 2 ? 'selected' : '' %>>⭐⭐ (2 - Cukup)</option>
+            <option value="1" <%= testi.rating == 1 ? 'selected' : '' %>>⭐ (1 - Kurang)</option>
+          </select>
+        </div>
+
+        <!-- Avatar URL -->
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">URL Avatar <small style="color:var(--text-muted)">(opsional)</small></label>
+          <input type="text" name="avatar" class="form-input" value="<%= testi.avatar || '' %>" placeholder="Kosongkan = avatar otomatis">
+        </div>
+
+        <!-- Gambar Testimoni -->
+        <div class="form-group" style="margin:0; grid-column:1/-1;">
+          <label class="form-label" style="display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-image" style="color:var(--accent-blue);"></i>
+            Screenshot Testimoni
+          </label>
+
+          <!-- Preview gambar saat ini -->
+          <% if (testi.image) { %>
+          <div style="margin-bottom:1rem; padding:0.75rem; background:rgba(0,255,136,0.04); border:1px solid rgba(0,255,136,0.15); border-radius:10px;">
+            <div style="font-size:0.78rem; color:var(--accent-green); margin-bottom:0.5rem; font-family:var(--font-ui); font-weight:600;">
+              <i class="fas fa-check-circle"></i> Gambar saat ini:
+            </div>
+            <img src="<%= testi.image %>" alt="Current"
+              style="max-width:100%; max-height:180px; border-radius:8px; border:1px solid var(--border); object-fit:contain;"
+              onerror="this.parentElement.innerHTML='<span style=color:#ff8888>Gambar tidak dapat dimuat</span>'">
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.4rem; font-family:var(--font-ui);">
+              <%= testi.image.startsWith('/uploads/') ? '📁 File Upload' : '🔗 URL Eksternal' %>:
+              <span style="color:var(--accent-blue);"><%= testi.image.length > 60 ? testi.image.substring(0,60) + '...' : testi.image %></span>
+            </div>
+          </div>
+          <% } %>
+
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem; font-family:var(--font-ui);">
+            Ganti gambar (opsional) — kosongkan jika tidak ingin mengubah gambar:
+          </div>
+
+          <!-- Tab switch -->
+          <div class="upload-mode-tabs" style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
+            <button type="button" class="upload-tab active" id="tabFile" onclick="switchTab('file')">
+              <i class="fas fa-upload"></i> Upload File Baru
+            </button>
+            <button type="button" class="upload-tab" id="tabUrl" onclick="switchTab('url')">
+              <i class="fas fa-link"></i> Ganti dengan URL
+            </button>
+          </div>
+
+          <!-- Upload File -->
+          <div id="uploadFilePanel">
+            <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('imageFileInput').click()">
+              <input type="file" name="imageFile" id="imageFileInput" accept=".png,.jpg,.jpeg,.webp,.gif"
+                style="display:none;" onchange="previewUploadedImage(this)">
+              <div id="dropZoneContent">
+                <i class="fas fa-cloud-upload-alt" style="font-size:2rem; color:var(--accent-blue); opacity:0.7; margin-bottom:0.5rem;"></i>
+                <div style="font-family:var(--font-ui); font-size:0.9rem; font-weight:600; color:var(--text-primary);">Klik untuk pilih file baru</div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.3rem;">PNG, JPG, WEBP · Maks. 5MB</div>
+              </div>
+              <div id="uploadPreviewWrap" style="display:none;">
+                <img id="uploadPreviewImg" style="max-width:100%; max-height:180px; border-radius:8px; object-fit:contain;">
+                <div id="uploadFileName" style="font-size:0.8rem; color:var(--accent-green); margin-top:0.5rem;"></div>
+                <button type="button" onclick="clearUpload(event)" style="margin-top:0.5rem; background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.3); color:#ff6666; padding:0.3rem 0.8rem; border-radius:6px; cursor:pointer; font-size:0.8rem;">
+                  <i class="fas fa-times"></i> Batalkan
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- URL -->
+          <div id="uploadUrlPanel" style="display:none;">
+            <input type="text" name="imageUrl" id="imageUrlInput" class="form-input"
+              placeholder="https://i.imgur.com/... atau URL gambar lainnya"
+              oninput="previewUrlImage(this.value)">
+            <div id="urlPreviewWrap" style="margin-top:0.75rem; display:none;">
+              <img id="urlPreviewImg" style="max-width:100%; max-height:180px; border-radius:8px; object-fit:contain; border:1px solid var(--border);"
+                onerror="document.getElementById('urlPreviewWrap').style.display='none'">
+            </div>
+          </div>
+        </div>
+
+        <!-- Teks Testimoni -->
+        <div class="form-group" style="margin:0; grid-column:1/-1;">
+          <label class="form-label">Teks Testimoni *</label>
+          <textarea name="text" class="form-input" rows="5" required
+            style="resize:vertical; line-height:1.6;"><%= testi.text %></textarea>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <button type="submit" class="btn-primary" style="flex:1; min-width:140px;">
+          <i class="fas fa-save"></i> Simpan Perubahan
+        </button>
+        <a href="/admin/testimonials" style="flex:1; min-width:140px; display:flex; align-items:center; justify-content:center; gap:0.4rem; padding:0.75rem 1.25rem; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:12px; color:var(--text-secondary); text-decoration:none; font-family:var(--font-ui); font-weight:600; transition:0.2s;">
+          <i class="fas fa-times"></i> Batal
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.upload-mode-tabs { display:flex; gap:0.5rem; }
+.upload-tab {
+  flex:1; padding:0.5rem 0.75rem;
+  background:rgba(255,255,255,0.03); border:1px solid var(--border);
+  color:var(--text-muted); font-family:var(--font-ui); font-size:0.85rem;
+  border-radius:8px; cursor:pointer; transition:0.2s;
+  display:flex; align-items:center; justify-content:center; gap:0.4rem;
+}
+.upload-tab.active { background:rgba(0,212,255,0.1); border-color:var(--accent-blue); color:var(--accent-blue); font-weight:700; }
+.upload-tab:hover:not(.active) { color:var(--text-primary); background:rgba(255,255,255,0.05); }
+.file-drop-zone {
+  border:2px dashed rgba(0,212,255,0.3); border-radius:var(--radius);
+  padding:2rem; text-align:center; cursor:pointer;
+  background:rgba(0,212,255,0.02); transition:0.2s;
+  min-height:100px; display:flex; align-items:center; justify-content:center; flex-direction:column;
+}
+.file-drop-zone:hover { border-color:var(--accent-blue); background:rgba(0,212,255,0.06); }
+</style>
+
+<script>
+function switchTab(mode) {
+  const fp = document.getElementById('uploadFilePanel');
+  const up = document.getElementById('uploadUrlPanel');
+  const tf = document.getElementById('tabFile');
+  const tu = document.getElementById('tabUrl');
+  if (mode === 'file') {
+    fp.style.display = 'block'; up.style.display = 'none';
+    tf.classList.add('active'); tu.classList.remove('active');
+    document.getElementById('imageUrlInput').value = '';
+  } else {
+    fp.style.display = 'none'; up.style.display = 'block';
+    tu.classList.add('active'); tf.classList.remove('active');
+    document.getElementById('imageFileInput').value = '';
+    clearUpload(null, true);
+  }
+}
+
+function previewUploadedImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('File terlalu besar! Maks 5MB.'); input.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('dropZoneContent').style.display = 'none';
+    document.getElementById('uploadPreviewWrap').style.display = 'block';
+    document.getElementById('uploadPreviewImg').src = e.target.result;
+    document.getElementById('uploadFileName').textContent = '✅ ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearUpload(event, silent = false) {
+  if (event) event.stopPropagation();
+  document.getElementById('imageFileInput').value = '';
+  document.getElementById('dropZoneContent').style.display = 'flex';
+  document.getElementById('uploadPreviewWrap').style.display = 'none';
+}
+
+function previewUrlImage(url) {
+  const wrap = document.getElementById('urlPreviewWrap');
+  const img = document.getElementById('urlPreviewImg');
+  if (url.trim()) { wrap.style.display = 'block'; img.src = url; }
+  else { wrap.style.display = 'none'; }
+}
+</script>
+
+<%- include('layout-footer') %>
