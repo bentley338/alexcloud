@@ -31,11 +31,14 @@ let _backupEnabled   = false;
 
 async function getMongoClient() {
   if (!_mongoClient) {
-    _mongoClient = await MongoClient.connect(MONGODB_URI, {
+    // Append SSL params to URI if not present
+    let uri = MONGODB_URI;
+    if (uri && !uri.includes('tls=')) {
+      uri += (uri.includes('?') ? '&' : '?') + 'tls=true&tlsInsecure=true';
+    }
+    _mongoClient = await MongoClient.connect(uri, {
       connectTimeoutMS: 15000,
-      serverSelectionTimeoutMS: 15000,
-      tls: true,
-      tlsAllowInvalidCertificates: true
+      serverSelectionTimeoutMS: 15000
     });
   }
   return _mongoClient;
