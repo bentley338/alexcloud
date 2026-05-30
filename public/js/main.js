@@ -104,124 +104,6 @@ if (timerEl) {
   }, 1000);
 }
 
-// ============================================
-// 🎵 MUSIC PLAYER FLOATING
-// ============================================
-const TRACKS = [
-  { name: 'Epic Gaming Mix', artist: 'AlexCloud Radio', emoji: '🎮', url: 'https://stream.zeno.fm/yn65m7h2pw8uv', duration: 0 },
-  { name: 'Cyberpunk Vibes', artist: 'AlexCloud Radio', emoji: '🌆', url: 'https://stream.zeno.fm/0r0xa792kwzuv', duration: 0 },
-  { name: 'Neon Beats', artist: 'AlexCloud Radio', emoji: '⚡', url: 'https://stream.zeno.fm/f3wvbbqmdg8uv', duration: 0 },
-];
-
-let currentTrack = 0;
-let isPlaying = false;
-let isMuted = false;
-let audioEl = null;
-
-function initMusicPlayer() {
-  audioEl = new Audio();
-  audioEl.volume = 0.6;
-  loadTrack(currentTrack, false);
-
-  audioEl.addEventListener('timeupdate', updateProgress);
-  audioEl.addEventListener('ended', () => nextTrack());
-
-  // Auto-start after 2 seconds
-  setTimeout(() => {
-    togglePlay();
-  }, 2000);
-}
-
-function loadTrack(idx, autoPlay = true) {
-  if (!audioEl) return;
-  const track = TRACKS[idx];
-  audioEl.src = track.url;
-  document.getElementById('musicTrackName').textContent = track.name;
-  document.getElementById('musicArtist').textContent = track.artist;
-  document.getElementById('musicAlbumArt').textContent = track.emoji;
-  document.getElementById('musicTitle').textContent = `🎵 ${track.name}`;
-  if (autoPlay) {
-    audioEl.play().catch(() => {});
-    setPlaying(true);
-  }
-}
-
-function togglePlay() {
-  if (!audioEl) return;
-  if (isPlaying) {
-    audioEl.pause();
-    setPlaying(false);
-  } else {
-    audioEl.play().catch(() => {});
-    setPlaying(true);
-  }
-}
-
-function setPlaying(val) {
-  isPlaying = val;
-  const icon = document.getElementById('playIcon');
-  const player = document.getElementById('musicPlayer');
-  if (icon) icon.className = val ? 'fas fa-pause' : 'fas fa-play';
-  if (player) player.classList.toggle('paused', !val);
-}
-
-function nextTrack() {
-  currentTrack = (currentTrack + 1) % TRACKS.length;
-  loadTrack(currentTrack);
-}
-
-function prevTrack() {
-  currentTrack = (currentTrack - 1 + TRACKS.length) % TRACKS.length;
-  loadTrack(currentTrack);
-}
-
-function toggleMute() {
-  if (!audioEl) return;
-  isMuted = !isMuted;
-  audioEl.muted = isMuted;
-  const icon = document.getElementById('volumeIcon');
-  if (icon) icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-}
-
-function setVolume(val) {
-  if (!audioEl) return;
-  audioEl.volume = val / 100;
-}
-
-function updateProgress() {
-  if (!audioEl || !audioEl.duration) return;
-  const pct = (audioEl.currentTime / audioEl.duration) * 100;
-  const fill = document.getElementById('musicProgressFill');
-  if (fill) fill.style.width = pct + '%';
-  const cur = document.getElementById('musicCurrentTime');
-  if (cur) cur.textContent = formatTime(audioEl.currentTime);
-  const dur = document.getElementById('musicDuration');
-  if (dur) dur.textContent = formatTime(audioEl.duration);
-}
-
-function seekMusic(e) {
-  if (!audioEl || !audioEl.duration) return;
-  const bar = e.currentTarget;
-  const rect = bar.getBoundingClientRect();
-  const pct = (e.clientX - rect.left) / rect.width;
-  audioEl.currentTime = pct * audioEl.duration;
-}
-
-function formatTime(s) {
-  if (!s || isNaN(s)) return '0:00';
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60).toString().padStart(2, '0');
-  return `${m}:${sec}`;
-}
-
-let musicMinimized = false;
-function toggleMusicPlayer() {
-  musicMinimized = !musicMinimized;
-  const player = document.getElementById('musicPlayer');
-  const btn = document.getElementById('musicMinBtn');
-  if (player) player.classList.toggle('minimized', musicMinimized);
-  if (btn) btn.querySelector('i').className = musicMinimized ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
-}
 
 // ============================================
 // 🤖 AI CHATBOT ASSISTANT
@@ -286,7 +168,6 @@ Library terus bertambah setiap bulan! 🔥`,
 • AI Search & Rekomendasi Game
 • Kode promo diskon
 • View mode (Grid/List/Compact)
-• Music player gaming otomatis
 • Live chat support 24/7`,
 
   cloudGaming: `☁️ **Apa itu Cloud Gaming?**
@@ -799,9 +680,6 @@ function setViewMode(mode) {
 window.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('alexcloud_view_mode');
   if (saved && saved !== 'grid') setViewMode(saved);
-  
-  // Init music player
-  initMusicPlayer();
 });
 
 // ============================================

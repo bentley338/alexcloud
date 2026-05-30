@@ -44,51 +44,6 @@
   </footer>
 
   <!-- ============================================ -->
-  <!-- 🎵 MUSIC PLAYER FLOATING                     -->
-  <!-- ============================================ -->
-  <div class="music-player-floating" id="musicPlayer">
-    <div class="music-player-header" onclick="toggleMusicPlayer()">
-      <div class="music-eq-bars">
-        <span class="eq-bar"></span>
-        <span class="eq-bar"></span>
-        <span class="eq-bar"></span>
-        <span class="eq-bar"></span>
-      </div>
-      <span class="music-player-title" id="musicTitle">🎵 Gaming Vibes</span>
-      <button class="music-minimize-btn" id="musicMinBtn"><i class="fas fa-chevron-down"></i></button>
-    </div>
-    <div class="music-player-body" id="musicPlayerBody">
-      <div class="music-track-info">
-        <div class="music-album-art" id="musicAlbumArt">🎮</div>
-        <div class="music-meta">
-          <div class="music-track-name" id="musicTrackName">Epic Gaming Mix</div>
-          <div class="music-artist" id="musicArtist">AlexCloud Radio</div>
-        </div>
-      </div>
-      <div class="music-progress-wrap">
-        <span class="music-time" id="musicCurrentTime">0:00</span>
-        <div class="music-progress-bar" id="musicProgressBar" onclick="seekMusic(event)">
-          <div class="music-progress-fill" id="musicProgressFill"></div>
-        </div>
-        <span class="music-time" id="musicDuration">0:00</span>
-      </div>
-      <div class="music-controls">
-        <button class="music-btn" onclick="prevTrack()" title="Sebelumnya"><i class="fas fa-backward"></i></button>
-        <button class="music-btn play-btn" id="playPauseBtn" onclick="togglePlay()">
-          <i class="fas fa-play" id="playIcon"></i>
-        </button>
-        <button class="music-btn" onclick="nextTrack()" title="Berikutnya"><i class="fas fa-forward"></i></button>
-        <button class="music-btn" onclick="toggleMute()" id="muteBtn" title="Mute"><i class="fas fa-volume-up" id="volumeIcon"></i></button>
-      </div>
-      <div class="music-volume-wrap">
-        <i class="fas fa-volume-down" style="color:var(--text-muted);font-size:0.7rem;"></i>
-        <input type="range" class="music-volume-slider" id="volumeSlider" min="0" max="100" value="60" oninput="setVolume(this.value)">
-        <i class="fas fa-volume-up" style="color:var(--text-muted);font-size:0.7rem;"></i>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================ -->
   <!-- 🤖 AI CHATBOT ASSISTANT                      -->
   <!-- ============================================ -->
   <div class="ai-chatbot-widget" id="aiChatbot">
