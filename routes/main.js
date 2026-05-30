@@ -385,32 +385,44 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
 // =====================
 router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res) => {
   const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
-  if (!order || !order.fr3TrxId) return res.json({ error: 'Tidak bisa dibatalkan' });
-
-  const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
-  const FR3_BASE    = 'https://fr3newera.com/api/v1';
-
-  try {
-    const https = require('https');
-    const payload = JSON.stringify({ apikey: FR3_API_KEY, trxId: order.fr3TrxId });
-    const result = await new Promise((resolve, reject) => {
-      const options = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload), 'User-Agent': 'AlexCloud/1.0' }
-      };
-      const r = https.request(`${FR3_BASE}/topup/cancel`, options, (resp) => {
-        let body = '';
-        resp.on('data', d => body += d);
-        resp.on('end', () => { try { resolve(JSON.parse(body)); } catch { resolve({}); } });
-      });
-      r.on('error', reject);
-      r.write(payload); r.end();
-    });
-    db.get('orders').find({ id: order.id }).assign({ status: 'cancelled' }).write();
-    return res.json({ success: true, message: 'Transaksi berhasil dibatalkan' });
-  } catch (e) {
-    return res.json({ error: e.message });
+  if (!order) return res.json({ error: 'Order tidak ditemukan' });
+  if (order.status === 'confirmed' || order.status === 'cancelled') {
+    return res.json({ error: `Order sudah ${order.status}, tidak bisa dibatalkan` });
   }
+
+  // Coba cancel ke FR3 jika ada trxId (tidak blocking)
+  if (order.fr3TrxId) {
+    try {
+      const https = require('https');
+      const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
+      const payload = JSON.stringify({ apikey: FR3_API_KEY, trxId: order.fr3TrxId });
+      await new Promise((resolve) => {
+        const options = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload), 'User-Agent': 'AlexCloud/1.0' }
+        };
+        const r = https.request('https://fr3newera.com/api/v1/topup/cancel', options, (resp) => {
+          let body = '';
+          resp.on('data', d => body += d);
+          resp.on('end', () => resolve(body));
+        });
+        r.on('error', () => resolve(null));
+        r.setTimeout(8000, () => { r.destroy(); resolve(null); });
+        r.write(payload);
+        r.end();
+      });
+    } catch (e) {
+      console.warn('[FR3] Cancel warning (non-blocking):', e.message);
+    }
+  }
+
+  // Selalu cancel di DB lokal
+  db.get('orders').find({ id: order.id }).assign({
+    status: 'cancelled',
+    cancelledAt: new Date().toISOString()
+  }).write();
+
+  return res.json({ success: true, message: 'Pesanan berhasil dibatalkan' });
 });
 
 // Profile

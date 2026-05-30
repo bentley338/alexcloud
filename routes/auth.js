@@ -84,7 +84,7 @@ router.post('/login', ensureGuest, (req, res, next) => {
         req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000;  // 7 hari default
       }
       req.session.rememberMe = rememberMe;
-      res.redirect('/dashboard');
+      res.redirect('/');
     });
   })(req, res, next);
 });
@@ -103,7 +103,7 @@ router.get('/auth/google/callback',
     // Google login selalu persistent 30 hari
     req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
     req.session.rememberMe = true;
-    res.redirect('/dashboard');
+    res.redirect('/');
   }
 );
 

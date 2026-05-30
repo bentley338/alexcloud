@@ -14,35 +14,41 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, don
   return done(null, user);
 }));
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL
-}, (accessToken, refreshToken, profile, done) => {
-  let user = db.get('users').find({ googleId: profile.id }).value();
-  if (!user) {
-    user = db.get('users').find({ email: profile.emails[0].value.toLowerCase() }).value();
-    if (user) {
-      db.get('users').find({ id: user.id }).assign({ googleId: profile.id }).write();
-      user = db.get('users').find({ id: user.id }).value();
-    } else {
-      const newUser = {
-        id: uuidv4(),
-        name: profile.displayName,
-        email: profile.emails[0].value.toLowerCase(),
-        password: null,
-        role: 'user',
-        avatar: profile.photos[0]?.value || null,
-        googleId: profile.id,
-        createdAt: new Date().toISOString(),
-        isActive: true
-      };
-      db.get('users').push(newUser).write();
-      user = newUser;
+// Google OAuth — hanya aktif jika env vars tersedia
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'
+  }, (accessToken, refreshToken, profile, done) => {
+    let user = db.get('users').find({ googleId: profile.id }).value();
+    if (!user) {
+      user = db.get('users').find({ email: profile.emails[0].value.toLowerCase() }).value();
+      if (user) {
+        db.get('users').find({ id: user.id }).assign({ googleId: profile.id }).write();
+        user = db.get('users').find({ id: user.id }).value();
+      } else {
+        const newUser = {
+          id: uuidv4(),
+          name: profile.displayName,
+          email: profile.emails[0].value.toLowerCase(),
+          password: null,
+          role: 'user',
+          avatar: profile.photos[0]?.value || null,
+          googleId: profile.id,
+          createdAt: new Date().toISOString(),
+          isActive: true
+        };
+        db.get('users').push(newUser).write();
+        user = newUser;
+      }
     }
-  }
-  return done(null, user);
-}));
+    return done(null, user);
+  }));
+  console.log('✅ Google OAuth aktif');
+} else {
+  console.log('⚠️  Google OAuth tidak aktif (GOOGLE_CLIENT_ID tidak diset)');
+}
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => {
