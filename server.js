@@ -22,31 +22,8 @@ app.use(express.json());
 // Method override
 app.use(methodOverride('_method'));
 
-// Session — MongoDB store jika MONGODB_URI ada, fallback ke file store
-let sessionStore;
-if (process.env.MONGODB_URI) {
-  const MongoStore = require('connect-mongo');
-  sessionStore = MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    dbName: 'alexcloud',
-    collectionName: 'sessions',
-    ttl: 30 * 24 * 60 * 60, // 30 hari
-    autoRemove: 'native'
-  });
-  console.log('[Session] Using MongoDB session store');
-} else {
-  const FileStore = require('session-file-store')(session);
-  sessionStore = new FileStore({
-    path: './sessions',
-    ttl: 30 * 24 * 60 * 60,
-    retries: 1,
-    logFn: () => {}
-  });
-  console.log('[Session] Using file session store (dev mode)');
-}
-
+// Session — memory store (simple, works everywhere)
 app.use(session({
-  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'alexcloud_secret_2024_persist',
   resave: false,
   saveUninitialized: false,
@@ -61,7 +38,7 @@ app.use(session({
 // Flash messages
 app.use(flash());
 
-// Passport — loaded after session
+// Passport
 const passport = require('./middleware/passport');
 app.use(passport.initialize());
 app.use(passport.session());
@@ -99,17 +76,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ─── Start server after restoring DB from MongoDB ──────────────────────────────
+// ─── Start: restore from MongoDB first, then seed, then listen ─────────────────
 const { initDB, restoreFromMongoDB } = require('./database/db');
 
 async function startServer() {
-  // 1. Restore data dari MongoDB Atlas dulu
   await restoreFromMongoDB();
-
-  // 2. Seed data default (hanya jika belum ada)
   initDB();
 
-  // 3. Start listening
   app.listen(PORT, () => {
     console.log('');
     console.log('╔══════════════════════════════════════╗');
