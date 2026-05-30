@@ -33,7 +33,9 @@ async function getMongoClient() {
   if (!_mongoClient) {
     _mongoClient = await MongoClient.connect(MONGODB_URI, {
       connectTimeoutMS: 15000,
-      serverSelectionTimeoutMS: 15000
+      serverSelectionTimeoutMS: 15000,
+      tls: true,
+      tlsAllowInvalidCertificates: true
     });
   }
   return _mongoClient;
