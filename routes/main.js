@@ -390,33 +390,57 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
     return res.json({ error: `Order sudah ${order.status}, tidak bisa dibatalkan` });
   }
 
-  // Coba cancel ke FR3 jika ada trxId (tidak blocking)
+  // Coba cancel ke FR3 jika ada trxId
   if (order.fr3TrxId) {
     try {
       const https = require('https');
       const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
       const payload = JSON.stringify({ apikey: FR3_API_KEY, trxId: order.fr3TrxId });
-      await new Promise((resolve) => {
+      
+      const fr3Result = await new Promise((resolve) => {
         const options = {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload), 'User-Agent': 'AlexCloud/1.0' }
+          headers: { 
+            'Content-Type': 'application/json', 
+            'Content-Length': Buffer.byteLength(payload), 
+            'User-Agent': 'AlexCloud/1.0' 
+          }
         };
         const r = https.request('https://fr3newera.com/api/v1/topup/cancel', options, (resp) => {
           let body = '';
           resp.on('data', d => body += d);
-          resp.on('end', () => resolve(body));
+          resp.on('end', () => {
+            try {
+              resolve(JSON.parse(body));
+            } catch (e) {
+              resolve({ status: 500, message: 'Invalid JSON response from FR3 Gateway' });
+            }
+          });
         });
-        r.on('error', () => resolve(null));
-        r.setTimeout(8000, () => { r.destroy(); resolve(null); });
+        r.on('error', (err) => resolve({ status: 500, message: `Koneksi error: ${err.message}` }));
+        r.setTimeout(10000, () => { 
+          r.destroy(); 
+          resolve({ status: 500, message: 'FR3 Gateway timeout' }); 
+        });
         r.write(payload);
         r.end();
       });
+
+      console.log('[FR3] Cancel response:', fr3Result);
+
+      // Jika FR3 mengembalikan status selain 200, gagalkan pembatalan dan infokan error-nya!
+      if (fr3Result && fr3Result.status !== 200) {
+        return res.json({ 
+          error: fr3Result.message || 'Gagal membatalkan transaksi di Payment Gateway.' 
+        });
+      }
     } catch (e) {
-      console.warn('[FR3] Cancel warning (non-blocking):', e.message);
+      console.error('[FR3] Cancel error:', e.message);
+      return res.json({ error: `Gagal menghubungi server payment: ${e.message}` });
     }
   }
 
-  // Selalu cancel di DB lokal
+  // Jika berhasil cancel di FR3 (atau tidak pakai QRIS), cancel di DB lokal
   db.get('orders').find({ id: order.id }).assign({
     status: 'cancelled',
     cancelledAt: new Date().toISOString()
