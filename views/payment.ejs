@@ -618,7 +618,7 @@
 <script>
 const ORDER_ID = <%- JSON.stringify(order.orderId) %>;
 const QR_STRING = <%- JSON.stringify(order.fr3QrString || '') %>;
-const EXPIRY = <%- order.fr3Expiry || (Date.now() + 10 * 60 * 1000) %>;
+const EXPIRY = <%- order.fr3Expiry ? (typeof order.fr3Expiry === 'number' ? order.fr3Expiry : new Date(order.fr3Expiry).getTime()) : (Date.now() + 10 * 60 * 1000) %>;
 
 let pollInterval;
 let timerInterval;
@@ -715,7 +715,7 @@ function showSuccess() {
   const userEmail = <%- JSON.stringify(user.email || '') %>;
   const planName = <%- JSON.stringify(plan.name || '') %>;
   const orderId = ORDER_ID;
-  const totalBayar = 'Rp ' + <%- order.fr3TotalTransfer %>.toLocaleString('id-ID');
+  const totalBayar = 'Rp ' + <%- JSON.stringify(order.fr3TotalTransfer.toLocaleString('id-ID')) %>;
 
   const waMsg = [
     '✅ *KONFIRMASI PEMBAYARAN*',
