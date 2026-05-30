@@ -4,14 +4,9 @@ const session = require('express-session');
 const flash = require('express-flash');
 const methodOverride = require('method-override');
 const path = require('path');
-const passport = require('./middleware/passport');
-const { initDB } = require('./database/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Initialize database
-initDB();
 
 // View engine
 app.set('view engine', 'ejs');
@@ -27,22 +22,37 @@ app.use(express.json());
 // Method override
 app.use(methodOverride('_method'));
 
-// Session — persistent file store (survives server restart)
-const FileStore = require('session-file-store')(session);
+// Session — MongoDB store jika MONGODB_URI ada, fallback ke file store
+let sessionStore;
+if (process.env.MONGODB_URI) {
+  const MongoStore = require('connect-mongo');
+  sessionStore = MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    dbName: 'alexcloud',
+    collectionName: 'sessions',
+    ttl: 30 * 24 * 60 * 60, // 30 hari
+    autoRemove: 'native'
+  });
+  console.log('[Session] Using MongoDB session store');
+} else {
+  const FileStore = require('session-file-store')(session);
+  sessionStore = new FileStore({
+    path: './sessions',
+    ttl: 30 * 24 * 60 * 60,
+    retries: 1,
+    logFn: () => {}
+  });
+  console.log('[Session] Using file session store (dev mode)');
+}
 
 app.use(session({
-  store: new FileStore({
-    path: './sessions',          // folder penyimpanan session files
-    ttl: 30 * 24 * 60 * 60,     // 30 hari (detik) — max lifetime di disk
-    retries: 1,
-    logFn: () => {}              // silent log
-  }),
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'alexcloud_secret_2024_persist',
   resave: false,
   saveUninitialized: false,
-  rolling: true,                 // reset cookie expire setiap request
+  rolling: true,
   cookie: {
-    maxAge: 7 * 24 * 60 * 60 * 1000, // default 7 hari
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: 'lax'
   }
@@ -51,7 +61,8 @@ app.use(session({
 // Flash messages
 app.use(flash());
 
-// Passport
+// Passport — loaded after session
+const passport = require('./middleware/passport');
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -88,14 +99,31 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log('');
-  console.log('╔══════════════════════════════════════╗');
-  console.log('║     ⚡  ALEXCLOUD SERVER READY  ⚡    ║');
-  console.log('╠══════════════════════════════════════╣');
-  console.log(`║  URL    : http://localhost:${PORT}       ║`);
-  console.log(`║  Admin  : admin@alexcloud.com         ║`);
-  console.log(`║  Pass   : Admin@123                   ║`);
-  console.log('╚══════════════════════════════════════╝');
-  console.log('');
+// ─── Start server after restoring DB from MongoDB ──────────────────────────────
+const { initDB, restoreFromMongoDB } = require('./database/db');
+
+async function startServer() {
+  // 1. Restore data dari MongoDB Atlas dulu
+  await restoreFromMongoDB();
+
+  // 2. Seed data default (hanya jika belum ada)
+  initDB();
+
+  // 3. Start listening
+  app.listen(PORT, () => {
+    console.log('');
+    console.log('╔══════════════════════════════════════╗');
+    console.log('║     ⚡  ALEXCLOUD SERVER READY  ⚡    ║');
+    console.log('╠══════════════════════════════════════╣');
+    console.log(`║  URL    : http://localhost:${PORT}       ║`);
+    console.log(`║  Admin  : admin@alexcloud.com         ║`);
+    console.log(`║  Pass   : Admin@123                   ║`);
+    console.log('╚══════════════════════════════════════╝');
+    console.log('');
+  });
+}
+
+startServer().catch(err => {
+  console.error('[FATAL]', err);
+  process.exit(1);
 });
