@@ -8,22 +8,40 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 // =====================
-// MULTER SETUP — Upload PNG Testimoni
+// MULTER STORAGE SETUP — Cloudinary (Production) with local fallback (Development)
 // =====================
-const testiStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../public/uploads/testimonials');
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const uniqueName = `testi-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
-    cb(null, uniqueName);
-  }
-});
+let testiStorage;
+
+if (process.env.CLOUDINARY_URL) {
+  testiStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: 'alexcloud/testimonials',
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif'],
+      public_id: (req, file) => {
+        const uniqueName = `testi-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+        return uniqueName;
+      }
+    }
+  });
+} else {
+  testiStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadDir = path.join(__dirname, '../public/uploads/testimonials');
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const uniqueName = `testi-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
+      cb(null, uniqueName);
+    }
+  });
+}
 
 const testiUpload = multer({
   storage: testiStorage,
@@ -383,7 +401,7 @@ router.post('/testimonials', ensureAdmin, testiUpload.single('imageFile'), (req,
   // Prioritas: file upload > URL manual
   let finalImage = null;
   if (req.file) {
-    finalImage = `/uploads/testimonials/${req.file.filename}`;
+    finalImage = req.file.path.startsWith('http') ? req.file.path : `/uploads/testimonials/${req.file.filename}`;
   } else if (imageUrl && imageUrl.trim()) {
     finalImage = imageUrl.trim();
   }
@@ -456,7 +474,7 @@ router.post('/testimonials/:id/edit', ensureAdmin, testiUpload.single('imageFile
       const oldPath = path.join(__dirname, '../public', testi.image);
       try { if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath); } catch (e) {}
     }
-    finalImage = `/uploads/testimonials/${req.file.filename}`;
+    finalImage = req.file.path.startsWith('http') ? req.file.path : `/uploads/testimonials/${req.file.filename}`;
   } else if (imageUrl && imageUrl.trim()) {
     finalImage = imageUrl.trim();
   }
