@@ -1,21 +1,12 @@
 const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
-const path = require('path');
-const fs = require('fs');
+const Memory = require('lowdb/adapters/Memory');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
-// ─── Persistent path: Railway Volume (/data) or local ──────────────────────────
-// Railway Volume di-mount ke /data — data di sini TIDAK hilang saat redeploy
-const DATA_DIR = fs.existsSync('/data') ? '/data' : path.join(__dirname);
-const DB_PATH  = path.join(DATA_DIR, 'db.json');
-
-console.log(`[DB] Using database path: ${DB_PATH}`);
-
-const adapter = new FileSync(DB_PATH);
+// Use Memory adapter — data loaded from Postgres on startup
+const adapter = new Memory();
 const db = low(adapter);
 
-// Default structure
 db.defaults({
   users: [],
   orders: [],
@@ -26,6 +17,91 @@ db.defaults({
   plans: [],
   settings: {}
 }).write();
+
+// ─── PostgreSQL Backup (Railway internal — no SSL issues) ──────────────────────
+const DATABASE_URL = process.env.DATABASE_URL;
+let _pgPool = null;
+let _backupEnabled = false;
+
+async function getPgPool() {
+  if (!_pgPool && DATABASE_URL) {
+    const { Pool } = require('pg');
+    _pgPool = new Pool({
+      connectionString: DATABASE_URL,
+      ssl: DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
+      max: 3,
+      idleTimeoutMillis: 30000
+    });
+    // Create table if not exists
+    await _pgPool.query(`
+      CREATE TABLE IF NOT EXISTS app_state (
+        key TEXT PRIMARY KEY,
+        value JSONB NOT NULL,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+  }
+  return _pgPool;
+}
+
+// ─── Restore from Postgres on startup ─────────────────────────────────────────
+async function restoreFromDB() {
+  if (!DATABASE_URL) {
+    console.log('[DB] ⚠️  No DATABASE_URL — data will reset on redeploy!');
+    _backupEnabled = false;
+    return;
+  }
+  try {
+    const pool = await getPgPool();
+    const result = await pool.query("SELECT value FROM app_state WHERE key = 'main'");
+    if (result.rows.length > 0) {
+      const savedData = result.rows[0].value;
+      const state = db.getState();
+      Object.keys(savedData).forEach(k => { state[k] = savedData[k]; });
+      db.setState(state);
+      console.log('[DB] ✅ Data restored from PostgreSQL!');
+    } else {
+      console.log('[DB] No backup found — seeding defaults');
+    }
+    _backupEnabled = true;
+  } catch (e) {
+    console.error('[DB] ❌ Postgres restore failed:', e.message);
+    _backupEnabled = false;
+  }
+}
+
+// ─── Backup to Postgres (debounced, non-blocking) ─────────────────────────────
+let _backupTimer = null;
+
+function scheduleBackup() {
+  if (!_backupEnabled || !DATABASE_URL) return;
+  if (_backupTimer) clearTimeout(_backupTimer);
+  _backupTimer = setTimeout(() => {
+    backupToPostgres().catch(e => console.error('[DB] Backup error:', e.message));
+  }, 2000); // Debounce: wait 2s after last write
+}
+
+async function backupToPostgres() {
+  try {
+    const pool = await getPgPool();
+    const data = db.getState();
+    await pool.query(`
+      INSERT INTO app_state (key, value, updated_at)
+      VALUES ('main', $1, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()
+    `, [JSON.stringify(data)]);
+  } catch (e) {
+    console.error('[DB] ❌ Postgres backup error:', e.message);
+  }
+}
+
+// ─── Override db.write() to auto-backup ──────────────────────────────────────
+const _origWrite = db.write.bind(db);
+db.write = function () {
+  const result = _origWrite();
+  scheduleBackup();
+  return result;
+};
 
 // ─── Seed functions ────────────────────────────────────────────────────────────
 function seedAdmin() {
@@ -105,14 +181,4 @@ function initDB() {
   seedTestimonials();
 }
 
-// No MongoDB needed — using Railway Volume
-async function restoreFromMongoDB() {
-  // Railway Volume handles persistence automatically
-  if (fs.existsSync('/data')) {
-    console.log('[DB] ✅ Railway Volume detected — data is persistent!');
-  } else {
-    console.log('[DB] ⚠️  No persistent volume — running locally');
-  }
-}
-
-module.exports = { db, initDB, restoreFromMongoDB };
+module.exports = { db, initDB, restoreFromMongoDB: restoreFromDB };
