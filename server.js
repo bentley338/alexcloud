@@ -22,8 +22,11 @@ app.use(express.json());
 // Method override
 app.use(methodOverride('_method'));
 
-// Session — memory store (simple, works everywhere)
+const { sessionStore } = require('./database/db');
+
+// Session — persisted in PostgreSQL via custom lowdb store
 app.use(session({
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'alexcloud_secret_2024_persist',
   resave: false,
   saveUninitialized: false,

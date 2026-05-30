@@ -2,6 +2,7 @@ const low = require('lowdb');
 const Memory = require('lowdb/adapters/Memory');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
+const session = require('express-session');
 
 // Use Memory adapter — data loaded from Postgres on startup
 const adapter = new Memory();
@@ -15,8 +16,56 @@ db.defaults({
   promoCodes: [],
   testimonials: [],
   plans: [],
-  settings: {}
+  settings: {},
+  sessions: []
 }).write();
+
+// ─── Custom Lowdb Session Store (automatically backed up to Postgres) ──────────
+class LowdbSessionStore extends session.Store {
+  get(sid, cb) {
+    try {
+      const record = db.get('sessions').find({ id: sid }).value();
+      if (!record) return cb(null, null);
+      cb(null, JSON.parse(record.data));
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  set(sid, sess, cb) {
+    try {
+      const dataStr = JSON.stringify(sess);
+      const existing = db.get('sessions').find({ id: sid }).value();
+      if (existing) {
+        db.get('sessions').find({ id: sid }).assign({ data: dataStr, updatedAt: new Date().toISOString() }).write();
+      } else {
+        db.get('sessions').push({
+          id: sid,
+          data: dataStr,
+          updatedAt: new Date().toISOString()
+        }).write();
+      }
+      cb(null);
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  destroy(sid, cb) {
+    try {
+      db.get('sessions').remove({ id: sid }).write();
+      cb(null);
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  touch(sid, sess, cb) {
+    this.set(sid, sess, cb);
+  }
+}
+
+const sessionStore = new LowdbSessionStore();
 
 // ─── PostgreSQL Backup (Railway internal — no SSL issues) ──────────────────────
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -174,11 +223,24 @@ function seedTestimonials() {
   }
 }
 
+function cleanOldSessions() {
+  try {
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    db.get('sessions')
+      .remove(s => !s.updatedAt || s.updatedAt < oneWeekAgo)
+      .write();
+    console.log('[DB] Cleaned expired sessions');
+  } catch (e) {
+    console.error('[DB] Clean sessions error:', e.message);
+  }
+}
+
 function initDB() {
   seedAdmin();
   seedPlans();
   seedGames();
   seedTestimonials();
+  cleanOldSessions();
 }
 
-module.exports = { db, initDB, restoreFromMongoDB: restoreFromDB };
+module.exports = { db, initDB, restoreFromMongoDB: restoreFromDB, sessionStore };
