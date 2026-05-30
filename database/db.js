@@ -1,11 +1,18 @@
 const low = require('lowdb');
-const Memory = require('lowdb/adapters/Memory');
+const FileSync = require('lowdb/adapters/FileSync');
+const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
-const { MongoClient } = require('mongodb');
 
-// Use Memory adapter — data will be loaded from MongoDB on startup
-const adapter = new Memory();
+// ─── Persistent path: Railway Volume (/data) or local ──────────────────────────
+// Railway Volume di-mount ke /data — data di sini TIDAK hilang saat redeploy
+const DATA_DIR = fs.existsSync('/data') ? '/data' : path.join(__dirname);
+const DB_PATH  = path.join(DATA_DIR, 'db.json');
+
+console.log(`[DB] Using database path: ${DB_PATH}`);
+
+const adapter = new FileSync(DB_PATH);
 const db = low(adapter);
 
 // Default structure
@@ -19,84 +26,6 @@ db.defaults({
   plans: [],
   settings: {}
 }).write();
-
-// ─── MongoDB Config ────────────────────────────────────────────────────────────
-const MONGODB_URI    = process.env.MONGODB_URI;
-const MONGO_DBNAME   = 'alexcloud';
-const MONGO_COL      = 'dbstore';
-const MONGO_DOC_ID   = 'main';
-
-let _mongoClient     = null;
-let _backupEnabled   = false;
-
-async function getMongoClient() {
-  if (!_mongoClient) {
-    // Append SSL params to URI if not present
-    let uri = MONGODB_URI;
-    if (uri && !uri.includes('tls=')) {
-      uri += (uri.includes('?') ? '&' : '?') + 'tls=true&tlsInsecure=true';
-    }
-    _mongoClient = await MongoClient.connect(uri, {
-      connectTimeoutMS: 15000,
-      serverSelectionTimeoutMS: 15000
-    });
-  }
-  return _mongoClient;
-}
-
-// ─── Restore from MongoDB on startup ─────────────────────────────────────────
-async function restoreFromMongoDB() {
-  if (!MONGODB_URI) {
-    console.log('[DB] ⚠️  No MONGODB_URI — data will reset on redeploy!');
-    _backupEnabled = false;
-    return;
-  }
-  try {
-    const client  = await getMongoClient();
-    const col     = client.db(MONGO_DBNAME).collection(MONGO_COL);
-    const doc     = await col.findOne({ _id: MONGO_DOC_ID });
-    if (doc && doc.data) {
-      const state = db.getState();
-      Object.assign(state, doc.data);
-      // Write without triggering backup loop
-      const origWrite = db.write.bind(db);
-      origWrite();
-      console.log('[DB] ✅ Restored from MongoDB Atlas');
-    } else {
-      console.log('[DB] No backup found in MongoDB — seeding defaults');
-    }
-  } catch (e) {
-    console.error('[DB] ❌ MongoDB restore failed:', e.message);
-  } finally {
-    _backupEnabled = true;
-  }
-}
-
-// ─── Async backup to MongoDB (non-blocking) ───────────────────────────────────
-async function backupToMongoDB() {
-  if (!MONGODB_URI || !_backupEnabled) return;
-  try {
-    const client = await getMongoClient();
-    const col    = client.db(MONGO_DBNAME).collection(MONGO_COL);
-    await col.replaceOne(
-      { _id: MONGO_DOC_ID },
-      { _id: MONGO_DOC_ID, data: db.getState(), updatedAt: new Date() },
-      { upsert: true }
-    );
-  } catch (e) {
-    console.error('[DB] ❌ MongoDB backup error:', e.message);
-  }
-}
-
-// ─── Override db.write() to auto-backup ──────────────────────────────────────
-const _origWrite = db.write.bind(db);
-db.write = function () {
-  const result = _origWrite();
-  if (_backupEnabled) {
-    backupToMongoDB().catch(e => console.error('[DB] Backup error:', e.message));
-  }
-  return result;
-};
 
 // ─── Seed functions ────────────────────────────────────────────────────────────
 function seedAdmin() {
@@ -174,6 +103,16 @@ function initDB() {
   seedPlans();
   seedGames();
   seedTestimonials();
+}
+
+// No MongoDB needed — using Railway Volume
+async function restoreFromMongoDB() {
+  // Railway Volume handles persistence automatically
+  if (fs.existsSync('/data')) {
+    console.log('[DB] ✅ Railway Volume detected — data is persistent!');
+  } else {
+    console.log('[DB] ⚠️  No persistent volume — running locally');
+  }
 }
 
 module.exports = { db, initDB, restoreFromMongoDB };
