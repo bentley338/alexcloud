@@ -1,8 +1,18 @@
 require('dotenv').config();
 
-// Fix common copy-paste mistake for CLOUDINARY_URL env var
-if (process.env.CLOUDINARY_URL && process.env.CLOUDINARY_URL.startsWith('CLOUDINARY_URL=')) {
-  process.env.CLOUDINARY_URL = process.env.CLOUDINARY_URL.replace('CLOUDINARY_URL=', '');
+// Fix common copy-paste and quote wrapping mistakes for CLOUDINARY_URL env var
+if (process.env.CLOUDINARY_URL) {
+  let url = process.env.CLOUDINARY_URL.trim();
+  if (url.startsWith("'") && url.endsWith("'")) {
+    url = url.slice(1, -1);
+  }
+  if (url.startsWith('"') && url.endsWith('"')) {
+    url = url.slice(1, -1);
+  }
+  if (url.startsWith('CLOUDINARY_URL=')) {
+    url = url.replace('CLOUDINARY_URL=', '');
+  }
+  process.env.CLOUDINARY_URL = url.trim();
 }
 
 const express = require('express');
