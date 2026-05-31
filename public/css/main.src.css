@@ -1,27 +1,41 @@
 :root {
-  --bg-primary: #030712;
-  --bg-secondary: #0a0f1e;
-  --bg-card: #0d1428;
-  --bg-card-hover: #111b38;
-  --accent-blue: #00d4ff;
-  --accent-purple: #7b2fff;
-  --accent-green: #00ff88;
-  --accent-orange: #ff6b35;
-  --text-primary: #e8f0ff;
-  --text-secondary: #8899bb;
-  --text-muted: #4d5d7a;
-  --border: rgba(0, 212, 255, 0.1);
-  --border-hover: rgba(0, 212, 255, 0.3);
-  --glow-blue: 0 0 20px rgba(0, 212, 255, 0.3);
-  --glow-purple: 0 0 20px rgba(123, 47, 255, 0.3);
-  --gradient-main: linear-gradient(135deg, #00d4ff 0%, #7b2fff 100%);
-  --gradient-dark: linear-gradient(180deg, #030712 0%, #0a0f1e 100%);
-  --font-display: 'Orbitron', sans-serif;
-  --font-body: 'Space Grotesk', sans-serif;
-  --font-ui: 'Rajdhani', sans-serif;
-  --radius: 12px;
-  --radius-lg: 20px;
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ─── Background ─── */
+  --bg-primary: #0c0c0e;
+  --bg-secondary: #111115;
+  --bg-card: #16161c;
+  --bg-card-hover: #1c1c24;
+
+  /* ─── Accent (Gaming Premium — Xbox/PS energy) ─── */
+  --accent-blue: #e8732a;         /* Was cyan — now warm orange (primary action) */
+  --accent-purple: #c0392b;       /* Was purple — now deep crimson (secondary) */
+  --accent-green: #4caf7d;        /* Stays green but softer, natural */
+  --accent-orange: #e8732a;       /* Same as primary */
+
+  /* ─── Typography ─── */
+  --text-primary: #f0f0f2;
+  --text-secondary: #8a8a99;
+  --text-muted: #4a4a58;
+
+  /* ─── Borders — no neon glow, just subtle warm lines ─── */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(232, 115, 42, 0.35);
+
+  /* ─── Shadows — depth instead of glow ─── */
+  --glow-blue: 0 4px 24px rgba(232, 115, 42, 0.18);
+  --glow-purple: 0 4px 24px rgba(192, 57, 43, 0.15);
+
+  /* ─── Gradients ─── */
+  --gradient-main: linear-gradient(135deg, #e8732a 0%, #c0392b 100%);
+  --gradient-dark: linear-gradient(180deg, #0c0c0e 0%, #111115 100%);
+
+  /* ─── Fonts — cleaner, modern (no Orbitron sci-fi) ─── */
+  --font-display: 'Inter', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+  --font-ui: 'Inter', 'Segoe UI', sans-serif;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,16 +51,18 @@ body {
   line-height: 1.6;
 }
 
+/* Subtle vignette-style background — not sci-fi, just premium depth */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 255, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 80% at 80% 50%, rgba(123, 47, 255, 0.04) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(232, 115, 42, 0.04) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 60% at 100% 100%, rgba(192, 57, 43, 0.03) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
+
 
 /* NAVBAR */
 .navbar {
