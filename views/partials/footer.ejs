@@ -7,11 +7,11 @@
         </a>
         <p>Platform cloud gaming terbaik di Indonesia. Main game AAA tanpa perlu PC mahal!</p>
         <div class="footer-social">
-          <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="social-link wa">
-            <i class="fab fa-whatsapp"></i>
+          <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="social-link wa" aria-label="Hubungi kami via WhatsApp" rel="noopener noreferrer">
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
           </a>
-          <a href="#" class="social-link ig"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="social-link tg"><i class="fab fa-telegram"></i></a>
+          <a href="#" class="social-link ig" aria-label="Ikuti kami di Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+          <a href="#" class="social-link tg" aria-label="Bergabung di Telegram kami"><i class="fab fa-telegram" aria-hidden="true"></i></a>
         </div>
       </div>
       <div class="footer-links">
@@ -47,23 +47,23 @@
   <!-- 🤖 AI CHATBOT ASSISTANT                      -->
   <!-- ============================================ -->
   <div class="ai-chatbot-widget" id="aiChatbot">
-    <div class="ai-chat-toggle" id="aiChatToggle" onclick="toggleAIChat()">
+    <div class="ai-chat-toggle" id="aiChatToggle" onclick="toggleAIChat()" role="button" aria-label="Buka AI Chat AlexBot" aria-expanded="false" aria-controls="aiChatWindow" tabindex="0">
       <div class="ai-pulse-ring"></div>
-      <i class="fas fa-robot"></i>
+      <i class="fas fa-robot" aria-hidden="true"></i>
       <span class="ai-badge-dot"></span>
     </div>
-    <div class="ai-chat-window" id="aiChatWindow">
+    <div class="ai-chat-window" id="aiChatWindow" role="dialog" aria-modal="true" aria-label="AlexBot AI Chat">
       <div class="ai-chat-header">
         <div class="ai-header-info">
-          <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+          <div class="ai-avatar" aria-hidden="true"><i class="fas fa-robot"></i></div>
           <div>
             <div class="ai-name">AlexBot AI</div>
-            <div class="ai-status"><span class="ai-online-dot"></span> Online & Siap Bantu</div>
+            <div class="ai-status"><span class="ai-online-dot" aria-hidden="true"></span>Online &amp; Siap Bantu</div>
           </div>
         </div>
         <div class="ai-header-actions">
-          <button onclick="clearChat()" title="Clear"><i class="fas fa-trash"></i></button>
-          <button onclick="toggleAIChat()" title="Tutup"><i class="fas fa-times"></i></button>
+          <button onclick="clearChat()" title="Hapus chat" aria-label="Hapus riwayat chat"><i class="fas fa-trash" aria-hidden="true"></i></button>
+          <button onclick="toggleAIChat()" title="Tutup" aria-label="Tutup AI Chat"><i class="fas fa-times" aria-hidden="true"></i></button>
         </div>
       </div>
       <div class="ai-chat-messages" id="aiMessages">
@@ -82,8 +82,8 @@
         </div>
       </div>
       <div class="ai-chat-input-wrap">
-        <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Tanya apa saja..." onkeypress="handleChatEnter(event)">
-        <button class="ai-send-btn" onclick="sendAIMessage()"><i class="fas fa-paper-plane"></i></button>
+        <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Tanya apa saja..." onkeypress="handleChatEnter(event)" aria-label="Ketik pesan ke AlexBot">
+        <button class="ai-send-btn" onclick="sendAIMessage()" aria-label="Kirim pesan"><i class="fas fa-paper-plane" aria-hidden="true"></i></button>
       </div>
     </div>
   </div>

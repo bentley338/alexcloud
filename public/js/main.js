@@ -8,7 +8,12 @@ window.addEventListener('scroll', () => {
 
 function toggleNav() {
   const links = document.getElementById('navLinks');
-  if (links) links.classList.toggle('open');
+  const btn = document.getElementById('navToggleBtn');
+  if (links) {
+    const isOpen = links.classList.toggle('open');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    if (btn) btn.setAttribute('aria-label', isOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+  }
 }
 
 function toggleUserMenu() {
@@ -16,11 +21,41 @@ function toggleUserMenu() {
   if (dropdown) dropdown.classList.toggle('show');
 }
 
+// Close nav on outside click or Escape key
 document.addEventListener('click', (e) => {
+  const links = document.getElementById('navLinks');
+  const btn = document.getElementById('navToggleBtn');
   const dropdown = document.getElementById('userDropdown');
-  const btn = document.querySelector('.nav-user-btn');
-  if (dropdown && btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+  const userBtn = document.querySelector('.nav-user-btn');
+
+  // Close mobile nav when clicking outside
+  if (links && links.classList.contains('open')) {
+    if (!links.contains(e.target) && e.target !== btn && !btn?.contains(e.target)) {
+      links.classList.remove('open');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+      if (btn) btn.setAttribute('aria-label', 'Buka menu navigasi');
+    }
+  }
+
+  // Close user dropdown when clicking outside
+  if (dropdown && userBtn && !userBtn.contains(e.target) && !dropdown.contains(e.target)) {
     dropdown.classList.remove('show');
+  }
+});
+
+// Close menus on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const links = document.getElementById('navLinks');
+    const btn = document.getElementById('navToggleBtn');
+    if (links && links.classList.contains('open')) {
+      links.classList.remove('open');
+      if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
+    }
+    const aiWindow = document.getElementById('aiChatWindow');
+    if (aiWindow && aiWindow.classList.contains('open')) {
+      toggleAIChat();
+    }
   }
 });
 
@@ -521,7 +556,10 @@ let chatOpen = false;
 function toggleAIChat() {
   chatOpen = !chatOpen;
   const win = document.getElementById('aiChatWindow');
+  const toggle = document.getElementById('aiChatToggle');
   if (win) win.classList.toggle('open', chatOpen);
+  if (toggle) toggle.setAttribute('aria-expanded', chatOpen ? 'true' : 'false');
+  if (toggle) toggle.setAttribute('aria-label', chatOpen ? 'Tutup AI Chat AlexBot' : 'Buka AI Chat AlexBot');
 }
 
 function sendAIMessage() {

@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 
 <!-- HERO -->
-<section class="hero">
+<section class="hero" id="main-content" aria-label="Hero utama">
   <div class="hero-bg"></div>
   <div class="hero-grid-overlay"></div>
   <div class="hero-container">
@@ -84,7 +84,7 @@
       <% trendingGames.forEach((game, idx) => { %>
       <div class="trending-card">
         <div class="trending-rank">#<%= idx + 1 %></div>
-        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img">
+        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img" width="200" height="110" loading="lazy">
         <div class="trending-info">
           <div class="trending-name"><%= game.name %></div>
           <div class="trending-genre"><%= game.genre %></div>
@@ -156,14 +156,14 @@
     <div class="view-mode-bar">
       <span class="view-mode-label"><i class="fas fa-eye"></i> Mode Tampilan:</span>
       <div class="view-mode-btns">
-        <button class="view-mode-btn active" id="btn-grid" onclick="setViewMode('grid')" title="Grid View">
-          <i class="fas fa-th-large"></i> Grid
+        <button class="view-mode-btn active" id="btn-grid" onclick="setViewMode('grid')" title="Grid View" aria-label="Tampilan Grid" aria-pressed="true">
+          <i class="fas fa-th-large" aria-hidden="true"></i> Grid
         </button>
-        <button class="view-mode-btn" id="btn-list" onclick="setViewMode('list')" title="List View">
-          <i class="fas fa-list"></i> List
+        <button class="view-mode-btn" id="btn-list" onclick="setViewMode('list')" title="List View" aria-label="Tampilan List" aria-pressed="false">
+          <i class="fas fa-list" aria-hidden="true"></i> List
         </button>
-        <button class="view-mode-btn" id="btn-compact" onclick="setViewMode('compact')" title="Compact View">
-          <i class="fas fa-grip-horizontal"></i> Compact
+        <button class="view-mode-btn" id="btn-compact" onclick="setViewMode('compact')" title="Compact View" aria-label="Tampilan Compact" aria-pressed="false">
+          <i class="fas fa-grip-horizontal" aria-hidden="true"></i> Compact
         </button>
       </div>
     </div>
@@ -172,7 +172,7 @@
       <% games.slice(0, 8).forEach(game => { %>
       <div class="game-card">
         <div class="game-img-wrap">
-          <img src="<%= game.image %>" alt="<%= game.name %>" loading="lazy">
+          <img src="<%= game.image %>" alt="<%= game.name %>" width="480" height="270" loading="lazy">
           <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
         </div>
         <div class="game-body">
@@ -243,7 +243,7 @@
     </div>
     <% if (testimonials && testimonials.length > 0) { %>
     <div class="testi-slider-wrap">
-      <button class="testi-nav testi-prev" onclick="testiPrev()"><i class="fas fa-chevron-left"></i></button>
+      <button class="testi-nav testi-prev" onclick="testiPrev()" aria-label="Testimoni sebelumnya"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
       <div class="testi-slider" id="testiSlider">
         <% testimonials.forEach((t, idx) => { %>
         <div class="testi-card <%= idx === 0 ? 'active' : '' %>" data-idx="<%= idx %>">
@@ -266,7 +266,7 @@
         </div>
         <% }) %>
       </div>
-      <button class="testi-nav testi-next" onclick="testiNext()"><i class="fas fa-chevron-right"></i></button>
+      <button class="testi-nav testi-next" onclick="testiNext()" aria-label="Testimoni berikutnya"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
     </div>
     <div class="testi-dots" id="testiDots">
       <% testimonials.forEach((t, idx) => { %>

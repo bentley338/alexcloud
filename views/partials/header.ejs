@@ -3,15 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof title !== 'undefined' ? title : 'AlexCloud' %></title>
-  <meta name="description" content="AlexCloud - Platform Cloud Gaming Premium #1 Indonesia. Main game AAA tanpa PC mahal!">
+  <title><%= typeof title !== 'undefined' ? title : 'AlexCloud - Platform Cloud Gaming Premium #1 Indonesia' %></title>
+  <meta name="description" content="AlexCloud - Platform Cloud Gaming Premium #1 Indonesia. Main game AAA tanpa PC mahal mulai Rp 40.000/minggu!">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+
+  <!-- Preconnect untuk performa -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+  <!-- CSS kritis: main stylesheet -->
   <link rel="stylesheet" href="/css/main.css">
+
+  <!-- Google Fonts: load dengan font-display=swap untuk hindari FOIT -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+  <!-- FontAwesome: load non-blocking untuk hindari render blocking -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
 </head>
 <body>
+  <!-- Skip to main content (accessibility) -->
+  <a href="#main-content" class="skip-link">Langsung ke konten utama</a>
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <a href="/" class="nav-logo">
@@ -62,7 +76,7 @@
           <a href="/register" class="btn-nav-cta">Daftar Gratis</a>
         <% } %>
       </div>
-      <button class="nav-toggle" onclick="toggleNav()">
+      <button class="nav-toggle" onclick="toggleNav()" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="navLinks" id="navToggleBtn">
         <span></span><span></span><span></span>
       </button>
     </div>
