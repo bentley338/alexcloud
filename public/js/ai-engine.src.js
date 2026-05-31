@@ -15,6 +15,41 @@ const AI_TOPICS = [
     direct: `Sama-sama! 😊 Senang bisa membantu!\n\n**Happy gaming!** 🎮⚡\nJangan ragu tanya lagi ya!`
   },
   {
+    key: 'identity',
+    kw: ['siapa kamu','siapa lu','nama kamu','namamu','siapa anda','lu siapa','apa nama','kamu siapa'],
+    direct: `Saya adalah **AlexBot** 🤖, asisten AI pribadi Anda di AlexCloud! Saya didesain khusus untuk menjawab segala pertanyaan seputar cloud gaming, daftar game, harga paket, dan membantu kelancaran bermain Anda. Mau cari tahu info apa hari ini?`
+  },
+  {
+    key: 'laugh',
+    kw: ['wkwk','haha','wkwkwk','hahaha','lol','xixi','hehe','awok','huhu','lucu','kocak'],
+    direct: `Haha! 😄 Senang bisa melihat Anda ceria. Apakah ada game seru atau hal seputar AlexCloud yang ingin Anda tanyakan hari ini?`
+  },
+  {
+    key: 'creator',
+    kw: ['siapa pembuat','pembuatmu','dibuat oleh','developer','siapa yg buat','bikin kamu','yang menciptakan','penciptamu'],
+    direct: `Saya diciptakan dan dikembangkan oleh tim developer hebat dari **AlexCloud Indonesia** 🇮🇩 untuk mempermudah petualangan gaming Anda di cloud!`
+  },
+  {
+    key: 'ai_status',
+    kw: ['kamu ai','apakah kamu ai','robot','bot','ai ya','apakah kamu robot','mesin','sistem'],
+    direct: `Ya, betul! Saya adalah asisten virtual berbasis kecerdasan buatan (AI) 🤖. Walau saya robot, saya tahu segalanya tentang cloud gaming dan selalu siap menemani Anda 24/7! 😊`
+  },
+  {
+    key: 'compliment',
+    kw: ['pintar','hebat','keren','cerdas','cantik','ganteng','luar biasa','hebat kamu','pintar kamu','mantap','pro'],
+    direct: `Terima kasih banyak atas pujiannya! 🥰 Saya belajar setiap hari agar dapat membantu Anda dan komunitas gamer AlexCloud dengan lebih baik. Anda juga luar biasa!`
+  },
+  {
+    key: 'bad_word',
+    kw: ['anjing','bangsat','bego','goblok','tolol','tai','kontol','pantek','jancok','ngasal','bodoh','kamu bodoh','jelek','buruk','sampah','babi'],
+    direct: `Waduh, santai dulu kak... 🥺 Maaf ya kalau ada jawaban saya sebelumnya yang kurang memuaskan atau dirasa ngasal. Tolong beri tahu apa yang sedang kakak cari, saya akan coba jelaskan dengan lebih baik! 🦾`
+  },
+  {
+    key: 'casual_ask',
+    kw: ['lagi apa','sedang apa','sibuk gak','lagi sibuk','apa kabar','apa kabarmu','apa saja kegiatan','kabar','sehat','bagaimana kabar'],
+    direct: `Saya selalu standby 24/7 di server AlexCloud, siap menjawab semua kebingungan Anda tentang cloud gaming! 🎮 Bagaimana kabar Anda hari ini? Sudah siap memainkan game AAA pilihan Anda?`
+  },
+  {
     key: 'harga',
     kw: ['harga','paket','biaya','tarif','berapa','bayar berapa','cost','price','idr','rupiah','rp','uang','murah','mahal','cicil','subscribe','berlangganan','plan','tipe pilihan','plan apa','paket apa','brp','hrgnya','hrg','bayar brp','biayanya'],
     resp: 'harga'
@@ -225,8 +260,8 @@ function getAIResponse(msg) {
 
   if (topSuggestions.length) {
     const list = topSuggestions.map(r => `• ${topicLabels[r.topic.key] || r.topic.key}`).join('\n');
-    return `🤖 Hmm, kurang paham maksudnya. Mungkin kamu mau tanya tentang:\n\n${list}\n\nCoba tanya dengan lebih spesifik, atau hubungi admin via **WhatsApp**! 📱`;
+    return `🤖 Hmm, sepertinya saya kurang paham maksud kalimat kakak. 😅 Tapi jangan khawatir! Mungkin kakak mau tanya tentang:\n\n${list}\n\nKetik pertanyaan kakak dengan lebih spesifik, atau klik menu **Tanya AlexBot AI** di atas untuk topik populer! 😊`;
   }
 
-  return `🤖 Saya tidak menemukan jawaban yang tepat.\n\nCoba tanya tentang:\n• "harga paket"\n• "cara daftar"\n• "game yang ada"\n• "koneksi internet"\n\nAtau hubungi admin **WhatsApp** untuk bantuan langsung! 📱`;
+  return `Aduh kak, sepertinya saya kurang mengerti kalimatnya. 😅 Tapi jangan khawatir! Sebagai AI AlexCloud, saya paling pintar menjawab seputar:\n\n🎮 **Game yang tersedia** (GTA VI, FC26, MotoGP25)\n💰 **Harga paket berlangganan** (Mulai Rp 40rb)\n💳 **Cara beli & bayar otomatis** (Scan QRIS)\n📶 **Cara test kecepatan internet kamu**\n\nKira-kira kakak mau cari tahu tentang apa nih? Atau bisa langsung chat admin WhatsApp kami untuk dipandu langsung! 📱`;
 }
