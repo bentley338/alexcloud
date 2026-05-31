@@ -23,22 +23,26 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
 
-  <!-- Preconnect untuk performa -->
+  <!-- Preconnect untuk performa (maksimal 2 agar tidak boros koneksi) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="preconnect" href="https://api.dicebear.com">
-  <link rel="preconnect" href="https://placehold.co">
 
-  <!-- CSS kritis: main stylesheet -->
-  <link rel="stylesheet" href="/css/main.css">
+  <!-- CSS kritis inlined untuk mempercepat First Contentful Paint & cegah FOUC -->
+  <style>
+    body { background-color: #030712 !important; color: #e8f0ff; }
+    .navbar { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(20px); min-height: 70px; }
+  </style>
 
-  <!-- Google Fonts: load dengan font-display=swap untuk hindari FOIT -->
+  <!-- Main stylesheet loaded asinkron (non-blocking) -->
+  <link rel="stylesheet" href="/css/main.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="/css/main.css"></noscript>
+
+  <!-- Google Fonts: load dengan font-display=swap asinkron -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 
-  <!-- FontAwesome: load non-blocking untuk hindari render blocking -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <!-- FontAwesome: load non-blocking menggunakan print-onload trick -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
 </head>
 <body>
@@ -75,7 +79,7 @@
           <div class="nav-user-menu">
             <button class="nav-user-btn" onclick="toggleUserMenu()">
               <% if (user.avatar) { %>
-                <img src="<%= user.avatar %>" class="nav-avatar" alt="<%= user.name %>">
+                <img src="<%= user.avatar %>" class="nav-avatar" alt="<%= user.name %>" width="28" height="28">
               <% } else { %>
                 <div class="nav-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
               <% } %>

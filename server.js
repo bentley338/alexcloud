@@ -39,17 +39,17 @@ app.set('views', path.join(__dirname, 'views'));
 // ── Static files dengan aggressive caching ───────────────────────────────────
 // CSS/JS/images: cache 1 tahun (immutable untuk file yang di-hash), revalidate dengan ETag
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '7d',          // cache 7 hari di browser
+  maxAge: '365d',        // cache 1 tahun di browser
   etag: true,            // ETag untuk conditional requests
   lastModified: true,    // Last-Modified header
   setHeaders: (res, filePath) => {
-    // CSS dan JS: cache lebih lama
+    // CSS dan JS: cache 1 tahun
     if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
-      res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=604800');
     }
-    // Images: cache 30 hari
+    // Images: cache 1 tahun
     if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=604800');
     }
     // Security headers
     res.setHeader('X-Content-Type-Options', 'nosniff');
