@@ -79,15 +79,26 @@ const observer = new IntersectionObserver((entries) => {
     if (entry.isIntersecting) {
       entry.target.style.opacity = '1';
       entry.target.style.transform = 'translateY(0)';
+      observer.unobserve(entry.target); // Hentikan observasi setelah animasi selesai untuk hemat CPU
     }
   });
-}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+}, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
 
 document.querySelectorAll('.feature-card, .game-card, .plan-card, .stat-card, .trending-card').forEach(el => {
-  el.style.opacity = '0';
-  el.style.transform = 'translateY(20px)';
-  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-  observer.observe(el);
+  const rect = el.getBoundingClientRect();
+  const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+  
+  if (isInViewport) {
+    // Jika sudah di viewport saat load, tampilkan langsung tanpa animasi/flash
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  } else {
+    // Sembunyikan & observasi hanya elemen yang di luar viewport
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  }
 });
 
 // ============================================
