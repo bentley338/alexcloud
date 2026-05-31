@@ -20,16 +20,41 @@ const session = require('express-session');
 const flash = require('express-flash');
 const methodOverride = require('method-override');
 const path = require('path');
+const compression = require('compression');
+const { runMinifier } = require('./utils/minifier');
+
+// Jalankan minifier aset statis otomatis
+runMinifier();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ── Gzip/Brotli Compression (reduces transfer size ~70%) ──────────────────────
+app.use(compression({ level: 6 }));
 
 // View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Static files
-app.use(express.static(path.join(__dirname, 'public')));
+// ── Static files dengan aggressive caching ───────────────────────────────────
+// CSS/JS/images: cache 1 tahun (immutable untuk file yang di-hash), revalidate dengan ETag
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '7d',          // cache 7 hari di browser
+  etag: true,            // ETag untuk conditional requests
+  lastModified: true,    // Last-Modified header
+  setHeaders: (res, filePath) => {
+    // CSS dan JS: cache lebih lama
+    if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
+    }
+    // Images: cache 30 hari
+    if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
+    }
+    // Security headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+  }
+}));
 
 // Body parsing
 app.use(express.urlencoded({ extended: true }));

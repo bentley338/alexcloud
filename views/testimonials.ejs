@@ -13,7 +13,7 @@
       <% testimonials.forEach(t => { %>
       <div class="testi-card-full">
         <% if (t.image) { %>
-          <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-full-img">
+          <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-full-img" loading="lazy">
         <% } %>
         <div class="testi-content">
           <div class="testi-stars">
@@ -21,7 +21,7 @@
           </div>
           <p class="testi-text">"<%= t.text %>"</p>
           <div class="testi-author">
-            <img src="<%= t.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(t.name) %>" alt="<%= t.name %>" class="testi-avatar">
+            <img src="<%= t.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(t.name) %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy">
             <div>
               <div class="testi-name"><%= t.name %></div>
               <div class="testi-role"><%= t.role %></div>

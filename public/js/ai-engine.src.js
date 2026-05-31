@@ -1,4 +1,8 @@
-// WARNING: JANGAN EDIT FILE INI SECARA LANGSUNG. Edit file .src.js yang sesuai. File ini di-minify otomatis saat startup server.
+// ============================================
+// 🧠 ALEXBOT SMART AI ENGINE v2
+// Fuzzy + Scoring-based intent detection
+// ============================================
+
 const AI_TOPICS = [
   {
     key: 'greet',
@@ -146,6 +150,8 @@ const AI_TOPICS = [
     direct: `🤖 Saya bisa jawab pertanyaan tentang:\n\n☁️ **Cloud Gaming**\n• Apa itu & cara kerjanya\n• Perangkat yang bisa dipakai\n• Koneksi internet yang dibutuhkan\n\n🎮 **AlexCloud**\n• Harga & paket\n• Cara daftar & login\n• Cara bayar (QRIS)\n• Library game\n• Rekomendasi & trending\n• Troubleshooting\n\n🔧 **Tools**\n• 📶 [Test kecepatan internet](/network-test)\n• ❓ [FAQ lengkap](/faq)\n\nKetik pertanyaan kamu! 😊`
   }
 ];
+
+// Levenshtein distance for typo tolerance
 function lev(a, b) {
   if (!a.length) return b.length;
   if (!b.length) return a.length;
@@ -160,32 +166,44 @@ function lev(a, b) {
   }
   return m[b.length][a.length];
 }
+
 function getAIResponse(msg) {
   const lower = msg.toLowerCase().trim();
   const words = lower.split(/[\s,!?.]+/).filter(w => w.length > 1);
+
+  // Empty / very short
   if (!lower || lower.length < 2) {
     return `Hai! 😊 Ketik pertanyaan kamu ya!\n\nContoh:\n• "harga berapa?"\n• "game apa yang ada?"\n• "cara daftar gimana?"`;
   }
+
+  // Score each topic
   const results = AI_TOPICS.map(topic => {
     let score = 0;
+
+    // Full phrase match in full message (highest priority)
     for (const kw of topic.kw) {
       if (kw.includes(' ') && lower.includes(kw)) score += 20;
     }
+
+    // Word-level matching
     for (const word of words) {
       if (word.length < 2) continue;
       for (const kw of topic.kw) {
-        if (kw.includes(' ')) continue; 
-        if (kw === word) score += 10;                              
-        else if (kw.startsWith(word) && word.length >= 3) score += 6; 
-        else if (word.startsWith(kw) && kw.length >= 4) score += 5;   
-        else if (kw.includes(word) && word.length >= 4) score += 4;   
-        else if (lev(word, kw) === 1 && kw.length >= 5) score += 4;   
-        else if (lev(word, kw) === 2 && kw.length >= 6) score += 2;   
+        if (kw.includes(' ')) continue; // already handled above
+        if (kw === word) score += 10;                              // exact
+        else if (kw.startsWith(word) && word.length >= 3) score += 6; // prefix
+        else if (word.startsWith(kw) && kw.length >= 4) score += 5;   // word contains kw
+        else if (kw.includes(word) && word.length >= 4) score += 4;   // kw contains word
+        else if (lev(word, kw) === 1 && kw.length >= 5) score += 4;   // 1 char typo
+        else if (lev(word, kw) === 2 && kw.length >= 6) score += 2;   // 2 char typo
       }
     }
     return { topic, score };
   }).sort((a, b) => b.score - a.score);
+
   const best = results[0];
+
+  // Confident match
   if (best && best.score >= 3) {
     const t = best.topic;
     if (t.direct) return t.direct;
@@ -193,6 +211,8 @@ function getAIResponse(msg) {
       return AI_KNOWLEDGE[t.resp];
     }
   }
+
+  // Weak match — suggest closest topics
   const topSuggestions = results.filter(r => r.score >= 1).slice(0, 3);
   const topicLabels = {
     harga: '💰 Harga paket', bayar: '💳 Cara bayar', game: '🎮 Daftar game',
@@ -202,9 +222,11 @@ function getAIResponse(msg) {
     daftar: '👤 Cara daftar', latency: '⚡ Performa', speedtest: '📶 Speed test',
     faq: '❓ FAQ', refund: '💸 Refund', aktivasi: '⚡ Aktivasi akun'
   };
+
   if (topSuggestions.length) {
     const list = topSuggestions.map(r => `• ${topicLabels[r.topic.key] || r.topic.key}`).join('\n');
     return `🤖 Hmm, kurang paham maksudnya. Mungkin kamu mau tanya tentang:\n\n${list}\n\nCoba tanya dengan lebih spesifik, atau hubungi admin via **WhatsApp**! 📱`;
   }
+
   return `🤖 Saya tidak menemukan jawaban yang tepat.\n\nCoba tanya tentang:\n• "harga paket"\n• "cara daftar"\n• "game yang ada"\n• "koneksi internet"\n\nAtau hubungi admin **WhatsApp** untuk bantuan langsung! 📱`;
 }
