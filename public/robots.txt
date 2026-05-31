@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /order/
+Disallow: /payment/
+
+Sitemap: https://alexcloud.my.id/sitemap.xml
