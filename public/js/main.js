@@ -63,7 +63,7 @@ const observer = new IntersectionObserver((entries) => {
     }
   });
 }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
-document.querySelectorAll('.feature-card, .game-card, .plan-card, .stat-card, .trending-card').forEach(el => {
+document.querySelectorAll('.feature-card, .game-card, .plan-card, .stat-card, .trending-card, .tiktok-banner').forEach(el => {
   const rect = el.getBoundingClientRect();
   const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
   if (isInViewport) {
@@ -71,8 +71,8 @@ document.querySelectorAll('.feature-card, .game-card, .plan-card, .stat-card, .t
     el.style.transform = 'translateY(0)';
   } else {
     el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
     observer.observe(el);
   }
 });
