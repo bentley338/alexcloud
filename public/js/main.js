@@ -54,25 +54,41 @@ document.querySelectorAll('.alert').forEach(alert => {
     setTimeout(() => alert.remove(), 500);
   }, 5000);
 });
-const observer = new IntersectionObserver((entries) => {
+const observerCallback = (entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      entry.target.style.opacity = '1';
-      entry.target.style.transform = 'translateY(0)';
-      observer.unobserve(entry.target); 
+      const el = entry.target;
+      const delay = parseInt(el.dataset.delay) || 0;
+      setTimeout(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        el.style.filter = 'blur(0px)';
+      }, delay);
+      observer.unobserve(el);
     }
   });
-}, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
-document.querySelectorAll('.feature-card, .game-card, .plan-card, .stat-card, .trending-card, .tiktok-banner').forEach(el => {
+};
+const observer = new IntersectionObserver(observerCallback, {
+  threshold: 0.05,
+  rootMargin: '0px 0px -40px 0px'
+});
+const animatableSelectors = [
+  '.feature-card', '.game-card', '.plan-card', '.stat-card',
+  '.trending-card', '.tiktok-banner', '.tiktok-grid', '.testi-card',
+  '.animate-on-scroll', '.section-header'
+];
+document.querySelectorAll(animatableSelectors.join(', ')).forEach(el => {
   const rect = el.getBoundingClientRect();
   const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
   if (isInViewport) {
     el.style.opacity = '1';
     el.style.transform = 'translateY(0)';
+    el.style.filter = 'blur(0px)';
   } else {
     el.style.opacity = '0';
-    el.style.transform = 'translateY(30px)';
-    el.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+    el.style.transform = 'translateY(32px)';
+    el.style.filter = 'blur(4px)';
+    el.style.transition = 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
     observer.observe(el);
   }
 });

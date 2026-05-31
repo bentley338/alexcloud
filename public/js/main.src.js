@@ -72,31 +72,50 @@ document.querySelectorAll('.alert').forEach(alert => {
 });
 
 // ============================================
-// ANIMATE ON SCROLL
+// ANIMATE ON SCROLL (Enhanced with stagger delay)
 // ============================================
-const observer = new IntersectionObserver((entries) => {
+const observerCallback = (entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      entry.target.style.opacity = '1';
-      entry.target.style.transform = 'translateY(0)';
-      observer.unobserve(entry.target); // Hentikan observasi setelah animasi selesai untuk hemat CPU
+      const el = entry.target;
+      const delay = parseInt(el.dataset.delay) || 0;
+      setTimeout(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        el.style.filter = 'blur(0px)';
+      }, delay);
+      observer.unobserve(el);
     }
   });
-}, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+};
 
-document.querySelectorAll('.feature-card, .game-card, .plan-card, .stat-card, .trending-card, .tiktok-banner').forEach(el => {
+const observer = new IntersectionObserver(observerCallback, {
+  threshold: 0.05,
+  rootMargin: '0px 0px -40px 0px'
+});
+
+// Select all elements to animate
+const animatableSelectors = [
+  '.feature-card', '.game-card', '.plan-card', '.stat-card',
+  '.trending-card', '.tiktok-banner', '.tiktok-grid', '.testi-card',
+  '.animate-on-scroll', '.section-header'
+];
+
+document.querySelectorAll(animatableSelectors.join(', ')).forEach(el => {
   const rect = el.getBoundingClientRect();
   const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
-  
+
   if (isInViewport) {
-    // Jika sudah di viewport saat load, tampilkan langsung tanpa animasi/flash
+    // Already visible on load — show immediately, no flash
     el.style.opacity = '1';
     el.style.transform = 'translateY(0)';
+    el.style.filter = 'blur(0px)';
   } else {
-    // Sembunyikan & observasi hanya elemen yang di luar viewport
+    // Off-screen — animate in on scroll
     el.style.opacity = '0';
-    el.style.transform = 'translateY(30px)';
-    el.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+    el.style.transform = 'translateY(32px)';
+    el.style.filter = 'blur(4px)';
+    el.style.transition = 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
     observer.observe(el);
   }
 });

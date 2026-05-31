@@ -103,38 +103,38 @@
 <!-- FEATURES -->
 <section class="features-section">
   <div class="features-container">
-    <div class="section-header">
+    <div class="section-header animate-on-scroll">
       <div class="section-tag">Kenapa AlexCloud?</div>
       <h2 class="section-title">Gaming <span class="accent">Tanpa Batas</span></h2>
       <p class="section-desc">Nikmati game AAA terbaru dengan kualitas terbaik tanpa perlu investasi hardware mahal.</p>
     </div>
     <div class="features-grid">
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll" data-delay="0">
         <div class="feature-icon blue"><i class="fas fa-bolt" style="color:var(--accent-blue)"></i></div>
         <div class="feature-title">Latency Ultra Rendah</div>
         <p class="feature-desc">Server dioptimalkan untuk Indonesia dengan ping di bawah 30ms untuk pengalaman gaming yang mulus.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll" data-delay="80">
         <div class="feature-icon purple"><i class="fas fa-gamepad" style="color:#a855f7"></i></div>
         <div class="feature-title">100+ Game Premium</div>
         <p class="feature-desc">Akses game AAA terbaru seperti EA FC 26, MotoGP 25, Hogwarts Legacy, dan masih banyak lagi.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll" data-delay="160">
         <div class="feature-icon green"><i class="fas fa-tv" style="color:var(--accent-green)"></i></div>
         <div class="feature-title">Streaming 4K / 60fps</div>
         <p class="feature-desc">Kualitas visual maksimal dengan resolusi hingga 4K dan framerate stabil 60fps bahkan di HP.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll" data-delay="0">
         <div class="feature-icon orange"><i class="fas fa-robot" style="color:var(--accent-orange)"></i></div>
         <div class="feature-title">AI Assistant 24/7</div>
         <p class="feature-desc">AlexBot AI siap menjawab pertanyaanmu, merekomendasikan game, dan membantu masalah kapanpun.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll" data-delay="80">
         <div class="feature-icon blue"><i class="fas fa-save" style="color:var(--accent-blue)"></i></div>
         <div class="feature-title">Cloud Save</div>
         <p class="feature-desc">Progress game tersimpan di cloud. Main di HP, lanjut di TV, atau sebaliknya tanpa kehilangan data.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll" data-delay="160">
         <div class="feature-icon purple"><i class="fas fa-tags" style="color:#a855f7"></i></div>
         <div class="feature-title">Harga Terjangkau</div>
         <p class="feature-desc">Mulai dari Rp 40.000/minggu saja! Jauh lebih hemat dibanding beli PC gaming jutaan rupiah.</p>
@@ -146,7 +146,7 @@
 <!-- POPULAR GAMES with View Mode Toggle -->
 <section class="games-section" id="games-section">
   <div class="games-container">
-    <div class="section-header">
+    <div class="section-header animate-on-scroll">
       <div class="section-tag">Game Terpopuler</div>
       <h2 class="section-title">Pilihan <span class="accent">Game Terbaik</span></h2>
       <p class="section-desc">Dari sepak bola, balap, hingga RPG epik — semua ada di AlexCloud!</p>
@@ -192,21 +192,61 @@
     </div>
 </section>
 
-<!-- TIKTOK GAMEPLAY BANNER -->
+<!-- TIKTOK GAMEPLAY SECTION -->
 <section class="tiktok-section">
-  <div class="container">
-    <div class="tiktok-banner animate-on-scroll">
+  <div class="tiktok-grid animate-on-scroll">
+    <!-- Left: Info -->
+    <div class="tiktok-info">
       <div class="tiktok-badge">
         <i class="fab fa-tiktok"></i>
         <span>Gameplay Showcase</span>
       </div>
       <h2 class="tiktok-title">Tonton Gameplay <span class="accent">AlexCloud!</span></h2>
       <p class="tiktok-desc">Lihat keseruan bermain game AAA premium dengan setelan grafik maksimal langsung di handphone dan laptop biasa.</p>
-      <div style="display: flex; justify-content: center; gap: 1rem;">
-        <a href="https://www.tiktok.com/@bentleysaja_" target="_blank" rel="noopener noreferrer" class="btn-tiktok">
-          <i class="fab fa-tiktok"></i> @bentleysaja_ di TikTok
-        </a>
-      </div>
+      <p class="tiktok-subdesc">Game seperti GTA VI, Elden Ring, MotoGP 25 — semua dimainkan langsung via cloud tanpa PC mahal. Liat sendiri buktinya!</p>
+    </div>
+    <!-- Right: TikTok Card -->
+    <div class="tiktok-card-wrap">
+      <a href="https://www.tiktok.com/@bentleysaja_" target="_blank" rel="noopener noreferrer" class="tiktok-card">
+        <!-- Card Header: Profile -->
+        <div class="tiktok-card-header">
+          <div class="tiktok-profile">
+            <div class="tiktok-avatar">
+              <i class="fab fa-tiktok"></i>
+            </div>
+            <div class="tiktok-profile-info">
+              <span class="tiktok-profile-name">@bentleysaja_</span>
+              <span class="tiktok-profile-sub">Gameplay AlexCloud ☁️🎮</span>
+            </div>
+          </div>
+          <i class="fab fa-tiktok tiktok-verified"></i>
+        </div>
+        <!-- Video Thumbnail -->
+        <div class="tiktok-video-container">
+          <div class="tiktok-cover-img" style="background: linear-gradient(135deg, #1a0a2e 0%, #0d1428 50%, #0a1a0d 100%); display: flex; align-items: center; justify-content: center; width:100%; height:100%;">
+            <div style="text-align:center; opacity:0.6;">
+              <div style="font-size:3rem; margin-bottom:0.5rem;">🎮</div>
+              <div style="font-family: var(--font-ui); font-size:0.85rem; color: var(--text-muted);">Cloud Gaming Gameplay</div>
+            </div>
+          </div>
+          <div class="tiktok-play-overlay">
+            <div class="tiktok-play-btn">
+              <i class="fas fa-play"></i>
+            </div>
+          </div>
+          <span class="tiktok-video-tag">☁️ AlexCloud Gaming</span>
+        </div>
+        <!-- Card Footer: Stats -->
+        <div class="tiktok-card-footer">
+          <div class="tiktok-stats">
+            <span><i class="fas fa-heart"></i> Lihat Video</span>
+            <span><i class="fas fa-share"></i> Share</span>
+          </div>
+          <span class="tiktok-action-text">
+            <i class="fab fa-tiktok"></i> Tonton Sekarang <i class="fas fa-arrow-right"></i>
+          </span>
+        </div>
+      </a>
     </div>
   </div>
 </section>
@@ -214,7 +254,7 @@
 <!-- PRICING -->
 <section class="pricing-section" id="pricing">
   <div class="pricing-container">
-    <div class="section-header">
+    <div class="section-header animate-on-scroll">
       <div class="section-tag">Harga</div>
       <h2 class="section-title">Pilih <span class="accent">Paket Terbaik</span></h2>
       <p class="section-desc">Harga bersahabat untuk semua kalangan gamer. Semakin lama, semakin hemat!</p>
