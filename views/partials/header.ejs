@@ -27,13 +27,38 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- CSS kritis inlined untuk mempercepat First Contentful Paint & cegah FOUC -->
+  <!-- CRITICAL CSS INLINE (above-the-fold) - eliminates render blocking & FOUC -->
   <style>
-    body { background-color: #030712 !important; color: #e8f0ff; }
-    .navbar { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(20px); min-height: 70px; }
+    :root{--bg-primary:#030712;--bg-secondary:#0a0f1e;--bg-card:#0d1428;--bg-card-hover:#111b38;--accent-blue:#00d4ff;--accent-purple:#7b2fff;--accent-green:#00ff88;--accent-orange:#ff6b35;--text-primary:#e8f0ff;--text-secondary:#8899bb;--text-muted:#4d5d7a;--border:rgba(0,212,255,0.1);--border-hover:rgba(0,212,255,0.3);--glow-blue:0 0 20px rgba(0,212,255,0.3);--gradient-main:linear-gradient(135deg,#00d4ff 0%,#7b2fff 100%);--font-display:'Orbitron',sans-serif;--font-body:'Space Grotesk',sans-serif;--font-ui:'Rajdhani',sans-serif;--radius:12px;--radius-lg:20px;--transition:0.3s cubic-bezier(0.4,0,0.2,1)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-body),system-ui,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.75rem 0;background:rgba(3,7,18,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .nav-container{max-width:1280px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:2rem}
+    .nav-logo{text-decoration:none;display:flex;align-items:center;gap:0.6rem;flex-shrink:0}
+    .logo-text{font-family:var(--font-display),sans-serif;font-size:1.3rem;font-weight:700;color:var(--text-primary);letter-spacing:2px}
+    .logo-accent{color:var(--accent-blue)}
+    .nav-links{display:flex;align-items:center;gap:0.5rem;margin-left:auto;flex-wrap:wrap}
+    .nav-link{color:var(--text-secondary);text-decoration:none;font-size:1rem;font-weight:500;padding:0.5rem 0.9rem;border-radius:8px}
+    .btn-nav-cta{background:var(--gradient-main);color:#000!important;text-decoration:none;font-weight:700;padding:0.5rem 1.4rem;border-radius:8px}
+    .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;margin-left:auto}
+    .nav-toggle span{display:block;width:24px;height:2px;background:var(--text-primary);border-radius:2px}
+    .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px;overflow:hidden}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 70% 50%,rgba(0,212,255,0.07) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 20% 60%,rgba(123,47,255,0.06) 0%,transparent 60%)}
+    .hero-container{max-width:1280px;margin:0 auto;padding:4rem 2rem;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+    .hero-title{font-family:var(--font-display),sans-serif;font-size:clamp(2.5rem,5vw,4.5rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:1.5rem;color:var(--text-primary)}
+    .hero-title .accent{background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-subtitle{font-size:1.15rem;color:var(--text-secondary);max-width:500px;margin-bottom:2.5rem;line-height:1.7}
+    .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-primary{display:inline-flex;align-items:center;gap:0.5rem;background:var(--gradient-main);color:#000;text-decoration:none;font-weight:700;padding:0.85rem 2rem;border-radius:var(--radius);border:none;cursor:pointer}
+    .btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;background:transparent;color:var(--text-primary);text-decoration:none;font-weight:600;padding:0.85rem 2rem;border-radius:var(--radius);border:1px solid var(--border-hover);cursor:pointer}
+    .skip-link{position:absolute;top:-100%;left:0;background:var(--accent-blue);color:#000;padding:0.5rem 1rem;z-index:9999;font-weight:700}
+    .skip-link:focus{top:0}
+    section{position:relative;z-index:1}
+    @media(max-width:768px){.nav-links{display:none}.nav-toggle{display:flex}.hero-container{grid-template-columns:1fr}.hero-visual{display:none}}
   </style>
 
-  <!-- Main stylesheet loaded asinkron (non-blocking) -->
+  <!-- Full CSS loaded asinkron setelah critical CSS di atas menampilkan halaman -->
   <link rel="stylesheet" href="/css/main.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="/css/main.css"></noscript>
 
