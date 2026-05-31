@@ -100,10 +100,10 @@ function showToast(msg, type = 'success') {
   toast.innerHTML = msg;
   toast.style.cssText = `
     position: fixed; bottom: 5rem; right: 2rem; z-index: 99999;
-    background: ${type === 'success' ? 'linear-gradient(135deg, #00d4ff, #00ff88)' : '#ff4444'};
-    color: #000; font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    background: ${type === 'success' ? 'linear-gradient(135deg, #e8732a, #ff9554)' : '#ff4444'};
+    color: #fff; font-family: var(--font-ui), sans-serif; font-weight: 700;
     padding: 0.85rem 1.5rem; border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     font-size: 0.95rem;
     max-width: 320px;
   `;
@@ -575,4 +575,16 @@ function resetTestiAutoPlay() {
 }
 if (document.querySelectorAll('.testi-card').length > 1) {
   startTestiAutoPlay();
-}
+}
+window.addEventListener('scroll', () => {
+  const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+  const progress = document.getElementById('scrollProgress');
+  if (progress) progress.style.width = scrollPercent + '%';
+});
+document.querySelectorAll('.feature-card, .game-card, .plan-card, .trending-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+  });
+});
