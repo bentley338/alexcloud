@@ -84,7 +84,7 @@
       <% trendingGames.forEach((game, idx) => { %>
       <div class="trending-card">
         <div class="trending-rank">#<%= idx + 1 %></div>
-        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img" width="200" height="110" loading="lazy">
+        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
         <div class="trending-info">
           <div class="trending-name"><%= game.name %></div>
           <div class="trending-genre"><%= game.genre %></div>
@@ -172,7 +172,7 @@
       <% games.slice(0, 8).forEach(game => { %>
       <div class="game-card">
         <div class="game-img-wrap">
-          <img src="<%= game.image %>" alt="<%= game.name %>" width="480" height="270" loading="lazy">
+          <img src="<%= game.image %>" alt="<%= game.name %>" width="480" height="270" loading="lazy" decoding="async">
           <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
         </div>
         <div class="game-body">
@@ -248,7 +248,7 @@
         <% testimonials.forEach((t, idx) => { %>
         <div class="testi-card <%= idx === 0 ? 'active' : '' %>" data-idx="<%= idx %>">
           <% if (t.image) { %>
-            <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-img" width="400" height="250" loading="lazy">
+            <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-img" width="400" height="250" loading="lazy" decoding="async">
           <% } %>
           <div class="testi-content">
             <div class="testi-stars">
@@ -256,7 +256,7 @@
             </div>
             <p class="testi-text">"<%= t.text %>"</p>
             <div class="testi-author">
-              <img src="<%= t.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(t.name) %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy">
+              <img src="<%= t.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(t.name) %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy" decoding="async">
               <div>
                 <div class="testi-name"><%= t.name %></div>
                 <div class="testi-role"><%= t.role %></div>
