@@ -1,0 +1,53 @@
+<% currentPage = 'orders'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-magic"></i> Simulasi Order</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<div class="card" style="margin-bottom:2rem; max-width:600px;">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-shopping-cart"></i> Buat Simulasi Pembelian</div>
+  </div>
+  <div style="padding:1.5rem;">
+    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem; line-height:1.5;">
+      Fitur ini memungkinkan admin untuk membuat order yang langsung otomatis <strong>Confirmed</strong> untuk user tertentu. Fitur ini berfungsi layaknya user membeli paket, namun tanpa melalui payment gateway dan 100% aman.
+    </p>
+
+    <form action="/admin/simulate-order" method="POST">
+      <div class="form-group">
+        <label class="form-label">Pilih User *</label>
+        <select name="userId" class="form-input" required>
+          <option value="" disabled selected>-- Pilih User --</option>
+          <% users.forEach(u => { %>
+            <option value="<%= u.id %>"><%= u.name %> (<%= u.email %>)</option>
+          <% }) %>
+        </select>
+        <small style="color:var(--text-muted); font-size:0.78rem;">Admin tidak bisa disimulasikan, hanya user biasa.</small>
+      </div>
+
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Pilih Paket (Plan) *</label>
+        <select name="planId" class="form-input" required>
+          <option value="" disabled selected>-- Pilih Paket --</option>
+          <% plans.forEach(p => { %>
+            <option value="<%= p.id %>"><%= p.name %> - Rp <%= p.price.toLocaleString('id-ID') %> (<%= p.duration %> Hari)</option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div style="margin-top:2rem;">
+        <button type="submit" class="btn-primary" onclick="return confirm('Apakah Anda yakin ingin melakukan simulasi beli untuk user ini? Order akan langsung berstatus Confirmed dan subscription akan aktif.')">
+          <i class="fas fa-bolt"></i> Eksekusi Simulasi
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('layout-footer') %>

@@ -837,7 +837,8 @@ async function checkStatus() {
     const r = await fetch(`/api/payment/status/${ORDER_ID}`);
     const data = await r.json();
 
-    if (data.fr3Status === 'SUCCESS' || data.status === 'confirmed') {
+    const st = (data.fr3Status || '').toUpperCase();
+    if (st === 'SUCCESS' || st === 'PAID' || st === 'SETTLED' || data.status === 'confirmed') {
       clearInterval(pollInterval);
       clearInterval(timerInterval);
       showSuccess();

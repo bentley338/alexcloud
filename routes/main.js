@@ -333,10 +333,10 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
       r.on('timeout', () => { r.destroy(); reject(new Error('timeout')); });
     });
 
-    const fr3St = fr3Status?.data?.status || 'PENDING';
+    const fr3St = (fr3Status?.data?.status || 'PENDING').toUpperCase();
 
-    // Auto-confirm jika SUCCESS
-    if (fr3St === 'SUCCESS' && order.status === 'pending') {
+    // Auto-confirm jika SUCCESS atau PAID
+    if ((fr3St === 'SUCCESS' || fr3St === 'PAID' || fr3St === 'SETTLED') && order.status === 'pending') {
       db.get('orders').find({ id: order.id }).assign({
         status: 'confirmed',
         paidAt: new Date().toISOString()

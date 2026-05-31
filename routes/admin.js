@@ -66,7 +66,78 @@ router.get('/', ensureAdmin, (req, res) => {
 });
 
 // =====================
-// ORDERS
+// SIMULATE ORDER
+// =====================
+router.get('/simulate-order', ensureAdmin, (req, res) => {
+  const users = db.get('users').value().filter(u => u.role !== 'admin');
+  const plans = getPlans();
+  res.render('admin/simulate-order', {
+    title: 'Simulasi Order - AlexCloud',
+    user: req.user,
+    users,
+    plans
+  });
+});
+
+router.post('/simulate-order', ensureAdmin, (req, res) => {
+  const { userId, planId } = req.body;
+  const targetUser = db.get('users').find({ id: userId }).value();
+  if (!targetUser) { req.flash('error', 'User tidak ditemukan.'); return res.redirect('/admin/simulate-order'); }
+  
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === planId);
+  if (!plan) { req.flash('error', 'Paket tidak valid.'); return res.redirect('/admin/simulate-order'); }
+
+  const orderId = 'AC-SIM-' + Date.now().toString().slice(-8).toUpperCase();
+  const actualPrice = plan.price;
+  const now = new Date();
+
+  // Save order directly as confirmed
+  const order = {
+    id: uuidv4(),
+    orderId,
+    userId: targetUser.id,
+    userName: targetUser.name,
+    userEmail: targetUser.email,
+    planId: plan.id,
+    planName: plan.name,
+    price: actualPrice,
+    originalPrice: plan.price,
+    discount: 0,
+    promoCode: null,
+    status: 'confirmed',
+    createdAt: now.toISOString(),
+    paidAt: now.toISOString(),
+    activatedAt: now.toISOString(),
+    paymentMethod: 'manual_simulasi'
+  };
+
+  db.get('orders').push(order).write();
+
+  // Create or Update Subscription
+  const expiresAt = new Date(now);
+  expiresAt.setDate(expiresAt.getDate() + (plan.duration || 30));
+
+  const existingSub = db.get('subscriptions').find({ userId: targetUser.id, status: 'active' }).value();
+  if (existingSub) {
+    db.get('subscriptions').find({ id: existingSub.id }).assign({
+      status: 'expired', expiredAt: now.toISOString()
+    }).write();
+  }
+  db.get('subscriptions').push({
+    id: uuidv4(), userId: targetUser.id, orderId: order.id,
+    planId: plan.id, planName: plan.name,
+    status: 'active', startedAt: now.toISOString(), expiresAt: expiresAt.toISOString()
+  }).write();
+
+  db.get('users').find({ id: targetUser.id }).assign({ isActive: true }).write();
+
+  req.flash('success', `Simulasi Order #${orderId} berhasil untuk user ${targetUser.name}.`);
+  res.redirect('/admin/orders');
+});
+
+// =====================
+// ORDER MANAGEMENT
 // =====================
 router.get('/orders', ensureAdmin, (req, res) => {
   const ordersRaw = db.get('orders').sortBy('createdAt').reverse().value();
