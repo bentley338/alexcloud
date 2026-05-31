@@ -112,6 +112,16 @@
         <div class="wallet-item">LinkAja</div>
       </div>
 
+      <!-- Manual confirmation helper if stuck -->
+      <div class="pay-stuck-helper" style="margin: 1.5rem 0; text-align: center; border-top: 1px dashed var(--border); padding-top: 1.5rem;">
+        <div style="font-family: var(--font-ui); font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Sudah transfer tapi status belum terkonfirmasi otomatis?
+        </div>
+        <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud! 👋\n\nSaya sudah sukses membayar via QRIS otomatis namun statusnya masih stuck.\n\n📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: Rp ' + order.fr3TotalTransfer.toLocaleString('id-ID') + '\n\nMohon bantuannya untuk mengaktifkan akun saya. Terima kasih!') %>" target="_blank" class="wa-confirm-btn" style="margin: 0 auto; max-width: 320px; display: flex;">
+          <i class="fab fa-whatsapp"></i> Konfirmasi Manual via WA
+        </a>
+      </div>
+
       <!-- Cancel -->
       <button class="cancel-btn" id="cancelBtn" onclick="cancelPayment()">
         <i class="fas fa-times"></i> Batalkan Pembayaran
