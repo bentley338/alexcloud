@@ -635,6 +635,7 @@ body::after {
   padding: 0.75rem 1rem;
   font-family: var(--font-ui);
   white-space: nowrap;
+  z-index: 10;
 }
 
 .floating-badge.badge-price {
