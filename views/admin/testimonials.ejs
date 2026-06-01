@@ -262,22 +262,62 @@ function switchTab(mode) {
   }
 }
 
+let compressedBase64 = null;
+
+function compressImage(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.src = e.target.result;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      const maxDim = 800;
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      callback(compressed);
+    };
+  };
+  reader.readAsDataURL(file);
+}
+
 function previewUploadedImage(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) {
-    alert('File terlalu besar! Maksimal 5MB.');
-    input.value = '';
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('dropZoneContent').style.display = 'none';
-    document.getElementById('uploadPreviewWrap').style.display = 'block';
-    document.getElementById('uploadPreviewImg').src = e.target.result;
-    document.getElementById('uploadFileName').textContent = '✅ ' + file.name + ' (' + (file.size / 1024).toFixed(0) + 'KB)';
-  };
-  reader.readAsDataURL(file);
+  
+  document.getElementById('dropZoneContent').style.display = 'none';
+  document.getElementById('uploadPreviewWrap').style.display = 'block';
+  document.getElementById('uploadPreviewImg').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38" stroke="%23e8732a"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="2"><circle stroke-opacity=".5" cx="18" cy="18" r="18"/><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"/></path></g></g></svg>';
+  document.getElementById('uploadFileName').textContent = '⌛ Mengompresi gambar agar ringan...';
+  
+  compressImage(file, (compressedUrl) => {
+    compressedBase64 = compressedUrl;
+    document.getElementById('uploadPreviewImg').src = compressedUrl;
+    
+    const originalKB = (file.size / 1024).toFixed(0);
+    const base64Str = compressedUrl.split(',')[1];
+    const compressedBytes = Math.round((base64Str.length * 3) / 4);
+    const compressedKB = (compressedBytes / 1024).toFixed(0);
+    
+    document.getElementById('uploadFileName').innerHTML = `✅ ${file.name}<br><small style="color:var(--text-secondary)">Dikompresi: <strong style="text-decoration:line-through; color:#ff4444">${originalKB} KB</strong> ➔ <strong style="color:var(--accent-green)">${compressedKB} KB</strong> (Sangat Ringan!)</small>`;
+  });
 }
 
 function clearUpload(event, silent = false) {
@@ -286,6 +326,7 @@ function clearUpload(event, silent = false) {
   document.getElementById('dropZoneContent').style.display = 'flex';
   document.getElementById('uploadPreviewWrap').style.display = 'none';
   document.getElementById('uploadPreviewImg').src = '';
+  compressedBase64 = null;
 }
 
 function previewUrlImage(url) {
@@ -297,6 +338,17 @@ function previewUrlImage(url) {
   } else {
     wrap.style.display = 'none';
   }
+}
+
+// Intercept form submit to send compressed image
+const testiForm = document.getElementById('testiForm');
+if (testiForm) {
+  testiForm.addEventListener('submit', (e) => {
+    if (compressedBase64) {
+      document.getElementById('imageUrlInput').value = compressedBase64;
+      document.getElementById('imageFileInput').value = ''; // clear file input so server uses imageUrl!
+    }
+  });
 }
 
 function openImageModal(src) {
