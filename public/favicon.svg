@@ -1,15 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7b2fff;stop-opacity:1" />
+    <!-- Premium Gaming Sunset Gradient -->
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8732a" />
+      <stop offset="100%" stop-color="#c0392b" />
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
+    
+    <!-- Intense Esports Neon Glow -->
+    <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
-  <rect width="512" height="512" rx="120" fill="#030712"/>
-  <path d="M400,240 c0,-61.8 -50.2,-112 -112,-112 c-45.3,0 -84.3,27.1 -102.7,66.4 c-8.5,-3.5 -18,-5.4 -28.3,-5.4 c-38.6,0 -70,31.4 -70,70 c0,10.6 2.4,20.6 6.7,29.6 c-25.5,12.7 -42.7,39.3 -42.7,69.4 c0,44.2 35.8,80 80,80 l256,0 c39.8,0 72,-32.2 72,-72 c0,-32.2 -21.1,-59.5 -50,-68.9 C400,277.9 400,259.2 400,240 z" fill="url(#cloudGrad)" filter="url(#glow)"/>
-  <text x="256" y="320" font-family="Arial, sans-serif" font-weight="bold" font-size="140" fill="#ffffff" text-anchor="middle" dominant-baseline="central">A</text>
+  
+  <!-- Rounded Premium Dark Background Shield -->
+  <rect width="512" height="512" rx="128" fill="#0c0c0e" stroke="rgba(232, 115, 42, 0.15)" stroke-width="12"/>
+  
+  <!-- Outer Glow Cloud outline -->
+  <path d="M 372 230 C 362 165 306 115 238 115 C 183 115 135 146 112 192 C 55 198 12 247 12 305 C 12 368 63 419 126 419 L 372 419 C 424 419 467 376 467 324 C 467 274 426 233 376 230" fill="url(#logoGrad)" opacity="0.08" />
+  <path d="M 372 230 C 362 165 306 115 238 115 C 183 115 135 146 112 192 C 55 198 12 247 12 305 C 12 368 63 419 126 419 L 372 419 C 424 419 467 376 467 324 C 467 274 426 233 376 230" stroke="url(#logoGrad)" stroke-width="12" stroke-linejoin="round" opacity="0.3" fill="none" />
+  
+  <!-- Sharp Geometric Lightning Bolt representing cloud server speed -->
+  <path d="M 276 70 L 156 260 L 236 260 L 206 430 L 326 240 L 246 240 L 276 70 Z" fill="url(#logoGrad)" filter="url(#logoGlow)" />
 </svg>
