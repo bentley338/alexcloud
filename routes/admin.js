@@ -257,15 +257,49 @@ router.get('/games/:id/edit', ensureAdmin, (req, res) => {
 });
 
 // Add game
+function optimizeImageUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  const trimmed = url.trim();
+  if (!trimmed.startsWith('http')) return trimmed; // Base64 or local path, leave it
+
+  // If already optimized by Cloudinary or weserv, don't wrap it again
+  if (trimmed.includes('res.cloudinary.com') || trimmed.includes('wsrv.nl')) {
+    return trimmed;
+  }
+
+  // Check if Cloudinary is configured
+  let cloudName = null;
+  if (process.env.CLOUDINARY_URL) {
+    const match = process.env.CLOUDINARY_URL.trim().match(/@([^@/]+)$/);
+    if (match) cloudName = match[1];
+  }
+
+  if (cloudName) {
+    // Cloudinary Fetch API with auto quality, format, and max width 800px
+    return `https://res.cloudinary.com/${cloudName}/image/fetch/q_auto,f_auto,w_800,c_limit/${trimmed}`;
+  } else {
+    // Highly reliable, free, open-source image CDN (wsrv.nl) with WebP output, 75% quality, 800px width
+    return `https://wsrv.nl/?url=${encodeURIComponent(trimmed)}&w=800&output=webp&q=75`;
+  }
+}
+
 router.post('/games', ensureAdmin, (req, res) => {
   const { name, genre, description, image, rating, tag, popular, developer, releaseYear, platform, detailDesc, minRequirements } = req.body;
   if (!name || !genre) { req.flash('error', 'Nama dan genre wajib diisi.'); return res.redirect('/admin/games'); }
+
+  let finalImage = image ? image.trim() : '';
+  if (finalImage) {
+    finalImage = optimizeImageUrl(finalImage);
+  } else {
+    finalImage = `https://placehold.co/600x340/0d1428/00d4ff?text=${encodeURIComponent(name)}&font=montserrat`;
+  }
+
   db.get('games').push({
     id: uuidv4(),
     name, genre,
     description: description || '',
     detailDesc: detailDesc || '',
-    image: image || `https://placehold.co/600x340/0d1428/00d4ff?text=${encodeURIComponent(name)}&font=montserrat`,
+    image: finalImage,
     screenshots: [],
     rating: parseFloat(rating) || 4.5,
     popular: popular === 'on',
@@ -295,7 +329,14 @@ router.post('/games/:id/edit', ensureAdmin, (req, res) => {
     const urls = Array.isArray(screenshotUrls)
       ? screenshotUrls.filter(u => u.trim())
       : [screenshotUrls].filter(u => u.trim());
-    if (urls.length > 0) screenshots = urls;
+    if (urls.length > 0) screenshots = urls.map(optimizeImageUrl);
+  }
+
+  let finalImage = image ? image.trim() : '';
+  if (finalImage) {
+    finalImage = optimizeImageUrl(finalImage);
+  } else {
+    finalImage = game.image;
   }
 
   db.get('games').find({ id: req.params.id }).assign({
@@ -303,7 +344,7 @@ router.post('/games/:id/edit', ensureAdmin, (req, res) => {
     genre: genre || game.genre,
     description: description !== undefined ? description : game.description,
     detailDesc: detailDesc !== undefined ? detailDesc : (game.detailDesc || ''),
-    image: image || game.image,
+    image: finalImage,
     screenshots,
     rating: parseFloat(rating) || game.rating,
     tag: tag || game.tag,
