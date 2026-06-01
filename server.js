@@ -29,10 +29,11 @@ runMinifier();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ── Gzip/Brotli Compression (reduces transfer size ~70%) ──────────────────────
-app.use(compression({ level: 6 }));
+// ── Gzip/Brotli Compression (reduces transfer size ~70%, threshold 0 forces all text to compress) ──
+app.use(compression({ level: 6, threshold: 0 }));
 
-// View engine
+// View engine & View Cache (caching compiled templates in memory for sub-1ms rendering)
+app.enable('view cache');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
