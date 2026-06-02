@@ -495,4 +495,17 @@ router.get('/api/ping', (req, res) => {
   res.json({ pong: true, ts: Date.now() });
 });
 
+// Sitemap.xml & Robots.txt routes for robust SEO and Google Search Console indexing
+router.get('/sitemap.xml', (req, res) => {
+  const path = require('path');
+  res.header('Content-Type', 'application/xml');
+  res.sendFile(path.join(__dirname, '../public/sitemap.xml'));
+});
+
+router.get('/robots.txt', (req, res) => {
+  const path = require('path');
+  res.header('Content-Type', 'text/plain');
+  res.sendFile(path.join(__dirname, '../public/robots.txt'));
+});
+
 module.exports = { router, getPlans };
