@@ -112,18 +112,46 @@ Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! ðŸ
               <input type="checkbox" name="whatsappEnabled" value="true" <%= settings.whatsappEnabled === true || settings.whatsappEnabled === 'true' ? 'checked' : '' %>>
               Aktifkan Notifikasi WhatsApp
             </label>
-            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Kirimkan notifikasi transaksi ke WhatsApp Anda.</small>
+            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Centang ini untuk mengaktifkan notifikasi via WhatsApp.</small>
           </div>
           
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Provider WhatsApp Gateway</label>
+            <select name="whatsappProvider" id="whatsappProviderSelect" class="form-input" onchange="toggleWaProvider(this.value)" style="background:var(--bg-input); color:white; outline:none; border:1px solid var(--border); border-radius:10px; padding:0.75rem 1rem;">
+              <option value="callmebot" <%= settings.whatsappProvider === 'callmebot' || !settings.whatsappProvider ? 'selected' : '' %>>CallMeBot (WhatsApp Bot Gratisan)</option>
+              <option value="twilio" <%= settings.whatsappProvider === 'twilio' ? 'selected' : '' %>>Twilio Sandbox (Gratis, Resmi, 100% Stabil & Cepat)</option>
+            </select>
+          </div>
+
           <div class="form-group" style="margin-bottom:1.25rem;">
             <label class="form-label">Nomor WhatsApp Anda (Gunakan kode negara, contoh: 628xxxxxx)</label>
             <input type="text" name="whatsappPhone" class="form-input" placeholder="Contoh: 6282328437656" value="<%= settings.whatsappPhone || '' %>" required>
             <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan tanpa menggunakan tanda tambah (+).</small>
           </div>
           
-          <div class="form-group" style="margin-bottom:1.5rem;">
-            <label class="form-label">CallMeBot API Key</label>
-            <input type="text" name="whatsappApiKey" class="form-input" placeholder="Masukkan API Key yang Anda dapatkan dari CallMeBot" value="<%= settings.whatsappApiKey || '' %>" required>
+          <!-- FIELDS FOR CALLMEBOT -->
+          <div id="wa-fields-callmebot" class="provider-fields">
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-label">CallMeBot API Key</label>
+              <input type="text" name="whatsappApiKey" class="form-input" placeholder="Masukkan API Key CallMeBot" value="<%= settings.whatsappApiKey || '' %>">
+            </div>
+          </div>
+
+          <!-- FIELDS FOR TWILIO -->
+          <div id="wa-fields-twilio" class="provider-fields" style="display:none;">
+            <div class="form-group" style="margin-bottom:1.25rem;">
+              <label class="form-label">Twilio Account SID</label>
+              <input type="text" name="twilioAccountSid" class="form-input" placeholder="Contoh: ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" value="<%= settings.twilioAccountSid || '' %>" style="font-family:monospace;">
+            </div>
+            <div class="form-group" style="margin-bottom:1.25rem;">
+              <label class="form-label">Twilio Auth Token</label>
+              <input type="password" name="twilioAuthToken" class="form-input" placeholder="Masukkan Auth Token Twilio Anda" value="<%= settings.twilioAuthToken || '' %>" style="font-family:monospace;">
+            </div>
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-label">Twilio Sandbox Number (Nomor Pengirim)</label>
+              <input type="text" name="twilioSandboxNumber" class="form-input" placeholder="Contoh: +14155238886" value="<%= settings.twilioSandboxNumber || '+14155238886' %>">
+              <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Gunakan format internasional lengkap (+1...).</small>
+            </div>
           </div>
           
           <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
@@ -133,8 +161,8 @@ Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! ðŸ
       </div>
     </div>
 
-    <!-- Panduan WA -->
-    <div class="card">
+    <!-- Panduan WA CallMeBot -->
+    <div id="wa-guide-callmebot" class="provider-guide card">
       <div class="card-header">
         <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Mendapatkan API Key CallMeBot</div>
       </div>
@@ -147,19 +175,36 @@ Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! ðŸ
               Cek Nomor Bot Aktif di CallMeBot.com <i class="fas fa-external-link-alt"></i>
             </a>
           </li>
-          <li>Cari bagian **"1. Add the phone number..."** di halaman tersebut. Simpan nomor bot WhatsApp yang tertera di sana ke kontak HP Anda (misal beri nama "CallMeBot").</li>
-          <li>Buka WhatsApp Anda, cari kontak bot tersebut, lalu kirimkan pesan berikut:  
+          <li>Simpan nomor bot WhatsApp yang tertera di sana ke kontak HP Anda (misal beri nama "CallMeBot").</li>
+          <li>Kirim pesan berikut via WhatsApp ke bot tersebut:  
             <code style="display:block; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:6px; margin-top:0.25rem; color:#fff; font-family:monospace; border:1px solid var(--border);">I allow callmebot to send me messages</code>
           </li>
-          <li>Tunggu beberapa detik, bot tersebut akan membalas dengan memberikan **API Key** khusus untuk nomor WhatsApp Anda.</li>
-          <li>Salin API Key tersebut, lalu tempelkan (paste) pada input **CallMeBot API Key** di sebelah kiri.</li>
+          <li>Tunggu beberapa saat, bot tersebut akan mengirimkan **API Key** khusus untuk nomor WhatsApp Anda.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Panduan WA Twilio -->
+    <div id="wa-guide-twilio" class="provider-guide card" style="display:none;">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-shield-alt"></i> Cara Setup WhatsApp Twilio Sandbox (100% Instan & Stabil)</div>
+      </div>
+      <div style="padding:1.5rem; font-size:0.85rem; line-height:1.6; color:var(--text-secondary);">
+        <p style="margin-bottom:1rem;">Twilio adalah provider global yang **100% stabil, resmi, gratis untuk testing/personal, dan tidak pernah pending.**</p>
+        
+        <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
+          <li>Daftar akun gratis di **[Twilio.com](https://www.twilio.com/try-twilio)**.</li>
+          <li>Buka **Twilio Console**, lalu cari menu **Messaging -> Try it out -> Send a WhatsApp Message**.</li>
+          <li>Ikuti instruksi: Simpan nomor WhatsApp Sandbox Twilio yang tertera ke HP Anda, lalu kirimkan kode verifikasi di sana (contoh: `join [keyword]`).</li>
+          <li>Salin **Account SID** dan **Auth Token** dari dashboard Twilio, lalu tempelkan di form sebelah kiri.</li>
+          <li>Simpan, lalu coba kirim pesan tes di bawah!</li>
         </ol>
       </div>
     </div>
   </div>
 
   <!-- Uji Coba WA -->
-  <% if (settings.whatsappPhone && settings.whatsappApiKey) { %>
+  <% if (settings.whatsappPhone && (settings.whatsappApiKey || settings.twilioAuthToken)) { %>
   <div class="card" style="max-width: 600px;">
     <div class="card-header">
       <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes WhatsApp</div>
@@ -189,21 +234,33 @@ Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! ðŸ
 
 <script>
 function switchTab(tab) {
-  // Hide all contents
   document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-  // Remove active class from buttons
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.remove('active');
     btn.style.color = 'var(--text-muted)';
   });
   
-  // Show target content
   document.getElementById('section-' + tab).style.display = 'block';
-  // Add active to selected button
   const activeBtn = document.getElementById('tab-btn-' + tab);
   activeBtn.classList.add('active');
   activeBtn.style.color = 'white';
 }
+
+function toggleWaProvider(provider) {
+  // Hide all provider fields and guides
+  document.querySelectorAll('.provider-fields').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.provider-guide').forEach(el => el.style.display = 'none');
+  
+  // Show target
+  document.getElementById('wa-fields-' + provider).style.display = 'block';
+  document.getElementById('wa-guide-' + provider).style.display = 'block';
+}
+
+// Run on load
+document.addEventListener('DOMContentLoaded', function() {
+  const provider = document.getElementById('whatsappProviderSelect').value;
+  toggleWaProvider(provider);
+});
 </script>
 
 <%- include('layout-footer') %>

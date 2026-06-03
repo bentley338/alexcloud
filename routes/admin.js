@@ -198,12 +198,16 @@ router.get('/settings/whatsapp', ensureAdmin, (req, res) => {
 });
 
 router.post('/settings/whatsapp', ensureAdmin, (req, res) => {
-  const { whatsappEnabled, whatsappPhone, whatsappApiKey } = req.body;
+  const { whatsappEnabled, whatsappProvider, whatsappPhone, whatsappApiKey, twilioAccountSid, twilioAuthToken, twilioSandboxNumber } = req.body;
   
   db.get('settings').assign({
     whatsappEnabled: !!whatsappEnabled,
+    whatsappProvider: whatsappProvider || 'callmebot',
     whatsappPhone: whatsappPhone ? whatsappPhone.trim() : '',
-    whatsappApiKey: whatsappApiKey ? whatsappApiKey.trim() : ''
+    whatsappApiKey: whatsappApiKey ? whatsappApiKey.trim() : '',
+    twilioAccountSid: twilioAccountSid ? twilioAccountSid.trim() : '',
+    twilioAuthToken: twilioAuthToken ? twilioAuthToken.trim() : '',
+    twilioSandboxNumber: twilioSandboxNumber ? twilioSandboxNumber.trim() : ''
   }).write();
   
   req.flash('success', 'Setelan notifikasi WhatsApp berhasil disimpan.');
