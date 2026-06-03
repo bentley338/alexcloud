@@ -198,27 +198,34 @@
     </div>
 
     <% } else { %>
-    <!-- ======= FALLBACK: Manual Payment ======= -->
-    <div class="pay-card">
-    <% if (fr3Error) { %>
-    <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start;">
-      <div style="display:flex; align-items:center; gap:0.5rem;">
-        <i class="fas fa-exclamation-triangle"></i>
-        <strong>Tidak dapat membuat QRIS otomatis</strong>
+    <!-- ======= FALLBACK: Manual Payment (Premium Design) ======= -->
+    <div class="pay-card qris-card">
+      
+      <!-- Status bar -->
+      <div class="pay-status-bar" style="background: rgba(232,115,42,0.05); border-bottom: 1px solid rgba(232,115,42,0.1);">
+        <div class="pay-status-dot pending" style="background: #e8732a; box-shadow: 0 0 8px #e8732a;"></div>
+        <span>Pembayaran Manual (WhatsApp)</span>
       </div>
-      <span style="font-size:0.82rem;">Silakan bayar manual via WhatsApp Admin.</span>
-      <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
-        <div style="margin-top:0.5rem; background:rgba(0,0,0,0.3); padding:0.4rem 0.6rem; border-radius:6px; font-family:monospace; font-size:0.75rem; color:#ff8888; width:100%; border:1px solid rgba(255,100,100,0.2); text-align:left; word-break:break-all;">
-          Debug Admin: <%= fr3Error %>
-        </div>
-      <% } %>
-    </div>
-    <% } %>
 
       <div class="qr-section">
-        <% if (qrisImage) { %>
-        <img src="<%= qrisImage %>" alt="QRIS" class="manual-qr-img">
-        <% } %>
+        <div class="qr-brand-row">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/QRIS_logo.svg/200px-QRIS_logo.svg.png" alt="QRIS" style="height:28px;">
+          <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); border-left:1px solid var(--border); padding-left:0.75rem; margin-left:0.25rem;">Scan dengan semua e-wallet</span>
+        </div>
+
+        <div class="qr-box">
+          <% if (qrisImage) { %>
+          <img src="<%= qrisImage %>" alt="QRIS" width="220" height="220" style="border-radius:8px; display:block; object-fit: contain; margin:0 auto;">
+          <% } else { %>
+          <div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;margin:0 auto;">
+            <div style="color:#999;font-size:0.8rem;text-align:center;"><i class="fas fa-exclamation-circle"></i><br>QR tidak tersedia</div>
+          </div>
+          <% } %>
+        </div>
+
+        <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">
+          Bayar sejumlah:
+        </div>
         <div class="pay-total-amount"><%= priceDisplay %></div>
       </div>
 
@@ -233,7 +240,7 @@
         </div>
       </div>
 
-      <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud!\n\nSaya mau bayar:\n- Order: ' + order.orderId + '\n- Paket: ' + plan.name + '\n- Harga: ' + priceDisplay) %>" target="_blank" class="wa-confirm-btn">
+      <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud! 👋\n\nSaya mau bayar manual untuk pesanan:\n📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: ' + priceDisplay + '\n\nMohon dibantu prosesnya. Terima kasih!') %>" target="_blank" class="wa-confirm-btn" style="margin:1.25rem auto; max-width:320px; display:flex;">
         <i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp
       </a>
     </div>

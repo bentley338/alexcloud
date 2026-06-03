@@ -230,36 +230,50 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   const localUniqueCode = actualPrice % 100 === 0 ? (Math.floor(Math.random() * 90) + 10) : 0;
   const nominal = actualPrice + localUniqueCode;
 
-  try {
-    const https = require('https');
-    const payload = JSON.stringify({ apikey: FR3_API_KEY, nominal: nominal });
+  // Call FR3 API with retry logic (up to 2 attempts) to increase success rate
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const https = require('https');
+      const payload = JSON.stringify({ apikey: FR3_API_KEY, nominal: nominal });
 
-    fr3Data = await new Promise((resolve, reject) => {
-      const options = {
-        method: 'POST',
-        family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(payload),
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-      };
-      const req2 = https.request(`${FR3_BASE}/topup`, options, (r) => {
-        let body = '';
-        r.on('data', d => body += d);
-        r.on('end', () => {
-          try { resolve(JSON.parse(body)); }
-          catch { reject(new Error('Invalid JSON from FR3')); }
+      fr3Data = await new Promise((resolve, reject) => {
+        const options = {
+          method: 'POST',
+          family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload),
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+        };
+        const req2 = https.request(`${FR3_BASE}/topup`, options, (r) => {
+          let body = '';
+          r.on('data', d => body += d);
+          r.on('end', () => {
+            try { resolve(JSON.parse(body)); }
+            catch { reject(new Error('Invalid JSON from FR3')); }
+          });
         });
+        req2.on('error', reject);
+        req2.setTimeout(8000, () => { req2.destroy(); reject(new Error('FR3 timeout')); }); // 8s timeout per attempt
+        req2.write(payload);
+        req2.end();
       });
-      req2.on('error', reject);
-      req2.setTimeout(15000, () => { req2.destroy(); reject(new Error('FR3 timeout')); });
-      req2.write(payload);
-      req2.end();
-    });
-  } catch (e) {
-    fr3Error = e.message;
-    console.error('[FR3] Create topup error:', e.message);
+
+      // If success, clear error and break the loop
+      if (fr3Data && fr3Data.status === 200 && fr3Data.data && fr3Data.data.trxId) {
+        fr3Error = null;
+        break;
+      } else {
+        throw new Error(fr3Data?.message || `Gateway returned status ${fr3Data?.status}`);
+      }
+    } catch (e) {
+      fr3Error = e.message;
+      console.warn(`[FR3] Topup attempt ${attempt} warning:`, e.message);
+      if (attempt < 2) {
+        await new Promise(r => setTimeout(r, 1000)); // wait 1s before retry
+      }
+    }
   }
 
   // Check if API returned an error JSON instead of throwing a connection error

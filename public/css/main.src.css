@@ -3047,7 +3047,40 @@ input:focus-visible,
   .hero-stats { gap: 0.75rem; }
   .stat-item { flex: 1; min-width: 60px; }
 
-  .games-grid { grid-template-columns: 1fr; }
+  .games-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .game-card {
+    border-radius: 12px;
+  }
+  .game-body {
+    padding: 0.6rem 0.75rem;
+  }
+  .game-title {
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+  }
+  .game-genre {
+    font-size: 0.7rem;
+    margin-bottom: 0.4rem;
+  }
+  .game-desc {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    -webkit-line-clamp: 2;
+  }
+  .game-footer {
+    padding: 0.5rem 0.75rem;
+  }
+  .game-rating {
+    font-size: 0.75rem;
+    gap: 0.2rem;
+  }
+  .game-platform {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.4rem;
+  }
 
   .dashboard-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; }

@@ -194,6 +194,7 @@ const gameImageMapping = {
   'Alan Wake 2': '/images/games/alan_wake_2.jpg',
   'Hogwarts Legacy': '/images/games/hogwarts_legacy.jpg',
   'GTA VI': '/images/games/gta_vi.jpg', // Local high-res vertical GTA V/VI cover
+  'GTA V': '/images/games/gta_v.jpg', // Local high-res vertical GTA V cover
   'Red Dead Redemption 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/library_600x900_2x.jpg',
   'Cyberpunk 2077': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/library_600x900_2x.jpg',
   'Call of Duty: BO6': '/images/games/cod_bo6.png',
