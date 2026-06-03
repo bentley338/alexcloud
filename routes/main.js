@@ -260,12 +260,12 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
         req2.end();
       });
 
-      // If success, clear error and break the loop
-      if (fr3Data && fr3Data.status === 200 && fr3Data.data && fr3Data.data.trxId) {
+      // If success (we have a valid trxId), clear error and break the loop
+      if (fr3Data && fr3Data.data && fr3Data.data.trxId) {
         fr3Error = null;
         break;
       } else {
-        throw new Error(fr3Data?.message || `Gateway returned status ${fr3Data?.status}`);
+        throw new Error(fr3Data?.message || 'Gateway did not return transaction ID');
       }
     } catch (e) {
       fr3Error = e.message;
@@ -277,8 +277,8 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   }
 
   // Check if API returned an error JSON instead of throwing a connection error
-  if (!fr3Error && fr3Data && (fr3Data.status !== 200 || !fr3Data.data || !fr3Data.data.trxId)) {
-    fr3Error = fr3Data.message || `API Gateway Error (Status: ${fr3Data.status})`;
+  if (!fr3Error && fr3Data && (!fr3Data.data || !fr3Data.data.trxId)) {
+    fr3Error = fr3Data.message || 'API Gateway did not return transaction ID';
     console.warn('[FR3] Create topup API warning:', fr3Error);
   }
 
