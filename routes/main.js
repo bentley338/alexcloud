@@ -257,6 +257,12 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     console.error('[FR3] Create topup error:', e.message);
   }
 
+  // Check if API returned an error JSON instead of throwing a connection error
+  if (!fr3Error && fr3Data && (fr3Data.status !== 200 || !fr3Data.data || !fr3Data.data.trxId)) {
+    fr3Error = fr3Data.message || `API Gateway Error (Status: ${fr3Data.status})`;
+    console.warn('[FR3] Create topup API warning:', fr3Error);
+  }
+
   // Save order
   const order = {
     id: uuidv4(),
