@@ -232,10 +232,11 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     fr3Data = await new Promise((resolve, reject) => {
       const options = {
         method: 'POST',
+        family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(payload),
-          'User-Agent': 'AlexCloud/1.0 (+https://alexcloud.app)'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
       };
       const req2 = https.request(`${FR3_BASE}/topup`, options, (r) => {
@@ -319,7 +320,8 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
     const fr3Status = await new Promise((resolve, reject) => {
       const url = `${FR3_BASE}/check-status?apikey=${encodeURIComponent(FR3_API_KEY)}&idTransaksi=${encodeURIComponent(order.fr3TrxId)}`;
       const r = https.get(url, {
-        headers: { 'User-Agent': 'AlexCloud/1.0 (+https://alexcloud.app)' },
+        family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
         timeout: 10000
       }, (resp) => {
         let body = '';
@@ -416,10 +418,11 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
       const fr3Result = await new Promise((resolve) => {
         const options = {
           method: 'POST',
+          family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
           headers: { 
             'Content-Type': 'application/json', 
             'Content-Length': Buffer.byteLength(payload), 
-            'User-Agent': 'AlexCloud/1.0' 
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' 
           }
         };
         const r = https.request('https://fr3newera.com/api/v1/topup/cancel', options, (resp) => {
@@ -444,15 +447,12 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
 
       console.log('[FR3] Cancel response:', fr3Result);
 
-      // Jika FR3 mengembalikan status selain 200, gagalkan pembatalan dan infokan error-nya!
+      // Jika FR3 mengembalikan status selain 200, kita log warning saja dan biarkan local DB membatalkan pesanan.
       if (fr3Result && fr3Result.status !== 200) {
-        return res.json({ 
-          error: fr3Result.message || 'Gagal membatalkan transaksi di Payment Gateway.' 
-        });
+        console.warn('[FR3] Cancel payment returned non-200 status on gateway, proceeding with local cancellation:', fr3Result);
       }
     } catch (e) {
-      console.error('[FR3] Cancel error:', e.message);
-      return res.json({ error: `Gagal menghubungi server payment: ${e.message}` });
+      console.error('[FR3] Cancel error (proceeding with local cancellation):', e.message);
     }
   }
 
