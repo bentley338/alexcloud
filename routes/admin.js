@@ -184,6 +184,51 @@ router.post('/orders/:id/reject', ensureAdmin, (req, res) => {
 });
 
 // =====================
+// WHATSAPP NOTIFICATION SETTINGS
+// =====================
+router.get('/settings/whatsapp', ensureAdmin, (req, res) => {
+  const settings = db.get('settings').value() || {};
+  res.render('admin/settings-whatsapp', {
+    title: 'Setelan WhatsApp - AlexCloud Admin',
+    user: req.user,
+    settings,
+    success: req.flash('success'),
+    error: req.flash('error')
+  });
+});
+
+router.post('/settings/whatsapp', ensureAdmin, (req, res) => {
+  const { whatsappEnabled, whatsappPhone, whatsappApiKey } = req.body;
+  
+  db.get('settings').assign({
+    whatsappEnabled: !!whatsappEnabled,
+    whatsappPhone: whatsappPhone ? whatsappPhone.trim() : '',
+    whatsappApiKey: whatsappApiKey ? whatsappApiKey.trim() : ''
+  }).write();
+  
+  req.flash('success', 'Setelan notifikasi WhatsApp berhasil disimpan.');
+  res.redirect('/admin/settings/whatsapp');
+});
+
+router.post('/settings/test-whatsapp', ensureAdmin, async (req, res) => {
+  const { testMessage } = req.body;
+  const { sendWhatsAppNotification } = require('../utils/whatsapp');
+  
+  try {
+    const result = await sendWhatsAppNotification(testMessage);
+    if (result.success) {
+      req.flash('success', 'Pesan tes WhatsApp berhasil terkirim ke nomor Anda!');
+    } else {
+      req.flash('error', `Gagal mengirim pesan tes: ${result.reason || result.body || 'Unknown error'}`);
+    }
+  } catch (err) {
+    req.flash('error', `Terjadi kesalahan saat memanggil API: ${err.message}`);
+  }
+  
+  res.redirect('/admin/settings/whatsapp');
+});
+
+// =====================
 // USERS
 // =====================
 router.get('/users', ensureAdmin, (req, res) => {

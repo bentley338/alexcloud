@@ -360,6 +360,14 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
         }).write();
         db.get('orders').find({ id: order.id }).assign({ activatedAt: new Date().toISOString() }).write();
       }
+
+      // Trigger WhatsApp Notification for Admin
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      const formattedPrice = 'Rp ' + order.price.toLocaleString('id-ID');
+      const waMsg = `🎉 *PEMBAYARAN QRIS SUKSES*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
+      sendWhatsAppNotification(waMsg).catch(err => {
+        console.error('[WA NOTIF] Notification send error:', err.message);
+      });
     }
 
     if (fr3St === 'EXPIRED' && order.status === 'pending') {

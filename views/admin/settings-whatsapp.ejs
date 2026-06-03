@@ -1,0 +1,99 @@
+<% currentPage = 'settings-whatsapp'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fab fa-whatsapp"></i> Setelan Notifikasi WhatsApp</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:1.5rem; align-items: start; margin-bottom: 2rem;">
+  
+  <!-- Form Konfigurasi -->
+  <div class="card" style="border-color: rgba(232, 115, 42, 0.25); overflow:hidden;">
+    <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(232,115,42,0.02);">
+      <div class="card-title"><i class="fas fa-cog"></i> Konfigurasi WhatsApp API</div>
+    </div>
+    <div style="padding:1.5rem;">
+      <form action="/admin/settings/whatsapp" method="POST">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:700;">
+            <input type="checkbox" name="whatsappEnabled" value="true" <%= settings.whatsappEnabled === true || settings.whatsappEnabled === 'true' ? 'checked' : '' %>>
+            Aktifkan Notifikasi WhatsApp Otomatis
+          </label>
+          <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Centang ini untuk mengirim notifikasi ke WhatsApp Anda setiap kali ada transaksi sukses.</small>
+        </div>
+        
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-label">Nomor WhatsApp Anda (Gunakan kode negara, contoh: 628xxxxxx)</label>
+          <input type="text" name="whatsappPhone" class="form-input" placeholder="Contoh: 6282328437656" value="<%= settings.whatsappPhone || '' %>" required>
+          <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan tanpa menggunakan tanda tambah (+).</small>
+        </div>
+        
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-label">CallMeBot API Key</label>
+          <input type="text" name="whatsappApiKey" class="form-input" placeholder="Masukkan API Key yang Anda dapatkan dari CallMeBot" value="<%= settings.whatsappApiKey || '' %>" required>
+        </div>
+        
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
+          <i class="fas fa-save"></i> Simpan Konfigurasi
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Petunjuk Setup -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Mendapatkan API Key CallMeBot (Gratis)</div>
+    </div>
+    <div style="padding:1.5rem; font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
+      <p style="margin-bottom:1rem;">Untuk mengirim pesan WhatsApp pribadi secara gratis, kita menggunakan API dari **CallMeBot**. Anda perlu mendaftarkan nomor Anda terlebih dahulu:</p>
+      
+      <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
+        <li>Simpan nomor bot CallMeBot di kontak Anda atau klik tautan ini:  
+          <a href="https://wa.me/34621073617?text=I%20allow%20callmebot%20to%20send%20me%20messages" target="_blank" style="color:var(--accent-blue); font-weight:700; text-decoration:underline;">
+            Hubungi Bot CallMeBot di WA <i class="fab fa-whatsapp"></i>
+          </a>
+        </li>
+        <li>Kirim pesan WhatsApp berikut ke bot tersebut:  
+          <code style="display:block; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:6px; margin-top:0.25rem; color:#fff; font-family:monospace; border:1px solid var(--border);">I allow callmebot to send me messages</code>
+        </li>
+        <li>Tunggu beberapa detik, bot akan membalas dengan memberikan **API Key** khusus untuk nomor Anda.</li>
+        <li>Salin API Key tersebut, masukkan ke form di sebelah kiri, lalu klik **Simpan Konfigurasi**.</li>
+      </ol>
+      
+      <div style="background:rgba(232, 115, 42, 0.04); border:1px solid rgba(232, 115, 42, 0.15); border-radius:10px; padding:0.85rem; margin-top:1rem; font-size:0.8rem; color:var(--text-muted);">
+        <i class="fas fa-shield-alt" style="color:var(--accent-orange); margin-right:0.35rem;"></i> **Catatan Keamanan:** API CallMeBot ini gratis dan aman karena pesannya dikirim khusus ke nomor WhatsApp Anda sendiri, sehingga berfungsi sebagai notifikasi internal admin yang instan.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Card Uji Coba (Kirim Tes Pesan) -->
+<% if (settings.whatsappPhone && settings.whatsappApiKey) { %>
+<div class="card" style="max-width: 600px;">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes WhatsApp</div>
+  </div>
+  <div style="padding:1.5rem;">
+    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.25rem;">Gunakan form di bawah ini untuk mencoba mengirim pesan tes langsung ke nomor Anda untuk memastikan koneksi API sudah benar.</p>
+    
+    <form action="/admin/settings/test-whatsapp" method="POST">
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label class="form-label">Isi Pesan Tes</label>
+        <textarea name="testMessage" class="form-input" rows="3" required style="resize:vertical; font-family:var(--font-ui);">Halo Admin! ⚡ Notifikasi WhatsApp dari AlexCloud telah berhasil terhubung dan siap memantau transaksi Anda! 🎮</textarea>
+      </div>
+      <button type="submit" class="btn-secondary" style="border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.2rem;">
+        <i class="fas fa-paper-plane"></i> Kirim Pesan Tes
+      </button>
+    </form>
+  </div>
+</div>
+<% } %>
+
+<%- include('layout-footer') %>
