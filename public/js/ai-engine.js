@@ -1,245 +1,346 @@
-// WARNING: JANGAN EDIT FILE INI SECARA LANGSUNG. Edit file .src.js yang sesuai. File ini di-minify otomatis saat startup server.
-const AI_TOPICS = [
-  {
-    key: 'greet',
-    kw: ['halo','hai','hi','hello','hey','apa kabar','selamat','assalamualaikum','pagi','siang','malam','sore','hoi','haloo','helo','p','yo'],
-    direct: `Halo! 👋 Saya **AlexBot** 🤖 — AI assistant AlexCloud!\n\nSaya bisa jawab semua pertanyaan tentang:\n🎮 Game & library\n💰 Harga & paket\n☁️ Apa itu cloud gaming?\n💳 Cara bayar & daftar\n📱 Perangkat yang bisa dipakai\n⚡ Performa & tips\n📶 Test kecepatan internet\n\nTanya apa saja, saya siap bantu! 😊`
-  },
-  {
-    key: 'thanks',
-    kw: ['terima kasih','makasih','thanks','thank','tengkiu','thx','tx','mantap','keren','oke','ok','sip','bagus','good','nice','top','gas','gass','siap','iya','ya'],
-    direct: `Sama-sama! 😊 Senang bisa membantu!\n\n**Happy gaming!** 🎮⚡\nJangan ragu tanya lagi ya!`
-  },
-  {
-    key: 'identity',
-    kw: ['siapa kamu','siapa lu','nama kamu','namamu','siapa anda','lu siapa','apa nama','kamu siapa'],
-    direct: `Saya adalah **AlexBot** 🤖, asisten AI pribadi Anda di AlexCloud! Saya didesain khusus untuk menjawab segala pertanyaan seputar cloud gaming, daftar game, harga paket, dan membantu kelancaran bermain Anda. Mau cari tahu info apa hari ini?`
-  },
-  {
-    key: 'laugh',
-    kw: ['wkwk','haha','wkwkwk','hahaha','lol','xixi','hehe','awok','huhu','lucu','kocak'],
-    direct: `Haha! 😄 Senang bisa melihat Anda ceria. Apakah ada game seru atau hal seputar AlexCloud yang ingin Anda tanyakan hari ini?`
-  },
-  {
-    key: 'creator',
-    kw: ['siapa pembuat','pembuatmu','dibuat oleh','developer','siapa yg buat','bikin kamu','yang menciptakan','penciptamu'],
-    direct: `Saya diciptakan dan dikembangkan oleh tim developer hebat dari **AlexCloud Indonesia** 🇮🇩 untuk mempermudah petualangan gaming Anda di cloud!`
-  },
-  {
-    key: 'ai_status',
-    kw: ['kamu ai','apakah kamu ai','robot','bot','ai ya','apakah kamu robot','mesin','sistem'],
-    direct: `Ya, betul! Saya adalah asisten virtual berbasis kecerdasan buatan (AI) 🤖. Walau saya robot, saya tahu segalanya tentang cloud gaming dan selalu siap menemani Anda 24/7! 😊`
-  },
-  {
-    key: 'compliment',
-    kw: ['pintar','hebat','keren','cerdas','cantik','ganteng','luar biasa','hebat kamu','pintar kamu','mantap','pro'],
-    direct: `Terima kasih banyak atas pujiannya! 🥰 Saya belajar setiap hari agar dapat membantu Anda dan komunitas gamer AlexCloud dengan lebih baik. Anda juga luar biasa!`
-  },
-  {
-    key: 'bad_word',
-    kw: ['anjing','bangsat','bego','goblok','tolol','tai','kontol','pantek','jancok','ngasal','bodoh','kamu bodoh','jelek','buruk','sampah','babi'],
-    direct: `Waduh, santai dulu kak... 🥺 Maaf ya kalau ada jawaban saya sebelumnya yang kurang memuaskan atau dirasa ngasal. Tolong beri tahu apa yang sedang kakak cari, saya akan coba jelaskan dengan lebih baik! 🦾`
-  },
-  {
-    key: 'casual_ask',
-    kw: ['lagi apa','sedang apa','sibuk gak','lagi sibuk','apa kabar','apa kabarmu','apa saja kegiatan','kabar','sehat','bagaimana kabar'],
-    direct: `Saya selalu standby 24/7 di server AlexCloud, siap menjawab semua kebingungan Anda tentang cloud gaming! 🎮 Bagaimana kabar Anda hari ini? Sudah siap memainkan game AAA pilihan Anda?`
-  },
-  {
-    key: 'harga',
-    kw: ['harga','paket','biaya','tarif','berapa','bayar berapa','cost','price','idr','rupiah','rp','uang','murah','mahal','cicil','subscribe','berlangganan','plan','tipe pilihan','plan apa','paket apa','brp','hrgnya','hrg','bayar brp','biayanya'],
-    resp: 'harga'
-  },
-  {
-    key: 'bayar',
-    kw: ['cara bayar','bayar','pembayaran','qris','transfer','cara order','order','beli','checkout','konfirmasi','aktifkan','cara pesan','transaksi','gopay','ovo','dana','shopeepay','linkaja','mbanking','mobile banking','scan qr','scan','gmn bayar','bayar gmn','cara order gmn','pesan'],
-    resp: 'bayar'
-  },
-  {
-    key: 'game',
-    kw: ['game','games','judul game','main apa','library','koleksi','tersedia','gta','elden ring','god of war','ea fc','motogp','cod','alan wake','cyberpunk','spider man','hogwarts','witcher','rdr','battlefield','list game','ada game','game apa','judul apa'],
-    resp: 'game'
-  },
-  {
-    key: 'fitur',
-    kw: ['fitur','feature','keunggulan','kelebihan','kenapa pilih','keuntungan','benefit','apa yang ada','fasilitas','layanan','service','advantage','apa aja','apa saja','keistimewaan'],
-    resp: 'fitur'
-  },
-  {
-    key: 'cloudGaming',
-    kw: ['cloud gaming','apa itu','pengertian','definisi','cara kerja','sistem','teknologi','gimana sih','gimana cara','streaming game','remote play','cloud game itu','maksudnya','artinya'],
-    resp: 'cloudGaming'
-  },
-  {
-    key: 'cara',
-    kw: ['cara','langkah','gimana','bagaimana','tutorial','guide','cara main','mulai','start','step by step','how to','akses','cara masuk','cara login','pertama kali','baru pertama'],
-    resp: 'cara'
-  },
-  {
-    key: 'perangkat',
-    kw: ['perangkat','device','hp','handphone','ponsel','smartphone','laptop','pc','computer','komputer','tablet','ipad','tv','smart tv','chromebook','macbook','android','ios','iphone','bisa di','support di','kompatibel','bisa pakai'],
-    resp: 'perangkat'
-  },
-  {
-    key: 'internet',
-    kw: ['internet','mbps','wifi','koneksi','speed','bandwidth','data','kuota','jaringan','sinyal','4g','5g','fiber','indihome','telkom','xl','simpati','tri','axis','kencang','lemot','lambat','cepat','stabil','butuh berapa','minimal berapa','berapa mbps'],
-    resp: 'internet'
-  },
-  {
-    key: 'latency',
-    kw: ['ping','latency','lag','fps','frame','performa','smooth','input lag','delay','ngelag','patah','lemot','berat','slow','glitch','freeze','stuttering','4k','resolusi','quality','kualitas','rebahan','tidak smooth'],
-    resp: 'latency'
-  },
-  {
-    key: 'vs',
-    kw: ['banding','compare','vs','versus','geforce','xbox cloud','playstation','shadow','nvidia','stadia','luna','lebih bagus dari','beda','perbedaan','bedanya','alternatif','competitor','lain','other','dibanding'],
-    resp: 'vs'
-  },
-  {
-    key: 'keunggulan',
-    kw: ['beli pc','beli konsol','tanpa pc','tanpa konsol','gak perlu','tidak perlu hardware','hemat','menghemat','lebih murah dari','worth','invest','mahal beli','spec pc','spesifikasi','min spec','butuh pc'],
-    resp: 'keunggulan'
-  },
-  {
-    key: 'rekomendasi',
-    kw: ['rekomendasi','rekomen','rekom','saran','suggest','bagus','enak dimain','wajib main','game seru','terbaik','top game','must play','harus main','suka main','genre apa','rpg','fps','sport','racing','horror','action','adventure','mana yang','game bagus'],
-    resp: 'rekomendasi'
-  },
-  {
-    key: 'trending',
-    kw: ['trending','trend','populer','popular','hits','viral','banyak dimain','hot','top chart','paling laris','sedang hits','minggu ini','terkini','terbaru','new game','newest','latest'],
-    resp: 'trending'
-  },
-  {
-    key: 'promo',
-    kw: ['promo','diskon','kode promo','voucher','coupon','cashback','potongan harga','promo apa','kode apa','redeem','kupon','reward','promo sekarang','ada diskon','ada promo','promo gak','diskon gak','kode diskon','kode voucher'],
-    resp: 'promo'
-  },
-  {
-    key: 'daftar',
-    kw: ['daftar','register','buat akun','signup','sign up','cara daftar','registrasi','join','akun baru','google login','login google','oauth','masuk akun','new account','belum punya akun'],
-    resp: 'daftar'
-  },
-  {
-    key: 'aman',
-    kw: ['aman','keamanan','privasi','data','hack','enkripsi','secure','safety','bocor','terpercaya','trust','privasi','terlindungi','safe','privacy'],
-    resp: 'aman'
-  },
-  {
-    key: 'save',
-    kw: ['save','simpan','progress','lanjut','ganti hp','ganti perangkat','beda device','hilang','cloud save','tersimpan','tersinkron','sync','progress hilang','data hilang'],
-    resp: 'save'
-  },
-  {
-    key: 'kontrol',
-    kw: ['kontrol','controller','joystick','keyboard','mouse','gamepad','ps4','ps5','xbox','input','stik','stick','dualshock','dualshock4','kontroller','cara kontrol','pakai apa','bisa pakai stik','stik bisa','ctrl','pad','analog'],
-    resp: 'kontrol'
-  },
-  {
-    key: 'browser',
-    kw: ['browser','chrome','firefox','edge','safari','opera','aplikasi','app','download app','install','software','pakai browser apa','browser terbaik'],
-    resp: 'browser'
-  },
-  {
-    key: 'troubleshoot',
-    kw: ['error','problem','masalah','tidak bisa','gangguan','crash','freeze','black screen','tidak jalan','tidak konek','blank','rusak','bug','issue','tolong','susah','gagal','kenapa tidak','kenapa gak','tidak keluar','tidak muncul'],
-    resp: 'troubleshoot'
-  },
-  {
-    key: 'speedtest',
-    kw: ['speed test','tes kecepatan','test jaringan','cek internet','cek koneksi','tes internet','ukur kecepatan','kecepatan internet','network test','speedtest','test speed','test net','cek speed','tes speed'],
-    direct: `📶 **Test Kecepatan Jaringan**\n\nTest kecepatan internet kamu langsung di:\n👉 **[/network-test](/network-test)**\n\nHasil test:\n• 🏓 Ping (latency)\n• ⬇️ Download speed\n• ⬆️ Upload speed\n• 📊 Rekomendasi kualitas gaming\n\n**Panduan kecepatan:**\n• ≥ 25 Mbps → 4K/60fps 🚀\n• ≥ 10 Mbps → 1080p/60fps ✅\n• ≥ 5 Mbps → 720p ⚠️\n• < 5 Mbps → Tidak direkomendasikan ❌`
-  },
-  {
-    key: 'faq',
-    kw: ['faq','pertanyaan umum','tanya jawab','qna','q&a','sering ditanya','info lengkap','panduan lengkap','semua pertanyaan','daftar pertanyaan'],
-    direct: `❓ **FAQ AlexCloud**\n\nLihat semua pertanyaan lengkap di:\n👉 **[/faq](/faq)**\n\nKategori FAQ:\n• 💡 Pertanyaan Umum\n• ⚙️ Teknis & Performa\n• 💳 Pembayaran & Harga\n• 👤 Akun & Login\n• 🎮 Seputar Game\n\nAtau tanya langsung ke saya! 🤖`
-  },
-  {
-    key: 'refund',
-    kw: ['refund','uang kembali','cancel','pembatalan','batal','tidak jadi','kembaliin uang','minta refund','garansi','kembalikan'],
-    direct: `💸 **Kebijakan Refund AlexCloud:**\n\n✅ Refund penuh jika akun **belum diaktifkan** dalam 24 jam\n✅ Kompensasi waktu jika ada **gangguan server** dari kami\n⚠️ Tidak ada refund jika akun sudah aktif & digunakan\n\nUntuk diskusi lebih lanjut, hubungi admin via **WhatsApp**!`
-  },
-  {
-    key: 'multidevice',
-    kw: ['multi device','banyak perangkat','berapa perangkat','beberapa hp','sharing akun','share akun','2 hp','dua device','login banyak','serentak','bersamaan'],
-    direct: `📱 **Multi-Device AlexCloud:**\n\nSatu akun hanya untuk **1 sesi aktif** dalam satu waktu.\n\nJika login di perangkat lain → sesi sebelumnya otomatis logout.\n\nIni untuk menjaga kualitas layanan dan keadilan untuk semua pengguna.`
-  },
-  {
-    key: 'multiplayer',
-    kw: ['multiplayer','online','pvp','coop','co-op','bareng teman','sama teman','main bareng','online multiplayer','bisa main sama','versus orang'],
-    direct: `🎮 **Multiplayer di AlexCloud:**\n\nTergantung game yang dimainkan:\n✅ Game dengan **mode online built-in** (COD, EA FC, dll) → langsung main online!\n✅ **Co-op campaign** → bisa jika game mendukung\n⚠️ **Local multiplayer** → tidak tersedia (cloud-based)\n\nUntuk detail per game, tanya admin WhatsApp!`
-  },
-  {
-    key: 'aktivasi',
-    kw: ['aktivasi','aktifkan','sudah bayar','setelah bayar','berapa lama','kapan aktif','belum aktif','aktivasi berapa lama','aktif nya','akun aktif','lama aktivasi'],
-    direct: `⚡ **Waktu Aktivasi Akun:**\n\nAkun diaktifkan dalam **1–15 menit** setelah konfirmasi!\n\n**Cara konfirmasi:**\n1. Screenshot bukti pembayaran\n2. Kirim ke admin WhatsApp\n3. Admin verifikasi & aktifkan\n4. Kamu langsung bisa main! 🎮\n\nKami beroperasi **24/7** untuk konfirmasi cepat!`
-  },
-  {
-    key: 'help',
-    kw: ['bantu','help','bantuan','bisa apa','ngapain','topik','tanya apa','list','menu','kemampuan','kapabilitas','apa fungsi'],
-    direct: `🤖 Saya bisa jawab pertanyaan tentang:\n\n☁️ **Cloud Gaming**\n• Apa itu & cara kerjanya\n• Perangkat yang bisa dipakai\n• Koneksi internet yang dibutuhkan\n\n🎮 **AlexCloud**\n• Harga & paket\n• Cara daftar & login\n• Cara bayar (QRIS)\n• Library game\n• Rekomendasi & trending\n• Troubleshooting\n\n🔧 **Tools**\n• 📶 [Test kecepatan internet](/network-test)\n• ❓ [FAQ lengkap](/faq)\n\nKetik pertanyaan kamu! 😊`
+/* ============================================================
+   AlexCloud — ai-engine.js
+   AlexBot Chatbot Engine (keyword-based, vanilla JS)
+   ============================================================ */
+
+(function () {
+  'use strict';
+
+  /* ----------------------------------------------------------
+     DOM references (cached on init)
+  ---------------------------------------------------------- */
+  var chatWindow   = null;
+  var chatMessages = null;
+  var chatInput    = null;
+  var toggleBtn    = null;
+
+  /* ----------------------------------------------------------
+     Knowledge-base: keyword → response mapping
+  ---------------------------------------------------------- */
+  var knowledgeBase = [
+    {
+      keywords: ['harga', 'paket', 'price', 'berapa', 'biaya', 'tarif', 'murah', 'promo'],
+      response:
+        '💰 <b>Paket Harga AlexCloud Gaming:</b><br><br>' +
+        '• <b>1 Minggu</b> — Rp40.000<br>' +
+        '• <b>1 Bulan</b> — Rp60.000<br>' +
+        '• <b>2 Bulan</b> — Rp100.000<br>' +
+        '• <b>3 Bulan</b> — Rp150.000<br><br>' +
+        '✨ Semakin lama langganan, semakin hemat! Mau langsung order? Hubungi admin via WhatsApp ya 😉'
+    },
+    {
+      keywords: ['game', 'rekomendasi', 'main', 'judul', 'daftar game', 'katalog', 'list game', 'permainan'],
+      response:
+        '🎮 <b>Game Populer di AlexCloud:</b><br><br>' +
+        '⚽ EA FC 26 &amp; EA FC 25<br>' +
+        '🏍️ MotoGP 25 &amp; MotoGP 24<br>' +
+        '🔦 Alan Wake 2<br>' +
+        '🧙 Hogwarts Legacy<br>' +
+        '⚔️ God of War Ragnarök<br>' +
+        '🕷️ Spider-Man 2<br>' +
+        '🏎️ Forza Horizon 5<br>' +
+        '🔫 Call of Duty MW3<br>' +
+        '🧟 Resident Evil 4 Remake<br><br>' +
+        'Dan masih banyak lagi! Semua bisa langsung dimainkan tanpa download besar 🚀'
+    },
+    {
+      keywords: ['bayar', 'payment', 'qris', 'gopay', 'transfer', 'dana', 'ovo', 'bca', 'pembayaran'],
+      response:
+        '💳 <b>Cara Pembayaran AlexCloud:</b><br><br>' +
+        '1️⃣ Scan <b>QRIS</b> yang tersedia di halaman checkout<br>' +
+        '2️⃣ Bayar via <b>GoPay</b>, DANA, atau OVO<br>' +
+        '3️⃣ Setelah bayar, <b>konfirmasi ke admin</b> via WhatsApp<br><br>' +
+        '⚡ Akun aktif dalam 1–5 menit setelah konfirmasi!'
+    },
+    {
+      keywords: ['fitur', 'spesifikasi', 'server', 'spec', 'kualitas', 'latency', 'lag', 'ping', 'fps', 'resolusi'],
+      response:
+        '🖥️ <b>Fitur Unggulan AlexCloud:</b><br><br>' +
+        '🇮🇩 Server lokal <b>Indonesia</b> — ping rendah<br>' +
+        '⚡ <b>Low latency</b> untuk pengalaman gaming mulus<br>' +
+        '🎬 Streaming hingga <b>4K 60fps</b><br>' +
+        '🛡️ <b>Support 24/7</b> — tim kami selalu siap bantu<br>' +
+        '☁️ Tanpa download — langsung main dari browser<br><br>' +
+        'Gaming kelas PC premium, cukup dari HP kamu! 📱'
+    },
+    {
+      keywords: ['daftar', 'register', 'akun', 'buat akun', 'sign up', 'signup', 'registrasi', 'cara daftar'],
+      response:
+        '📝 <b>Cara Daftar AlexCloud:</b><br><br>' +
+        '1️⃣ Klik tombol <b>"Daftar"</b> di halaman utama<br>' +
+        '2️⃣ Isi data diri (nama, email, no. HP)<br>' +
+        '3️⃣ Pilih paket yang kamu mau<br>' +
+        '4️⃣ Lakukan pembayaran<br>' +
+        '5️⃣ Akun siap digunakan! 🎉<br><br>' +
+        'Mudah banget, kan? Yuk langsung daftar!'
+    },
+    {
+      keywords: ['halo', 'hai', 'hello', 'hi', 'hey', 'apa kabar', 'selamat'],
+      response:
+        'Halo! 👋 Selamat datang di <b>AlexCloud Gaming</b>!<br><br>' +
+        'Aku <b>AlexBot</b>, asisten virtual kamu. Mau tanya soal apa nih? 😊<br><br>' +
+        '• 💰 Harga &amp; Paket<br>' +
+        '• 🎮 Daftar Game<br>' +
+        '• 💳 Cara Pembayaran<br>' +
+        '• 🖥️ Fitur &amp; Spesifikasi<br>' +
+        '• 📝 Cara Daftar'
+    },
+    {
+      keywords: ['terima kasih', 'thanks', 'makasih', 'thx', 'thank you'],
+      response:
+        'Sama-sama! 😊 Senang bisa membantu.<br>Kalau ada pertanyaan lain, jangan ragu tanya lagi ya! 🎮'
+    },
+    {
+      keywords: ['admin', 'whatsapp', 'wa', 'kontak', 'hubungi', 'contact'],
+      response:
+        '📞 <b>Hubungi Admin AlexCloud:</b><br><br>' +
+        'Kamu bisa langsung chat admin via <b>WhatsApp</b> untuk bantuan lebih lanjut.<br>' +
+        'Klik tombol WhatsApp di pojok halaman atau kirim pesan ke nomor yang tertera di website 💬'
+    }
+  ];
+
+  /* ----------------------------------------------------------
+     Default (fallback) response
+  ---------------------------------------------------------- */
+  var defaultResponse =
+    '🤔 Hmm, aku belum paham pertanyaan kamu nih.<br><br>' +
+    'Coba tanya tentang:<br>' +
+    '• 💰 <b>Harga</b> — ketik "harga" atau "paket"<br>' +
+    '• 🎮 <b>Game</b> — ketik "game" atau "rekomendasi"<br>' +
+    '• 💳 <b>Pembayaran</b> — ketik "bayar" atau "QRIS"<br>' +
+    '• 🖥️ <b>Fitur</b> — ketik "fitur" atau "server"<br>' +
+    '• 📝 <b>Daftar</b> — ketik "daftar" atau "register"<br><br>' +
+    'Atau hubungi admin langsung via WhatsApp ya! 😉';
+
+  /* ==========================================================
+     Helpers
+  ========================================================== */
+
+  /** Create and append a message bubble */
+  function appendMessage(text, sender) {
+    if (!chatMessages) return;
+
+    var bubble = document.createElement('div');
+    bubble.className = 'chat-message ' + (sender === 'user' ? 'user-message' : 'bot-message');
+
+    var content = document.createElement('div');
+    content.className = 'message-content';
+
+    if (sender === 'user') {
+      content.textContent = text;           // plain-text for user (XSS safe)
+    } else {
+      content.innerHTML = text;             // HTML for bot (controlled content)
+    }
+
+    bubble.appendChild(content);
+    chatMessages.appendChild(bubble);
+    scrollChatToBottom();
+
+    return bubble;
   }
-];
-function lev(a, b) {
-  if (!a.length) return b.length;
-  if (!b.length) return a.length;
-  const m = [];
-  for (let i = 0; i <= b.length; i++) m[i] = [i];
-  for (let j = 0; j <= a.length; j++) m[0][j] = j;
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      m[i][j] = b[i-1] === a[j-1] ? m[i-1][j-1]
-        : 1 + Math.min(m[i-1][j-1], m[i][j-1], m[i-1][j]);
+
+  /** Show typing indicator and return the element */
+  function showTypingIndicator() {
+    if (!chatMessages) return null;
+
+    var indicator = document.createElement('div');
+    indicator.className = 'chat-message bot-message typing-indicator';
+    indicator.innerHTML =
+      '<div class="message-content">' +
+        '<span class="dot"></span>' +
+        '<span class="dot"></span>' +
+        '<span class="dot"></span>' +
+      '</div>';
+    chatMessages.appendChild(indicator);
+    scrollChatToBottom();
+    return indicator;
+  }
+
+  /** Remove typing indicator element */
+  function removeTypingIndicator(indicator) {
+    if (indicator && indicator.parentNode) {
+      indicator.parentNode.removeChild(indicator);
     }
   }
-  return m[b.length][a.length];
-}
-function getAIResponse(msg) {
-  const lower = msg.toLowerCase().trim();
-  const words = lower.split(/[\s,!?.]+/).filter(w => w.length > 1);
-  if (!lower || lower.length < 2) {
-    return `Hai! 😊 Ketik pertanyaan kamu ya!\n\nContoh:\n• "harga berapa?"\n• "game apa yang ada?"\n• "cara daftar gimana?"`;
-  }
-  const results = AI_TOPICS.map(topic => {
-    let score = 0;
-    for (const kw of topic.kw) {
-      if (kw.includes(' ') && lower.includes(kw)) score += 20;
+
+  /** Scroll chat to the newest message */
+  function scrollChatToBottom() {
+    if (chatMessages) {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    for (const word of words) {
-      if (word.length < 2) continue;
-      for (const kw of topic.kw) {
-        if (kw.includes(' ')) continue; 
-        if (kw === word) score += 10;                              
-        else if (kw.startsWith(word) && word.length >= 3) score += 6; 
-        else if (word.startsWith(kw) && kw.length >= 4) score += 5;   
-        else if (kw.includes(word) && word.length >= 4) score += 4;   
-        else if (lev(word, kw) === 1 && kw.length >= 5) score += 4;   
-        else if (lev(word, kw) === 2 && kw.length >= 6) score += 2;   
+  }
+
+  /** Random delay between min and max (ms) */
+  function randomDelay(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  /* ==========================================================
+     6. getAIResponse — keyword matching engine
+  ========================================================== */
+  function getAIResponse(query) {
+    var normalised = query.toLowerCase().trim();
+
+    for (var i = 0; i < knowledgeBase.length; i++) {
+      var entry = knowledgeBase[i];
+      for (var k = 0; k < entry.keywords.length; k++) {
+        if (normalised.indexOf(entry.keywords[k]) !== -1) {
+          return entry.response;
+        }
       }
     }
-    return { topic, score };
-  }).sort((a, b) => b.score - a.score);
-  const best = results[0];
-  if (best && best.score >= 3) {
-    const t = best.topic;
-    if (t.direct) return t.direct;
-    if (t.resp && typeof AI_KNOWLEDGE !== 'undefined' && AI_KNOWLEDGE[t.resp]) {
-      return AI_KNOWLEDGE[t.resp];
+
+    return defaultResponse;
+  }
+  window.getAIResponse = getAIResponse;
+
+  /* ==========================================================
+     2. sendAIMessage
+  ========================================================== */
+  function sendAIMessage() {
+    if (!chatInput) return;
+
+    var text = chatInput.value.trim();
+    if (!text) return;
+
+    // Append user message
+    appendMessage(text, 'user');
+    chatInput.value = '';
+    chatInput.focus();
+
+    // Show typing indicator, then respond
+    var indicator = showTypingIndicator();
+    var delay = randomDelay(500, 1500);
+
+    setTimeout(function () {
+      removeTypingIndicator(indicator);
+      var response = getAIResponse(text);
+      appendMessage(response, 'bot');
+    }, delay);
+  }
+  window.sendAIMessage = sendAIMessage;
+
+  /* ==========================================================
+     3. handleChatEnter
+  ========================================================== */
+  function handleChatEnter(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendAIMessage();
     }
   }
-  const topSuggestions = results.filter(r => r.score >= 1).slice(0, 3);
-  const topicLabels = {
-    harga: '💰 Harga paket', bayar: '💳 Cara bayar', game: '🎮 Daftar game',
-    cloudGaming: '☁️ Apa itu cloud gaming', cara: '🚀 Cara main',
-    perangkat: '📱 Perangkat', internet: '📶 Koneksi internet',
-    rekomendasi: '🎯 Rekomendasi game', promo: '🏷️ Promo & diskon',
-    daftar: '👤 Cara daftar', latency: '⚡ Performa', speedtest: '📶 Speed test',
-    faq: '❓ FAQ', refund: '💸 Refund', aktivasi: '⚡ Aktivasi akun'
-  };
-  if (topSuggestions.length) {
-    const list = topSuggestions.map(r => `• ${topicLabels[r.topic.key] || r.topic.key}`).join('\n');
-    return `🤖 Hmm, sepertinya saya kurang paham maksud kalimat kakak. 😅 Tapi jangan khawatir! Mungkin kakak mau tanya tentang:\n\n${list}\n\nKetik pertanyaan kakak dengan lebih spesifik, atau klik menu **Tanya AlexBot AI** di atas untuk topik populer! 😊`;
+  window.handleChatEnter = handleChatEnter;
+
+  /* ==========================================================
+     4. askAI — programmatic send (for quick-action chips)
+  ========================================================== */
+  function askAI(question) {
+    if (!chatInput) {
+      chatInput = document.getElementById('aiChatInput');
+    }
+    if (chatInput) {
+      chatInput.value = question;
+    }
+    sendAIMessage();
   }
-  return `Aduh kak, sepertinya saya kurang mengerti kalimatnya. 😅 Tapi jangan khawatir! Sebagai AI AlexCloud, saya paling pintar menjawab seputar:\n\n🎮 **Game yang tersedia** (GTA VI, FC26, MotoGP25)\n💰 **Harga paket berlangganan** (Mulai Rp 40rb)\n💳 **Cara beli & bayar otomatis** (Scan QRIS)\n📶 **Cara test kecepatan internet kamu**\n\nKira-kira kakak mau cari tahu tentang apa nih? Atau bisa langsung chat admin WhatsApp kami untuk dipandu langsung! 📱`;
-}
+  window.askAI = askAI;
+
+  /* ==========================================================
+     5. clearChat
+  ========================================================== */
+  function clearChat() {
+    if (!chatMessages) return;
+
+    // Remove all messages except the first welcome message
+    var messages = chatMessages.querySelectorAll('.chat-message');
+    for (var i = 1; i < messages.length; i++) {
+      chatMessages.removeChild(messages[i]);
+    }
+
+    // If no welcome message existed, add one
+    if (!chatMessages.querySelector('.chat-message')) {
+      appendMessage(
+        '👋 Halo! Aku <b>AlexBot</b>, asisten virtual AlexCloud Gaming.<br>' +
+        'Tanya aku soal harga, game, pembayaran, atau fitur ya!',
+        'bot'
+      );
+    }
+
+    if (chatInput) {
+      chatInput.value = '';
+      chatInput.focus();
+    }
+  }
+  window.clearChat = clearChat;
+
+  /* ==========================================================
+     1. toggleAIChat (chat-specific logic)
+  ========================================================== */
+  function toggleAIChat() {
+    if (!chatWindow) {
+      chatWindow = document.getElementById('aiChatWindow');
+    }
+    if (!chatWindow) return;
+
+    var isOpen = chatWindow.classList.toggle('open');
+
+    if (toggleBtn) {
+      toggleBtn.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    if (isOpen) {
+      // Ensure welcome message exists
+      if (chatMessages && !chatMessages.querySelector('.chat-message')) {
+        appendMessage(
+          '👋 Halo! Aku <b>AlexBot</b>, asisten virtual AlexCloud Gaming.<br>' +
+          'Tanya aku soal harga, game, pembayaran, atau fitur ya!',
+          'bot'
+        );
+      }
+      if (chatInput) chatInput.focus();
+    }
+  }
+  window.toggleAIChat = toggleAIChat;
+
+  /* ==========================================================
+     Init
+  ========================================================== */
+  function init() {
+    chatWindow   = document.getElementById('aiChatWindow');
+    chatMessages = document.getElementById('aiMessages');
+    chatInput    = document.getElementById('aiChatInput');
+    toggleBtn    = document.querySelector('[data-chat-toggle], .ai-chat-toggle, #aiChatToggle');
+
+    // Wire up input enter key
+    if (chatInput) {
+      chatInput.addEventListener('keydown', handleChatEnter);
+    }
+
+    // Wire up send button
+    var sendBtn = document.querySelector('#aiChatSend, .ai-chat-send');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', sendAIMessage);
+    }
+
+    // Wire up clear button
+    var clearBtn = document.querySelector('#aiChatClear, .ai-chat-clear');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearChat);
+    }
+
+    // Wire up quick-action chips
+    var chips = document.querySelectorAll('[data-ai-ask]');
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        askAI(chip.getAttribute('data-ai-ask'));
+      });
+    });
+  }
+
+  // Boot
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

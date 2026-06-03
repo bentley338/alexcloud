@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="id" style="background-color: #030712; color-scheme: dark;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlexCloud - Premium Cloud Gaming Indonesia</title>
+  <meta name="description" content="AlexCloud - Layanan Cloud Gaming Premium & Terbaik di Indonesia. Mainkan ratusan game PC/Console AAA terbaru langsung di HP, Laptop, atau Smart TV tanpa perlu beli PC mahal. Server lokal anti lag, harga mulai Rp 40.000/minggu.">
+  <meta name="keywords" content="cloud gaming indonesia, cloud gaming murah, main game AAA di hp, game cloud server indonesia, sewa cloud gaming pc, alexcloud, alexcloud gaming">
+  <!-- FIX #7: Missing SEO Meta Tags -->
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="author" content="AlexCloud">
+  <link rel="canonical" href="https://alexcloud.my.id/">
+  <!-- FIX #10: Theme Color -->
+  <meta name="theme-color" content="#e8732a">
+
+  <!-- Open Graph / Facebook — FIX #3/#5: Real OG image instead of placehold.co -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alexcloud.my.id/">
+  <meta property="og:site_name" content="AlexCloud">
+  <meta property="og:title" content="AlexCloud | Platform Cloud Gaming Premium #1 Indonesia">
+  <meta property="og:description" content="Main game AAA terbaru langsung di HP, laptop, atau TV tanpa PC mahal. Mulai Rp 40.000/minggu dengan server lokal ping rendah!">
+  <meta property="og:image" content="https://alexcloud.my.id/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://alexcloud.my.id/">
+  <meta property="twitter:title" content="AlexCloud | Platform Cloud Gaming Premium #1 Indonesia">
+  <meta property="twitter:description" content="Main game AAA terbaru langsung di HP, laptop, atau TV tanpa PC mahal. Mulai Rp 40.000/minggu dengan server lokal ping rendah!">
+  <meta property="twitter:image" content="https://alexcloud.my.id/images/og-cover.png">
+
+  <!-- FIX #7: Schema.org Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AlexCloud",
+    "alternateName": ["Alex Cloud", "AlexCloud Gaming"],
+    "url": "https://alexcloud.my.id/",
+    "logo": "https://alexcloud.my.id/favicon.svg",
+    "description": "Platform Cloud Gaming Premium #1 Indonesia",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+62-823-2843-7656",
+      "contactType": "customer service",
+      "areaServed": "ID",
+      "availableLanguage": "Indonesian"
+    },
+    "sameAs": [
+      "https://wa.me/6282328437656",
+      "https://www.tiktok.com/@bentleysaja_"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "AlexCloud",
+    "alternateName": ["Alex Cloud", "AlexCloud Gaming"],
+    "url": "https://alexcloud.my.id/"
+  }
+  </script>
+
+  <!-- FIX #6: Favicon — consistent SVG type -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+  <!-- FIX #8: PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- FIX #2: Preload real main.css -->
+  <link rel="preload" href="/css/main.css?v=2.0" as="style">
+  <link rel="stylesheet" href="/css/main.css?v=2.0">
+
+  <!-- Preload JS -->
+  <link rel="preload" href="/js/main.js?v=2.0" as="script">
+  <link rel="preload" href="/js/ai-engine.js?v=2.0" as="script">
+
+  <!-- FIX #9: Google Fonts with non-blocking load + font-display:swap -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+
+  <!-- FontAwesome non-blocking -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+</head>
+<body>
+  <!-- Scroll Progress Indicator -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- Ambient Glow Background Blobs -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Skip to main content (accessibility) -->
+  <a href="#main-content" class="skip-link">Langsung ke konten utama</a>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">
+        <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="logoIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#e8732a" />
+              <stop offset="100%" stop-color="#c0392b" />
+            </linearGradient>
+          </defs>
+          <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="url(#logoIconGrad)" opacity="0.12" />
+          <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" stroke="url(#logoIconGrad)" stroke-width="1.5" stroke-linejoin="round" opacity="0.35" fill="none" />
+          <path d="M14 2L7 13H12L10 22L17 11H12L14 2Z" fill="url(#logoIconGrad)" />
+        </svg>
+        <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
+      </a>
+
+      <!-- AI Smart Search -->
+      <div class="nav-search-wrap" id="navSearchWrap">
+        <div class="nav-search-box">
+          <i class="fas fa-search nav-search-icon"></i>
+          <input type="text" id="navSearchInput" class="nav-search-input" placeholder="🤖 AI Search game..." autocomplete="off">
+          <div class="search-results-dropdown" id="searchDropdown"></div>
+        </div>
+      </div>
+
+      <div class="nav-links" id="navLinks">
+        <a href="/" class="nav-link">Beranda</a>
+        <a href="/games" class="nav-link">Game Library</a>
+        <a href="/pricing" class="nav-link">Harga</a>
+        <a href="/testimonials" class="nav-link">Testimoni</a>
+        <a href="/faq" class="nav-link">FAQ</a>
+        <a href="/network-test" class="nav-link"><i class="fas fa-wifi"></i> Speed Test</a>
+        <a href="/login" class="nav-link">Login</a>
+        <a href="/register" class="btn-nav-cta">Daftar Gratis</a>
+      </div>
+      <button class="nav-toggle" onclick="toggleNav()" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="navLinks" id="navToggleBtn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+
+<!-- HERO -->
+<section class="hero" id="main-content" aria-label="Hero utama">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-overlay"></div>
+  <div class="hero-container">
+    <div class="hero-content" data-animate>
+      <div class="hero-badge">
+        <i class="fas fa-bolt"></i>
+        <span>Platform Cloud Gaming #1 Indonesia</span>
+      </div>
+      <h1 class="hero-title">
+        Main Game AAA<br><span class="accent">Tanpa PC Mahal</span>
+      </h1>
+      <p class="hero-subtitle">
+        AlexCloud menghadirkan pengalaman gaming premium langsung dari cloud. 
+        Akses ratusan game terbaru dengan koneksi internet biasa. 
+        Mulai dari Rp 40.000/minggu!
+      </p>
+      <div class="hero-actions">
+        <a href="/pricing" class="btn-primary">
+          <i class="fas fa-gamepad"></i> Mulai Sekarang
+        </a>
+        <a href="/games" class="btn-secondary">
+          <i class="fas fa-th-large"></i> Lihat Game
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">16+</span>
+          <span class="stat-label">Game Tersedia</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">4K</span>
+          <span class="stat-label">Resolusi Max</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">60fps</span>
+          <span class="stat-label">Smooth Gaming</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">24/7</span>
+          <span class="stat-label">Support</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual" data-animate>
+      <div class="hero-card-stack">
+        <div class="floating-badge badge-price">🔥 Mulai Rp 40.000</div>
+        <div class="hero-main-card">
+          <div class="hero-card-header">
+            <div class="hero-card-icon">🎮</div>
+            <div>
+              <div class="hero-card-title">AlexCloud Gaming</div>
+              <div class="hero-card-sub">Server Online • Low Latency</div>
+            </div>
+          </div>
+          <div class="hero-game-list">
+            <div class="hero-game-item">
+              <div class="game-dot blue"></div>
+              <span class="game-name">EA FC 26</span>
+              <span class="game-status">● Online</span>
+            </div>
+            <div class="hero-game-item">
+              <div class="game-dot purple"></div>
+              <span class="game-name">EA FC 25</span>
+              <span class="game-status">● Online</span>
+            </div>
+            <div class="hero-game-item">
+              <div class="game-dot green"></div>
+              <span class="game-name">MotoGP 25</span>
+              <span class="game-status">● Online</span>
+            </div>
+            <div class="hero-game-item">
+              <div class="game-dot orange"></div>
+              <span class="game-name">MotoGP 24</span>
+              <span class="game-status">● Online</span>
+            </div>
+          </div>
+        </div>
+        <div class="floating-badge badge-users">👥 Ribuan Gamer Aktif</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI TRENDING SECTION — FIX #1: Real image paths instead of base64 -->
+<section class="trending-section">
+  <div class="trending-container">
+    <div class="section-header" data-animate>
+      <div class="section-tag">🤖 AI Trending</div>
+      <h2 class="section-title">Game <span class="accent">Trending Minggu Ini</span></h2>
+      <p class="section-desc">Rekomendasi cerdas AI berdasarkan rating & popularitas terkini</p>
+    </div>
+    <div class="trending-scroll">
+      <div class="trending-card" data-animate>
+        <div class="trending-rank">#1</div>
+        <img src="/images/games/ea_fc_26.jpg" alt="EA FC 26 - Game Sepak Bola Terbaru" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
+        <div class="trending-info">
+          <div class="trending-name">EA FC 26</div>
+          <div class="trending-genre">Sports</div>
+          <div class="trending-rating">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star" style="opacity:0.3"></i>
+            <span>4.8</span>
+          </div>
+        </div>
+        <span class="trending-tag">POPULAR</span>
+      </div>
+
+      <div class="trending-card" data-animate>
+        <div class="trending-rank">#2</div>
+        <img src="/images/games/alan_wake_2.jpg" alt="Alan Wake 2 - Game Horror Action" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
+        <div class="trending-info">
+          <div class="trending-name">Alan Wake 2</div>
+          <div class="trending-genre">Horror/Action</div>
+          <div class="trending-rating">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star" style="opacity:0.3"></i>
+            <span>4.9</span>
+          </div>
+        </div>
+        <span class="trending-tag">TOP RATED</span>
+      </div>
+
+      <div class="trending-card" data-animate>
+        <div class="trending-rank">#3</div>
+        <img src="/images/games/hogwarts_legacy.jpg" alt="Hogwarts Legacy - Game RPG Dunia Sihir" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
+        <div class="trending-info">
+          <div class="trending-name">Hogwarts Legacy</div>
+          <div class="trending-genre">RPG</div>
+          <div class="trending-rating">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star" style="opacity:0.3"></i>
+            <span>4.8</span>
+          </div>
+        </div>
+        <span class="trending-tag">BESTSELLER</span>
+      </div>
+
+      <div class="trending-card" data-animate>
+        <div class="trending-rank">#4</div>
+        <img src="/images/games/motogp_25.jpg" alt="MotoGP 25 - Game Balap Motor" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
+        <div class="trending-info">
+          <div class="trending-name">MotoGP 25</div>
+          <div class="trending-genre">Racing</div>
+          <div class="trending-rating">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star" style="opacity:0.3"></i>
+            <span>4.7</span>
+          </div>
+        </div>
+        <span class="trending-tag">NEW</span>
+      </div>
+
+      <div class="trending-card" data-animate>
+        <div class="trending-rank">#5</div>
+        <img src="/images/games/ea_fc_25.jpg" alt="EA FC 25 - Game Sepak Bola" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
+        <div class="trending-info">
+          <div class="trending-name">EA FC 25</div>
+          <div class="trending-genre">Sports</div>
+          <div class="trending-rating">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star" style="opacity:0.3"></i>
+            <span>4.6</span>
+          </div>
+        </div>
+        <span class="trending-tag">CLASSIC</span>
+      </div>
+
+      <div class="trending-card" data-animate>
+        <div class="trending-rank">#6</div>
+        <img src="/images/games/motogp_24.jpg" alt="MotoGP 24 - Game Balap Motor" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
+        <div class="trending-info">
+          <div class="trending-name">MotoGP 24</div>
+          <div class="trending-genre">Racing</div>
+          <div class="trending-rating">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star" style="opacity:0.3"></i>
+            <span>4.5</span>
+          </div>
+        </div>
+        <span class="trending-tag">CLASSIC</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING SECTION -->
+<section class="pricing-section" id="pricing">
+  <div class="trending-container">
+    <div class="section-header" data-animate>
+      <div class="section-tag">💰 Paket Langganan</div>
+      <h2 class="section-title">Harga <span class="accent">Super Terjangkau</span></h2>
+      <p class="section-desc">Pilih paket yang sesuai budget kamu. Semua paket sudah termasuk akses penuh ke seluruh game!</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card" data-animate>
+        <div class="price-tag">
+          <span class="price-amount">Rp 40k</span>
+          <span class="price-period">/minggu</span>
+        </div>
+        <h3>1 Minggu</h3>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> Akses semua game AAA</li>
+          <li><i class="fas fa-check"></i> Server low latency</li>
+          <li><i class="fas fa-check"></i> Full HD 60 FPS</li>
+          <li><i class="fas fa-check"></i> Support admin</li>
+        </ul>
+        <a href="/register" class="pricing-cta">Pilih Paket</a>
+      </div>
+
+      <div class="pricing-card popular" data-animate>
+        <div class="popular-badge">🔥 Terpopuler</div>
+        <div class="price-tag">
+          <span class="price-amount">Rp 60k</span>
+          <span class="price-period">/bulan</span>
+        </div>
+        <h3>1 Bulan</h3>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> Akses semua game AAA</li>
+          <li><i class="fas fa-check"></i> Server prioritas</li>
+          <li><i class="fas fa-check"></i> Up to 4K 60 FPS</li>
+          <li><i class="fas fa-check"></i> Support prioritas</li>
+          <li><i class="fas fa-check"></i> Hemat Rp 100.000+</li>
+        </ul>
+        <a href="/register" class="pricing-cta">Pilih Paket</a>
+      </div>
+
+      <div class="pricing-card" data-animate>
+        <div class="price-tag">
+          <span class="price-amount">Rp 100k</span>
+          <span class="price-period">/2 bulan</span>
+        </div>
+        <h3>2 Bulan</h3>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> Akses semua game AAA</li>
+          <li><i class="fas fa-check"></i> Server prioritas</li>
+          <li><i class="fas fa-check"></i> Up to 4K 60 FPS</li>
+          <li><i class="fas fa-check"></i> Support prioritas</li>
+          <li><i class="fas fa-check"></i> Hemat Rp 220.000+</li>
+        </ul>
+        <a href="/register" class="pricing-cta">Pilih Paket</a>
+      </div>
+
+      <div class="pricing-card" data-animate>
+        <div class="price-tag">
+          <span class="price-amount">Rp 150k</span>
+          <span class="price-period">/3 bulan</span>
+        </div>
+        <h3>3 Bulan</h3>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> Akses semua game AAA</li>
+          <li><i class="fas fa-check"></i> Server prioritas</li>
+          <li><i class="fas fa-check"></i> Up to 4K 60 FPS</li>
+          <li><i class="fas fa-check"></i> Support VIP 24/7</li>
+          <li><i class="fas fa-check"></i> Hemat Rp 330.000+</li>
+        </ul>
+        <a href="/register" class="pricing-cta">Pilih Paket</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ SECTION -->
+<section class="faq-section" id="faq">
+  <div class="trending-container">
+    <div class="section-header" data-animate>
+      <div class="section-tag">❓ FAQ</div>
+      <h2 class="section-title">Pertanyaan <span class="accent">Yang Sering Ditanyakan</span></h2>
+    </div>
+    <div class="faq-list" data-animate>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Apa itu AlexCloud?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>AlexCloud adalah platform cloud gaming yang memungkinkan kamu main game AAA (EA FC 26, MotoGP 25, Hogwarts Legacy, dll) langsung dari HP, laptop, atau Smart TV tanpa perlu PC spek tinggi. Semua proses game berjalan di server kami.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Bagaimana cara mulai bermain?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>1. Daftar akun gratis di website kami. 2. Pilih paket langganan (mulai Rp 40.000/minggu). 3. Bayar via QRIS/GoPay. 4. Dapatkan akses login dan mulai main!</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Apa saja metode pembayaran yang tersedia?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Saat ini kami menerima pembayaran melalui QRIS (GoPay, OVO, Dana, dll). Scan QRIS, bayar, lalu konfirmasi ke admin WhatsApp untuk aktivasi instan.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Apakah butuh internet cepat?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Koneksi internet minimal 10 Mbps sudah cukup untuk pengalaman bermain yang lancar. Untuk kualitas 4K, disarankan 25 Mbps ke atas. Server kami berlokasi lokal di Indonesia untuk ping rendah!</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Bisakah main di HP?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Ya! AlexCloud bisa diakses dari HP Android/iOS, laptop, PC, bahkan Smart TV. Yang penting ada koneksi internet dan browser.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- FOOTER — FIX #4: Broken links + FIX #12: Dynamic copyright year -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="/" class="nav-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
+        </a>
+        <p>Platform cloud gaming terbaik di Indonesia. Main game AAA tanpa perlu PC mahal!</p>
+        <div class="footer-social">
+          <a href="https://wa.me/6282328437656" target="_blank" class="social-link wa" aria-label="Hubungi kami via WhatsApp" rel="noopener noreferrer">
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.tiktok.com/@bentleysaja_" target="_blank" class="social-link tt" aria-label="Tonton kami di TikTok" rel="noopener noreferrer">
+            <i class="fab fa-tiktok" aria-hidden="true"></i>
+          </a>
+          <!-- FIX #4: Instagram & Telegram — javascript:void(0) with descriptive title until real links exist -->
+          <a href="javascript:void(0)" class="social-link ig" aria-label="Instagram (segera hadir)" title="Link Instagram segera tersedia">
+            <i class="fab fa-instagram" aria-hidden="true"></i>
+          </a>
+          <a href="javascript:void(0)" class="social-link tg" aria-label="Telegram (segera hadir)" title="Link Telegram segera tersedia">
+            <i class="fab fa-telegram" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navigasi</h4>
+        <a href="/">Beranda</a>
+        <a href="/games">Game Library</a>
+        <a href="/pricing">Harga</a>
+        <a href="/testimonials">Testimoni</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="footer-links">
+        <h4>Support</h4>
+        <a href="https://wa.me/6282328437656" target="_blank">WhatsApp Admin</a>
+        <a href="/faq">FAQ Lengkap</a>
+        <a href="/network-test"><i class="fas fa-wifi"></i> Speed Test</a>
+        <a href="/pricing">Cek Harga</a>
+        <a href="/register">Daftar Sekarang</a>
+      </div>
+      <div class="footer-links">
+        <h4>Paket</h4>
+        <a href="/pricing">1 Minggu</a>
+        <a href="/pricing">1 Bulan</a>
+        <a href="/pricing">2 Bulan</a>
+        <a href="/pricing">3 Bulan</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <!-- FIX #12: Dynamic year via JS -->
+      <p>&copy; <span id="copyrightYear">2026</span> AlexCloud. All rights reserved. | Made with ❤️ for Gamers Indonesia</p>
+    </div>
+  </footer>
+
+  <!-- 🤖 AI CHATBOT ASSISTANT -->
+  <div class="ai-chatbot-widget" id="aiChatbot">
+    <div class="ai-chat-toggle" id="aiChatToggle" onclick="toggleAIChat()" role="button" aria-label="Buka AI Chat AlexBot" aria-expanded="false" aria-controls="aiChatWindow" tabindex="0">
+      <div class="ai-pulse-ring"></div>
+      <i class="fas fa-robot" aria-hidden="true"></i>
+      <span class="ai-badge-dot"></span>
+    </div>
+    <div class="ai-chat-window" id="aiChatWindow" role="dialog" aria-modal="true" aria-label="AlexBot AI Chat">
+      <div class="ai-chat-header">
+        <div class="ai-header-info">
+          <div class="ai-avatar" aria-hidden="true"><i class="fas fa-robot"></i></div>
+          <div>
+            <div class="ai-name">AlexBot AI</div>
+            <div class="ai-status"><span class="ai-online-dot" aria-hidden="true"></span>Online &amp; Siap Bantu</div>
+          </div>
+        </div>
+        <div class="ai-header-actions">
+          <button onclick="clearChat()" title="Hapus chat" aria-label="Hapus riwayat chat"><i class="fas fa-trash" aria-hidden="true"></i></button>
+          <button onclick="toggleAIChat()" title="Tutup" aria-label="Tutup AI Chat"><i class="fas fa-times" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div class="ai-chat-messages" id="aiMessages">
+        <div class="ai-message bot">
+          <div class="ai-msg-avatar"><i class="fas fa-robot"></i></div>
+          <div class="ai-msg-bubble">
+            Halo! Saya <strong>AlexBot</strong> 🤖 — asisten AI AlexCloud.<br><br>
+            Saya bisa bantu kamu:
+            <div class="ai-quick-chips">
+              <button onclick="askAI('rekomendasi game terbaik')">🎮 Rekomendasi Game</button>
+              <button onclick="askAI('harga paket berlangganan')">💰 Info Harga</button>
+              <button onclick="askAI('cara bayar dan aktifkan akun')">💳 Cara Bayar</button>
+              <button onclick="askAI('fitur alexcloud')">⚡ Fitur AlexCloud</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ai-chat-input-wrap">
+        <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Tanya apa saja..." onkeypress="handleChatEnter(event)" aria-label="Ketik pesan ke AlexBot">
+        <button class="ai-send-btn" onclick="sendAIMessage()" aria-label="Kirim pesan"><i class="fas fa-paper-plane" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Kembali ke atas">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <script src="/js/ai-engine.js?v=2.0" defer></script>
+  <script src="/js/main.js?v=2.0" defer></script>
+</body>
+</html>

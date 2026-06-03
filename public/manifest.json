@@ -1,0 +1,21 @@
+{
+  "name": "AlexCloud - Premium Cloud Gaming",
+  "short_name": "AlexCloud",
+  "description": "Platform Cloud Gaming Premium #1 Indonesia. Main game AAA tanpa PC mahal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#e8732a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "id",
+  "dir": "ltr"
+}
