@@ -186,25 +186,44 @@ function seedPlans() {
   }
 }
 
+const gameImageMapping = {
+  'EA FC 26': '/images/games/ea_fc_26.jpg',
+  'EA FC 25': '/images/games/ea_fc_25.jpg',
+  'MotoGP 25': '/images/games/motogp_25.jpg',
+  'MotoGP 24': '/images/games/motogp_24.jpg',
+  'Alan Wake 2': '/images/games/alan_wake_2.jpg',
+  'Hogwarts Legacy': '/images/games/hogwarts_legacy.jpg',
+  'GTA VI': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg', // GTA V fallback
+  'Red Dead Redemption 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg',
+  'Cyberpunk 2077': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
+  'Call of Duty: BO6': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2933080/header.jpg',
+  'The Witcher 3': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg',
+  'Spider-Man 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817070/header.jpg',
+  'Elden Ring': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
+  'God of War Ragnarök': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg',
+  'Forza Horizon 5': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1551360/header.jpg',
+  'Mortal Kombat 1': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1971870/header.jpg'
+};
+
 function seedGames() {
   if (db.get('games').value().length === 0) {
     const games = [
-      { id: uuidv4(), name: 'EA FC 26',              genre: 'Sports',           platform: 'Cloud', image: 'https://placehold.co/400x220/1a1a2e/00d4ff?text=EA+FC+26&font=montserrat',         description: 'Sepak bola paling realistis!',              rating: 4.8, popular: true,  new: true,  tag: 'NEW'        },
-      { id: uuidv4(), name: 'EA FC 25',              genre: 'Sports',           platform: 'Cloud', image: 'https://placehold.co/400x220/1a1a2e/00d4ff?text=EA+FC+25&font=montserrat',         description: 'Edisi terdahulu EA FC.',                    rating: 4.7, popular: true,  new: false, tag: 'POPULAR'    },
-      { id: uuidv4(), name: 'MotoGP 25',             genre: 'Racing',           platform: 'Cloud', image: 'https://placehold.co/400x220/0d0d1a/ff6b35?text=MotoGP+25&font=montserrat',        description: 'Balapan MotoGP terbaru.',                   rating: 4.6, popular: true,  new: true,  tag: 'NEW'        },
-      { id: uuidv4(), name: 'MotoGP 24',             genre: 'Racing',           platform: 'Cloud', image: 'https://placehold.co/400x220/0d0d1a/ff6b35?text=MotoGP+24&font=montserrat',        description: 'Seri MotoGP sebelumnya.',                   rating: 4.5, popular: true,  new: false, tag: 'HOT'        },
-      { id: uuidv4(), name: 'Alan Wake 2',            genre: 'Horror/Action',   platform: 'Cloud', image: 'https://placehold.co/400x220/0a0a0a/7b2fff?text=Alan+Wake+2&font=montserrat',      description: 'Thriller psychological horror terbaik.',    rating: 4.9, popular: true,  new: false, tag: 'TOP RATED'  },
-      { id: uuidv4(), name: 'Hogwarts Legacy',        genre: 'RPG',             platform: 'Cloud', image: 'https://placehold.co/400x220/1a0a2e/ffcc00?text=Hogwarts+Legacy&font=montserrat',  description: 'Jelajahi dunia sihir Hogwarts.',            rating: 4.8, popular: true,  new: false, tag: 'BESTSELLER' },
-      { id: uuidv4(), name: 'GTA VI',                 genre: 'Action',          platform: 'Cloud', image: 'https://placehold.co/400x220/0a1a0a/00ff88?text=GTA+VI&font=montserrat',           description: 'Open world terbesar Rockstar Games.',       rating: 5.0, popular: true,  new: true,  tag: 'COMING SOON'},
-      { id: uuidv4(), name: 'Red Dead Redemption 2',  genre: 'Action/Adventure',platform: 'Cloud', image: 'https://placehold.co/400x220/1a0a00/ff4500?text=RDR+2&font=montserrat',            description: 'Petualangan koboi epik.',                   rating: 4.9, popular: true,  new: false, tag: 'CLASSIC'    },
-      { id: uuidv4(), name: 'Cyberpunk 2077',         genre: 'RPG',             platform: 'Cloud', image: 'https://placehold.co/400x220/0a001a/ffff00?text=Cyberpunk+2077&font=montserrat',   description: 'Dunia dystopia futuristik Night City.',     rating: 4.7, popular: true,  new: false, tag: 'HOT'        },
-      { id: uuidv4(), name: 'Call of Duty: BO6',      genre: 'FPS',             platform: 'Cloud', image: 'https://placehold.co/400x220/0a0a0a/ff0000?text=COD+BO6&font=montserrat',          description: 'Multiplayer FPS terpanas.',                 rating: 4.6, popular: true,  new: true,  tag: 'NEW'        },
-      { id: uuidv4(), name: 'The Witcher 3',           genre: 'RPG',             platform: 'Cloud', image: 'https://placehold.co/400x220/001a0a/00ff44?text=The+Witcher+3&font=montserrat',    description: 'RPG terbaik sepanjang masa.',               rating: 5.0, popular: false, new: false, tag: 'LEGENDARY'  },
-      { id: uuidv4(), name: 'Spider-Man 2',            genre: 'Action',          platform: 'Cloud', image: 'https://placehold.co/400x220/1a001a/ff0066?text=Spider-Man+2&font=montserrat',     description: 'Berayun di New York sebagai Spider-Man.',   rating: 4.8, popular: true,  new: false, tag: 'POPULAR'    },
-      { id: uuidv4(), name: 'Elden Ring',              genre: 'Action RPG',      platform: 'Cloud', image: 'https://placehold.co/400x220/0a0500/ffaa00?text=Elden+Ring&font=montserrat',       description: 'Mahakarya FromSoftware x GRRM.',            rating: 4.9, popular: true,  new: false, tag: 'TOP RATED'  },
-      { id: uuidv4(), name: 'God of War Ragnarök',     genre: 'Action/Adventure',platform: 'Cloud', image: 'https://placehold.co/400x220/050010/4444ff?text=GoW+Ragnarok&font=montserrat',     description: 'Kratos vs para dewa Norse.',                rating: 4.9, popular: true,  new: false, tag: 'EPIC'       },
-      { id: uuidv4(), name: 'Forza Horizon 5',         genre: 'Racing',          platform: 'Cloud', image: 'https://placehold.co/400x220/001a00/44ff44?text=Forza+H5&font=montserrat',         description: 'Racing terbaik di Meksiko.',                rating: 4.7, popular: false, new: false, tag: 'HOT'        },
-      { id: uuidv4(), name: 'Mortal Kombat 1',         genre: 'Fighting',        platform: 'Cloud', image: 'https://placehold.co/400x220/1a0000/ff2222?text=MK+1&font=montserrat',             description: 'Fatality paling brutal.',                   rating: 4.5, popular: false, new: false, tag: 'BRUTAL'     }
+      { id: uuidv4(), name: 'EA FC 26',              genre: 'Sports',           platform: 'Cloud', image: gameImageMapping['EA FC 26'],         description: 'Sepak bola paling realistis!',              rating: 4.8, popular: true,  new: true,  tag: 'NEW'        },
+      { id: uuidv4(), name: 'EA FC 25',              genre: 'Sports',           platform: 'Cloud', image: gameImageMapping['EA FC 25'],         description: 'Edisi terdahulu EA FC.',                    rating: 4.7, popular: true,  new: false, tag: 'POPULAR'    },
+      { id: uuidv4(), name: 'MotoGP 25',             genre: 'Racing',           platform: 'Cloud', image: gameImageMapping['MotoGP 25'],        description: 'Balapan MotoGP terbaru.',                   rating: 4.6, popular: true,  new: true,  tag: 'NEW'        },
+      { id: uuidv4(), name: 'MotoGP 24',             genre: 'Racing',           platform: 'Cloud', image: gameImageMapping['MotoGP 24'],        description: 'Seri MotoGP sebelumnya.',                   rating: 4.5, popular: true,  new: false, tag: 'HOT'        },
+      { id: uuidv4(), name: 'Alan Wake 2',            genre: 'Horror/Action',   platform: 'Cloud', image: gameImageMapping['Alan Wake 2'],      description: 'Thriller psychological horror terbaik.',    rating: 4.9, popular: true,  new: false, tag: 'TOP RATED'  },
+      { id: uuidv4(), name: 'Hogwarts Legacy',        genre: 'RPG',             platform: 'Cloud', image: gameImageMapping['Hogwarts Legacy'],  description: 'Jelajahi dunia sihir Hogwarts.',            rating: 4.8, popular: true,  new: false, tag: 'BESTSELLER' },
+      { id: uuidv4(), name: 'GTA VI',                 genre: 'Action',          platform: 'Cloud', image: gameImageMapping['GTA VI'],           description: 'Open world terbesar Rockstar Games.',       rating: 5.0, popular: true,  new: true,  tag: 'COMING SOON'},
+      { id: uuidv4(), name: 'Red Dead Redemption 2',  genre: 'Action/Adventure',platform: 'Cloud', image: gameImageMapping['Red Dead Redemption 2'],description: 'Petualangan koboi epik.',                   rating: 4.9, popular: true,  new: false, tag: 'CLASSIC'    },
+      { id: uuidv4(), name: 'Cyberpunk 2077',         genre: 'RPG',             platform: 'Cloud', image: gameImageMapping['Cyberpunk 2077'],   description: 'Dunia dystopia futuristik Night City.',     rating: 4.7, popular: true,  new: false, tag: 'HOT'        },
+      { id: uuidv4(), name: 'Call of Duty: BO6',      genre: 'FPS',             platform: 'Cloud', image: gameImageMapping['Call of Duty: BO6'],description: 'Multiplayer FPS terpanas.',                 rating: 4.6, popular: true,  new: true,  tag: 'NEW'        },
+      { id: uuidv4(), name: 'The Witcher 3',           genre: 'RPG',             platform: 'Cloud', image: gameImageMapping['The Witcher 3'],    description: 'RPG terbaik sepanjang masa.',               rating: 5.0, popular: false, new: false, tag: 'LEGENDARY'  },
+      { id: uuidv4(), name: 'Spider-Man 2',            genre: 'Action',          platform: 'Cloud', image: gameImageMapping['Spider-Man 2'],     description: 'Berayun di New York sebagai Spider-Man.',   rating: 4.8, popular: true,  new: false, tag: 'POPULAR'    },
+      { id: uuidv4(), name: 'Elden Ring',              genre: 'Action RPG',      platform: 'Cloud', image: gameImageMapping['Elden Ring'],       description: 'Mahakarya FromSoftware x GRRM.',            rating: 4.9, popular: true,  new: false, tag: 'TOP RATED'  },
+      { id: uuidv4(), name: 'God of War Ragnarök',     genre: 'Action/Adventure',platform: 'Cloud', image: gameImageMapping['God of War Ragnarök'],description: 'Kratos vs para dewa Norse.',                rating: 4.9, popular: true,  new: false, tag: 'EPIC'       },
+      { id: uuidv4(), name: 'Forza Horizon 5',         genre: 'Racing',          platform: 'Cloud', image: gameImageMapping['Forza Horizon 5'],  description: 'Racing terbaik di Meksiko.',                rating: 4.7, popular: false, new: false, tag: 'HOT'        },
+      { id: uuidv4(), name: 'Mortal Kombat 1',         genre: 'Fighting',        platform: 'Cloud', image: gameImageMapping['Mortal Kombat 1'],  description: 'Fatality paling brutal.',                   rating: 4.5, popular: false, new: false, tag: 'BRUTAL'     }
     ];
     db.get('games').push(...games).write();
     console.log('[DB] Games seeded:', games.length);
@@ -235,11 +254,32 @@ function cleanOldSessions() {
   }
 }
 
+function updateGameImages() {
+  try {
+    const games = db.get('games').value() || [];
+    let updated = false;
+    games.forEach(g => {
+      const correctImage = gameImageMapping[g.name];
+      if (correctImage && (g.image !== correctImage || g.image.includes('placehold.co') || g.image.startsWith('data:image'))) {
+        g.image = correctImage;
+        updated = true;
+      }
+    });
+    if (updated) {
+      db.write();
+      console.log('[DB] ✅ Game images successfully updated to local/CDN paths');
+    }
+  } catch (e) {
+    console.error('[DB] ❌ Update game images failed:', e.message);
+  }
+}
+
 function initDB() {
   seedAdmin();
   seedPlans();
   seedGames();
   seedTestimonials();
+  updateGameImages();
   cleanOldSessions();
 }
 
