@@ -141,7 +141,7 @@ router.get('/order/:planId', ensureAuthenticated, (req, res) => {
     title: `Order ${plan.name} - AlexCloud`,
     user: req.user,
     plan,
-    qrisImage: process.env.QRIS_IMAGE,
+    qrisImage: process.env.QRIS_IMAGE || 'https://img1.pixhost.to/images/5339/592942381_rizzhosting.jpg',
     waNumber: process.env.WA_NUMBER
   });
 });
@@ -324,7 +324,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     discount,
     fr3Success: !!fr3Data?.data?.trxId,
     fr3Error,
-    qrisImage: process.env.QRIS_IMAGE,
+    qrisImage: process.env.QRIS_IMAGE || 'https://img1.pixhost.to/images/5339/592942381_rizzhosting.jpg',
     waNumber: process.env.WA_NUMBER || '82328437656'
   });
 });
