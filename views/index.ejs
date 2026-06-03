@@ -84,7 +84,7 @@
       <% trendingGames.forEach((game, idx) => { %>
       <div class="trending-card">
         <div class="trending-rank">#<%= idx + 1 %></div>
-        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img" width="200" height="110" loading="lazy" decoding="async">
+        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img" width="200" height="300" loading="lazy" decoding="async">
         <div class="trending-info">
           <div class="trending-name"><%= game.name %></div>
           <div class="trending-genre"><%= game.genre %></div>
@@ -172,7 +172,7 @@
       <% games.slice(0, 8).forEach(game => { %>
       <div class="game-card">
         <div class="game-img-wrap">
-          <img src="<%= game.image %>" alt="<%= game.name %>" width="480" height="270" loading="lazy" decoding="async">
+          <img src="<%= game.image %>" alt="<%= game.name %>" width="300" height="450" loading="lazy" decoding="async">
           <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
         </div>
         <div class="game-body">

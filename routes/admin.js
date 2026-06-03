@@ -371,7 +371,7 @@ router.post('/games', ensureAdmin, (req, res) => {
   if (finalImage) {
     finalImage = optimizeImageUrl(finalImage);
   } else {
-    finalImage = `https://placehold.co/600x340/0d1428/00d4ff?text=${encodeURIComponent(name)}&font=montserrat`;
+    finalImage = `https://placehold.co/600x900/0d1428/00d4ff?text=${encodeURIComponent(name)}&font=montserrat`;
   }
 
   db.get('games').push({

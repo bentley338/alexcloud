@@ -83,11 +83,11 @@
               placeholder="https://... / https://upload.wikimedia.org/..."
               oninput="previewCover(this.value)">
             <small style="color:var(--text-muted); font-size:0.78rem; margin-top:0.3rem; display:block;">
-              💡 Sarankan resolusi 600×340px (16:9). Bisa pakai link dari Google Images, Wikipedia, RAWG.io, dll.
+              💡 Sarankan resolusi 600×900px (2:3). Bisa pakai link dari Google Images, Wikipedia, RAWG.io, dll.
             </small>
           </div>
           <!-- Preview -->
-          <div id="coverPreviewWrap" style="border:2px dashed var(--border); border-radius:var(--radius); overflow:hidden; aspect-ratio:16/9; background:rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center; max-width:400px;">
+          <div id="coverPreviewWrap" style="border:2px dashed var(--border); border-radius:var(--radius); overflow:hidden; aspect-ratio:2/3; background:rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center; max-width:250px;">
             <img id="coverPreviewImg" src="<%= game.image %>" alt="Preview" 
               style="width:100%; height:100%; object-fit:cover; display:<%= game.image ? 'block' : 'none' %>;"
               onerror="this.style.display='none'; document.getElementById('coverPlaceholder').style.display='flex'">
@@ -169,7 +169,7 @@
         <div style="padding:1rem;">
           <div class="game-card" style="cursor:default; pointer-events:none;">
             <div class="game-img-wrap">
-              <img id="previewCardImg" src="<%= game.image %>" alt="<%= game.name %>" onerror="this.src='https://placehold.co/400x220/0d1428/00d4ff?text=Game+Image&font=montserrat'">
+              <img id="previewCardImg" src="<%= game.image %>" alt="<%= game.name %>" onerror="this.src='https://placehold.co/300x450/0d1428/00d4ff?text=Game+Image&font=montserrat'">
               <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
             </div>
             <div class="game-body">

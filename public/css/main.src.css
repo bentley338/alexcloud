@@ -789,7 +789,7 @@ section { position: relative; z-index: 1; }
 
 .game-img-wrap {
   position: relative;
-  aspect-ratio: 16/9;
+  aspect-ratio: 2/3;
   overflow: hidden;
 }
 
@@ -2082,10 +2082,10 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 }
 
 #gamesDisplay.list-view .game-img-wrap {
-  width: 200px;
+  width: 120px;
   flex-shrink: 0;
-  aspect-ratio: auto;
-  height: 120px;
+  aspect-ratio: 2/3;
+  height: 180px;
 }
 
 #gamesDisplay.list-view .game-body { flex: 1; }
@@ -2098,7 +2098,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   gap: 0.75rem !important;
 }
 
-#gamesDisplay.compact-view .game-img-wrap { aspect-ratio: 4/3; }
+#gamesDisplay.compact-view .game-img-wrap { aspect-ratio: 2/3; }
 
 #gamesDisplay.compact-view .game-body { padding: 0.6rem; }
 
@@ -2687,7 +2687,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 .trending-img {
   width: 100%;
-  height: 110px;
+  aspect-ratio: 2/3;
   object-fit: cover;
 }
 
@@ -2812,8 +2812,8 @@ input:focus-visible,
    🖼️ IMAGE SIZING - Prevent CLS
    ============================================ */
 .trending-img {
-  width: 200px;
-  height: 110px;
+  width: 100%;
+  aspect-ratio: 2/3;
   object-fit: cover;
 }
 
@@ -2998,7 +2998,7 @@ input:focus-visible,
 
   /* Trending scroll mobile */
   .trending-card { width: 160px; }
-  .trending-img { width: 160px; height: 90px; }
+  .trending-img { width: 100%; height: auto; }
 
   /* Section header */
   .section-header { margin-bottom: 2rem; }
@@ -3059,7 +3059,7 @@ input:focus-visible,
 
   /* Trending cards lebih kecil */
   .trending-card { width: 140px; }
-  .trending-img { width: 140px; height: 80px; }
+  .trending-img { width: 100%; height: auto; }
   .trending-section { padding: 2rem 0; }
 
   /* Nav */

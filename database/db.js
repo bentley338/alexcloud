@@ -193,16 +193,16 @@ const gameImageMapping = {
   'MotoGP 24': '/images/games/motogp_24.jpg',
   'Alan Wake 2': '/images/games/alan_wake_2.jpg',
   'Hogwarts Legacy': '/images/games/hogwarts_legacy.jpg',
-  'GTA VI': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg', // GTA V fallback
-  'Red Dead Redemption 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg',
-  'Cyberpunk 2077': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
+  'GTA VI': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/library_600x900_2x.jpg', // GTA V fallback
+  'Red Dead Redemption 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/library_600x900_2x.jpg',
+  'Cyberpunk 2077': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/library_600x900_2x.jpg',
   'Call of Duty: BO6': '/images/games/cod_bo6.jpg',
-  'The Witcher 3': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg',
-  'Spider-Man 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817070/header.jpg',
-  'Elden Ring': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
-  'God of War Ragnarök': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg',
-  'Forza Horizon 5': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1551360/header.jpg',
-  'Mortal Kombat 1': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1971870/header.jpg'
+  'The Witcher 3': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/library_600x900_2x.jpg',
+  'Spider-Man 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817070/library_600x900_2x.jpg',
+  'Elden Ring': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/library_600x900_2x.jpg',
+  'God of War Ragnarök': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2322010/library_600x900_2x.jpg',
+  'Forza Horizon 5': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1551360/library_600x900_2x.jpg',
+  'Mortal Kombat 1': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1971870/library_600x900_2x.jpg'
 };
 
 function seedGames() {
