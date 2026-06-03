@@ -2983,6 +2983,9 @@ input:focus-visible,
   .admin-sidebar { display: none; }
   .admin-content { margin-left: 0; }
 
+  /* Hide popular games section on mobile beranda */
+  #games-section { display: none !important; }
+
   /* Footer mobile */
   .footer-container {
     grid-template-columns: 1fr;
