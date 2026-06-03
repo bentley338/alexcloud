@@ -196,7 +196,7 @@ const gameImageMapping = {
   'GTA VI': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg', // GTA V fallback
   'Red Dead Redemption 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg',
   'Cyberpunk 2077': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
-  'Call of Duty: BO6': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2933080/header.jpg',
+  'Call of Duty: BO6': '/images/games/cod_bo6.jpg',
   'The Witcher 3': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg',
   'Spider-Man 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817070/header.jpg',
   'Elden Ring': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
