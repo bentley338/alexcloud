@@ -225,9 +225,14 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   let fr3Data = null;
   let fr3Error = null;
 
+  // Generate a local unique code (10-99) if price is a multiple of 100 (round number)
+  // to force the gateway to generate a unique QRIS and avoid payment matching failures.
+  const localUniqueCode = actualPrice % 100 === 0 ? (Math.floor(Math.random() * 90) + 10) : 0;
+  const nominal = actualPrice + localUniqueCode;
+
   try {
     const https = require('https');
-    const payload = JSON.stringify({ apikey: FR3_API_KEY, nominal: actualPrice });
+    const payload = JSON.stringify({ apikey: FR3_API_KEY, nominal: nominal });
 
     fr3Data = await new Promise((resolve, reject) => {
       const options = {
@@ -283,8 +288,8 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     // FR3 data
     fr3TrxId: fr3Data?.data?.trxId || null,
     fr3QrString: fr3Data?.data?.qr_string || null,
-    fr3TotalTransfer: fr3Data?.data?.totalTransfer || actualPrice,
-    fr3UniqueCode: fr3Data?.data?.uniqueCode || 0,
+    fr3TotalTransfer: fr3Data?.data?.totalTransfer || nominal,
+    fr3UniqueCode: fr3Data?.data?.totalTransfer ? (fr3Data.data.totalTransfer - actualPrice) : localUniqueCode,
     fr3Expiry: fr3Data?.data?.expiry || null,
     fr3Error: fr3Error || null,
     paymentMethod: fr3Data?.data?.trxId ? 'fr3_qris' : 'manual'
