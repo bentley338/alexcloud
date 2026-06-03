@@ -207,6 +207,16 @@
         <span>Pembayaran Manual (WhatsApp)</span>
       </div>
 
+      <% if (fr3Error && typeof user !== 'undefined' && user && user.role === 'admin') { %>
+      <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start; margin: 1.25rem; padding: 1rem; border-radius: 12px; background: rgba(255, 68, 68, 0.07); border: 1px solid rgba(255, 68, 68, 0.15); color: #ff8888; text-align: left;">
+        <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Debug Admin: API Gateway Error</span>
+        </div>
+        <span style="font-size:0.8rem; font-family:monospace; word-break:break-all;"><%= fr3Error %></span>
+      </div>
+      <% } %>
+
       <div class="qr-section">
         <div class="qr-brand-row">
           <img src="/images/qris-logo.svg" alt="QRIS" style="height:28px;">
