@@ -200,15 +200,20 @@
     <% } else { %>
     <!-- ======= FALLBACK: Manual Payment ======= -->
     <div class="pay-card">
-      <% if (fr3Error) { %>
-      <div class="fr3-error-banner">
+    <% if (fr3Error) { %>
+    <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start;">
+      <div style="display:flex; align-items:center; gap:0.5rem;">
         <i class="fas fa-exclamation-triangle"></i>
-        <div>
-          <strong>Tidak dapat membuat QRIS otomatis</strong><br>
-          <span style="font-size:0.82rem;">Silakan bayar manual via WhatsApp Admin.</span>
-        </div>
+        <strong>Tidak dapat membuat QRIS otomatis</strong>
       </div>
+      <span style="font-size:0.82rem;">Silakan bayar manual via WhatsApp Admin.</span>
+      <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+        <div style="margin-top:0.5rem; background:rgba(0,0,0,0.3); padding:0.4rem 0.6rem; border-radius:6px; font-family:monospace; font-size:0.75rem; color:#ff8888; width:100%; border:1px solid rgba(255,100,100,0.2); text-align:left; word-break:break-all;">
+          Debug Admin: <%= fr3Error %>
+        </div>
       <% } %>
+    </div>
+    <% } %>
 
       <div class="qr-section">
         <% if (qrisImage) { %>

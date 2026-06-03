@@ -15,6 +15,18 @@ if (process.env.CLOUDINARY_URL) {
   process.env.CLOUDINARY_URL = url.trim();
 }
 
+// Fix common copy-paste and quote wrapping mistakes for FR3_API_KEY env var
+if (process.env.FR3_API_KEY) {
+  let key = process.env.FR3_API_KEY.trim();
+  if (key.startsWith("'") && key.endsWith("'")) {
+    key = key.slice(1, -1);
+  }
+  if (key.startsWith('"') && key.endsWith('"')) {
+    key = key.slice(1, -1);
+  }
+  process.env.FR3_API_KEY = key.trim();
+}
+
 const express = require('express');
 const session = require('express-session');
 const flash = require('express-flash');
