@@ -219,7 +219,7 @@ router.post('/settings/test-whatsapp', ensureAdmin, async (req, res) => {
   const { sendWhatsAppNotification } = require('../utils/whatsapp');
   
   try {
-    const result = await sendWhatsAppNotification(testMessage);
+    const result = await sendWhatsAppNotification(testMessage, true);
     if (result.success) {
       req.flash('success', 'Pesan tes WhatsApp berhasil terkirim ke nomor Anda!');
     } else {

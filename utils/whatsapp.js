@@ -6,11 +6,11 @@ const { db } = require('../database/db');
  * Sends a WhatsApp notification using either CallMeBot or Twilio Sandbox
  * @param {string} messageText - The message content to send
  */
-async function sendWhatsAppNotification(messageText) {
+async function sendWhatsAppNotification(messageText, isTest = false) {
   const settings = db.get('settings').value() || {};
   const isEnabled = settings.whatsappEnabled === true || settings.whatsappEnabled === 'true';
   
-  if (!isEnabled) {
+  if (!isEnabled && !isTest) {
     console.log('[WA NOTIF] WhatsApp notifications are disabled.');
     return { success: false, reason: 'disabled' };
   }
