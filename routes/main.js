@@ -361,12 +361,20 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
         db.get('orders').find({ id: order.id }).assign({ activatedAt: new Date().toISOString() }).write();
       }
 
-      // Trigger WhatsApp Notification for Admin
-      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      // Trigger Notifications for Admin
       const formattedPrice = 'Rp ' + order.price.toLocaleString('id-ID');
-      const waMsg = `🎉 *PEMBAYARAN QRIS SUKSES*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
-      sendWhatsAppNotification(waMsg).catch(err => {
+      const textMsg = `🎉 *PEMBAYARAN QRIS SUKSES*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
+      
+      // WhatsApp
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      sendWhatsAppNotification(textMsg).catch(err => {
         console.error('[WA NOTIF] Notification send error:', err.message);
+      });
+
+      // Telegram
+      const { sendTelegramNotification } = require('../utils/telegram');
+      sendTelegramNotification(textMsg).catch(err => {
+        console.error('[TG NOTIF] Notification send error:', err.message);
       });
     }
 

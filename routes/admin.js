@@ -228,6 +228,37 @@ router.post('/settings/test-whatsapp', ensureAdmin, async (req, res) => {
   res.redirect('/admin/settings/whatsapp');
 });
 
+router.post('/settings/telegram', ensureAdmin, (req, res) => {
+  const { telegramEnabled, telegramBotToken, telegramChatId } = req.body;
+  
+  db.get('settings').assign({
+    telegramEnabled: !!telegramEnabled,
+    telegramBotToken: telegramBotToken ? telegramBotToken.trim() : '',
+    telegramChatId: telegramChatId ? telegramChatId.trim() : ''
+  }).write();
+  
+  req.flash('success', 'Setelan notifikasi Telegram berhasil disimpan.');
+  res.redirect('/admin/settings/whatsapp');
+});
+
+router.post('/settings/test-telegram', ensureAdmin, async (req, res) => {
+  const { testMessage } = req.body;
+  const { sendTelegramNotification } = require('../utils/telegram');
+  
+  try {
+    const result = await sendTelegramNotification(testMessage);
+    if (result.success) {
+      req.flash('success', 'Pesan tes Telegram berhasil terkirim ke bot Anda!');
+    } else {
+      req.flash('error', `Gagal mengirim pesan tes Telegram: ${result.reason || result.body || 'Unknown error'}`);
+    }
+  } catch (err) {
+    req.flash('error', `Terjadi kesalahan saat memanggil API Telegram: ${err.message}`);
+  }
+  
+  res.redirect('/admin/settings/whatsapp');
+});
+
 // =====================
 // USERS
 // =====================

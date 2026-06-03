@@ -1,7 +1,7 @@
 <% currentPage = 'settings-whatsapp'; %>
 <%- include('layout-header') %>
 
-<h1 class="admin-page-title"><i class="fab fa-whatsapp"></i> Setelan Notifikasi WhatsApp</h1>
+<h1 class="admin-page-title"><i class="fas fa-bell"></i> Setelan Notifikasi Admin</h1>
 
 <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
 <% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
@@ -10,91 +10,200 @@
 <% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
 <% } %>
 
-<div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:1.5rem; align-items: start; margin-bottom: 2rem;">
+<!-- Tab Headers -->
+<div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+  <button onclick="switchTab('telegram')" id="tab-btn-telegram" class="tab-btn active" style="padding:0.6rem 1.2rem; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:white; font-family:var(--font-ui); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:0.2s;">
+    <i class="fab fa-telegram" style="color:#0088cc; font-size:1.1rem;"></i> Notifikasi Telegram (Rekomendasi - Instan & Stabil)
+  </button>
+  <button onclick="switchTab('whatsapp')" id="tab-btn-whatsapp" class="tab-btn" style="padding:0.6rem 1.2rem; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-muted); font-family:var(--font-ui); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:0.2s;">
+    <i class="fab fa-whatsapp" style="color:#25d366; font-size:1.1rem;"></i> Notifikasi WhatsApp
+  </button>
+</div>
+
+<!-- TELEGRAM SECTION -->
+<div id="section-telegram" class="tab-content">
+  <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:1.5rem; align-items: start; margin-bottom: 2rem;">
+    <!-- Form Telegram -->
+    <div class="card" style="border-color: rgba(0, 136, 204, 0.25); overflow:hidden;">
+      <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(0,136,204,0.02);">
+        <div class="card-title"><i class="fab fa-telegram"></i> Setelan Telegram Bot</div>
+      </div>
+      <div style="padding:1.5rem;">
+        <form action="/admin/settings/telegram" method="POST">
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:700;">
+              <input type="checkbox" name="telegramEnabled" value="true" <%= settings.telegramEnabled === true || settings.telegramEnabled === 'true' ? 'checked' : '' %>>
+              Aktifkan Notifikasi Telegram
+            </label>
+            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Kirimkan notifikasi transaksi ke bot Telegram pribadi Anda secara real-time.</small>
+          </div>
+          
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Telegram Bot Token</label>
+            <input type="text" name="telegramBotToken" class="form-input" placeholder="Contoh: 123456789:ABCdefGhIJKlmNoPQRsT" value="<%= settings.telegramBotToken || '' %>" required style="font-family:monospace;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom:1.5rem;">
+            <label class="form-label">Telegram Chat ID Anda</label>
+            <input type="text" name="telegramChatId" class="form-input" placeholder="Contoh: 987654321" value="<%= settings.telegramChatId || '' %>" required style="font-family:monospace;">
+          </div>
+          
+          <button type="submit" class="btn-primary" style="width:100%; justify-content:center; background:linear-gradient(135deg, #0088cc, #005580); border-color:#0088cc; box-shadow:0 4px 15px rgba(0, 136, 204, 0.25);">
+            <i class="fas fa-save"></i> Simpan Setelan Telegram
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Panduan Telegram -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Membuat Bot Telegram Sendiri (Hanya 1 Menit & 100% Stabil)</div>
+      </div>
+      <div style="padding:1.5rem; font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
+        <p style="margin-bottom:0.75rem;">Notifikasi Telegram jauh lebih **stabil, instan, dan gratis selamanya** dibanding WhatsApp gratisan yang sering terhambat server. Cara buatnya sangat mudah:</p>
+        
+        <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
+          <li>Buka Telegram di HP/PC Anda, cari bot resmi **`@BotFather`** lalu ketik **`/newbot`**.</li>
+          <li>Ikuti panduan: masukkan **Nama Bot** bebas, lalu masukkan **Username Bot** (wajib diakhiri kata `bot`, contoh: `alexcloud_notif_bot`).</li>
+          <li>Anda akan langsung dikirimi pesan berisi **HTTP API Token** (salin kode ini dan masukkan ke input **Telegram Bot Token** di kiri).</li>
+          <li>Cari bot bernama **`@userinfobot`** di Telegram Anda, lalu klik Start. Bot tersebut akan memberikan nomor ID Anda (salin nomor ini dan masukkan ke input **Telegram Chat ID** di kiri).</li>
+          <li>Buka bot yang baru saja Anda buat di langkah 2, lalu klik **Start** (agar bot diizinkan mengirim pesan ke Anda).</li>
+        </ol>
+      </div>
+    </div>
+  </div>
   
-  <!-- Form Konfigurasi -->
-  <div class="card" style="border-color: rgba(232, 115, 42, 0.25); overflow:hidden;">
-    <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(232,115,42,0.02);">
-      <div class="card-title"><i class="fas fa-cog"></i> Konfigurasi WhatsApp API</div>
+  <!-- Uji Coba Telegram -->
+  <% if (settings.telegramBotToken && settings.telegramChatId) { %>
+  <div class="card" style="max-width: 600px; border-color: rgba(0, 136, 204, 0.25);">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes Telegram</div>
     </div>
     <div style="padding:1.5rem;">
-      <form action="/admin/settings/whatsapp" method="POST">
+      <form action="/admin/settings/test-telegram" method="POST">
         <div class="form-group" style="margin-bottom:1.25rem;">
-          <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:700;">
-            <input type="checkbox" name="whatsappEnabled" value="true" <%= settings.whatsappEnabled === true || settings.whatsappEnabled === 'true' ? 'checked' : '' %>>
-            Aktifkan Notifikasi WhatsApp Otomatis
-          </label>
-          <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Centang ini untuk mengirim notifikasi ke WhatsApp Anda setiap kali ada transaksi sukses.</small>
+          <label class="form-label">Isi Pesan Tes</label>
+          <textarea name="testMessage" class="form-input" rows="3" required style="resize:vertical; font-family:var(--font-ui);">⚡ *AlexCloud Telegram Notif Terhubung!* ⚡
+
+Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! 🎮</textarea>
         </div>
-        
-        <div class="form-group" style="margin-bottom:1.25rem;">
-          <label class="form-label">Nomor WhatsApp Anda (Gunakan kode negara, contoh: 628xxxxxx)</label>
-          <input type="text" name="whatsappPhone" class="form-input" placeholder="Contoh: 6282328437656" value="<%= settings.whatsappPhone || '' %>" required>
-          <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan tanpa menggunakan tanda tambah (+).</small>
-        </div>
-        
-        <div class="form-group" style="margin-bottom:1.5rem;">
-          <label class="form-label">CallMeBot API Key</label>
-          <input type="text" name="whatsappApiKey" class="form-input" placeholder="Masukkan API Key yang Anda dapatkan dari CallMeBot" value="<%= settings.whatsappApiKey || '' %>" required>
-        </div>
-        
-        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
-          <i class="fas fa-save"></i> Simpan Konfigurasi
+        <button type="submit" class="btn-secondary" style="border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.2rem;">
+          <i class="fas fa-paper-plane"></i> Kirim Pesan Tes Telegram
         </button>
       </form>
     </div>
   </div>
+  <% } %>
+</div>
 
-  <!-- Petunjuk Setup -->
-  <div class="card">
+<!-- WHATSAPP SECTION (HIDDEN BY DEFAULT) -->
+<div id="section-whatsapp" class="tab-content" style="display:none;">
+  <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:1.5rem; align-items: start; margin-bottom: 2rem;">
+    <!-- Form WA -->
+    <div class="card" style="border-color: rgba(232, 115, 42, 0.25); overflow:hidden;">
+      <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(232,115,42,0.02);">
+        <div class="card-title"><i class="fab fa-whatsapp"></i> Konfigurasi WhatsApp API</div>
+      </div>
+      <div style="padding:1.5rem;">
+        <form action="/admin/settings/whatsapp" method="POST">
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:700;">
+              <input type="checkbox" name="whatsappEnabled" value="true" <%= settings.whatsappEnabled === true || settings.whatsappEnabled === 'true' ? 'checked' : '' %>>
+              Aktifkan Notifikasi WhatsApp
+            </label>
+            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Kirimkan notifikasi transaksi ke WhatsApp Anda.</small>
+          </div>
+          
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Nomor WhatsApp Anda (Gunakan kode negara, contoh: 628xxxxxx)</label>
+            <input type="text" name="whatsappPhone" class="form-input" placeholder="Contoh: 6282328437656" value="<%= settings.whatsappPhone || '' %>" required>
+            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan tanpa menggunakan tanda tambah (+).</small>
+          </div>
+          
+          <div class="form-group" style="margin-bottom:1.5rem;">
+            <label class="form-label">CallMeBot API Key</label>
+            <input type="text" name="whatsappApiKey" class="form-input" placeholder="Masukkan API Key yang Anda dapatkan dari CallMeBot" value="<%= settings.whatsappApiKey || '' %>" required>
+          </div>
+          
+          <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
+            <i class="fas fa-save"></i> Simpan Setelan WhatsApp
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Panduan WA -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Mendapatkan API Key CallMeBot</div>
+      </div>
+      <div style="padding:1.5rem; font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
+        <p style="margin-bottom:1rem;">Untuk mengirim pesan WhatsApp pribadi secara gratis, kita menggunakan API dari **CallMeBot**:</p>
+        
+        <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.6rem;">
+          <li>Buka website resmi CallMeBot berikut:  
+            <a href="https://www.callmebot.com/blog/free-api-whatsapp-messages/" target="_blank" style="color:var(--accent-blue); font-weight:700; text-decoration:underline;">
+              Cek Nomor Bot Aktif di CallMeBot.com <i class="fas fa-external-link-alt"></i>
+            </a>
+          </li>
+          <li>Cari bagian **"1. Add the phone number..."** di halaman tersebut. Simpan nomor bot WhatsApp yang tertera di sana ke kontak HP Anda (misal beri nama "CallMeBot").</li>
+          <li>Buka WhatsApp Anda, cari kontak bot tersebut, lalu kirimkan pesan berikut:  
+            <code style="display:block; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:6px; margin-top:0.25rem; color:#fff; font-family:monospace; border:1px solid var(--border);">I allow callmebot to send me messages</code>
+          </li>
+          <li>Tunggu beberapa detik, bot tersebut akan membalas dengan memberikan **API Key** khusus untuk nomor WhatsApp Anda.</li>
+          <li>Salin API Key tersebut, lalu tempelkan (paste) pada input **CallMeBot API Key** di sebelah kiri.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Uji Coba WA -->
+  <% if (settings.whatsappPhone && settings.whatsappApiKey) { %>
+  <div class="card" style="max-width: 600px;">
     <div class="card-header">
-      <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Mendapatkan API Key CallMeBot (Gratis)</div>
+      <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes WhatsApp</div>
     </div>
-    <div style="padding:1.5rem; font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
-      <p style="margin-bottom:1rem;">Untuk mengirim pesan WhatsApp pribadi secara gratis, kita menggunakan API dari **CallMeBot**. Karena nomor bot WhatsApp CallMeBot sering berubah (di-update oleh sistem mereka), silakan ikuti panduan berikut:</p>
-      
-      <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.6rem;">
-        <li>Buka website resmi CallMeBot berikut:  
-          <a href="https://www.callmebot.com/blog/free-api-whatsapp-messages/" target="_blank" style="color:var(--accent-blue); font-weight:700; text-decoration:underline;">
-            Cek Nomor Bot Aktif di CallMeBot.com <i class="fas fa-external-link-alt"></i>
-          </a>
-        </li>
-        <li>Cari bagian **"1. Add the phone number..."** di halaman tersebut. Simpan nomor bot WhatsApp yang tertera di sana ke kontak HP Anda (misal beri nama "CallMeBot").</li>
-        <li>Buka WhatsApp Anda, cari kontak bot tersebut, lalu kirimkan pesan berikut:  
-          <code style="display:block; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:6px; margin-top:0.25rem; color:#fff; font-family:monospace; border:1px solid var(--border);">I allow callmebot to send me messages</code>
-        </li>
-        <li>Tunggu beberapa detik, bot tersebut akan membalas dengan memberikan **API Key** khusus untuk nomor WhatsApp Anda.</li>
-        <li>Salin API Key tersebut, lalu tempelkan (paste) pada input **CallMeBot API Key** di sebelah kiri.</li>
-      </ol>
-      
-      <div style="background:rgba(232, 115, 42, 0.04); border:1px solid rgba(232, 115, 42, 0.15); border-radius:10px; padding:0.85rem; margin-top:1rem; font-size:0.8rem; color:var(--text-muted);">
-        <i class="fas fa-shield-alt" style="color:var(--accent-orange); margin-right:0.35rem;"></i> **Catatan Keamanan:** API CallMeBot ini gratis dan aman karena pesannya dikirim khusus ke nomor WhatsApp Anda sendiri, sehingga berfungsi sebagai notifikasi internal admin yang instan.
-      </div>
+    <div style="padding:1.5rem;">
+      <form action="/admin/settings/test-whatsapp" method="POST">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-label">Isi Pesan Tes</label>
+          <textarea name="testMessage" class="form-input" rows="3" required style="resize:vertical; font-family:var(--font-ui);">Halo Admin! ⚡ Notifikasi WhatsApp dari AlexCloud telah berhasil terhubung dan siap memantau transaksi Anda! 🎮</textarea>
+        </div>
+        <button type="submit" class="btn-secondary" style="border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.2rem;">
+          <i class="fas fa-paper-plane"></i> Kirim Pesan Tes WhatsApp
+        </button>
+      </form>
     </div>
   </div>
-
+  <% } %>
 </div>
 
-<!-- Card Uji Coba (Kirim Tes Pesan) -->
-<% if (settings.whatsappPhone && settings.whatsappApiKey) { %>
-<div class="card" style="max-width: 600px;">
-  <div class="card-header">
-    <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes WhatsApp</div>
-  </div>
-  <div style="padding:1.5rem;">
-    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.25rem;">Gunakan form di bawah ini untuk mencoba mengirim pesan tes langsung ke nomor Anda untuk memastikan koneksi API sudah benar.</p>
-    
-    <form action="/admin/settings/test-whatsapp" method="POST">
-      <div class="form-group" style="margin-bottom:1.25rem;">
-        <label class="form-label">Isi Pesan Tes</label>
-        <textarea name="testMessage" class="form-input" rows="3" required style="resize:vertical; font-family:var(--font-ui);">Halo Admin! ⚡ Notifikasi WhatsApp dari AlexCloud telah berhasil terhubung dan siap memantau transaksi Anda! 🎮</textarea>
-      </div>
-      <button type="submit" class="btn-secondary" style="border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.2rem;">
-        <i class="fas fa-paper-plane"></i> Kirim Pesan Tes
-      </button>
-    </form>
-  </div>
-</div>
-<% } %>
+<style>
+.tab-btn.active {
+  background: rgba(232, 115, 42, 0.1) !important;
+  border-color: var(--accent-blue) !important;
+  color: white !important;
+}
+</style>
+
+<script>
+function switchTab(tab) {
+  // Hide all contents
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  // Remove active class from buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.color = 'var(--text-muted)';
+  });
+  
+  // Show target content
+  document.getElementById('section-' + tab).style.display = 'block';
+  // Add active to selected button
+  const activeBtn = document.getElementById('tab-btn-' + tab);
+  activeBtn.classList.add('active');
+  activeBtn.style.color = 'white';
+}
+</script>
 
 <%- include('layout-footer') %>
