@@ -527,8 +527,8 @@ router.get('/api/ping', (req, res) => {
   res.json({ pong: true, ts: Date.now() });
 });
 
-// AI Chatbot API endpoint utilizing Gemini 2.5 Flash
-router.post('/api/chat', (req, res) => {
+// AI Chatbot API endpoint utilizing Gemini with multi-model fallback for maximum availability
+router.post('/api/chat', async (req, res) => {
   const { message } = req.body;
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
@@ -560,66 +560,78 @@ Jika pengguna menanyakan hal lain yang tidak ada hubungannya dengan cloud gaming
 Gaya Komunikasi:
 Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Sering gunakan emoji yang sesuai. Gunakan sapaan 'kak' atau 'kamu'. Jawablah secara ringkas dan informatif.`;
 
-  const payload = JSON.stringify({
-    contents: [
-      {
-        parts: [
+  const models = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-3.5-flash',
+    'gemini-flash-latest',
+    'gemini-pro-latest'
+  ];
+
+  const https = require('https');
+
+  for (const model of models) {
+    try {
+      console.log(`[AI CHAT] Contacting Gemini API with model: ${model}`);
+      const payload = JSON.stringify({
+        contents: [
           {
-            text: message
+            parts: [{ text: message }]
           }
-        ]
+        ],
+        systemInstruction: {
+          parts: [{ text: systemInstructionText }]
+        }
+      });
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+      const responseBody = await new Promise((resolve, reject) => {
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload)
+          }
+        };
+        const req = https.request(url, options, (res) => {
+          let body = '';
+          res.on('data', chunk => body += chunk);
+          res.on('end', () => {
+            if (res.statusCode !== 200) {
+              reject(new Error(`Status ${res.statusCode}: ${body}`));
+            } else {
+              resolve(body);
+            }
+          });
+        });
+        
+        req.on('error', reject);
+        req.setTimeout(15000, () => {
+          req.destroy();
+          reject(new Error('Request Timeout (15s)'));
+        });
+        
+        req.write(payload);
+        req.end();
+      });
+
+      const parsed = JSON.parse(responseBody);
+      const textResponse = parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content && parsed.candidates[0].content.parts && parsed.candidates[0].content.parts[0] && parsed.candidates[0].content.parts[0].text;
+      
+      if (textResponse) {
+        console.log(`[AI CHAT] Success response generated via model: ${model}`);
+        return res.json({ response: textResponse });
+      } else {
+        console.warn(`[AI CHAT] Model ${model} returned empty response or invalid structure:`, parsed);
       }
-    ],
-    systemInstruction: {
-      parts: [
-        {
-          text: systemInstructionText
-        }
-      ]
+    } catch (err) {
+      console.warn(`[AI CHAT] Model ${model} failed:`, err.message);
     }
-  });
+  }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(payload)
-    }
-  };
-
-  const geminiReq = https.request(url, options, (geminiRes) => {
-    let body = '';
-    geminiRes.on('data', chunk => body += chunk);
-    geminiRes.on('end', () => {
-      try {
-        if (geminiRes.statusCode !== 200) {
-          console.error(`[CHAT ERROR] Gemini API returned status ${geminiRes.statusCode}:`, body);
-          return res.status(500).json({ error: 'Error communicating with AI service' });
-        }
-        const parsed = JSON.parse(body);
-        const textResponse = parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content && parsed.candidates[0].content.parts && parsed.candidates[0].content.parts[0] && parsed.candidates[0].content.parts[0].text;
-        if (textResponse) {
-          return res.json({ response: textResponse });
-        } else {
-          console.error('[CHAT ERROR] Empty response or invalid structure from Gemini API:', parsed);
-          return res.status(500).json({ error: 'Invalid response structure from AI service' });
-        }
-      } catch (e) {
-        console.error('[CHAT ERROR] Exception parsing response:', e, body);
-        return res.status(500).json({ error: 'Error parsing AI response' });
-      }
-    });
-  });
-
-  geminiReq.on('error', (err) => {
-    console.error('[CHAT ERROR] Request error:', err);
-    return res.status(500).json({ error: 'Network error calling AI service' });
-  });
-
-  geminiReq.write(payload);
-  geminiReq.end();
+  console.error('[CHAT ERROR] All Gemini models failed to respond.');
+  return res.status(500).json({ error: 'AI Service currently unavailable' });
 });
 
 // Sitemap.xml & Robots.txt routes for robust SEO and Google Search Console indexing
