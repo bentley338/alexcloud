@@ -212,12 +212,10 @@
       }
     })
     .catch(function(err) {
-      console.warn('[AI CHAT] Gemini API error, falling back to local engine:', err);
+      console.warn('[AI CHAT] API error, falling back to local engine:', err);
       removeTypingIndicator(indicator);
       var response = getAIResponse(text);
-      if (response !== defaultResponse) {
-        appendMessage(response, 'bot');
-      }
+      appendMessage(response, 'bot');
     });
   }
   window.sendAIMessage = sendAIMessage;
