@@ -226,57 +226,51 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   let fr3Data = null;
   let fr3Error = null;
 
-  const isAuto = (!paymentMethod || paymentMethod === 'auto');
-
-  // Generate a local unique code (10-99) if price is a multiple of 100 (round number) and payment is auto
+  // Generate a local unique code (10-99) if price is a multiple of 100 (round number)
   // to force the gateway to generate a unique QRIS and avoid payment matching failures.
-  const localUniqueCode = (isAuto && actualPrice % 100 === 0) ? (Math.floor(Math.random() * 90) + 10) : 0;
+  const localUniqueCode = (actualPrice % 100 === 0) ? (Math.floor(Math.random() * 90) + 10) : 0;
   const nominal = actualPrice + localUniqueCode;
 
-  if (isAuto) {
-    try {
-      const https = require('https');
-      const payload = JSON.stringify({ apikey: FR3_API_KEY, nominal: nominal });
+  try {
+    const https = require('https');
+    const payload = JSON.stringify({ apikey: FR3_API_KEY, nominal: nominal });
 
-      fr3Data = await new Promise((resolve, reject) => {
-        const options = {
-          method: 'POST',
-          family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
-          headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(payload),
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-          }
-        };
-        const req2 = https.request(`${FR3_BASE}/topup`, options, (r) => {
-          let body = '';
-          r.on('data', d => body += d);
-          r.on('end', () => {
-            try { resolve(JSON.parse(body)); }
-            catch { reject(new Error('Invalid JSON from FR3')); }
-          });
+    fr3Data = await new Promise((resolve, reject) => {
+      const options = {
+        method: 'POST',
+        family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      };
+      const req2 = https.request(`${FR3_BASE}/topup`, options, (r) => {
+        let body = '';
+        r.on('data', d => body += d);
+        r.on('end', () => {
+          try { resolve(JSON.parse(body)); }
+          catch { reject(new Error('Invalid JSON from FR3')); }
         });
-        req2.on('error', reject);
-        req2.setTimeout(20000, () => { req2.destroy(); reject(new Error('FR3 Gateway Timeout (20s)')); }); // 20s timeout
-        req2.write(payload);
-        req2.end();
       });
+      req2.on('error', reject);
+      req2.setTimeout(20000, () => { req2.destroy(); reject(new Error('FR3 Gateway Timeout (20s)')); }); // 20s timeout
+      req2.write(payload);
+      req2.end();
+    });
 
-      if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
-        throw new Error(fr3Data?.message || 'API did not return a transaction ID');
-      }
-    } catch (e) {
-      fr3Error = e.message;
-      console.error('[FR3] Create topup error:', e.message);
+    if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
+      throw new Error(fr3Data?.message || 'API did not return a transaction ID');
     }
+  } catch (e) {
+    fr3Error = e.message;
+    console.error('[FR3] Create topup error:', e.message);
+  }
 
-    // Check if API returned an error JSON instead of throwing a connection error
-    if (!fr3Error && fr3Data && (!fr3Data.data || !fr3Data.data.trxId)) {
-      fr3Error = fr3Data.message || 'API Gateway did not return transaction ID';
-      console.warn('[FR3] Create topup API warning:', fr3Error);
-    }
-  } else {
-    console.log('[PAYMENT] User selected QRIS Manual payment, skipping FR3 call.');
+  // Check if API returned an error JSON instead of throwing a connection error
+  if (!fr3Error && fr3Data && (!fr3Data.data || !fr3Data.data.trxId)) {
+    fr3Error = fr3Data.message || 'API Gateway did not return transaction ID';
+    console.warn('[FR3] Create topup API warning:', fr3Error);
   }
 
   // Save order
@@ -303,7 +297,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     fr3UniqueCode: fr3Data?.data?.totalTransfer ? (fr3Data.data.totalTransfer - actualPrice) : localUniqueCode,
     fr3Expiry: fr3Data?.data?.expiry || null,
     fr3Error: fr3Error || null,
-    paymentMethod: isAuto ? (fr3Data?.data?.trxId ? 'fr3_qris' : 'manual') : paymentMethod
+    paymentMethod: fr3Data?.data?.trxId ? 'fr3_qris' : 'manual'
   };
 
   db.get('orders').push(order).write();

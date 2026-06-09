@@ -204,17 +204,7 @@
       <!-- Status bar -->
       <div class="pay-status-bar" style="background: rgba(232,115,42,0.05); border-bottom: 1px solid rgba(232,115,42,0.1);">
         <div class="pay-status-dot pending" style="background: #e8732a; box-shadow: 0 0 8px #e8732a;"></div>
-        <span>
-          <% if (order.paymentMethod === 'dana_manual') { %>
-            Pembayaran Manual DANA
-          <% } else if (order.paymentMethod === 'gopay_manual') { %>
-            Pembayaran Manual GoPay
-          <% } else if (order.paymentMethod === 'shopeepay_manual') { %>
-            Pembayaran Manual ShopeePay
-          <% } else { %>
-            Pembayaran Manual (WhatsApp)
-          <% } %>
-        </span>
+        <span>Pembayaran Manual (WhatsApp)</span>
       </div>
 
       <% if (fr3Error && typeof user !== 'undefined' && user && user.role === 'admin') { %>
@@ -229,27 +219,10 @@
 
       <div style="padding: 1.25rem 1.25rem 0;">
         <div style="font-family:var(--font-ui); font-size:0.85rem; color:var(--text-muted); background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:16px; padding:1.25rem; text-align:left;">
-          <% if (order.paymentMethod === 'dana_manual') { %>
-            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
-              <i class="fas fa-wallet" style="color:#108ee9;"></i> Transfer ke DANA
-            </div>
-            <div style="margin-bottom:0.4rem;">Nomor DANA: <strong style="color:white; font-size:1.05rem;"><%= waNumber %></strong></div>
-          <% } else if (order.paymentMethod === 'gopay_manual') { %>
-            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
-              <i class="fas fa-money-bill-wave" style="color:#00a550;"></i> Transfer ke GoPay
-            </div>
-            <div style="margin-bottom:0.4rem;">Nomor GoPay: <strong style="color:white; font-size:1.05rem;"><%= waNumber %></strong></div>
-          <% } else if (order.paymentMethod === 'shopeepay_manual') { %>
-            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
-              <i class="fas fa-mobile-alt" style="color:#ee4d2d;"></i> Transfer ke ShopeePay
-            </div>
-            <div style="margin-bottom:0.4rem;">Nomor ShopeePay: <strong style="color:white; font-size:1.05rem;"><%= waNumber %></strong></div>
-          <% } else { %>
-            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
-              <i class="fas fa-qrcode" style="color:#e8732a;"></i> Transfer Manual QRIS
-            </div>
-            <div style="margin-bottom:0.4rem;">Scan QRIS di bawah ini dengan e-wallet Anda.</div>
-          <% } %>
+          <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-qrcode" style="color:#e8732a;"></i> Transfer Manual QRIS
+          </div>
+          <div style="margin-bottom:0.4rem;">Scan QRIS di bawah ini dengan e-wallet Anda.</div>
           <div style="margin-bottom:0.4rem;">Atas Nama: <strong style="color:white;">AlexCloud Admin</strong></div>
           <div style="font-size:0.78rem; color:#e8732a; margin-top:0.6rem; display:flex; align-items:center; gap:0.4rem;">
             <i class="fas fa-info-circle"></i> Silakan transfer tepat sejumlah total tagihan.
@@ -294,15 +267,7 @@
 
       <% 
         let waMsg = 'Halo Admin AlexCloud! 👋\n\n';
-        if (order.paymentMethod === 'dana_manual') {
-          waMsg += 'Saya sudah transfer manual via *DANA*:\n';
-        } else if (order.paymentMethod === 'gopay_manual') {
-          waMsg += 'Saya sudah transfer manual via *GoPay*:\n';
-        } else if (order.paymentMethod === 'shopeepay_manual') {
-          waMsg += 'Saya sudah transfer manual via *ShopeePay*:\n';
-        } else {
-          waMsg += 'Saya mau bayar manual untuk pesanan:\n';
-        }
+        waMsg += 'Saya mau konfirmasi pembayaran manual:\n';
         waMsg += '📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: ' + priceDisplay + '\n\nMohon dibantu prosesnya. Terima kasih!';
       %>
       <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent(waMsg) %>" target="_blank" class="wa-confirm-btn" style="margin:1.25rem auto; max-width:320px; display:flex;">

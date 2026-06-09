@@ -56,13 +56,9 @@
       <div id="promoStatus" class="promo-status"></div>
     </div>
 
-    <div style="background:rgba(232, 115, 42, 0.05); border:1px solid rgba(232, 115, 42, 0.15); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem; font-family:var(--font-ui); font-size:0.85rem; color:var(--text-secondary); line-height: 1.6;">
-      <div style="color:white; font-weight:700; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
-        <i class="fas fa-info-circle" style="color:#e8732a;"></i>
-        <span>Panduan Metode Pembayaran</span>
-      </div>
-      • Pilih <strong style="color:white;">QRIS Otomatis</strong> jika ingin membayar langsung & otomatis menggunakan aplikasi <strong style="color:white;">DANA, GoPay, OVO, ShopeePay, LinkAja, atau m-Banking</strong>. Cukup scan QR code yang muncul, bayar, dan akun langsung aktif instan.<br>
-      • Pilih <strong style="color:white;">Manual</strong> jika ingin mentransfer secara manual ke nomor e-wallet admin lalu mengirim bukti transfer ke WhatsApp.
+    <div style="background:rgba(232, 115, 42, 0.05); border:1px solid rgba(232, 115, 42, 0.15); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; font-family:var(--font-ui); font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
+      <i class="fas fa-info-circle" style="color:#e8732a; margin-right:0.25rem;"></i>
+      Pembayaran dilakukan secara otomatis menggunakan <strong>QRIS</strong> (mendukung <strong>DANA, GoPay, OVO, ShopeePay, LinkAja, m-Banking</strong>, dll).
     </div>
 
     <form action="/order" method="POST" id="orderForm">
@@ -70,47 +66,7 @@
       <input type="hidden" name="promoCode" id="hiddenPromoCode" value="">
       <input type="hidden" name="promoId" id="hiddenPromoId" value="">
       <input type="hidden" name="finalPrice" id="hiddenFinalPrice" value="<%= plan.price %>">
-
-      <!-- METODE PEMBAYARAN -->
-      <div style="margin-bottom: 2rem;">
-        <h3 style="font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 1rem; color: var(--text-primary);">Pilih Metode Pembayaran</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
-          
-          <!-- QRIS Otomatis -->
-          <label class="payment-method-card active" id="labelQrisAuto" style="cursor: pointer;">
-            <input type="radio" name="paymentMethod" value="auto" checked style="display: none;" onchange="selectPaymentMethod('auto')">
-            <div class="payment-method-icon" style="color: #e8732a;"><i class="fas fa-bolt"></i></div>
-            <div class="payment-method-title">QRIS Otomatis</div>
-            <div class="payment-method-desc">DANA, GoPay, OVO, dll <span class="badge-fast">Instan</span></div>
-          </label>
-          
-          <!-- DANA Manual -->
-          <label class="payment-method-card" id="labelDana" style="cursor: pointer;">
-            <input type="radio" name="paymentMethod" value="dana_manual" style="display: none;" onchange="selectPaymentMethod('dana_manual')">
-            <div class="payment-method-icon" style="color: #108ee9;"><i class="fas fa-wallet"></i></div>
-            <div class="payment-method-title">DANA (Manual)</div>
-            <div class="payment-method-desc">Transfer DANA <span class="badge-manual">5-15 Mnt</span></div>
-          </label>
-          
-          <!-- GoPay Manual -->
-          <label class="payment-method-card" id="labelGopay" style="cursor: pointer;">
-            <input type="radio" name="paymentMethod" value="gopay_manual" style="display: none;" onchange="selectPaymentMethod('gopay_manual')">
-            <div class="payment-method-icon" style="color: #00a550;"><i class="fas fa-money-bill-wave"></i></div>
-            <div class="payment-method-title">GoPay (Manual)</div>
-            <div class="payment-method-desc">Transfer GoPay <span class="badge-manual">5-15 Mnt</span></div>
-          </label>
-          
-          <!-- ShopeePay Manual -->
-          <label class="payment-method-card" id="labelShopee" style="cursor: pointer;">
-            <input type="radio" name="paymentMethod" value="shopeepay_manual" style="display: none;" onchange="selectPaymentMethod('shopeepay_manual')">
-            <div class="payment-method-icon" style="color: #ee4d2d;"><i class="fas fa-mobile-alt"></i></div>
-            <div class="payment-method-title">ShopeePay (Manual)</div>
-            <div class="payment-method-desc">Transfer ShopeePay <span class="badge-manual">5-15 Mnt</span></div>
-          </label>
-          
-        </div>
-      </div>
-
+      <input type="hidden" name="paymentMethod" value="auto">
       <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:1rem; font-size:1.05rem;">
         <i class="fas fa-shopping-cart"></i> Buat Order & Lanjut Bayar
       </button>
@@ -136,61 +92,6 @@
 </div>
 
 <style>
-.payment-method-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-.payment-method-card:hover {
-  border-color: rgba(232, 115, 42, 0.4);
-  background: rgba(232, 115, 42, 0.02);
-}
-.payment-method-card.active {
-  border-color: #e8732a;
-  background: rgba(232, 115, 42, 0.05);
-  box-shadow: 0 0 15px rgba(232, 115, 42, 0.1);
-}
-.payment-method-icon {
-  font-size: 1.5rem;
-  color: var(--text-muted);
-  transition: color 0.2s ease;
-}
-.payment-method-card.active .payment-method-icon {
-  color: #e8732a;
-}
-.payment-method-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-}
-.payment-method-desc {
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-.badge-fast {
-  background: rgba(0, 212, 255, 0.15);
-  color: var(--accent-blue);
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  font-weight: 700;
-}
-.badge-manual {
-  background: rgba(255, 170, 0, 0.15);
-  color: #ffaa00;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  font-weight: 700;
-}
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -348,29 +249,7 @@ document.getElementById('promoInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') applyPromo();
 });
 
-function selectPaymentMethod(method) {
-  const cards = ['QrisAuto', 'Dana', 'Gopay', 'Shopee'];
-  cards.forEach(c => {
-    const el = document.getElementById('label' + c);
-    if (el) el.classList.remove('active');
-  });
-  
-  const loadingSub = document.querySelector('.loading-subtitle');
-  
-  if (method === 'auto') {
-    document.getElementById('labelQrisAuto').classList.add('active');
-    if (loadingSub) loadingSub.textContent = 'Sedang mendaftarkan QRIS otomatis Anda...';
-  } else if (method === 'dana_manual') {
-    document.getElementById('labelDana').classList.add('active');
-    if (loadingSub) loadingSub.textContent = 'Sedang menyiapkan petunjuk transfer DANA...';
-  } else if (method === 'gopay_manual') {
-    document.getElementById('labelGopay').classList.add('active');
-    if (loadingSub) loadingSub.textContent = 'Sedang menyiapkan petunjuk transfer GoPay...';
-  } else if (method === 'shopeepay_manual') {
-    document.getElementById('labelShopee').classList.add('active');
-    if (loadingSub) loadingSub.textContent = 'Sedang menyiapkan petunjuk transfer ShopeePay...';
-  }
-}
+// Payment method logic removed (QRIS auto is now default & mandatory)
 
 // Form submit loading logic
 document.getElementById('orderForm').addEventListener('submit', function(e) {
