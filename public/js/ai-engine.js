@@ -5,6 +5,7 @@
   var chatMessages = null;
   var chatInput    = null;
   var toggleBtn    = null;
+  var chatHistory  = [];
   var knowledgeBase = [
     {
       keywords: ['harga', 'paket', 'price', 'berapa', 'biaya', 'tarif', 'murah', 'promo'],
@@ -95,6 +96,16 @@
     '• 🖥️ <b>Fitur</b> — ketik "fitur" atau "server"<br>' +
     '• 📝 <b>Daftar</b> — ketik "daftar" atau "register"<br><br>' +
     'Atau hubungi admin langsung via WhatsApp ya! 😉';
+  function formatMarkdownToHTML(text) {
+    if (!text) return '';
+    var html = text
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>') 
+      .replace(/\*([^*]+)\*/g, '<i>$1</i>')     
+      .replace(/`([^`]+)`/g, '<code>$1</code>') 
+      .replace(/^\s*[\*\-\•]\s+(.+)$/gm, '• $1') 
+      .replace(/\n/g, '<br>');                  
+    return html;
+  }
   function appendMessage(text, sender) {
     if (!chatMessages) return;
     var messageDiv = document.createElement('div');
@@ -171,13 +182,17 @@
     appendMessage(text, 'user');
     chatInput.value = '';
     chatInput.focus();
+    chatHistory.push({ role: 'user', parts: [{ text: text }] });
     var indicator = showTypingIndicator();
     fetch('/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ 
+        message: text,
+        history: chatHistory
+      })
     })
     .then(function(res) {
       if (!res.ok) throw new Error('API response not OK');
@@ -185,8 +200,13 @@
     })
     .then(function(data) {
       removeTypingIndicator(indicator);
-      if (data && data.response) {
-        appendMessage(data.response, 'bot');
+      if (data && data.response) {
+        var formattedText = formatMarkdownToHTML(data.response);
+        appendMessage(formattedText, 'bot');
+        chatHistory.push({ role: 'model', parts: [{ text: data.response }] });
+        if (chatHistory.length > 12) {
+          chatHistory = chatHistory.slice(-12);
+        }
       } else {
         throw new Error('Invalid API response format');
       }
@@ -219,7 +239,8 @@
   }
   window.askAI = askAI;
   function clearChat() {
-    if (!chatMessages) return;
+    if (!chatMessages) return;
+    chatHistory = []; 
     var messages = chatMessages.querySelectorAll('.ai-message');
     for (var i = 1; i < messages.length; i++) {
       chatMessages.removeChild(messages[i]);

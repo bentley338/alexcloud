@@ -13,6 +13,7 @@
   var chatMessages = null;
   var chatInput    = null;
   var toggleBtn    = null;
+  var chatHistory  = [];
 
   /* ----------------------------------------------------------
      Knowledge-base: keyword → response mapping
@@ -115,6 +116,18 @@
   /* ==========================================================
      Helpers
   ========================================================== */
+
+  /** Format simple markdown bold/italic asterisks and lists to clean HTML */
+  function formatMarkdownToHTML(text) {
+    if (!text) return '';
+    var html = text
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>') // Convert **bold** to <b>bold</b>
+      .replace(/\*([^*]+)\*/g, '<i>$1</i>')     // Convert *italic* to <i>italic</i>
+      .replace(/`([^`]+)`/g, '<code>$1</code>') // Convert `code` to <code>code</code>
+      .replace(/^\s*[\*\-\•]\s+(.+)$/gm, '• $1') // Align list bullets nicely
+      .replace(/\n/g, '<br>');                  // Convert newlines to breaks
+    return html;
+  }
 
   /** Create and append a message bubble matching CSS classes */
   function appendMessage(text, sender) {
@@ -222,10 +235,13 @@
     var text = chatInput.value.trim();
     if (!text) return;
 
-    // Append user message
+    // Append user message to view
     appendMessage(text, 'user');
     chatInput.value = '';
     chatInput.focus();
+
+    // Add turn to chat history state
+    chatHistory.push({ role: 'user', parts: [{ text: text }] });
 
     // Show typing indicator, then respond
     var indicator = showTypingIndicator();
@@ -235,7 +251,10 @@
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ 
+        message: text,
+        history: chatHistory
+      })
     })
     .then(function(res) {
       if (!res.ok) throw new Error('API response not OK');
@@ -244,7 +263,17 @@
     .then(function(data) {
       removeTypingIndicator(indicator);
       if (data && data.response) {
-        appendMessage(data.response, 'bot');
+        // Format response to remove markdown asterisks and show neat HTML
+        var formattedText = formatMarkdownToHTML(data.response);
+        appendMessage(formattedText, 'bot');
+        
+        // Add bot turn to chat history state
+        chatHistory.push({ role: 'model', parts: [{ text: data.response }] });
+
+        // Keep history size in check (e.g., last 12 messages / 6 turns)
+        if (chatHistory.length > 12) {
+          chatHistory = chatHistory.slice(-12);
+        }
       } else {
         throw new Error('Invalid API response format');
       }
@@ -290,6 +319,8 @@
   ========================================================== */
   function clearChat() {
     if (!chatMessages) return;
+
+    chatHistory = []; // Reset history state
 
     // Remove all messages except the first welcome message
     var messages = chatMessages.querySelectorAll('.ai-message');

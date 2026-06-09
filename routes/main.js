@@ -558,7 +558,8 @@ Panduan Batasan & Topik:
 2. Jika pengguna menanyakan hal yang sama sekali di luar topik gaming / AlexCloud (seperti matematika, pelajaran sekolah, resep masakan, politik, sejarah umum, coding, dll), JANGAN menjawab dengan kaku seperti robot terkunci. Jawablah dengan santai dan ramah, boleh berikan jawaban singkat jika kamu tahu secara umum, lalu alihkan percakapan kembali dengan asyik ke topik game atau layanan AlexCloud. Contoh: "Wah kalau soal resep nasi goreng aku kurang jago masak nih kak, tapi kalau racik server cloud gaming buat main GTA VI lancar jaya, aku jagonya! Mau nanya seputar paket gaming kita? 😉"
 
 Gaya Komunikasi:
-Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Sering gunakan emoji yang sesuai. Gunakan sapaan 'kak' atau 'kamu'. Jawablah secara ringkas, asyik, dan informatif.`;
+Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Sering gunakan emoji yang sesuai. Gunakan sapaan 'kak' atau 'kamu'. Jawablah secara ringkas, asyik, dan informatif.
+JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) untuk mempertebal atau memiringkan kata, karena chat website kami tidak mendukung rendering markdown dan akan menampilkan tanda bintang tersebut secara mentah. Gunakan teks biasa saja atau gunakan tag HTML langsung seperti <b>teks</b> atau <i>teks</i> jika diperlukan agar tampilan teks sangat rapi.`;
 
   const models = [
     'gemini-3.1-flash-lite',
@@ -570,15 +571,19 @@ Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Ser
 
   const https = require('https');
 
+  // Use history if provided, otherwise default to single message format
+  let contents = [];
+  if (req.body.history && Array.isArray(req.body.history) && req.body.history.length > 0) {
+    contents = req.body.history;
+  } else {
+    contents = [{ role: 'user', parts: [{ text: message }] }];
+  }
+
   for (const model of models) {
     try {
       console.log(`[AI CHAT] Contacting Gemini API with model: ${model}`);
       const payload = JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: message }]
-          }
-        ],
+        contents: contents,
         systemInstruction: {
           parts: [{ text: systemInstructionText }]
         }
