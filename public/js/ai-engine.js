@@ -97,30 +97,43 @@
     'Atau hubungi admin langsung via WhatsApp ya! 😉';
   function appendMessage(text, sender) {
     if (!chatMessages) return;
-    var bubble = document.createElement('div');
-    bubble.className = 'chat-message ' + (sender === 'user' ? 'user-message' : 'bot-message');
-    var content = document.createElement('div');
-    content.className = 'message-content';
+    var messageDiv = document.createElement('div');
+    messageDiv.className = 'ai-message ' + (sender === 'user' ? 'user' : 'bot');
+    var avatarDiv = document.createElement('div');
+    avatarDiv.className = 'ai-msg-avatar';
+    var icon = document.createElement('i');
+    icon.className = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
+    avatarDiv.appendChild(icon);
+    var bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'ai-msg-bubble';
     if (sender === 'user') {
-      content.textContent = text;           
+      bubbleDiv.textContent = text;
     } else {
-      content.innerHTML = text;             
+      bubbleDiv.innerHTML = text;
     }
-    bubble.appendChild(content);
-    chatMessages.appendChild(bubble);
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(bubbleDiv);
+    chatMessages.appendChild(messageDiv);
     scrollChatToBottom();
-    return bubble;
+    return messageDiv;
   }
   function showTypingIndicator() {
     if (!chatMessages) return null;
     var indicator = document.createElement('div');
-    indicator.className = 'chat-message bot-message typing-indicator';
-    indicator.innerHTML =
-      '<div class="message-content">' +
-        '<span class="dot"></span>' +
-        '<span class="dot"></span>' +
-        '<span class="dot"></span>' +
-      '</div>';
+    indicator.className = 'ai-message bot typing-indicator';
+    var avatarDiv = document.createElement('div');
+    avatarDiv.className = 'ai-msg-avatar';
+    var icon = document.createElement('i');
+    icon.className = 'fas fa-robot';
+    avatarDiv.appendChild(icon);
+    var bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'ai-msg-bubble';
+    var typingDiv = document.createElement('div');
+    typingDiv.className = 'ai-typing';
+    typingDiv.innerHTML = '<span></span><span></span><span></span>';
+    bubbleDiv.appendChild(typingDiv);
+    indicator.appendChild(avatarDiv);
+    indicator.appendChild(bubbleDiv);
     chatMessages.appendChild(indicator);
     scrollChatToBottom();
     return indicator;
@@ -205,11 +218,11 @@
   window.askAI = askAI;
   function clearChat() {
     if (!chatMessages) return;
-    var messages = chatMessages.querySelectorAll('.chat-message');
+    var messages = chatMessages.querySelectorAll('.ai-message');
     for (var i = 1; i < messages.length; i++) {
       chatMessages.removeChild(messages[i]);
     }
-    if (!chatMessages.querySelector('.chat-message')) {
+    if (!chatMessages.querySelector('.ai-message')) {
       appendMessage(
         '👋 Halo! Aku <b>AlexBot</b>, asisten virtual AlexCloud Gaming.<br>' +
         'Tanya aku soal harga, game, pembayaran, atau fitur ya!',
@@ -232,7 +245,7 @@
       toggleBtn.setAttribute('aria-expanded', String(isOpen));
     }
     if (isOpen) {
-      if (chatMessages && !chatMessages.querySelector('.chat-message')) {
+      if (chatMessages && !chatMessages.querySelector('.ai-message')) {
         appendMessage(
           '👋 Halo! Aku <b>AlexBot</b>, asisten virtual AlexCloud Gaming.<br>' +
           'Tanya aku soal harga, game, pembayaran, atau fitur ya!',
