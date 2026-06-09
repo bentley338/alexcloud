@@ -226,7 +226,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   let fr3Data = null;
   let fr3Error = null;
 
-  const isAuto = (paymentMethod !== 'manual');
+  const isAuto = (!paymentMethod || paymentMethod === 'auto');
 
   // Generate a local unique code (10-99) if price is a multiple of 100 (round number) and payment is auto
   // to force the gateway to generate a unique QRIS and avoid payment matching failures.
@@ -303,7 +303,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     fr3UniqueCode: fr3Data?.data?.totalTransfer ? (fr3Data.data.totalTransfer - actualPrice) : localUniqueCode,
     fr3Expiry: fr3Data?.data?.expiry || null,
     fr3Error: fr3Error || null,
-    paymentMethod: fr3Data?.data?.trxId ? 'fr3_qris' : 'manual'
+    paymentMethod: isAuto ? (fr3Data?.data?.trxId ? 'fr3_qris' : 'manual') : paymentMethod
   };
 
   db.get('orders').push(order).write();

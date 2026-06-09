@@ -75,17 +75,33 @@
           <!-- QRIS Otomatis -->
           <label class="payment-method-card active" id="labelQrisAuto" style="cursor: pointer;">
             <input type="radio" name="paymentMethod" value="auto" checked style="display: none;" onchange="selectPaymentMethod('auto')">
-            <div class="payment-method-icon"><i class="fas fa-magic"></i></div>
+            <div class="payment-method-icon" style="color: #e8732a;"><i class="fas fa-magic"></i></div>
             <div class="payment-method-title">QRIS Otomatis</div>
             <div class="payment-method-desc">Verifikasi instan <span class="badge-fast">1 Mnt</span></div>
           </label>
           
-          <!-- QRIS Manual -->
-          <label class="payment-method-card" id="labelQrisManual" style="cursor: pointer;">
-            <input type="radio" name="paymentMethod" value="manual" style="display: none;" onchange="selectPaymentMethod('manual')">
-            <div class="payment-method-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-            <div class="payment-method-title">QRIS Manual</div>
-            <div class="payment-method-desc">Manual WhatsApp <span class="badge-manual">5-15 Mnt</span></div>
+          <!-- DANA Manual -->
+          <label class="payment-method-card" id="labelDana" style="cursor: pointer;">
+            <input type="radio" name="paymentMethod" value="dana_manual" style="display: none;" onchange="selectPaymentMethod('dana_manual')">
+            <div class="payment-method-icon" style="color: #108ee9;"><i class="fas fa-wallet"></i></div>
+            <div class="payment-method-title">DANA (Manual)</div>
+            <div class="payment-method-desc">Transfer DANA <span class="badge-manual">5-15 Mnt</span></div>
+          </label>
+          
+          <!-- GoPay Manual -->
+          <label class="payment-method-card" id="labelGopay" style="cursor: pointer;">
+            <input type="radio" name="paymentMethod" value="gopay_manual" style="display: none;" onchange="selectPaymentMethod('gopay_manual')">
+            <div class="payment-method-icon" style="color: #00a550;"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="payment-method-title">GoPay (Manual)</div>
+            <div class="payment-method-desc">Transfer GoPay <span class="badge-manual">5-15 Mnt</span></div>
+          </label>
+          
+          <!-- ShopeePay Manual -->
+          <label class="payment-method-card" id="labelShopee" style="cursor: pointer;">
+            <input type="radio" name="paymentMethod" value="shopeepay_manual" style="display: none;" onchange="selectPaymentMethod('shopeepay_manual')">
+            <div class="payment-method-icon" style="color: #ee4d2d;"><i class="fas fa-mobile-alt"></i></div>
+            <div class="payment-method-title">ShopeePay (Manual)</div>
+            <div class="payment-method-desc">Transfer ShopeePay <span class="badge-manual">5-15 Mnt</span></div>
           </label>
           
         </div>
@@ -329,18 +345,26 @@ document.getElementById('promoInput').addEventListener('keypress', (e) => {
 });
 
 function selectPaymentMethod(method) {
-  const labelAuto = document.getElementById('labelQrisAuto');
-  const labelManual = document.getElementById('labelQrisManual');
+  const cards = ['QrisAuto', 'Dana', 'Gopay', 'Shopee'];
+  cards.forEach(c => {
+    const el = document.getElementById('label' + c);
+    if (el) el.classList.remove('active');
+  });
+  
   const loadingSub = document.querySelector('.loading-subtitle');
   
   if (method === 'auto') {
-    labelAuto.classList.add('active');
-    labelManual.classList.remove('active');
+    document.getElementById('labelQrisAuto').classList.add('active');
     if (loadingSub) loadingSub.textContent = 'Sedang mendaftarkan QRIS otomatis Anda...';
-  } else {
-    labelAuto.classList.remove('active');
-    labelManual.classList.add('active');
-    if (loadingSub) loadingSub.textContent = 'Sedang menyiapkan tagihan pembayaran manual...';
+  } else if (method === 'dana_manual') {
+    document.getElementById('labelDana').classList.add('active');
+    if (loadingSub) loadingSub.textContent = 'Sedang menyiapkan petunjuk transfer DANA...';
+  } else if (method === 'gopay_manual') {
+    document.getElementById('labelGopay').classList.add('active');
+    if (loadingSub) loadingSub.textContent = 'Sedang menyiapkan petunjuk transfer GoPay...';
+  } else if (method === 'shopeepay_manual') {
+    document.getElementById('labelShopee').classList.add('active');
+    if (loadingSub) loadingSub.textContent = 'Sedang menyiapkan petunjuk transfer ShopeePay...';
   }
 }
 

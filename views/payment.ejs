@@ -204,7 +204,17 @@
       <!-- Status bar -->
       <div class="pay-status-bar" style="background: rgba(232,115,42,0.05); border-bottom: 1px solid rgba(232,115,42,0.1);">
         <div class="pay-status-dot pending" style="background: #e8732a; box-shadow: 0 0 8px #e8732a;"></div>
-        <span>Pembayaran Manual (WhatsApp)</span>
+        <span>
+          <% if (order.paymentMethod === 'dana_manual') { %>
+            Pembayaran Manual DANA
+          <% } else if (order.paymentMethod === 'gopay_manual') { %>
+            Pembayaran Manual GoPay
+          <% } else if (order.paymentMethod === 'shopeepay_manual') { %>
+            Pembayaran Manual ShopeePay
+          <% } else { %>
+            Pembayaran Manual (WhatsApp)
+          <% } %>
+        </span>
       </div>
 
       <% if (fr3Error && typeof user !== 'undefined' && user && user.role === 'admin') { %>
@@ -217,26 +227,58 @@
       </div>
       <% } %>
 
-      <div class="qr-section">
-        <div class="qr-brand-row">
-          <img src="/images/qris-logo.svg" alt="QRIS" style="height:28px;">
-          <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); border-left:1px solid var(--border); padding-left:0.75rem; margin-left:0.25rem;">Scan dengan semua e-wallet</span>
+      <div style="padding: 1.25rem 1.25rem 0;">
+        <div style="font-family:var(--font-ui); font-size:0.85rem; color:var(--text-muted); background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:16px; padding:1.25rem; text-align:left;">
+          <% if (order.paymentMethod === 'dana_manual') { %>
+            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <i class="fas fa-wallet" style="color:#108ee9;"></i> Transfer ke DANA
+            </div>
+            <div style="margin-bottom:0.4rem;">Nomor DANA: <strong style="color:white; font-size:1.05rem;"><%= waNumber %></strong></div>
+          <% } else if (order.paymentMethod === 'gopay_manual') { %>
+            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <i class="fas fa-money-bill-wave" style="color:#00a550;"></i> Transfer ke GoPay
+            </div>
+            <div style="margin-bottom:0.4rem;">Nomor GoPay: <strong style="color:white; font-size:1.05rem;"><%= waNumber %></strong></div>
+          <% } else if (order.paymentMethod === 'shopeepay_manual') { %>
+            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <i class="fas fa-mobile-alt" style="color:#ee4d2d;"></i> Transfer ke ShopeePay
+            </div>
+            <div style="margin-bottom:0.4rem;">Nomor ShopeePay: <strong style="color:white; font-size:1.05rem;"><%= waNumber %></strong></div>
+          <% } else { %>
+            <div style="color:white; font-family:var(--font-display); font-weight:800; font-size:1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <i class="fas fa-qrcode" style="color:#e8732a;"></i> Transfer Manual QRIS
+            </div>
+            <div style="margin-bottom:0.4rem;">Scan QRIS di bawah ini dengan e-wallet Anda.</div>
+          <% } %>
+          <div style="margin-bottom:0.4rem;">Atas Nama: <strong style="color:white;">AlexCloud Admin</strong></div>
+          <div style="font-size:0.78rem; color:#e8732a; margin-top:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+            <i class="fas fa-info-circle"></i> Silakan transfer tepat sejumlah total tagihan.
+          </div>
+        </div>
+      </div>
+
+      <div class="qr-section" style="padding-top:0.75rem;">
+        <div style="font-family:var(--font-ui); font-size:0.78rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          — ATAU SCAN QRIS DI BAWAH INI —
+        </div>
+        <div class="qr-brand-row" style="margin-bottom:0.75rem;">
+          <img src="/images/qris-logo.svg" alt="QRIS" style="height:24px;">
         </div>
 
-        <div class="qr-box">
+        <div class="qr-box" style="padding:0.5rem; margin-bottom:0.75rem;">
           <% if (qrisImage) { %>
-          <img src="<%= qrisImage %>" alt="QRIS" width="220" height="220" style="border-radius:8px; display:block; object-fit: contain; margin:0 auto;">
+          <img src="<%= qrisImage %>" alt="QRIS" width="200" height="200" style="border-radius:8px; display:block; object-fit: contain; margin:0 auto;">
           <% } else { %>
-          <div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;margin:0 auto;">
+          <div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;margin:0 auto;">
             <div style="color:#999;font-size:0.8rem;text-align:center;"><i class="fas fa-exclamation-circle"></i><br>QR tidak tersedia</div>
           </div>
           <% } %>
         </div>
 
-        <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">
-          Bayar sejumlah:
+        <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); margin-bottom:0.25rem;">
+          Jumlah yang harus dibayar:
         </div>
-        <div class="pay-total-amount"><%= priceDisplay %></div>
+        <div class="pay-total-amount" style="font-size:1.8rem;"><%= priceDisplay %></div>
       </div>
 
       <div class="pay-summary">
@@ -250,7 +292,20 @@
         </div>
       </div>
 
-      <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud! 👋\n\nSaya mau bayar manual untuk pesanan:\n📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: ' + priceDisplay + '\n\nMohon dibantu prosesnya. Terima kasih!') %>" target="_blank" class="wa-confirm-btn" style="margin:1.25rem auto; max-width:320px; display:flex;">
+      <% 
+        let waMsg = 'Halo Admin AlexCloud! 👋\n\n';
+        if (order.paymentMethod === 'dana_manual') {
+          waMsg += 'Saya sudah transfer manual via *DANA*:\n';
+        } else if (order.paymentMethod === 'gopay_manual') {
+          waMsg += 'Saya sudah transfer manual via *GoPay*:\n';
+        } else if (order.paymentMethod === 'shopeepay_manual') {
+          waMsg += 'Saya sudah transfer manual via *ShopeePay*:\n';
+        } else {
+          waMsg += 'Saya mau bayar manual untuk pesanan:\n';
+        }
+        waMsg += '📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: ' + priceDisplay + '\n\nMohon dibantu prosesnya. Terima kasih!';
+      %>
+      <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent(waMsg) %>" target="_blank" class="wa-confirm-btn" style="margin:1.25rem auto; max-width:320px; display:flex;">
         <i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp
       </a>
     </div>
