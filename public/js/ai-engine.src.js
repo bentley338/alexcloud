@@ -253,7 +253,9 @@
       console.warn('[AI CHAT] Gemini API error, falling back to local engine:', err);
       removeTypingIndicator(indicator);
       var response = getAIResponse(text);
-      appendMessage(response, 'bot');
+      if (response !== defaultResponse) {
+        appendMessage(response, 'bot');
+      }
     });
   }
   window.sendAIMessage = sendAIMessage;
