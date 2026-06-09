@@ -56,9 +56,13 @@
       <div id="promoStatus" class="promo-status"></div>
     </div>
 
-    <div style="background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; font-family:var(--font-ui); font-size:0.9rem; color:var(--text-secondary);">
-      <i class="fas fa-info-circle" style="color:var(--accent-blue)"></i>
-      Setelah order dibuat, kamu akan diarahkan ke halaman pembayaran QRIS dan konfirmasi WhatsApp.
+    <div style="background:rgba(232, 115, 42, 0.05); border:1px solid rgba(232, 115, 42, 0.15); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem; font-family:var(--font-ui); font-size:0.85rem; color:var(--text-secondary); line-height: 1.6;">
+      <div style="color:white; font-weight:700; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
+        <i class="fas fa-info-circle" style="color:#e8732a;"></i>
+        <span>Panduan Metode Pembayaran</span>
+      </div>
+      • Pilih <strong style="color:white;">QRIS Otomatis</strong> jika ingin membayar langsung & otomatis menggunakan aplikasi <strong style="color:white;">DANA, GoPay, OVO, ShopeePay, LinkAja, atau m-Banking</strong>. Cukup scan QR code yang muncul, bayar, dan akun langsung aktif instan.<br>
+      • Pilih <strong style="color:white;">Manual</strong> jika ingin mentransfer secara manual ke nomor e-wallet admin lalu mengirim bukti transfer ke WhatsApp.
     </div>
 
     <form action="/order" method="POST" id="orderForm">
@@ -75,9 +79,9 @@
           <!-- QRIS Otomatis -->
           <label class="payment-method-card active" id="labelQrisAuto" style="cursor: pointer;">
             <input type="radio" name="paymentMethod" value="auto" checked style="display: none;" onchange="selectPaymentMethod('auto')">
-            <div class="payment-method-icon" style="color: #e8732a;"><i class="fas fa-magic"></i></div>
+            <div class="payment-method-icon" style="color: #e8732a;"><i class="fas fa-bolt"></i></div>
             <div class="payment-method-title">QRIS Otomatis</div>
-            <div class="payment-method-desc">Verifikasi instan <span class="badge-fast">1 Mnt</span></div>
+            <div class="payment-method-desc">DANA, GoPay, OVO, dll <span class="badge-fast">Instan</span></div>
           </label>
           
           <!-- DANA Manual -->
