@@ -534,9 +534,9 @@ router.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: 'Message is required' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyC2hl1y6Qj8QF4MGFwNlFMa3ME4ho6e28E';
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error('[CHAT ERROR] GEMINI_API_KEY is not defined');
+    console.error('[CHAT ERROR] GEMINI_API_KEY is not defined in environment');
     return res.status(500).json({ error: 'AI Service configuration error' });
   }
 
