@@ -1,22 +1,10 @@
-/* ============================================================
-   AlexCloud — ai-engine.js
-   AlexBot Chatbot Engine (keyword-based, vanilla JS)
-   ============================================================ */
-
+// WARNING: JANGAN EDIT FILE INI SECARA LANGSUNG. Edit file .src.js yang sesuai. File ini di-minify otomatis saat startup server.
 (function () {
   'use strict';
-
-  /* ----------------------------------------------------------
-     DOM references (cached on init)
-  ---------------------------------------------------------- */
   var chatWindow   = null;
   var chatMessages = null;
   var chatInput    = null;
   var toggleBtn    = null;
-
-  /* ----------------------------------------------------------
-     Knowledge-base: keyword → response mapping
-  ---------------------------------------------------------- */
   var knowledgeBase = [
     {
       keywords: ['harga', 'paket', 'price', 'berapa', 'biaya', 'tarif', 'murah', 'promo'],
@@ -98,10 +86,6 @@
         'Klik tombol WhatsApp di pojok halaman atau kirim pesan ke nomor yang tertera di website 💬'
     }
   ];
-
-  /* ----------------------------------------------------------
-     Default (fallback) response
-  ---------------------------------------------------------- */
   var defaultResponse =
     '🤔 Hmm, aku belum paham pertanyaan kamu nih.<br><br>' +
     'Coba tanya tentang:<br>' +
@@ -111,38 +95,24 @@
     '• 🖥️ <b>Fitur</b> — ketik "fitur" atau "server"<br>' +
     '• 📝 <b>Daftar</b> — ketik "daftar" atau "register"<br><br>' +
     'Atau hubungi admin langsung via WhatsApp ya! 😉';
-
-  /* ==========================================================
-     Helpers
-  ========================================================== */
-
-  /** Create and append a message bubble */
   function appendMessage(text, sender) {
     if (!chatMessages) return;
-
     var bubble = document.createElement('div');
     bubble.className = 'chat-message ' + (sender === 'user' ? 'user-message' : 'bot-message');
-
     var content = document.createElement('div');
     content.className = 'message-content';
-
     if (sender === 'user') {
-      content.textContent = text;           // plain-text for user (XSS safe)
+      content.textContent = text;           
     } else {
-      content.innerHTML = text;             // HTML for bot (controlled content)
+      content.innerHTML = text;             
     }
-
     bubble.appendChild(content);
     chatMessages.appendChild(bubble);
     scrollChatToBottom();
-
     return bubble;
   }
-
-  /** Show typing indicator and return the element */
   function showTypingIndicator() {
     if (!chatMessages) return null;
-
     var indicator = document.createElement('div');
     indicator.className = 'chat-message bot-message typing-indicator';
     indicator.innerHTML =
@@ -155,32 +125,21 @@
     scrollChatToBottom();
     return indicator;
   }
-
-  /** Remove typing indicator element */
   function removeTypingIndicator(indicator) {
     if (indicator && indicator.parentNode) {
       indicator.parentNode.removeChild(indicator);
     }
   }
-
-  /** Scroll chat to the newest message */
   function scrollChatToBottom() {
     if (chatMessages) {
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
   }
-
-  /** Random delay between min and max (ms) */
   function randomDelay(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-
-  /* ==========================================================
-     6. getAIResponse — keyword matching engine
-  ========================================================== */
   function getAIResponse(query) {
     var normalised = query.toLowerCase().trim();
-
     for (var i = 0; i < knowledgeBase.length; i++) {
       var entry = knowledgeBase[i];
       for (var k = 0; k < entry.keywords.length; k++) {
@@ -189,40 +148,44 @@
         }
       }
     }
-
     return defaultResponse;
   }
   window.getAIResponse = getAIResponse;
-
-  /* ==========================================================
-     2. sendAIMessage
-  ========================================================== */
   function sendAIMessage() {
     if (!chatInput) return;
-
     var text = chatInput.value.trim();
-    if (!text) return;
-
-    // Append user message
+    if (!text) return;
     appendMessage(text, 'user');
     chatInput.value = '';
-    chatInput.focus();
-
-    // Show typing indicator, then respond
+    chatInput.focus();
     var indicator = showTypingIndicator();
-    var delay = randomDelay(500, 1500);
-
-    setTimeout(function () {
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: text })
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('API response not OK');
+      return res.json();
+    })
+    .then(function(data) {
+      removeTypingIndicator(indicator);
+      if (data && data.response) {
+        appendMessage(data.response, 'bot');
+      } else {
+        throw new Error('Invalid API response format');
+      }
+    })
+    .catch(function(err) {
+      console.warn('[AI CHAT] Gemini API error, falling back to local engine:', err);
       removeTypingIndicator(indicator);
       var response = getAIResponse(text);
       appendMessage(response, 'bot');
-    }, delay);
+    });
   }
   window.sendAIMessage = sendAIMessage;
-
-  /* ==========================================================
-     3. handleChatEnter
-  ========================================================== */
   function handleChatEnter(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -230,10 +193,6 @@
     }
   }
   window.handleChatEnter = handleChatEnter;
-
-  /* ==========================================================
-     4. askAI — programmatic send (for quick-action chips)
-  ========================================================== */
   function askAI(question) {
     if (!chatInput) {
       chatInput = document.getElementById('aiChatInput');
@@ -244,20 +203,12 @@
     sendAIMessage();
   }
   window.askAI = askAI;
-
-  /* ==========================================================
-     5. clearChat
-  ========================================================== */
   function clearChat() {
-    if (!chatMessages) return;
-
-    // Remove all messages except the first welcome message
+    if (!chatMessages) return;
     var messages = chatMessages.querySelectorAll('.chat-message');
     for (var i = 1; i < messages.length; i++) {
       chatMessages.removeChild(messages[i]);
-    }
-
-    // If no welcome message existed, add one
+    }
     if (!chatMessages.querySelector('.chat-message')) {
       appendMessage(
         '👋 Halo! Aku <b>AlexBot</b>, asisten virtual AlexCloud Gaming.<br>' +
@@ -265,31 +216,22 @@
         'bot'
       );
     }
-
     if (chatInput) {
       chatInput.value = '';
       chatInput.focus();
     }
   }
   window.clearChat = clearChat;
-
-  /* ==========================================================
-     1. toggleAIChat (chat-specific logic)
-  ========================================================== */
   function toggleAIChat() {
     if (!chatWindow) {
       chatWindow = document.getElementById('aiChatWindow');
     }
     if (!chatWindow) return;
-
     var isOpen = chatWindow.classList.toggle('open');
-
     if (toggleBtn) {
       toggleBtn.setAttribute('aria-expanded', String(isOpen));
     }
-
-    if (isOpen) {
-      // Ensure welcome message exists
+    if (isOpen) {
       if (chatMessages && !chatMessages.querySelector('.chat-message')) {
         appendMessage(
           '👋 Halo! Aku <b>AlexBot</b>, asisten virtual AlexCloud Gaming.<br>' +
@@ -301,43 +243,29 @@
     }
   }
   window.toggleAIChat = toggleAIChat;
-
-  /* ==========================================================
-     Init
-  ========================================================== */
   function init() {
     chatWindow   = document.getElementById('aiChatWindow');
     chatMessages = document.getElementById('aiMessages');
     chatInput    = document.getElementById('aiChatInput');
-    toggleBtn    = document.querySelector('[data-chat-toggle], .ai-chat-toggle, #aiChatToggle');
-
-    // Wire up input enter key
+    toggleBtn    = document.querySelector('[data-chat-toggle], .ai-chat-toggle, #aiChatToggle');
     if (chatInput) {
       chatInput.addEventListener('keydown', handleChatEnter);
-    }
-
-    // Wire up send button
+    }
     var sendBtn = document.querySelector('#aiChatSend, .ai-chat-send');
     if (sendBtn) {
       sendBtn.addEventListener('click', sendAIMessage);
-    }
-
-    // Wire up clear button
+    }
     var clearBtn = document.querySelector('#aiChatClear, .ai-chat-clear');
     if (clearBtn) {
       clearBtn.addEventListener('click', clearChat);
-    }
-
-    // Wire up quick-action chips
+    }
     var chips = document.querySelectorAll('[data-ai-ask]');
     chips.forEach(function (chip) {
       chip.addEventListener('click', function () {
         askAI(chip.getAttribute('data-ai-ask'));
       });
     });
-  }
-
-  // Boot
+  }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

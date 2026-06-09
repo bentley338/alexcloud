@@ -4,6 +4,7 @@ const { db } = require('../database/db');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
+const https = require('https');
 
 // Helper: get plans from DB
 function getPlans() {
@@ -524,6 +525,101 @@ router.get('/api/ping', (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.json({ pong: true, ts: Date.now() });
+});
+
+// AI Chatbot API endpoint utilizing Gemini 2.5 Flash
+router.post('/api/chat', (req, res) => {
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error('[CHAT ERROR] GEMINI_API_KEY is not defined in environment');
+    return res.status(500).json({ error: 'AI Service configuration error' });
+  }
+
+  const systemInstructionText = `Kamu adalah AlexBot 🤖, asisten AI pintar untuk platform cloud gaming AlexCloud.
+Tugas kamu adalah membantu pengguna dengan ramah, explaining services of AlexCloud.
+
+Berikut adalah informasi detail tentang AlexCloud yang wajib kamu gunakan untuk menjawab pertanyaan:
+- Harga Paket: 1 Minggu Rp 40.000, 1 Bulan Rp 60.000 (Paling populer), 2 Bulan Rp 100.000, 3 Bulan Rp 150.000. Semua akses ke 100+ game premium, streaming 4K/60fps, cloud save.
+- Pembayaran: Scan QRIS via GoPay, OVO, DANA, ShopeePay, LinkAja, Mobile Banking. Setelah transfer, kirim bukti screenshot ke WhatsApp admin. Akun aktif 1-15 menit.
+- Game Tersedia (contoh): GTA VI, GTA V, Cyberpunk 2077, Spider-Man 2, God of War Ragnarök, Elden Ring, Hogwarts Legacy, The Witcher 3, Red Dead Redemption 2, COD Black Ops 6, Battlefield 2042, EA FC 26, EA FC 25, MotoGP 25, MotoGP 24, Alan Wake 2.
+- Fitur Unggulan: Streaming 4K / 60fps, Latency rendah <30ms (server Jakarta), Cloud Save otomatis, Login aman Google OAuth, Live chat support 24/7.
+- Kebutuhan Internet: Minimum 5 Mbps (720p), Standar 10 Mbps (1080p/60fps), HD 15 Mbps, Ultra 4K 25 Mbps. WiFi 5GHz atau kabel LAN direkomendasikan.
+- Perangkat Kompatibel: Laptop/PC (Windows, Mac, Linux), Smartphone Android & iOS, Smart TV (dengan browser), Tablet. Hanya butuh browser modern.
+- Keunggulan vs PC: 10x lebih hemat (hanya Rp 60rb/bulan dibanding beli PC Rp 15-50 juta), tidak perlu maintenance/upgrade hardware, portable bisa main di mana saja.
+- Kontrol: Keyboard+Mouse, Controller (Xbox, PS4/PS5, generic USB), Touch Screen di HP.
+
+Batasan Penting Kamu:
+Kamu HANYA boleh menjawab pertanyaan seputar cloud gaming, game, teknologi cloud, dan layanan AlexCloud.
+Jika pengguna menanyakan hal lain yang tidak ada hubungannya dengan cloud gaming atau AlexCloud (misalnya resep makanan, matematika, politik, sejarah, coding umum, gosip artis, menyanyi, dll), kamu HARUS menjawab secara sopan dan ramah bahwa kamu adalah asisten virtual khusus AlexCloud dan memiliki batasan untuk hanya menjawab seputar cloud gaming dan layanan AlexCloud.
+
+Gaya Komunikasi:
+Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Sering gunakan emoji yang sesuai. Gunakan sapaan 'kak' atau 'kamu'. Jawablah secara ringkas dan informatif.`;
+
+  const payload = JSON.stringify({
+    contents: [
+      {
+        parts: [
+          {
+            text: message
+          }
+        ]
+      }
+    ],
+    systemInstruction: {
+      parts: [
+        {
+          text: systemInstructionText
+        }
+      ]
+    }
+  });
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload)
+    }
+  };
+
+  const geminiReq = https.request(url, options, (geminiRes) => {
+    let body = '';
+    geminiRes.on('data', chunk => body += chunk);
+    geminiRes.on('end', () => {
+      try {
+        if (geminiRes.statusCode !== 200) {
+          console.error(`[CHAT ERROR] Gemini API returned status ${geminiRes.statusCode}:`, body);
+          return res.status(500).json({ error: 'Error communicating with AI service' });
+        }
+        const parsed = JSON.parse(body);
+        const textResponse = parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content && parsed.candidates[0].content.parts && parsed.candidates[0].content.parts[0] && parsed.candidates[0].content.parts[0].text;
+        if (textResponse) {
+          return res.json({ response: textResponse });
+        } else {
+          console.error('[CHAT ERROR] Empty response or invalid structure from Gemini API:', parsed);
+          return res.status(500).json({ error: 'Invalid response structure from AI service' });
+        }
+      } catch (e) {
+        console.error('[CHAT ERROR] Exception parsing response:', e, body);
+        return res.status(500).json({ error: 'Error parsing AI response' });
+      }
+    });
+  });
+
+  geminiReq.on('error', (err) => {
+    console.error('[CHAT ERROR] Request error:', err);
+    return res.status(500).json({ error: 'Network error calling AI service' });
+  });
+
+  geminiReq.write(payload);
+  geminiReq.end();
 });
 
 // Sitemap.xml & Robots.txt routes for robust SEO and Google Search Console indexing

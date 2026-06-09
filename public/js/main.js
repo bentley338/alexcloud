@@ -1,17 +1,11 @@
 // WARNING: JANGAN EDIT FILE INI SECARA LANGSUNG. Edit file .src.js yang sesuai. File ini di-minify otomatis saat startup server.
 (function () {
-  'use strict';
-
-  // Global references
+  'use strict';
   var scrollProgressBar;
   var navbar;
   var navLinks;
   var hamburger;
   var backToTopBtn;
-
-  /* ==========================================================
-     1. Scroll Progress Bar
-  ========================================================== */
   function updateScrollProgress() {
     scrollProgressBar = document.getElementById('scrollProgress');
     if (!scrollProgressBar) return;
@@ -20,10 +14,6 @@
     var scrolled = height > 0 ? (winScroll / height) * 100 : 0;
     scrollProgressBar.style.width = scrolled + '%';
   }
-
-  /* ==========================================================
-     2. Navbar Sticky Effect
-  ========================================================== */
   function handleStickyNavbar() {
     navbar = document.getElementById('navbar') || document.querySelector('.navbar');
     if (!navbar) return;
@@ -33,10 +23,6 @@
       navbar.classList.remove('scrolled');
     }
   }
-
-  /* ==========================================================
-     3. Mobile Nav Toggle
-  ========================================================== */
   function toggleNav() {
     navLinks = document.getElementById('navLinks');
     hamburger = document.getElementById('navToggleBtn') || document.querySelector('.hamburger, .nav-toggle');
@@ -48,26 +34,16 @@
     }
   }
   window.toggleNav = toggleNav;
-
-  /* ==========================================================
-     4. Dynamic User Menu (Profile Dropdown)
-  ========================================================== */
   function toggleUserMenu() {
     var dropdown = document.getElementById('userDropdown');
     if (dropdown) dropdown.classList.toggle('show');
   }
   window.toggleUserMenu = toggleUserMenu;
-
-  /* ==========================================================
-     5. Click and Keydown Listeners (Outside Clicks, Escape Key)
-  ========================================================== */
   document.addEventListener('click', function (e) {
     navLinks = document.getElementById('navLinks');
     hamburger = document.getElementById('navToggleBtn') || document.querySelector('.hamburger, .nav-toggle');
     var dropdown = document.getElementById('userDropdown');
-    var userBtn = document.querySelector('.nav-user-btn');
-
-    // Close mobile nav on outside click
+    var userBtn = document.querySelector('.nav-user-btn');
     if (navLinks && navLinks.classList.contains('open')) {
       if (!navLinks.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target)) {
         navLinks.classList.remove('open');
@@ -76,16 +52,13 @@
           hamburger.setAttribute('aria-label', 'Buka menu navigasi');
         }
       }
-    }
-
-    // Close user dropdown on outside click
+    }
     if (dropdown && dropdown.classList.contains('show')) {
       if (userBtn && !userBtn.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.classList.remove('show');
       }
     }
   });
-
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       navLinks = document.getElementById('navLinks');
@@ -97,22 +70,16 @@
           hamburger.focus();
         }
       }
-
       var dropdown = document.getElementById('userDropdown');
       if (dropdown && dropdown.classList.contains('show')) {
         dropdown.classList.remove('show');
       }
-
       var aiChatWindow = document.getElementById('aiChatWindow');
       if (aiChatWindow && aiChatWindow.classList.contains('open') && typeof window.toggleAIChat === 'function') {
         window.toggleAIChat();
       }
     }
   });
-
-  /* ==========================================================
-     6. Alerts Auto-Dismiss
-  ========================================================== */
   document.querySelectorAll('.alert').forEach(function (alert) {
     setTimeout(function () {
       alert.style.opacity = '0';
@@ -123,10 +90,6 @@
       }, 500);
     }, 5000);
   });
-
-  /* ==========================================================
-     7. Copy Order ID and Toast Notifications
-  ========================================================== */
   function showToast(msg, type) {
     var toastType = type || 'success';
     var toast = document.createElement('div');
@@ -145,17 +108,12 @@
     }, 3000);
   }
   window.showToast = showToast;
-
   function copyOrderId(orderId) {
     navigator.clipboard.writeText(orderId).then(function () {
       showToast('Order ID disalin!');
     });
   }
   window.copyOrderId = copyOrderId;
-
-  /* ==========================================================
-     8. Payment Expiration Timer
-  ========================================================== */
   var timerEl = document.getElementById('paymentTimer');
   if (timerEl) {
     var seconds = 15 * 60;
@@ -171,10 +129,6 @@
       }
     }, 1000);
   }
-
-  /* ==========================================================
-     9. View Mode Selector (Grid/List/Compact)
-  ========================================================== */
   function setViewMode(mode) {
     var display = document.getElementById('gamesDisplay');
     if (!display) return;
@@ -194,10 +148,6 @@
     localStorage.setItem('alexcloud_view_mode', mode);
   }
   window.setViewMode = setViewMode;
-
-  /* ==========================================================
-     10. Dynamic Search from Backend API
-  ========================================================== */
   var searchTimeout;
   var navSearchInput = document.getElementById('navSearchInput');
   var searchDropdown = document.getElementById('searchDropdown');
@@ -232,23 +182,17 @@
           .catch(function () {});
       }, 300);
     });
-
     navSearchInput.addEventListener('keypress', function (e) {
       if (e.key === 'Enter') {
         window.location.href = '/games?q=' + encodeURIComponent(navSearchInput.value.trim());
       }
     });
-
     document.addEventListener('click', function (e) {
       if (searchDropdown && !searchDropdown.contains(e.target) && e.target !== navSearchInput) {
         searchDropdown.classList.remove('show');
       }
     });
   }
-
-  /* ==========================================================
-     11. FAQ Accordion
-  ========================================================== */
   var faqQuestions = document.querySelectorAll('.faq-question');
   faqQuestions.forEach(function (q) {
     q.addEventListener('click', function () {
@@ -262,13 +206,8 @@
       q.setAttribute('aria-expanded', String(isNowActive));
     });
   });
-
-  /* ==========================================================
-     12. Testimonial Slider
-  ========================================================== */
   var currentTesti = 0;
   var testiAutoPlay;
-
   function goToTesti(idx) {
     var cards = document.querySelectorAll('.testi-card');
     var dots = document.querySelectorAll('.testi-dot');
@@ -280,37 +219,28 @@
     if (dots[currentTesti]) dots[currentTesti].classList.add('active');
   }
   window.goToTesti = goToTesti;
-
   function testiNext() {
     goToTesti(currentTesti + 1);
     resetTestiAutoPlay();
   }
   window.testiNext = testiNext;
-
   function testiPrev() {
     goToTesti(currentTesti - 1);
     resetTestiAutoPlay();
   }
   window.testiPrev = testiPrev;
-
   function startTestiAutoPlay() {
     testiAutoPlay = setInterval(function () {
       goToTesti(currentTesti + 1);
     }, 5000);
   }
-
   function resetTestiAutoPlay() {
     clearInterval(testiAutoPlay);
     startTestiAutoPlay();
   }
-
   if (document.querySelectorAll('.testi-card').length > 1) {
     startTestiAutoPlay();
   }
-
-  /* ==========================================================
-     13. Mouse Move Hover Card Glow Effect
-  ========================================================== */
   document.querySelectorAll('.feature-card, .game-card, .plan-card, .trending-card').forEach(function (card) {
     card.addEventListener('mousemove', function (e) {
       var rect = card.getBoundingClientRect();
@@ -318,10 +248,6 @@
       card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
     });
   });
-
-  /* ==========================================================
-     14. Lazy Image Loading
-  ========================================================== */
   function initLazyLoading() {
     var lazyImages = document.querySelectorAll('img[loading="lazy"]');
     if (!lazyImages.length) return;
@@ -346,10 +272,6 @@
     }, { rootMargin: '100px 0px' });
     lazyImages.forEach(function (img) { imgObserver.observe(img); });
   }
-
-  /* ==========================================================
-     15. Back to Top Button
-  ========================================================== */
   function initBackToTop() {
     backToTopBtn = document.getElementById('backToTop');
     if (!backToTopBtn) return;
@@ -357,7 +279,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
-
   function handleBackToTopVisibility() {
     backToTopBtn = document.getElementById('backToTop');
     if (!backToTopBtn) return;
@@ -367,14 +288,9 @@
       backToTopBtn.classList.remove('visible');
     }
   }
-
-  /* ==========================================================
-     16. Intersection Observer Scroll Animations
-  ========================================================== */
   function initScrollAnimations() {
     var animatedEls = document.querySelectorAll('.animate-on-scroll, [data-animate]');
     if (!animatedEls.length) return;
-
     if (!('IntersectionObserver' in window)) {
       animatedEls.forEach(function (el) {
         el.style.opacity = '1';
@@ -382,7 +298,6 @@
       });
       return;
     }
-
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
@@ -397,7 +312,6 @@
         }
       });
     }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
-
     animatedEls.forEach(function (el) {
       var rect = el.getBoundingClientRect();
       var isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
@@ -414,10 +328,6 @@
       }
     });
   }
-
-  /* ==========================================================
-     Scroll Handler (throttled)
-  ========================================================== */
   var scrollTicking = false;
   function onScroll() {
     if (!scrollTicking) {
@@ -430,29 +340,17 @@
       scrollTicking = true;
     }
   }
-
-  /* ==========================================================
-     Init
-  ========================================================== */
-  function init() {
-    // Initialise view mode settings
+  function init() {
     var savedMode = localStorage.getItem('alexcloud_view_mode');
     if (savedMode && savedMode !== 'grid') {
       setViewMode(savedMode);
-    }
-
-    // Scroll listener
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    // Initialise features
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
     initLazyLoading();
     initBackToTop();
-    initScrollAnimations();
-
-    // Run once on load
+    initScrollAnimations();
     onScroll();
   }
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
