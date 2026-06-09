@@ -561,9 +561,9 @@ Gaya Komunikasi:
 Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Sering gunakan emoji yang sesuai. Gunakan sapaan 'kak' atau 'kamu'. Jawablah secara ringkas dan informatif.`;
 
   const models = [
+    'gemini-3.1-flash-lite',
     'gemini-2.5-flash',
     'gemini-2.0-flash',
-    'gemini-3.5-flash',
     'gemini-flash-latest',
     'gemini-pro-latest'
   ];
