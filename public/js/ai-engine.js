@@ -182,7 +182,7 @@
     appendMessage(text, 'user');
     chatInput.value = '';
     chatInput.focus();
-    chatHistory.push({ role: 'user', parts: [{ text: text }] });
+    chatHistory.push({ role: 'user', content: text });
     var indicator = showTypingIndicator();
     fetch('/api/chat', {
       method: 'POST',
@@ -203,7 +203,7 @@
       if (data && data.response) {
         var formattedText = formatMarkdownToHTML(data.response);
         appendMessage(formattedText, 'bot');
-        chatHistory.push({ role: 'model', parts: [{ text: data.response }] });
+        chatHistory.push({ role: 'assistant', content: data.response });
         if (chatHistory.length > 12) {
           chatHistory = chatHistory.slice(-12);
         }

@@ -527,16 +527,18 @@ router.get('/api/ping', (req, res) => {
   res.json({ pong: true, ts: Date.now() });
 });
 
-// AI Chatbot API endpoint utilizing Gemini with multi-model fallback for maximum availability
+// AI Chatbot API endpoint utilizing OpenAI (gpt-4o-mini)
 router.post('/api/chat', async (req, res) => {
   const { message } = req.body;
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error('[CHAT ERROR] GEMINI_API_KEY is not defined in environment');
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
+
+  if (!openaiKey && !geminiKey) {
+    console.error('[CHAT ERROR] Neither OPENAI_API_KEY nor GEMINI_API_KEY is defined');
     return res.status(500).json({ error: 'AI Service configuration error' });
   }
 
@@ -561,81 +563,160 @@ Gaya Komunikasi:
 Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Sering gunakan emoji yang sesuai. Gunakan sapaan 'kak' atau 'kamu'. Jawablah secara ringkas, asyik, dan informatif.
 JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) untuk mempertebal atau memiringkan kata, karena chat website kami tidak mendukung rendering markdown dan akan menampilkan tanda bintang tersebut secara mentah. Gunakan teks biasa saja atau gunakan tag HTML langsung seperti <b>teks</b> atau <i>teks</i> jika diperlukan agar tampilan teks sangat rapi.`;
 
-  const models = [
-    'gemini-3.1-flash-lite',
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-flash-latest',
-    'gemini-pro-latest'
-  ];
-
   const https = require('https');
 
-  // Use history if provided, otherwise default to single message format
-  let contents = [];
-  if (req.body.history && Array.isArray(req.body.history) && req.body.history.length > 0) {
-    contents = req.body.history;
-  } else {
-    contents = [{ role: 'user', parts: [{ text: message }] }];
-  }
-
-  for (const model of models) {
+  // ==========================================
+  // 1. Try OpenAI Chat completions (gpt-4o-mini)
+  // ==========================================
+  if (openaiKey) {
     try {
-      console.log(`[AI CHAT] Contacting Gemini API with model: ${model}`);
-      const payload = JSON.stringify({
-        contents: contents,
-        systemInstruction: {
-          parts: [{ text: systemInstructionText }]
-        }
-      });
+      console.log('[AI CHAT] Contacting OpenAI API (gpt-4o-mini)...');
+      
+      const openaiMessages = [{ role: 'system', content: systemInstructionText }];
+      if (req.body.history && Array.isArray(req.body.history)) {
+        req.body.history.forEach(turn => {
+          if (turn.role && turn.content) {
+            openaiMessages.push({
+              role: turn.role === 'assistant' ? 'assistant' : 'user',
+              content: turn.content
+            });
+          }
+        });
+      } else {
+        openaiMessages.push({ role: 'user', content: message });
+      }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const payload = JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: openaiMessages
+      });
 
       const responseBody = await new Promise((resolve, reject) => {
         const options = {
+          hostname: 'api.openai.com',
+          path: '/v1/chat/completions',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiKey}`,
             'Content-Length': Buffer.byteLength(payload)
           }
         };
-        const req = https.request(url, options, (res) => {
+        const req2 = https.request(options, (res2) => {
           let body = '';
-          res.on('data', chunk => body += chunk);
-          res.on('end', () => {
-            if (res.statusCode !== 200) {
-              reject(new Error(`Status ${res.statusCode}: ${body}`));
+          res2.on('data', chunk => body += chunk);
+          res2.on('end', () => {
+            if (res2.statusCode !== 200) {
+              reject(new Error(`OpenAI status ${res2.statusCode}: ${body}`));
             } else {
               resolve(body);
             }
           });
         });
         
-        req.on('error', reject);
-        req.setTimeout(15000, () => {
-          req.destroy();
-          reject(new Error('Request Timeout (15s)'));
+        req2.on('error', reject);
+        req2.setTimeout(15000, () => {
+          req2.destroy();
+          reject(new Error('OpenAI Timeout (15s)'));
         });
         
-        req.write(payload);
-        req.end();
+        req2.write(payload);
+        req2.end();
       });
 
       const parsed = JSON.parse(responseBody);
-      const textResponse = parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content && parsed.candidates[0].content.parts && parsed.candidates[0].content.parts[0] && parsed.candidates[0].content.parts[0].text;
-      
+      const textResponse = parsed.choices && parsed.choices[0] && parsed.choices[0].message && parsed.choices[0].message.content;
       if (textResponse) {
-        console.log(`[AI CHAT] Success response generated via model: ${model}`);
+        console.log('[AI CHAT] Success response generated via OpenAI!');
         return res.json({ response: textResponse });
-      } else {
-        console.warn(`[AI CHAT] Model ${model} returned empty response or invalid structure:`, parsed);
       }
     } catch (err) {
-      console.warn(`[AI CHAT] Model ${model} failed:`, err.message);
+      console.warn('[AI CHAT] OpenAI failed, dropping to Gemini:', err.message);
     }
   }
 
-  console.error('[CHAT ERROR] All Gemini models failed to respond.');
+  // ==========================================
+  // 2. Fallback to Gemini (gemini-3.1-flash-lite, etc.)
+  // ==========================================
+  if (geminiKey) {
+    const models = [
+      'gemini-3.1-flash-lite',
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-flash-latest',
+      'gemini-pro-latest'
+    ];
+
+    let geminiContents = [];
+    if (req.body.history && Array.isArray(req.body.history)) {
+      req.body.history.forEach(turn => {
+        if (turn.role && turn.content) {
+          geminiContents.push({
+            role: turn.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: turn.content }]
+          });
+        }
+      });
+    } else {
+      geminiContents = [{ role: 'user', parts: [{ text: message }] }];
+    }
+
+    for (const model of models) {
+      try {
+        console.log(`[AI CHAT] Contacting Gemini API with model: ${model}`);
+        const payload = JSON.stringify({
+          contents: geminiContents,
+          systemInstruction: {
+            parts: [{ text: systemInstructionText }]
+          }
+        });
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+
+        const responseBody = await new Promise((resolve, reject) => {
+          const options = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(payload)
+            }
+          };
+          const req3 = https.request(url, options, (res3) => {
+            let body = '';
+            res3.on('data', chunk => body += chunk);
+            res3.on('end', () => {
+              if (res3.statusCode !== 200) {
+                reject(new Error(`Status ${res3.statusCode}: ${body}`));
+              } else {
+                resolve(body);
+              }
+            });
+          });
+          
+          req3.on('error', reject);
+          req3.setTimeout(15000, () => {
+            req3.destroy();
+            reject(new Error('Request Timeout (15s)'));
+          });
+          
+          req3.write(payload);
+          req3.end();
+        });
+
+        const parsed = JSON.parse(responseBody);
+        const textResponse = parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content && parsed.candidates[0].content.parts && parsed.candidates[0].content.parts[0] && parsed.candidates[0].content.parts[0].text;
+        
+        if (textResponse) {
+          console.log(`[AI CHAT] Success response generated via Gemini model: ${model}`);
+          return res.json({ response: textResponse });
+        }
+      } catch (err) {
+        console.warn(`[AI CHAT] Gemini Model ${model} failed:`, err.message);
+      }
+    }
+  }
+
+  console.error('[CHAT ERROR] OpenAI failed to respond.');
   return res.status(500).json({ error: 'AI Service currently unavailable' });
 });
 

@@ -241,7 +241,7 @@
     chatInput.focus();
 
     // Add turn to chat history state
-    chatHistory.push({ role: 'user', parts: [{ text: text }] });
+    chatHistory.push({ role: 'user', content: text });
 
     // Show typing indicator, then respond
     var indicator = showTypingIndicator();
@@ -268,7 +268,7 @@
         appendMessage(formattedText, 'bot');
         
         // Add bot turn to chat history state
-        chatHistory.push({ role: 'model', parts: [{ text: data.response }] });
+        chatHistory.push({ role: 'assistant', content: data.response });
 
         // Keep history size in check (e.g., last 12 messages / 6 turns)
         if (chatHistory.length > 12) {
