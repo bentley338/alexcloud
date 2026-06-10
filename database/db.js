@@ -152,6 +152,34 @@ db.write = function () {
   return result;
 };
 
+// ─── Cached Data Getters (avoid repeated lowdb scans per request) ──────────────
+let _plansCache = null;
+let _plansCacheTs = 0;
+let _gamesCache = null;
+let _gamesCacheTs = 0;
+const DATA_TTL = 5000; // 5s cache
+
+function getPlans() {
+  const now = Date.now();
+  if (!_plansCache || now - _plansCacheTs > DATA_TTL) {
+    _plansCache = db.get('plans').value() || [];
+    _plansCacheTs = now;
+  }
+  return _plansCache;
+}
+
+function getGames() {
+  const now = Date.now();
+  if (!_gamesCache || now - _gamesCacheTs > DATA_TTL) {
+    _gamesCache = db.get('games').value() || [];
+    _gamesCacheTs = now;
+  }
+  return _gamesCache;
+}
+
+function invalidatePlansCache() { _plansCacheTs = 0; }
+function invalidateGamesCache() { _gamesCacheTs = 0; }
+
 // ─── Seed functions ────────────────────────────────────────────────────────────
 function seedAdmin() {
   const existing = db.get('users').find({ email: process.env.ADMIN_EMAIL || 'admin@alexcloud.com' }).value();
@@ -282,6 +310,20 @@ function initDB() {
   seedTestimonials();
   updateGameImages();
   cleanOldSessions();
+
+  // Schedule periodic session cleanup every 6 hours
+  setInterval(() => {
+    cleanOldSessions();
+  }, 6 * 60 * 60 * 1000).unref();
 }
 
-module.exports = { db, initDB, restoreFromMongoDB: restoreFromDB, sessionStore };
+module.exports = {
+  db,
+  initDB,
+  restoreFromMongoDB: restoreFromDB,
+  sessionStore,
+  getPlans,
+  getGames,
+  invalidatePlansCache,
+  invalidateGamesCache
+};

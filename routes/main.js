@@ -1,19 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { db } = require('../database/db');
+const https = require('https');
+const path = require('path');
+const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const https = require('https');
+const { sharedHttpsAgent, fr3Request, createRateLimiter, BROWSER_UA } = require('../utils/helpers');
 
-// Helper: get plans from DB
-function getPlans() {
-  return db.get('plans').value();
-}
+// Rate limiters for API endpoints
+const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
+const searchRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 60 }); // 60 searches/min
 
 // Homepage
 router.get('/', (req, res) => {
-  const games = db.get('games').value();
+  const games = getGames();
   const popularGames = games.filter(g => g.popular).slice(0, 8);
   const trendingGames = games.filter(g => g.rating >= 4.8).slice(0, 6);
   const testimonials = db.get('testimonials').filter({ approved: true }).value();
@@ -31,7 +32,7 @@ router.get('/', (req, res) => {
 
 // Games page — AI smart search
 router.get('/games', (req, res) => {
-  const games = db.get('games').value();
+  const games = getGames();
   const genre = req.query.genre;
   const search = req.query.q ? req.query.q.toLowerCase() : null;
   let filtered = genre ? games.filter(g => g.genre === genre) : games;
@@ -54,10 +55,10 @@ router.get('/games', (req, res) => {
 });
 
 // AI Game Search API (JSON)
-router.get('/api/games/search', (req, res) => {
+router.get('/api/games/search', searchRateLimit, (req, res) => {
   const q = req.query.q ? req.query.q.toLowerCase() : '';
   if (!q) return res.json([]);
-  const games = db.get('games').value();
+  const games = getGames();
   const results = games.filter(g =>
     g.name.toLowerCase().includes(q) ||
     g.genre.toLowerCase().includes(q)
@@ -70,10 +71,10 @@ router.get('/api/games/search', (req, res) => {
 // AI Recommendations API (JSON)
 router.get('/api/games/recommendations', (req, res) => {
   const genre = req.query.genre || '';
-  const games = db.get('games').value();
+  const games = getGames();
   let pool = genre ? games.filter(g => g.genre.toLowerCase().includes(genre.toLowerCase())) : games;
   if (pool.length < 3) pool = games;
-  const sorted = pool.sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const sorted = [...pool].sort((a, b) => b.rating - a.rating).slice(0, 4);
   res.json(sorted.map(g => ({ id: g.id, name: g.name, genre: g.genre, image: g.image, rating: g.rating, tag: g.tag })));
 });
 
@@ -117,7 +118,7 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
     }
   }
 
-  const games = db.get('games').value();
+  const games = getGames();
   const plans = getPlans();
 
   res.render('dashboard', {
@@ -220,9 +221,6 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   const orderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
 
   // ===== FR3 NEWERA Payment Gateway =====
-  const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
-  const FR3_BASE    = 'https://fr3newera.com/api/v1';
-
   let fr3Data = null;
   let fr3Error = null;
 
@@ -232,32 +230,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   const nominal = actualPrice + localUniqueCode;
 
   try {
-    const https = require('https');
-    const payload = JSON.stringify({ apikey: FR3_API_KEY, nominal: nominal });
-
-    fr3Data = await new Promise((resolve, reject) => {
-      const options = {
-        method: 'POST',
-        family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(payload),
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-      };
-      const req2 = https.request(`${FR3_BASE}/topup`, options, (r) => {
-        let body = '';
-        r.on('data', d => body += d);
-        r.on('end', () => {
-          try { resolve(JSON.parse(body)); }
-          catch { reject(new Error('Invalid JSON from FR3')); }
-        });
-      });
-      req2.on('error', reject);
-      req2.setTimeout(20000, () => { req2.destroy(); reject(new Error('FR3 Gateway Timeout (20s)')); }); // 20s timeout
-      req2.write(payload);
-      req2.end();
-    });
+    fr3Data = await fr3Request('/topup', 'POST', { nominal }, 20000);
 
     if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
       throw new Error(fr3Data?.message || 'API did not return a transaction ID');
@@ -329,17 +302,22 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
   if (!order.fr3TrxId) return res.json({ status: order.status, method: 'manual' });
 
   const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
-  const FR3_BASE    = 'https://fr3newera.com/api/v1';
 
   try {
-    const https = require('https');
+    const statusEndpoint = `/check-status?apikey=${encodeURIComponent(FR3_API_KEY)}&idTransaksi=${encodeURIComponent(order.fr3TrxId)}`;
+    const FR3_BASE = 'https://fr3newera.com/api/v1';
+    const urlObj = new URL(`${FR3_BASE}${statusEndpoint}`);
+
     const fr3Status = await new Promise((resolve, reject) => {
-      const url = `${FR3_BASE}/check-status?apikey=${encodeURIComponent(FR3_API_KEY)}&idTransaksi=${encodeURIComponent(order.fr3TrxId)}`;
-      const r = https.get(url, {
-        family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+      const options = {
+        hostname: urlObj.hostname,
+        path: urlObj.pathname + urlObj.search,
+        method: 'GET',
+        agent: sharedHttpsAgent,
+        headers: { 'User-Agent': BROWSER_UA },
         timeout: 10000
-      }, (resp) => {
+      };
+      const r = https.request(options, (resp) => {
         let body = '';
         resp.on('data', d => body += d);
         resp.on('end', () => {
@@ -349,6 +327,7 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
       });
       r.on('error', reject);
       r.on('timeout', () => { r.destroy(); reject(new Error('timeout')); });
+      r.end();
     });
 
     const fr3St = (fr3Status?.data?.status || 'PENDING').toUpperCase();
@@ -427,40 +406,7 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
   // Coba cancel ke FR3 jika ada trxId
   if (order.fr3TrxId) {
     try {
-      const https = require('https');
-      const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
-      const payload = JSON.stringify({ apikey: FR3_API_KEY, trxId: order.fr3TrxId });
-      
-      const fr3Result = await new Promise((resolve) => {
-        const options = {
-          method: 'POST',
-          family: 4, // Force IPv4 resolution to prevent Cloudflare/IPv6 connection hangs on cloud hosts
-          headers: { 
-            'Content-Type': 'application/json', 
-            'Content-Length': Buffer.byteLength(payload), 
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' 
-          }
-        };
-        const r = https.request('https://fr3newera.com/api/v1/topup/cancel', options, (resp) => {
-          let body = '';
-          resp.on('data', d => body += d);
-          resp.on('end', () => {
-            try {
-              resolve(JSON.parse(body));
-            } catch (e) {
-              resolve({ status: 500, message: 'Invalid JSON response from FR3 Gateway' });
-            }
-          });
-        });
-        r.on('error', (err) => resolve({ status: 500, message: `Koneksi error: ${err.message}` }));
-        r.setTimeout(10000, () => { 
-          r.destroy(); 
-          resolve({ status: 500, message: 'FR3 Gateway timeout' }); 
-        });
-        r.write(payload);
-        r.end();
-      });
-
+      const fr3Result = await fr3Request('/topup/cancel', 'POST', { trxId: order.fr3TrxId }, 10000);
       console.log('[FR3] Cancel response:', fr3Result);
 
       // Jika FR3 mengembalikan status selain 200, kita log warning saja dan biarkan local DB membatalkan pesanan.
@@ -528,7 +474,7 @@ router.get('/api/ping', (req, res) => {
 });
 
 // AI Chatbot API endpoint utilizing OpenAI (gpt-4o-mini)
-router.post('/api/chat', async (req, res) => {
+router.post('/api/chat', chatRateLimit, async (req, res) => {
   const { message } = req.body;
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
@@ -563,8 +509,6 @@ Gaya Komunikasi:
 Jawab dalam Bahasa Indonesia dengan nada santai, ramah, dan seru khas gamer. Sering gunakan emoji yang sesuai. Gunakan sapaan 'kak' atau 'kamu'. Jawablah secara ringkas, asyik, dan informatif.
 JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) untuk mempertebal atau memiringkan kata, karena chat website kami tidak mendukung rendering markdown dan akan menampilkan tanda bintang tersebut secara mentah. Gunakan teks biasa saja atau gunakan tag HTML langsung seperti <b>teks</b> atau <i>teks</i> jika diperlukan agar tampilan teks sangat rapi.`;
 
-  const https = require('https');
-
   // ==========================================
   // 1. Try OpenAI Chat completions (gpt-4o-mini)
   // ==========================================
@@ -596,6 +540,7 @@ JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) 
           hostname: 'api.openai.com',
           path: '/v1/chat/completions',
           method: 'POST',
+          agent: sharedHttpsAgent,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${openaiKey}`,
@@ -676,6 +621,7 @@ JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) 
         const responseBody = await new Promise((resolve, reject) => {
           const options = {
             method: 'POST',
+            agent: sharedHttpsAgent,
             headers: {
               'Content-Type': 'application/json',
               'Content-Length': Buffer.byteLength(payload)
@@ -722,13 +668,11 @@ JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) 
 
 // Sitemap.xml & Robots.txt routes for robust SEO and Google Search Console indexing
 router.get('/sitemap.xml', (req, res) => {
-  const path = require('path');
   res.header('Content-Type', 'application/xml');
   res.sendFile(path.join(__dirname, '../public/sitemap.xml'));
 });
 
 router.get('/robots.txt', (req, res) => {
-  const path = require('path');
   res.header('Content-Type', 'text/plain');
   res.sendFile(path.join(__dirname, '../public/robots.txt'));
 });

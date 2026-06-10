@@ -1,5 +1,6 @@
 const https = require('https');
 const { db } = require('../database/db');
+const { sharedHttpsAgent } = require('./helpers');
 
 /**
  * Sends a Telegram notification using the official Telegram Bot API
@@ -34,6 +35,7 @@ async function sendTelegramNotification(messageText) {
   return new Promise((resolve) => {
     const options = {
       method: 'POST',
+      agent: sharedHttpsAgent,
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload)

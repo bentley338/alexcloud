@@ -5,12 +5,37 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { db } = require('../database/db');
 
+// ─── User cache for fast deserializeUser lookups ────────────────────────────
+// Avoids scanning the full users array on every request for already-known users
+const _userCache = new Map();
+const USER_CACHE_TTL = 30000; // 30s
+
+function getCachedUser(id) {
+  const entry = _userCache.get(id);
+  if (entry && Date.now() - entry.ts < USER_CACHE_TTL) {
+    // Refresh from DB in case it changed
+    const fresh = db.get('users').find({ id }).value();
+    if (fresh) {
+      entry.data = fresh;
+      entry.ts = Date.now();
+      return fresh;
+    }
+    _userCache.delete(id);
+    return null;
+  }
+  const user = db.get('users').find({ id }).value();
+  if (user) _userCache.set(id, { data: user, ts: Date.now() });
+  return user || null;
+}
+
 passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
   const user = db.get('users').find({ email: email.toLowerCase() }).value();
   if (!user) return done(null, false, { message: 'Email tidak terdaftar.' });
   if (!user.password) return done(null, false, { message: 'Akun ini menggunakan login Google.' });
   if (!bcrypt.compareSync(password, user.password)) return done(null, false, { message: 'Password salah.' });
   if (!user.isActive) return done(null, false, { message: 'Akun dinonaktifkan.' });
+  // Warm the cache on successful login
+  _userCache.set(user.id, { data: user, ts: Date.now() });
   return done(null, user);
 }));
 
@@ -43,6 +68,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         user = newUser;
       }
     }
+    // Warm the cache on Google login
+    _userCache.set(user.id, { data: user, ts: Date.now() });
     return done(null, user);
   }));
   console.log('✅ Google OAuth aktif');
@@ -52,7 +79,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => {
-  const user = db.get('users').find({ id }).value();
+  const user = getCachedUser(id);
   done(null, user || null);
 });
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { db } = require('../database/db');
+const { db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache } = require('../database/db');
 const { ensureAdmin } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
@@ -28,10 +28,6 @@ const testiUpload = multer({
   }
 });
 
-function getPlans() {
-  return db.get('plans').value();
-}
-
 // =====================
 // ADMIN DASHBOARD
 // =====================
@@ -39,7 +35,7 @@ router.get('/', ensureAdmin, (req, res) => {
   const users = db.get('users').value();
   const orders = db.get('orders').value();
   const subscriptions = db.get('subscriptions').value();
-  const games = db.get('games').value();
+  const games = getGames();
   const promoCodes = db.get('promoCodes').value();
   const testimonials = db.get('testimonials').value();
 
@@ -142,7 +138,9 @@ router.post('/simulate-order', ensureAdmin, (req, res) => {
 router.get('/orders', ensureAdmin, (req, res) => {
   const ordersRaw = db.get('orders').sortBy('createdAt').reverse().value();
   const users = db.get('users').value();
-  const orders = ordersRaw.map(o => ({ ...o, user: users.find(u => u.id === o.userId) }));
+  // Build a user lookup map for O(1) access instead of O(n) .find() per order
+  const userMap = new Map(users.map(u => [u.id, u]));
+  const orders = ordersRaw.map(o => ({ ...o, user: userMap.get(o.userId) }));
   res.render('admin/orders', {
     title: 'Kelola Order - AlexCloud Admin',
     user: req.user, orders, moment,
@@ -317,7 +315,7 @@ router.post('/users/:id/reset-password', ensureAdmin, (req, res) => {
 // GAMES MANAGEMENT (dengan halaman produk lengkap)
 // =====================
 router.get('/games', ensureAdmin, (req, res) => {
-  const games = db.get('games').value();
+  const games = getGames();
   res.render('admin/games', {
     title: 'Kelola Game - AlexCloud Admin',
     user: req.user, games,
@@ -391,6 +389,7 @@ router.post('/games', ensureAdmin, (req, res) => {
     minRequirements: minRequirements || 'Browser modern + koneksi 10 Mbps',
     createdAt: new Date().toISOString()
   }).write();
+  invalidateGamesCache();
   req.flash('success', `Game "${name}" berhasil ditambahkan.`);
   res.redirect('/admin/games');
 });
@@ -434,6 +433,7 @@ router.post('/games/:id/edit', ensureAdmin, (req, res) => {
     platform: platform || game.platform || '',
     minRequirements: minRequirements || game.minRequirements || ''
   }).write();
+  invalidateGamesCache();
   req.flash('success', `Game "${name || game.name}" berhasil diperbarui.`);
 
   // Redirect back ke halaman edit jika dari sana, ke /admin/games jika dari modal
@@ -447,6 +447,7 @@ router.post('/games/:id/edit', ensureAdmin, (req, res) => {
 // Delete game
 router.post('/games/:id/delete', ensureAdmin, (req, res) => {
   db.get('games').remove({ id: req.params.id }).write();
+  invalidateGamesCache();
   req.flash('success', 'Game berhasil dihapus.');
   res.redirect('/admin/games');
 });
@@ -457,7 +458,9 @@ router.post('/games/:id/delete', ensureAdmin, (req, res) => {
 router.get('/subscriptions', ensureAdmin, (req, res) => {
   const subs = db.get('subscriptions').sortBy('startedAt').reverse().value();
   const users = db.get('users').value();
-  const subsWithUser = subs.map(s => ({ ...s, user: users.find(u => u.id === s.userId) }));
+  // Build a user lookup map for O(1) access instead of O(n) .find() per subscription
+  const userMap = new Map(users.map(u => [u.id, u]));
+  const subsWithUser = subs.map(s => ({ ...s, user: userMap.get(s.userId) }));
   res.render('admin/subscriptions', {
     title: 'Subscriptions - AlexCloud Admin',
     user: req.user, subscriptions: subsWithUser, moment
@@ -502,7 +505,7 @@ router.post('/promo', ensureAdmin, (req, res) => {
 router.post('/promo/:id/toggle', ensureAdmin, (req, res) => {
   const promo = db.get('promoCodes').find({ id: req.params.id }).value();
   if (!promo) { req.flash('error', 'Promo tidak ditemukan.'); return res.redirect('/admin/promo'); }
-  db.get('promoCodes').find({ id: req.params.id }).assign({ isActive: !promo.isActive }).write();
+  db.get('promoCodes').find({ id: promo.id }).assign({ isActive: !promo.isActive }).write();
   req.flash('success', `Promo "${promo.code}" ${!promo.isActive ? 'diaktifkan' : 'dinonaktifkan'}.`);
   res.redirect('/admin/promo');
 });
@@ -517,7 +520,7 @@ router.post('/promo/:id/delete', ensureAdmin, (req, res) => {
 // PLANS / HARGA
 // =====================
 router.get('/plans', ensureAdmin, (req, res) => {
-  const plans = db.get('plans').value();
+  const plans = getPlans();
   res.render('admin/plans', {
     title: 'Kelola Harga Paket - AlexCloud Admin',
     user: req.user, plans,
@@ -537,6 +540,7 @@ router.post('/plans/:id/edit', ensureAdmin, (req, res) => {
     duration: parseInt(duration) || plan.duration,
     popular: popular === 'on'
   }).write();
+  invalidatePlansCache();
   req.flash('success', `Paket "${name}" berhasil diperbarui.`);
   res.redirect('/admin/plans');
 });
@@ -600,7 +604,7 @@ router.post('/testimonials', ensureAdmin, (req, res) => {
 router.post('/testimonials/:id/toggle', ensureAdmin, (req, res) => {
   const testi = db.get('testimonials').find({ id: req.params.id }).value();
   if (!testi) { req.flash('error', 'Testimoni tidak ditemukan.'); return res.redirect('/admin/testimonials'); }
-  db.get('testimonials').find({ id: req.params.id }).assign({ approved: !testi.approved }).write();
+  db.get('testimonials').find({ id: testi.id }).assign({ approved: !testi.approved }).write();
   req.flash('success', `Testimoni ${!testi.approved ? 'ditampilkan' : 'disembunyikan'}.`);
   res.redirect('/admin/testimonials');
 });

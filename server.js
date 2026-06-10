@@ -1,31 +1,10 @@
 require('dotenv').config();
 
-// Fix common copy-paste and quote wrapping mistakes for CLOUDINARY_URL env var
-if (process.env.CLOUDINARY_URL) {
-  let url = process.env.CLOUDINARY_URL.trim();
-  if (url.startsWith("'") && url.endsWith("'")) {
-    url = url.slice(1, -1);
-  }
-  if (url.startsWith('"') && url.endsWith('"')) {
-    url = url.slice(1, -1);
-  }
-  if (url.startsWith('CLOUDINARY_URL=')) {
-    url = url.replace('CLOUDINARY_URL=', '');
-  }
-  process.env.CLOUDINARY_URL = url.trim();
-}
+const { cleanEnvVar } = require('./utils/helpers');
 
-// Fix common copy-paste and quote wrapping mistakes for FR3_API_KEY env var
-if (process.env.FR3_API_KEY) {
-  let key = process.env.FR3_API_KEY.trim();
-  if (key.startsWith("'") && key.endsWith("'")) {
-    key = key.slice(1, -1);
-  }
-  if (key.startsWith('"') && key.endsWith('"')) {
-    key = key.slice(1, -1);
-  }
-  process.env.FR3_API_KEY = key.trim();
-}
+// Fix common copy-paste and quote wrapping mistakes for env vars
+cleanEnvVar('CLOUDINARY_URL');
+cleanEnvVar('FR3_API_KEY');
 
 const express = require('express');
 const session = require('express-session');
@@ -43,6 +22,16 @@ const PORT = process.env.PORT || 3000;
 
 // ── Gzip/Brotli Compression (reduces transfer size ~70%) ──────────────────────
 app.use(compression({ level: 6 }));
+
+// ── Security Headers (applied to all responses) ─────────────────────────────
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
 
 // View engine
 app.set('view engine', 'ejs');
@@ -63,8 +52,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
     if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=604800');
     }
-    // Security headers
-    res.setHeader('X-Content-Type-Options', 'nosniff');
   }
 }));
 
@@ -135,11 +122,13 @@ app.use((err, req, res, next) => {
 // ─── Start: restore from MongoDB first, then seed, then listen ─────────────────
 const { initDB, restoreFromMongoDB } = require('./database/db');
 
+let server = null;
+
 async function startServer() {
   await restoreFromMongoDB();
   initDB();
 
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     console.log('');
     console.log('╔══════════════════════════════════════╗');
     console.log('║     ⚡  ALEXCLOUD SERVER READY  ⚡    ║');
@@ -151,6 +140,27 @@ async function startServer() {
     console.log('');
   });
 }
+
+// ─── Graceful Shutdown (drain connections, flush DB backup) ──────────────────
+function gracefulShutdown(signal) {
+  console.log(`\n[SHUTDOWN] ${signal} received. Closing server gracefully...`);
+  if (server) {
+    server.close(() => {
+      console.log('[SHUTDOWN] HTTP server closed.');
+      process.exit(0);
+    });
+    // Force close after 10s if connections don't drain
+    setTimeout(() => {
+      console.error('[SHUTDOWN] Forcing exit after 10s timeout.');
+      process.exit(1);
+    }, 10000).unref();
+  } else {
+    process.exit(0);
+  }
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 startServer().catch(err => {
   console.error('[FATAL]', err);

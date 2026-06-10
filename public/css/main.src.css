@@ -152,6 +152,7 @@ body::after {
 /* Spotlight card hover glow effect */
 .feature-card, .game-card, .plan-card, .trending-card {
   position: relative;
+  contain: layout style;
 }
 .feature-card::after, .game-card::after, .plan-card::after, .trending-card::after {
   content: '';
@@ -699,6 +700,8 @@ section { position: relative; z-index: 1; }
 .features-section {
   padding: 5rem 0;
   background: linear-gradient(180deg, transparent 0%, rgba(0, 212, 255, 0.02) 50%, transparent 100%);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
 }
 
 .features-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
@@ -763,7 +766,11 @@ section { position: relative; z-index: 1; }
 .feature-desc { color: var(--text-secondary); font-size: 0.9rem; }
 
 /* GAMES SECTION */
-.games-section { padding: 5rem 0; }
+.games-section {
+  padding: 5rem 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
 .games-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
 
 .games-grid {
@@ -874,6 +881,8 @@ section { position: relative; z-index: 1; }
 .pricing-section {
   padding: 6rem 0;
   background: linear-gradient(180deg, transparent 0%, rgba(123, 47, 255, 0.03) 50%, transparent 100%);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 650px;
 }
 
 .pricing-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
@@ -1574,6 +1583,8 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   padding: 4rem 0 0;
   position: relative;
   z-index: 1;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 350px;
 }
 
 .footer-container {
@@ -2114,6 +2125,8 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .testimonials-section {
   padding: 6rem 0;
   background: linear-gradient(180deg, transparent, rgba(123,47,255,0.03), transparent);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }
 
 .testi-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
@@ -2640,6 +2653,8 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .trending-section {
   padding: 3rem 0;
   background: linear-gradient(180deg, transparent, rgba(0,212,255,0.02), transparent);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }
 
 .trending-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
@@ -3161,6 +3176,8 @@ input:focus-visible,
   padding: 5rem 0;
   position: relative;
   z-index: 1;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 .tiktok-card-container {

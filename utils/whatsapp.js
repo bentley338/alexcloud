@@ -1,6 +1,7 @@
 const https = require('https');
 const querystring = require('querystring');
 const { db } = require('../database/db');
+const { sharedHttpsAgent } = require('./helpers');
 
 /**
  * Sends a WhatsApp notification using either CallMeBot or Twilio Sandbox
@@ -47,7 +48,11 @@ function sendViaCallMeBot(settings, messageText) {
   console.log(`[WA NOTIF] Sending CallMeBot WA to ${phone}...`);
   
   return new Promise((resolve) => {
-    const req = https.get(url, (res) => {
+    const options = {
+      agent: sharedHttpsAgent,
+      timeout: 8000
+    };
+    const req = https.get(url, options, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
@@ -107,6 +112,7 @@ function sendViaTwilio(settings, messageText) {
     hostname: 'api.twilio.com',
     path: `/2010-04-01/Accounts/${accountSid}/Messages.json`,
     method: 'POST',
+    agent: sharedHttpsAgent,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': Buffer.byteLength(postData),
