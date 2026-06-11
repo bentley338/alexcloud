@@ -55,9 +55,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-// Body parsing — limit 10mb agar base64 image dari WA Bot bisa diterima
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.json({ limit: '10mb' }));
+// Body parsing — limit 15mb agar base64 image dari WA Bot bisa diterima
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
+app.use(express.json({ limit: '15mb' }));
 
 // Method override
 app.use(methodOverride('_method'));
