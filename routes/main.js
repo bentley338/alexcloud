@@ -666,6 +666,41 @@ JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) 
   return res.status(500).json({ error: 'AI Service currently unavailable' });
 });
 
+// Secure endpoint to add testimonial from Bot
+router.post('/api/testimonials', async (req, res) => {
+  const apiKey = req.headers['x-api-key'] || req.query.apikey;
+  const expectedApiKey = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
+  
+  if (!apiKey || apiKey !== expectedApiKey) {
+    return res.status(401).json({ success: false, error: 'Unauthorized: Invalid API key' });
+  }
+
+  const { name, role, text, rating, image, avatar } = req.body;
+  if (!name || !text) {
+    return res.status(400).json({ success: false, error: 'Name and text are required' });
+  }
+
+  try {
+    db.get('testimonials').push({
+      id: uuidv4(),
+      name: name.trim(),
+      role: role || 'Gamer',
+      text: text.trim(),
+      rating: parseInt(rating) || 5,
+      image: image || null,
+      avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+      createdAt: new Date().toISOString(),
+      approved: true
+    }).write();
+
+    console.log(`[BOT API] Testimonial from ${name} successfully added!`);
+    return res.json({ success: true, message: 'Testimonial successfully added!' });
+  } catch (err) {
+    console.error('[BOT API Error]', err);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 // Sitemap.xml & Robots.txt routes for robust SEO and Google Search Console indexing
 router.get('/sitemap.xml', (req, res) => {
   res.header('Content-Type', 'application/xml');
