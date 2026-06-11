@@ -102,6 +102,46 @@ app.use('/', authRouter);
 app.use('/', mainRouter);
 app.use('/admin', adminRouter);
 
+// ── API: Testimonials (untuk WhatsApp Bot) ────────────────────────────────────
+app.post('/api/testimonials', (req, res) => {
+  try {
+    const { db } = require('./database/db');
+    const { v4: uuidv4 } = require('uuid');
+
+    // Validasi API Key
+    const apiKey = req.headers['x-api-key'] || req.body['apiKey'];
+    const validKey = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
+    if (apiKey !== validKey) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: API Key tidak valid.' });
+    }
+
+    const { name, role, text, rating, image } = req.body;
+    if (!name || !text) {
+      return res.status(400).json({ success: false, error: 'Nama dan teks testimoni wajib diisi.' });
+    }
+
+    const newTesti = {
+      id: uuidv4(),
+      name: name.trim(),
+      role: role || 'Customer AlexCloud',
+      text: text.trim(),
+      rating: parseInt(rating) || 5,
+      image: image || null,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+      createdAt: new Date().toISOString(),
+      approved: true
+    };
+
+    db.get('testimonials').push(newTesti).write();
+
+    console.log(`[API] Testimoni baru dari WA Bot: ${name}`);
+    return res.status(201).json({ success: true, message: 'Testimoni berhasil ditambahkan!', id: newTesti.id });
+  } catch (err) {
+    console.error('[API /api/testimonials Error]', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).render('error', {
