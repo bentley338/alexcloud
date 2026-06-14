@@ -280,7 +280,7 @@
         <% testimonials.forEach((t, idx) => { %>
         <div class="testi-card <%= idx === 0 ? 'active' : '' %>" data-idx="<%= idx %>">
           <% if (t.image) { %>
-            <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-img" width="400" height="250" loading="lazy" decoding="async">
+            <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-img" width="400" height="250" loading="lazy" decoding="async" fetchpriority="low">
           <% } %>
           <div class="testi-content">
             <div class="testi-stars">

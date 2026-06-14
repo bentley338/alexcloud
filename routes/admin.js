@@ -10,9 +10,23 @@ const fs = require('fs');
 const multer = require('multer');
 
 // =====================
-// MULTER STORAGE SETUP — Memory Storage (Converts images to Base64 for database persistence)
+// MULTER STORAGE SETUP — Disk Storage (saves images as physical files, not base64)
 // =====================
-const testiStorage = multer.memoryStorage();
+const testiUploadsDir = path.join(__dirname, '../public/uploads/testimonials');
+if (!fs.existsSync(testiUploadsDir)) {
+  fs.mkdirSync(testiUploadsDir, { recursive: true });
+}
+
+const testiStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, testiUploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueName = `testi-${uuidv4()}${ext}`;
+    cb(null, uniqueName);
+  }
+});
 
 const testiUpload = multer({
   storage: testiStorage,
@@ -579,7 +593,8 @@ router.post('/testimonials', ensureAdmin, (req, res) => {
     // Prioritas: file upload > URL manual
     let finalImage = null;
     if (req.file) {
-      finalImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      // Save as physical file path, not base64 — dramatically reduces HTML size
+      finalImage = `/uploads/testimonials/${req.file.filename}`;
     } else if (imageUrl && imageUrl.trim()) {
       finalImage = imageUrl.trim();
     }
@@ -664,7 +679,8 @@ router.post('/testimonials/:id/edit', ensureAdmin, (req, res) => {
         const oldPath = path.join(__dirname, '../public', testi.image);
         try { if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath); } catch (e) {}
       }
-      finalImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      // Save as physical file path, not base64
+      finalImage = `/uploads/testimonials/${req.file.filename}`;
     } else if (imageUrl && imageUrl.trim()) {
       finalImage = imageUrl.trim();
     }

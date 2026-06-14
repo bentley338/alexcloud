@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const fs = require('fs');
+const path = require('path');
 const { cleanEnvVar } = require('./utils/helpers');
 
 // Fix common copy-paste and quote wrapping mistakes for env vars
@@ -10,7 +12,6 @@ const express = require('express');
 const session = require('express-session');
 const flash = require('express-flash');
 const methodOverride = require('method-override');
-const path = require('path');
 const compression = require('compression');
 const { runMinifier } = require('./utils/minifier');
 
@@ -20,22 +21,116 @@ runMinifier();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── Auto-migrate base64 testimonial images to physical files ──────────────
+function migrateTestimonialImages() {
+  const dbJsonPath = path.join(__dirname, 'database', 'db.json');
+  const uploadsDir = path.join(__dirname, 'public', 'uploads', 'testimonials');
+
+  try {
+    const raw = fs.readFileSync(dbJsonPath, 'utf8');
+    const data = JSON.parse(raw);
+    if (!data.testimonials || !Array.isArray(data.testimonials)) return;
+
+    let migrated = 0;
+    data.testimonials.forEach((testi, idx) => {
+      if (testi.image && typeof testi.image === 'string' && testi.image.startsWith('data:image/')) {
+        const match = testi.image.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (!match) return;
+
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+        const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
+        const { v4: uuidv4 } = require('uuid');
+        const fileName = `testi-${uuidv4()}.${ext}`;
+        fs.writeFileSync(path.join(uploadsDir, fileName), Buffer.from(match[2], 'base64'));
+        data.testimonials[idx].image = `/uploads/testimonials/${fileName}`;
+        migrated++;
+        console.log(`[MIGRATE] Extracted image for "${testi.name}" \u2192 ${fileName}`);
+      }
+    });
+
+    if (migrated > 0) {
+      fs.writeFileSync(dbJsonPath, JSON.stringify(data, null, 2), 'utf8');
+      console.log(`[MIGRATE] Done! Migrated ${migrated} testimonial image(s) from base64 to files.`);
+    }
+  } catch (e) {
+    console.warn('[MIGRATE] Testimonial image migration warning:', e.message);
+  }
+}
+migrateTestimonialImages();
+
+// ─── Auto-convert game images to WebP if sharp is available ──────────────────
+async function autoConvertGameImagesToWebP() {
+  let sharp;
+  try { sharp = require('sharp'); } catch (e) {
+    console.log('[WEBP] sharp not installed — skipping game image conversion. Install with: npm install sharp');
+    return;
+  }
+  const imagesDir = path.join(__dirname, 'public', 'images', 'games');
+  if (!fs.existsSync(imagesDir)) return;
+
+  const legacyFiles = fs.readdirSync(imagesDir).filter(f =>
+    /\.(png|jpg|jpeg)$/i.test(f) && !f.endsWith('.webp')
+  );
+  if (legacyFiles.length === 0) return;
+
+  console.log(`[WEBP] Converting ${legacyFiles.length} game image(s) to WebP...`);
+  for (const file of legacyFiles) {
+    const inputPath = path.join(imagesDir, file);
+    const baseName = path.basename(file, path.extname(file));
+    const outputPath = path.join(imagesDir, `${baseName}.webp`);
+    if (fs.existsSync(outputPath)) continue; // Already converted
+    try {
+      await sharp(inputPath).webp({ quality: 82, effort: 4 }).toFile(outputPath);
+      console.log(`[WEBP] Converted ${file} -> ${baseName}.webp`);
+    } catch (e) {
+      console.warn(`[WEBP] Failed to convert ${file}:`, e.message);
+    }
+  }
+}
+autoConvertGameImagesToWebP();
+
 // ── Gzip/Brotli Compression (reduces transfer size ~70%) ──────────────────────
 app.use(compression({ level: 6 }));
 
-// ── Security Headers (applied to all responses) ─────────────────────────────
+// ── Security Headers & HTML Cache-Control (applied to all responses) ─────────
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+  // HTML pages: no-cache to always revalidate (ensures fresh content while allowing conditional 304)
+  if (req.accepts('html') && !req.path.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
   next();
 });
 
 // View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// ── WebP fallback: if .webp not found, serve original .png/.jpg ──────────────
+app.use('/images/games', (req, res, next) => {
+  if (req.path.endsWith('.webp')) {
+    const webpPath = path.join(__dirname, 'public', 'images', 'games', path.basename(req.path));
+    if (!fs.existsSync(webpPath)) {
+      const base = path.basename(req.path, '.webp');
+      const fallbacks = [`${base}.jpg`, `${base}.png`, `${base}.jpeg`];
+      for (const fb of fallbacks) {
+        const fbPath = path.join(__dirname, 'public', 'images', 'games', fb);
+        if (fs.existsSync(fbPath)) {
+          return res.sendFile(fbPath);
+        }
+      }
+    }
+  }
+  next();
+});
 
 // ── Static files dengan aggressive caching ───────────────────────────────────
 // CSS/JS/images: cache 1 tahun (immutable untuk file yang di-hash), revalidate dengan ETag

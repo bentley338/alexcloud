@@ -78,12 +78,10 @@
   <link rel="preload" href="/css/main.css?v=1.3" as="style" fetchpriority="high">
   <link rel="stylesheet" href="/css/main.css?v=1.3">
 
-  <!-- Preload JS files untuk mempercepat interaktivitas -->
+  <!-- Preload main JS only (chatbot deferred to idle-until-urgent) -->
   <link rel="preload" href="/js/main.js?v=1.3" as="script">
-  <link rel="preload" href="/js/ai-engine.js?v=1.3" as="script">
 
-  <!-- Google Fonts: Inter — clean, modern, premium (like Xbox/PlayStation UI) -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style">
+  <!-- Google Fonts: Inter — loaded async with display=swap to prevent FOIT/CLS -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 

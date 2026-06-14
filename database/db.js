@@ -215,17 +215,17 @@ function seedPlans() {
 }
 
 const gameImageMapping = {
-  'EA FC 26': '/images/games/ea_fc_26.png',
-  'EA FC 25': '/images/games/ea_fc_25.jpg',
-  'MotoGP 25': '/images/games/motogp_25.jpg',
-  'MotoGP 24': '/images/games/motogp_24.jpg',
-  'Alan Wake 2': '/images/games/alan_wake_2.jpg',
-  'Hogwarts Legacy': '/images/games/hogwarts_legacy.jpg',
-  'GTA VI': '/images/games/gta_vi.jpg', // Local high-res vertical GTA V/VI cover
-  'GTA V': '/images/games/gta_v.jpg', // Local high-res vertical GTA V cover
+  'EA FC 26': '/images/games/ea_fc_26.webp',
+  'EA FC 25': '/images/games/ea_fc_25.webp',
+  'MotoGP 25': '/images/games/motogp_25.webp',
+  'MotoGP 24': '/images/games/motogp_24.webp',
+  'Alan Wake 2': '/images/games/alan_wake_2.webp',
+  'Hogwarts Legacy': '/images/games/hogwarts_legacy.webp',
+  'GTA VI': '/images/games/gta_vi.webp',
+  'GTA V': '/images/games/gta_v.webp',
   'Red Dead Redemption 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/library_600x900_2x.jpg',
   'Cyberpunk 2077': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/library_600x900_2x.jpg',
-  'Call of Duty: BO6': '/images/games/cod_bo6.png',
+  'Call of Duty: BO6': '/images/games/cod_bo6.webp',
   'The Witcher 3': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/library_600x900_2x.jpg',
   'Spider-Man 2': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1817070/library_600x900_2x.jpg',
   'Elden Ring': 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/library_600x900_2x.jpg',

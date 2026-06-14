@@ -13,7 +13,7 @@
       <% testimonials.forEach(t => { %>
       <div class="testi-card-full">
         <% if (t.image) { %>
-          <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-full-img" width="400" height="250" loading="lazy" decoding="async">
+          <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-full-img" width="400" height="250" loading="lazy" decoding="async" fetchpriority="low">
         <% } %>
         <div class="testi-content">
           <div class="testi-stars">
