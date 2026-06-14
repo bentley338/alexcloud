@@ -64,7 +64,7 @@ body::before {
   z-index: 0;
 }
 
-/* Film grain texture — subtle, makes it feel tactile not flat/AI */
+/* Film grain texture — commented out to prevent heavy paint overhead / layout lag on scroll
 body::after {
   content: '';
   position: fixed;
@@ -75,6 +75,7 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
+*/
 
 /* ─── Scroll-reveal animations ─── */
 @keyframes fadeInUp {
