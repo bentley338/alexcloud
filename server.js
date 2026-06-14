@@ -90,6 +90,16 @@ app.use(passport.session());
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
   res.locals.process = process;
+
+  // Dynamic canonical URL & OG URL for SEO indexing
+  const host = req.get('host') || 'alexcloud.my.id';
+  const protocol = host.includes('localhost') ? 'http' : 'https';
+  let cleanPath = req.originalUrl.split('?')[0];
+  // Remove trailing slash for sub-pages to prevent duplicate crawl issues
+  if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
+    cleanPath = cleanPath.slice(0, -1);
+  }
+  res.locals.canonicalUrl = `${protocol}://${host}${cleanPath}`;
   next();
 });
 
