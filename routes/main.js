@@ -13,23 +13,59 @@ const { sharedHttpsAgent, fr3Request, createRateLimiter, BROWSER_UA } = require(
 const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
 const searchRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 60 }); // 60 searches/min
 
-// Helper to filter out missing/base64 testimonial images for clean UI
+// Helper to filter out missing testimonial images and return dynamic URL for clean UI & high PageSpeed
 function getCleanTestimonials() {
   const testimonials = db.get('testimonials').filter({ approved: true }).value() || [];
   return testimonials.map(t => {
     if (t.image && typeof t.image === 'string') {
-      if (t.image.startsWith('/uploads/')) {
-        const filePath = path.join(__dirname, '..', 'public', t.image);
-        if (!fs.existsSync(filePath)) {
-          return { ...t, image: null };
+      const trimmed = t.image.trim();
+      if (trimmed.startsWith('/uploads/')) {
+        // Physical file on disk — if it exists, serve via endpoint, otherwise hide it
+        const filePath = path.join(__dirname, '..', 'public', trimmed);
+        if (fs.existsSync(filePath)) {
+          return { ...t, image: `/api/testimonials/${t.id}/image` };
         }
-      } else if (t.image.startsWith('data:image/')) {
-        return { ...t, image: null };
+      } else if (trimmed.startsWith('data:image/')) {
+        // Base64 image — serve via persistent binary endpoint
+        return { ...t, image: `/api/testimonials/${t.id}/image` };
+      } else if (trimmed.startsWith('http')) {
+        // External URL — serve directly
+        return { ...t, image: trimmed };
       }
     }
-    return t;
+    return { ...t, image: null };
   });
 }
+
+// Dynamic binary testimonial image API endpoint (solves ephemeral filesystem deletes & preserves PageSpeed score)
+router.get('/api/testimonials/:id/image', (req, res) => {
+  const testi = db.get('testimonials').find({ id: req.params.id }).value();
+  if (!testi || !testi.image || typeof testi.image !== 'string') {
+    return res.status(404).send('Image Not Found');
+  }
+
+  const trimmed = testi.image.trim();
+  if (trimmed.startsWith('data:image/')) {
+    const match = trimmed.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (match) {
+      const contentType = `image/${match[1]}`;
+      const buffer = Buffer.from(match[2], 'base64');
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+      return res.send(buffer);
+    }
+  } else if (trimmed.startsWith('/uploads/')) {
+    const filePath = path.join(__dirname, '..', 'public', trimmed);
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.sendFile(filePath);
+    }
+  } else if (trimmed.startsWith('http')) {
+    return res.redirect(trimmed);
+  }
+
+  return res.status(404).send('Image Not Found');
+});
 
 // Homepage
 router.get('/', (req, res) => {

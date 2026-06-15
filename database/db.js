@@ -303,51 +303,12 @@ function updateGameImages() {
   }
 }
 
-function migrateTestimonialImages() {
-  const fs = require('fs');
-  const path = require('path');
-  const uploadsDir = path.join(__dirname, '..', 'public', 'uploads', 'testimonials');
-  
-  try {
-    const testimonials = db.get('testimonials').value() || [];
-    let migrated = 0;
-    
-    testimonials.forEach((testi) => {
-      if (testi.image && typeof testi.image === 'string' && testi.image.startsWith('data:image/')) {
-        const match = testi.image.match(/^data:image\/(\w+);base64,(.+)$/);
-        if (!match) return;
-
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-
-        const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
-        const { v4: uuidv4 } = require('uuid');
-        const fileName = `testi-${uuidv4()}.${ext}`;
-        
-        fs.writeFileSync(path.join(uploadsDir, fileName), Buffer.from(match[2], 'base64'));
-        testi.image = `/uploads/testimonials/${fileName}`;
-        migrated++;
-        console.log(`[MIGRATE-MEM] Extracted image for "${testi.name}" -> ${fileName}`);
-      }
-    });
-
-    if (migrated > 0) {
-      db.write();
-      console.log(`[MIGRATE-MEM] Done! Migrated ${migrated} testimonial image(s) from memory state to files.`);
-    }
-  } catch (e) {
-    console.warn('[MIGRATE-MEM] Testimonial image migration warning:', e.message);
-  }
-}
-
 function initDB() {
   seedAdmin();
   seedPlans();
   seedGames();
   seedTestimonials();
   updateGameImages();
-  migrateTestimonialImages();
   cleanOldSessions();
 
   // Schedule periodic session cleanup every 6 hours
