@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const https = require('https');
 const path = require('path');
+const fs = require('fs');
 const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
@@ -12,12 +13,30 @@ const { sharedHttpsAgent, fr3Request, createRateLimiter, BROWSER_UA } = require(
 const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
 const searchRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 60 }); // 60 searches/min
 
+// Helper to filter out missing/base64 testimonial images for clean UI
+function getCleanTestimonials() {
+  const testimonials = db.get('testimonials').filter({ approved: true }).value() || [];
+  return testimonials.map(t => {
+    if (t.image && typeof t.image === 'string') {
+      if (t.image.startsWith('/uploads/')) {
+        const filePath = path.join(__dirname, '..', 'public', t.image);
+        if (!fs.existsSync(filePath)) {
+          return { ...t, image: null };
+        }
+      } else if (t.image.startsWith('data:image/')) {
+        return { ...t, image: null };
+      }
+    }
+    return t;
+  });
+}
+
 // Homepage
 router.get('/', (req, res) => {
   const games = getGames();
   const popularGames = games.filter(g => g.popular).slice(0, 8);
   const trendingGames = games.filter(g => g.rating >= 4.8).slice(0, 6);
-  const testimonials = db.get('testimonials').filter({ approved: true }).value();
+  const testimonials = getCleanTestimonials();
   const plans = getPlans();
   res.render('index', {
     title: 'AlexCloud - Premium Cloud Gaming',
@@ -90,7 +109,7 @@ router.get('/pricing', (req, res) => {
 
 // Testimonials page
 router.get('/testimonials', (req, res) => {
-  const testimonials = db.get('testimonials').filter({ approved: true }).value();
+  const testimonials = getCleanTestimonials();
   res.render('testimonials', {
     title: 'Testimoni - AlexCloud',
     user: req.user || null,
