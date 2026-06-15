@@ -21,43 +21,7 @@ runMinifier();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Auto-migrate base64 testimonial images to physical files ──────────────
-function migrateTestimonialImages() {
-  const dbJsonPath = path.join(__dirname, 'database', 'db.json');
-  const uploadsDir = path.join(__dirname, 'public', 'uploads', 'testimonials');
 
-  try {
-    const raw = fs.readFileSync(dbJsonPath, 'utf8');
-    const data = JSON.parse(raw);
-    if (!data.testimonials || !Array.isArray(data.testimonials)) return;
-
-    let migrated = 0;
-    data.testimonials.forEach((testi, idx) => {
-      if (testi.image && typeof testi.image === 'string' && testi.image.startsWith('data:image/')) {
-        const match = testi.image.match(/^data:image\/(\w+);base64,(.+)$/);
-        if (!match) return;
-
-        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-        const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
-        const { v4: uuidv4 } = require('uuid');
-        const fileName = `testi-${uuidv4()}.${ext}`;
-        fs.writeFileSync(path.join(uploadsDir, fileName), Buffer.from(match[2], 'base64'));
-        data.testimonials[idx].image = `/uploads/testimonials/${fileName}`;
-        migrated++;
-        console.log(`[MIGRATE] Extracted image for "${testi.name}" \u2192 ${fileName}`);
-      }
-    });
-
-    if (migrated > 0) {
-      fs.writeFileSync(dbJsonPath, JSON.stringify(data, null, 2), 'utf8');
-      console.log(`[MIGRATE] Done! Migrated ${migrated} testimonial image(s) from base64 to files.`);
-    }
-  } catch (e) {
-    console.warn('[MIGRATE] Testimonial image migration warning:', e.message);
-  }
-}
-migrateTestimonialImages();
 
 // ─── Auto-convert game images to WebP if sharp is available ──────────────────
 async function autoConvertGameImagesToWebP() {
