@@ -2224,6 +2224,22 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   border: 2px solid var(--accent-blue);
 }
 
+.testi-avatar-placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gradient-main);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: 2px solid var(--accent-blue);
+  flex-shrink: 0;
+}
+
 .testi-name {
   font-family: var(--font-ui);
   font-weight: 700;
@@ -2847,6 +2863,12 @@ input:focus-visible,
 }
 
 .testi-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.testi-avatar-placeholder {
   width: 44px;
   height: 44px;
   flex-shrink: 0;

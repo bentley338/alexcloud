@@ -25,7 +25,6 @@
      2. Navbar Sticky Effect
   ========================================================== */
   function handleStickyNavbar() {
-    navbar = document.getElementById('navbar') || document.querySelector('.navbar');
     if (!navbar) return;
     if (window.scrollY > 20) {
       navbar.classList.add('scrolled');
@@ -311,13 +310,19 @@
   /* ==========================================================
      13. Mouse Move Hover Card Glow Effect
   ========================================================== */
-  document.querySelectorAll('.feature-card, .game-card, .plan-card, .trending-card').forEach(function (card) {
-    card.addEventListener('mousemove', function (e) {
-      var rect = card.getBoundingClientRect();
-      card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
-      card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+  if (window.innerWidth > 768) {
+    document.querySelectorAll('.feature-card, .game-card, .plan-card, .trending-card').forEach(function (card) {
+      var rect;
+      card.addEventListener('mouseenter', function () {
+        rect = card.getBoundingClientRect();
+      });
+      card.addEventListener('mousemove', function (e) {
+        if (!rect) rect = card.getBoundingClientRect();
+        card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+        card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+      });
     });
-  });
+  }
 
   /* ==========================================================
      14. Lazy Image Loading
@@ -359,7 +364,6 @@
   }
 
   function handleBackToTopVisibility() {
-    backToTopBtn = document.getElementById('backToTop');
     if (!backToTopBtn) return;
     if (window.scrollY > 400) {
       backToTopBtn.classList.add('visible');
@@ -374,6 +378,16 @@
   function initScrollAnimations() {
     var animatedEls = document.querySelectorAll('.animate-on-scroll, [data-animate]');
     if (!animatedEls.length) return;
+
+    // Mobile: disable animations entirely to boost performance, rendering elements visible immediately
+    if (window.innerWidth <= 768) {
+      animatedEls.forEach(function (el) {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+        el.style.filter = 'none';
+      });
+      return;
+    }
 
     if (!('IntersectionObserver' in window)) {
       animatedEls.forEach(function (el) {
@@ -399,19 +413,12 @@
     }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
 
     animatedEls.forEach(function (el) {
-      var rect = el.getBoundingClientRect();
-      var isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
-      if (isInViewport) {
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0)';
-        el.style.filter = 'blur(0px)';
-      } else {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(32px)';
-        el.style.filter = 'blur(4px)';
-        el.style.transition = 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
-        observer.observe(el);
-      }
+      // Setup initial state and transitions, let IntersectionObserver handle the trigger (no getBoundingClientRect loop)
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(32px)';
+      el.style.filter = 'blur(4px)';
+      el.style.transition = 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
+      observer.observe(el);
     });
   }
 
@@ -422,7 +429,7 @@
   function onScroll() {
     if (!scrollTicking) {
       window.requestAnimationFrame(function () {
-        updateScrollProgress();
+        // updateScrollProgress(); // Disabled for performance (invisible element)
         handleStickyNavbar();
         handleBackToTopVisibility();
         scrollTicking = false;
@@ -440,6 +447,10 @@
     if (savedMode && savedMode !== 'grid') {
       setViewMode(savedMode);
     }
+
+    // Cache elements to avoid DOM lookups inside scroll loop
+    navbar = document.getElementById('navbar') || document.querySelector('.navbar');
+    backToTopBtn = document.getElementById('backToTop');
 
     // Scroll listener
     window.addEventListener('scroll', onScroll, { passive: true });

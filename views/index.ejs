@@ -288,7 +288,11 @@
             </div>
             <p class="testi-text">"<%= t.text %>"</p>
             <div class="testi-author">
-              <img src="<%= t.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(t.name) %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy" decoding="async">
+              <% if (t.avatar && !t.avatar.includes('dicebear.com')) { %>
+                <img src="<%= t.avatar %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy" decoding="async">
+              <% } else { %>
+                <div class="testi-avatar-placeholder" aria-hidden="true"><%= t.name.charAt(0).toUpperCase() %></div>
+              <% } %>
               <div>
                 <div class="testi-name"><%= t.name %></div>
                 <div class="testi-role"><%= t.role %></div>
