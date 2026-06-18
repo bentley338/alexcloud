@@ -42,6 +42,7 @@
     if (!navLinks) return;
     var isOpen = navLinks.classList.toggle('open');
     if (hamburger) {
+      hamburger.classList.toggle('open', isOpen);
       hamburger.setAttribute('aria-expanded', String(isOpen));
       hamburger.setAttribute('aria-label', isOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi');
     }
@@ -71,6 +72,7 @@
       if (!navLinks.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target)) {
         navLinks.classList.remove('open');
         if (hamburger) {
+          hamburger.classList.remove('open');
           hamburger.setAttribute('aria-expanded', 'false');
           hamburger.setAttribute('aria-label', 'Buka menu navigasi');
         }
@@ -92,6 +94,7 @@
       if (navLinks && navLinks.classList.contains('open')) {
         navLinks.classList.remove('open');
         if (hamburger) {
+          hamburger.classList.remove('open');
           hamburger.setAttribute('aria-expanded', 'false');
           hamburger.focus();
         }
@@ -459,9 +462,66 @@
     initLazyLoading();
     initBackToTop();
     initScrollAnimations();
+    initHeroStatsObserver();
+    initHeroParticles();
 
     // Run once on load
     onScroll();
+  }
+
+  /* ==========================================================
+     Animated Number Counter for Hero Stats
+  ========================================================== */
+  function animateCounters() {
+    var counters = document.querySelectorAll('[data-count]');
+    counters.forEach(function(counter) {
+      var target = parseInt(counter.getAttribute('data-count'), 10);
+      if (isNaN(target) || counter.dataset.counted) return;
+      counter.dataset.counted = 'true';
+      var current = 0;
+      var increment = Math.max(1, Math.ceil(target / 60));
+      var timer = setInterval(function() {
+        current += increment;
+        if (current >= target) {
+          counter.textContent = target + '+';
+          clearInterval(timer);
+        } else {
+          counter.textContent = current + '+';
+        }
+      }, 30);
+    });
+  }
+
+  function initHeroStatsObserver() {
+    // Trigger counter when hero stats come into view
+    if ('IntersectionObserver' in window) {
+      var statsObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            animateCounters();
+            statsObserver.disconnect();
+          }
+        });
+      }, { threshold: 0.3 });
+      var heroStats = document.querySelector('.hero-stats');
+      if (heroStats) statsObserver.observe(heroStats);
+    } else {
+      animateCounters();
+    }
+  }
+
+  /* ==========================================================
+     Hero Floating Particles
+  ========================================================== */
+  function initHeroParticles() {
+    var container = document.querySelector('.hero-particles');
+    if (!container) return;
+    for (var i = 0; i < 20; i++) {
+      var dot = document.createElement('div');
+      dot.className = 'hero-particle';
+      dot.style.cssText = 'left:' + Math.random()*100 + '%;top:' + Math.random()*100 + '%;animation-delay:' + (Math.random()*8) + 's;animation-duration:' + (6+Math.random()*8) + 's;width:' + (2+Math.random()*3) + 'px;height:' + (2+Math.random()*3) + 'px;opacity:' + (0.15+Math.random()*0.35);
+      container.appendChild(dot);
+    }
   }
 
   if (document.readyState === 'loading') {

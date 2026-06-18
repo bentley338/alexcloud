@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" style="background-color: #0c0c0e; color-scheme: dark;">
+<html lang="id" style="background-color: #06060a; color-scheme: dark;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
   <meta name="author" content="AlexCloud">
   <link rel="canonical" href="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'https://alexcloud.my.id/' %>">
-  <meta name="theme-color" content="#e8732a">
+  <meta name="theme-color" content="#ff6b2b">
 
   <!-- Open Graph / Facebook (Tampilan premium saat di-share di WhatsApp/Sosmed) -->
   <meta property="og:type" content="website">
@@ -76,15 +76,15 @@
 
   <!-- ═══ CRITICAL CSS: Inlined for instant first paint ═══ -->
   <style>
-    :root{--bg-primary:#0c0c0e;--bg-secondary:#111115;--bg-card:#16161c;--bg-card-hover:#1c1c24;--accent-blue:#e8732a;--accent-purple:#c0392b;--accent-green:#4caf7d;--accent-orange:#e8732a;--text-primary:#f0f0f2;--text-secondary:#8a8a99;--text-muted:#4a4a58;--border:rgba(255,255,255,0.07);--border-hover:rgba(232,115,42,0.35);--glow-blue:0 4px 24px rgba(232,115,42,0.18);--gradient-main:linear-gradient(135deg,#e8732a 0%,#c0392b 100%);--gradient-dark:linear-gradient(180deg,#0c0c0e 0%,#111115 100%);--font-display:'Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:10px;--radius-lg:16px;--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
+    :root{--bg-primary:#06060a;--bg-secondary:#0c0c14;--bg-card:#111119;--bg-card-hover:#18182a;--bg-elevated:#1c1c2e;--accent-blue:#ff6b2b;--accent-purple:#c0392b;--accent-green:#22c55e;--accent-orange:#ff6b2b;--accent-secondary:#6366f1;--text-primary:#f0f0f5;--text-secondary:#9090a0;--text-muted:#505068;--border:rgba(255,255,255,0.06);--border-hover:rgba(255,107,43,0.4);--border-glass:rgba(255,255,255,0.1);--glow-blue:0 4px 30px rgba(255,107,43,0.2),0 0 60px rgba(255,107,43,0.05);--shadow-card:0 4px 24px rgba(0,0,0,0.4);--shadow-card-hover:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(255,107,43,0.08);--gradient-main:linear-gradient(135deg,#ff6b2b 0%,#e8401a 50%,#c0392b 100%);--gradient-dark:linear-gradient(180deg,#06060a 0%,#0c0c14 100%);--gradient-glass:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 100%);--gradient-accent:linear-gradient(135deg,#ff6b2b 0%,#6366f1 100%);--font-display:'Plus Jakarta Sans','Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:12px;--radius-lg:20px;--radius-xl:28px;--transition:0.3s cubic-bezier(0.4,0,0.2,1);--transition-fast:0.15s cubic-bezier(0.4,0,0.2,1)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
     body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
     .scroll-progress{display:none;position:fixed;top:0;left:0;width:0%;height:3px;background:var(--gradient-main);z-index:10001}
     .skip-link{position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:var(--gradient-main);color:#000;padding:0.75rem 1.5rem;border-radius:0 0 var(--radius) var(--radius);z-index:10000;font-weight:700;text-decoration:none;transition:top 0.3s ease}
     .skip-link:focus{top:0}
-    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.75rem 0;background:rgba(3,7,18,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:var(--transition)}
-    .navbar.scrolled{background:rgba(12,12,14,0.97);box-shadow:0 1px 0 rgba(232,115,42,0.15),0 4px 32px rgba(0,0,0,0.6)}
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.85rem 0;background:rgba(6,6,10,0.7);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.04);transition:var(--transition)}
+    .navbar.scrolled{background:rgba(6,6,10,0.95);border-bottom-color:rgba(255,107,43,0.15);box-shadow:0 1px 0 rgba(255,107,43,0.1),0 8px 40px rgba(0,0,0,0.7)}
     .nav-container{max-width:1280px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:2rem}
     .nav-logo{text-decoration:none;display:flex;align-items:center;gap:0.6rem;flex-shrink:0}
     .logo-text{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--text-primary);letter-spacing:2px}
@@ -95,16 +95,16 @@
     .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;margin-left:auto}
     .nav-toggle span{display:block;width:24px;height:2px;background:var(--text-primary);border-radius:2px}
     .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px;overflow:hidden}
-    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 70% 45%,rgba(232,115,42,0.07) 0%,transparent 65%),radial-gradient(ellipse 40% 50% at 15% 70%,rgba(192,57,43,0.05) 0%,transparent 55%)}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 70% 45%,rgba(255,107,43,0.07) 0%,transparent 65%),radial-gradient(ellipse 40% 50% at 15% 70%,rgba(192,57,43,0.05) 0%,transparent 55%)}
     .hero-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:80px 80px}
     .hero-container{max-width:1280px;margin:0 auto;padding:4rem 2rem;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
-    .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(232,115,42,0.1);border:1px solid rgba(232,115,42,0.3);color:var(--accent-blue);padding:0.4rem 1rem;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem}
-    .hero-title{font-family:var(--font-display);font-size:clamp(2.5rem,5vw,4.5rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:1.5rem;color:var(--text-primary)}
+    .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,107,43,0.1);border:1px solid rgba(255,107,43,0.3);color:var(--accent-blue);padding:0.4rem 1rem;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem}
+    .hero-title{font-family:var(--font-display);font-size:clamp(2.5rem,5vw,4.5rem);font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:1.5rem;color:var(--text-primary)}
     .hero-title .accent{background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .hero-subtitle{font-size:1.15rem;color:var(--text-secondary);max-width:500px;margin-bottom:2.5rem;line-height:1.7}
     .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
-    .btn-primary{display:inline-flex;align-items:center;gap:0.5rem;background:var(--gradient-main);color:#000;text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:700;padding:0.85rem 2rem;border-radius:var(--radius);transition:var(--transition);border:none;cursor:pointer}
-    .btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;background:transparent;color:var(--text-primary);text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:0.85rem 2rem;border-radius:var(--radius);border:1px solid var(--border-hover);transition:var(--transition);cursor:pointer}
+    .btn-primary{display:inline-flex;align-items:center;gap:0.5rem;background:var(--gradient-main);color:#fff;text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:700;padding:0.9rem 2.2rem;border-radius:var(--radius);transition:var(--transition);border:none;cursor:pointer;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
+    .btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.04);color:var(--text-primary);text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:0.9rem 2.2rem;border-radius:var(--radius);border:1px solid var(--border-hover);transition:var(--transition);cursor:pointer;backdrop-filter:blur(8px)}
     .hero-stats{display:flex;gap:2rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border)}
     .stat-item{text-align:center}
     .stat-num{display:block;font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent-blue)}
@@ -119,17 +119,17 @@
     .nav-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover}
     .nav-avatar-placeholder{width:28px;height:28px;border-radius:50%;background:var(--gradient-main);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#000}
     .testi-avatar-placeholder{width:44px;height:44px;border-radius:50%;background:var(--gradient-main);color:#000;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;border:2px solid var(--accent-blue);flex-shrink:0}
-    @media(max-width:1024px){.hero-container{grid-template-columns:1fr;text-align:center}.hero-visual{display:none}.hero-subtitle{margin:0 auto 2.5rem;max-width:540px}.hero-actions{justify-content:center}.hero-stats{justify-content:center;gap:1.5rem}.hero-badge{margin-left:auto;margin-right:auto}}
-    @media(max-width:768px){.nav-links{display:none}.nav-toggle{display:flex}.nav-search-wrap{display:none}.hero{min-height:auto;padding-top:100px;padding-bottom:2rem}.hero-container{padding:2rem 1.25rem}.hero-title{font-size:clamp(2rem,8vw,3rem)}.hero-subtitle{font-size:1rem}.hero-stats{gap:1rem;flex-wrap:wrap;justify-content:center}.hero-actions{flex-direction:column;align-items:center}.hero-actions .btn-primary,.hero-actions .btn-secondary{width:100%;justify-content:center}}
+    @media(max-width:1024px){.hero-container{grid-template-columns:1fr;text-align:center}.hero-visual{display:none}.hero-subtitle{margin:0 auto 2.5rem;max-width:540px}.hero-actions{justify-content:center}.hero-stats{justify-content:center;gap:1rem;flex-wrap:wrap}.hero-badge{margin-left:auto;margin-right:auto}}
+    @media(max-width:768px){.nav-links{display:none}.nav-toggle{display:flex}.nav-search-wrap{display:none}.hero{min-height:auto;padding-top:100px;padding-bottom:2rem}.hero-container{padding:2rem 1.25rem}.hero-title{font-size:clamp(2rem,8vw,3rem)}.hero-subtitle{font-size:1rem}.hero-stats{gap:0.75rem;flex-wrap:wrap;justify-content:center}.hero-actions{flex-direction:column;align-items:center}.hero-actions .btn-primary,.hero-actions .btn-secondary{width:100%;justify-content:center}}
   </style>
 
   <!-- Main CSS: loaded async (non-render-blocking) -->
   <link href="/css/main.css?v=2.3" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="/css/main.css?v=2.3"></noscript>
 
-  <!-- Google Fonts: Inter — async load, reduced weights -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <!-- Google Fonts: Inter + Plus Jakarta Sans — async load -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
   <!-- FontAwesome: load non-blocking -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" media="print" onload="this.media='all'">
@@ -144,10 +144,10 @@
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <a href="/" class="nav-logo">
-        <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px rgba(232, 115, 42, 0.45)); flex-shrink:0;">
+        <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px rgba(255, 107, 43, 0.45)); flex-shrink:0;">
           <defs>
             <linearGradient id="logoIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#e8732a" />
+              <stop offset="0%" stop-color="#ff6b2b" />
               <stop offset="100%" stop-color="#c0392b" />
             </linearGradient>
           </defs>

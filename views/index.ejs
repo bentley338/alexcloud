@@ -4,6 +4,7 @@
 <section class="hero" id="main-content" aria-label="Hero utama">
   <div class="hero-bg"></div>
   <div class="hero-grid-overlay"></div>
+  <div class="hero-particles" aria-hidden="true"></div>
   <div class="hero-container">
     <div class="hero-content">
       <div class="hero-badge">
@@ -27,19 +28,19 @@
         </a>
       </div>
       <div class="hero-stats">
-        <div class="stat-item">
-          <span class="stat-num"><%= allGames.length %>+</span>
+        <div class="stat-item glass">
+          <span class="stat-num" data-count="<%= allGames.length %>">0</span>
           <span class="stat-label">Game Tersedia</span>
         </div>
-        <div class="stat-item">
+        <div class="stat-item glass">
           <span class="stat-num">4K</span>
           <span class="stat-label">Resolusi Max</span>
         </div>
-        <div class="stat-item">
+        <div class="stat-item glass">
           <span class="stat-num">60fps</span>
           <span class="stat-label">Smooth Gaming</span>
         </div>
-        <div class="stat-item">
+        <div class="stat-item glass">
           <span class="stat-num">24/7</span>
           <span class="stat-label">Support</span>
         </div>
@@ -286,7 +287,7 @@
             <div class="testi-stars">
               <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < t.rating ? '#ffd700' : '#333' %>"></i><%}%>
             </div>
-            <p class="testi-text">"<%= t.text %>"</p>
+            <p class="testi-text"><span class="testi-quote-mark" aria-hidden="true">❝</span><%= t.text %></p>
             <div class="testi-author">
               <% if (t.avatar && !t.avatar.includes('dicebear.com')) { %>
                 <img src="<%= t.avatar %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy" decoding="async">
@@ -317,15 +318,15 @@
 </section>
 
 <!-- CTA -->
-<section style="padding: 5rem 0; text-align: center; position: relative; z-index: 1;">
+<section class="cta-section" id="cta">
   <div class="container">
-    <div style="background: linear-gradient(135deg, rgba(232, 115, 42, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%); border: 1px solid rgba(232, 115, 42, 0.25); border-radius: 24px; padding: 4rem 2rem; position: relative; overflow: hidden;">
-      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(232, 115, 42, 0.06) 0%, transparent 70%);"></div>
-      <div style="position: relative; z-index: 1;">
-        <div class="section-tag" style="margin-bottom: 1.5rem;">Mulai Sekarang</div>
+    <div class="cta-card">
+      <div class="cta-bg" aria-hidden="true"></div>
+      <div class="cta-content">
+        <div class="section-tag" style="margin-bottom: 1.5rem;">🚀 Mulai Sekarang</div>
         <h2 class="section-title">Siap Masuk ke Dunia <span class="accent">Cloud Gaming?</span></h2>
-        <p class="section-desc" style="margin-bottom: 2rem;">Daftar gratis sekarang dan nikmati pengalaman gaming premium tanpa batas!</p>
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <p class="section-desc" style="margin-bottom: 2.5rem;">Daftar gratis sekarang dan nikmati pengalaman gaming premium tanpa batas!</p>
+        <div class="cta-actions">
           <a href="/register" class="btn-primary"><i class="fas fa-user-plus"></i> Daftar Gratis</a>
           <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="btn-secondary">
             <i class="fab fa-whatsapp"></i> Hubungi Admin
