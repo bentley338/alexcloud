@@ -1,0 +1,266 @@
+<%- include('partials/header') %>
+
+<section class="community-page" id="main-content">
+  <div class="community-container">
+    <!-- Header -->
+    <div class="community-header">
+      <div class="section-tag">💬 Komunitas</div>
+      <h1 class="community-title">Chat <span class="accent">Komunitas Gamer</span></h1>
+      <p class="community-subtitle">Ngobrol bareng sesama gamer AlexCloud. Tetap santun &amp; saling menghargai ya — pesan toxic akan dihapus admin.</p>
+    </div>
+
+    <!-- Chat shell -->
+    <div class="chat-shell">
+      <div class="chat-bar">
+        <div class="chat-bar-left">
+          <span class="chat-live-dot" aria-hidden="true"></span>
+          <span class="chat-bar-title">Live Chat Global</span>
+        </div>
+        <div class="chat-bar-right" id="chatOnlineHint">Pesan otomatis diperbarui</div>
+      </div>
+
+      <div class="chat-messages" id="chatMessages" aria-live="polite">
+        <div class="chat-loading" id="chatLoading">
+          <i class="fas fa-circle-notch fa-spin"></i> Memuat pesan...
+        </div>
+      </div>
+
+      <form class="chat-composer" id="chatForm" autocomplete="off">
+        <div class="chat-input-wrap">
+          <textarea id="chatInput" class="chat-input" rows="1" maxlength="500"
+            placeholder="Tulis pesan... (Enter untuk kirim)"
+            aria-label="Tulis pesan komunitas"></textarea>
+          <span class="chat-counter" id="chatCounter">0/500</span>
+        </div>
+        <button type="submit" class="chat-send-btn" id="chatSendBtn" aria-label="Kirim pesan">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+    <p class="chat-foot-note"><i class="fas fa-shield-halved"></i> Bermain aman: jangan bagikan password, data pribadi, atau link mencurigakan.</p>
+  </div>
+</section>
+
+<script>
+(function () {
+  var CURRENT_USER_ID = <%- JSON.stringify(user.id) %>;
+  var IS_ADMIN = <%- (user.role === 'admin') ? 'true' : 'false' %>;
+
+  var box = document.getElementById('chatMessages');
+  var loading = document.getElementById('chatLoading');
+  var form = document.getElementById('chatForm');
+  var input = document.getElementById('chatInput');
+  var counter = document.getElementById('chatCounter');
+  var sendBtn = document.getElementById('chatSendBtn');
+
+  var lastTs = '';
+  var seen = {};
+  var POLL_MS = 4000;
+  var pollTimer = null;
+
+  function escapeInit() { /* using textContent — no manual escaping needed */ }
+
+  function timeLabel(iso) {
+    try {
+      var d = new Date(iso);
+      var now = new Date();
+      var diff = (now - d) / 1000;
+      if (diff < 60) return 'baru saja';
+      if (diff < 3600) return Math.floor(diff / 60) + ' mnt lalu';
+      if (d.toDateString() === now.toDateString())
+        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) + ' ' +
+             d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return ''; }
+  }
+
+  function nearBottom() {
+    return box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+  }
+  function scrollToBottom() { box.scrollTop = box.scrollHeight; }
+
+  // Build a message row using textContent only (XSS-safe)
+  function renderMessage(m) {
+    if (seen[m.id]) return null;
+    seen[m.id] = true;
+
+    var mine = m.userId === CURRENT_USER_ID;
+    var row = document.createElement('div');
+    row.className = 'msg-row' + (mine ? ' mine' : '');
+    row.setAttribute('data-id', m.id);
+
+    // avatar
+    var av = document.createElement('div');
+    av.className = 'msg-avatar';
+    if (m.userAvatar) {
+      var img = document.createElement('img');
+      img.src = m.userAvatar;
+      img.alt = m.userName;
+      img.loading = 'lazy';
+      av.appendChild(img);
+    } else {
+      av.classList.add('msg-avatar-ph');
+      av.textContent = (m.userName || '?').charAt(0).toUpperCase();
+    }
+
+    // bubble
+    var bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+
+    var meta = document.createElement('div');
+    meta.className = 'msg-meta';
+    var name = document.createElement('span');
+    name.className = 'msg-name';
+    name.textContent = m.userName || 'User';
+    meta.appendChild(name);
+    if (m.role === 'admin') {
+      var badge = document.createElement('span');
+      badge.className = 'msg-badge';
+      badge.textContent = 'ADMIN';
+      meta.appendChild(badge);
+    }
+    var time = document.createElement('span');
+    time.className = 'msg-time';
+    time.textContent = timeLabel(m.createdAt);
+    meta.appendChild(time);
+
+    var text = document.createElement('div');
+    text.className = 'msg-text';
+    text.textContent = m.text; // SAFE: never innerHTML
+
+    bubble.appendChild(meta);
+    bubble.appendChild(text);
+
+    // delete button (admin = any, user = own)
+    if (IS_ADMIN || mine) {
+      var del = document.createElement('button');
+      del.className = 'msg-del';
+      del.type = 'button';
+      del.title = 'Hapus pesan';
+      del.innerHTML = '<i class="fas fa-trash"></i>';
+      del.addEventListener('click', function () { deleteMessage(m.id, row); });
+      bubble.appendChild(del);
+    }
+
+    var wrap = document.createElement('div');
+    wrap.className = 'msg-inner';
+    wrap.appendChild(av);
+    wrap.appendChild(bubble);
+    row.appendChild(wrap);
+    return row;
+  }
+
+  function appendMessages(list) {
+    var stick = nearBottom();
+    var added = false;
+    list.forEach(function (m) {
+      var row = renderMessage(m);
+      if (row) { box.appendChild(row); added = true; }
+      if (m.createdAt > lastTs) lastTs = m.createdAt;
+    });
+    if (added && stick) scrollToBottom();
+  }
+
+  function showEmptyIfNone() {
+    if (box.querySelector('.msg-row')) return;
+    var empty = document.createElement('div');
+    empty.className = 'chat-empty';
+    empty.innerHTML = '<i class="far fa-comments"></i><p>Belum ada pesan. Jadi yang pertama menyapa! 👋</p>';
+    box.appendChild(empty);
+  }
+
+  function fetchInitial() {
+    fetch('/api/community/messages')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (loading) loading.remove();
+        appendMessages(data.messages || []);
+        showEmptyIfNone();
+        scrollToBottom();
+        startPolling();
+      })
+      .catch(function () {
+        if (loading) loading.textContent = 'Gagal memuat pesan. Coba refresh.';
+      });
+  }
+
+  function poll() {
+    var url = '/api/community/messages' + (lastTs ? ('?after=' + encodeURIComponent(lastTs)) : '');
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.messages && data.messages.length) {
+          var emptyEl = box.querySelector('.chat-empty');
+          if (emptyEl) emptyEl.remove();
+          appendMessages(data.messages);
+        }
+      })
+      .catch(function () {});
+  }
+
+  function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(function () {
+      if (document.hidden) return; // hemat saat tab tidak aktif
+      poll();
+    }, POLL_MS);
+  }
+
+  function deleteMessage(id, row) {
+    if (!confirm('Hapus pesan ini?')) return;
+    fetch('/api/community/messages/' + id + '/delete', { method: 'POST' })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.ok) { row.remove(); showEmptyIfNone(); }
+        else alert(res.error || 'Gagal menghapus pesan.');
+      })
+      .catch(function () { alert('Gagal menghapus pesan.'); });
+  }
+
+  // Composer
+  function autoGrow() {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    counter.textContent = input.value.length + '/500';
+  }
+  input.addEventListener('input', autoGrow);
+
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var text = input.value.trim();
+    if (!text) return;
+    sendBtn.disabled = true;
+    fetch('/api/community/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    })
+      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (res) {
+        if (res.ok && res.body.message) {
+          var emptyEl = box.querySelector('.chat-empty');
+          if (emptyEl) emptyEl.remove();
+          appendMessages([res.body.message]);
+          input.value = '';
+          autoGrow();
+          scrollToBottom();
+        } else {
+          alert(res.body.error || 'Gagal mengirim pesan. Coba lagi.');
+        }
+      })
+      .catch(function () { alert('Gagal mengirim pesan. Periksa koneksi.'); })
+      .finally(function () { sendBtn.disabled = false; input.focus(); });
+  });
+
+  fetchInitial();
+})();
+</script>
+
+<%- include('partials/footer') %>

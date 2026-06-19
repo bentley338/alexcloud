@@ -17,7 +17,8 @@ db.defaults({
   testimonials: [],
   plans: [],
   settings: {},
-  sessions: []
+  sessions: [],
+  chatMessages: []
 }).write();
 
 // ─── Custom Lowdb Session Store (automatically backed up to Postgres) ──────────

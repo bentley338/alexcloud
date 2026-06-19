@@ -1,0 +1,65 @@
+<% currentPage = 'community'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-comments"></i> Moderasi Chat Komunitas</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-list"></i> Pesan Terbaru (<%= messages.length %>)</div>
+    <div style="display:flex; gap:0.5rem; align-items:center;">
+      <a href="/community" target="_blank" class="btn-action btn-edit" style="text-decoration:none; font-size:0.8rem;">
+        <i class="fas fa-external-link-alt"></i> Buka Chat
+      </a>
+      <% if (messages.length > 0) { %>
+      <form action="/admin/community/clear-all" method="POST" style="margin:0;"
+        onsubmit="return confirm('Yakin hapus SEMUA pesan komunitas? Tindakan ini tidak bisa dibatalkan.')">
+        <button type="submit" class="btn-action btn-danger" style="font-size:0.8rem;">
+          <i class="fas fa-trash"></i> Bersihkan Semua
+        </button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (messages.length === 0) { %>
+  <div style="padding:3rem; text-align:center; color:var(--text-muted);">
+    <i class="fas fa-comment-slash" style="font-size:2.5rem; opacity:0.2; margin-bottom:1rem; display:block;"></i>
+    <p>Belum ada pesan di komunitas.</p>
+  </div>
+  <% } else { %>
+  <div style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:0.6rem;">
+    <% messages.forEach(m => { %>
+    <div style="display:flex; align-items:flex-start; gap:0.75rem; padding:0.85rem 1rem; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--radius);">
+      <% if (m.userAvatar) { %>
+        <img src="<%= m.userAvatar %>" alt="<%= m.userName %>" style="width:36px; height:36px; border-radius:50%; object-fit:cover; flex-shrink:0;">
+      <% } else { %>
+        <div style="width:36px; height:36px; border-radius:50%; background:var(--gradient-main); color:#000; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;"><%= m.userName.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div style="min-width:0; flex:1;">
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.2rem; flex-wrap:wrap;">
+          <span style="font-family:var(--font-ui); font-weight:700; font-size:0.85rem; color:var(--text-primary);"><%= m.userName %></span>
+          <% if (m.role === 'admin') { %><span style="font-size:0.65rem; font-weight:700; color:#000; background:var(--gradient-main); padding:0.1rem 0.45rem; border-radius:50px;">ADMIN</span><% } %>
+          <span style="font-size:0.72rem; color:var(--text-muted); font-family:var(--font-ui);"><i class="far fa-clock"></i> <%= moment(m.createdAt).format('DD MMM YYYY, HH:mm') %></span>
+        </div>
+        <div style="font-size:0.9rem; color:var(--text-secondary); line-height:1.5; word-break:break-word; white-space:pre-wrap;"><%= m.text %></div>
+      </div>
+      <form action="/admin/community/<%= m.id %>/delete" method="POST" style="margin:0; flex-shrink:0;"
+        onsubmit="return confirm('Hapus pesan dari <%= m.userName.replace(/'/g, '') %> secara permanen?')">
+        <button type="submit" class="btn-action btn-danger" style="font-size:0.78rem;" title="Hapus permanen">
+          <i class="fas fa-trash"></i>
+        </button>
+      </form>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+<%- include('layout-footer') %>

@@ -153,6 +153,82 @@ router.get('/testimonials', (req, res) => {
   });
 });
 
+// ─── Global Community Chat ──────────────────────────────────────────────────
+const chatPostRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 12 }); // 12 pesan/menit
+const MAX_CHAT_MESSAGES = 500; // simpan hanya 500 pesan terakhir (hindari blob backup membengkak)
+const MAX_CHAT_LEN = 500;
+
+function publicMessage(m) {
+  return {
+    id: m.id,
+    userId: m.userId,
+    userName: m.userName,
+    userAvatar: m.userAvatar || null,
+    role: m.role,
+    text: m.text,
+    createdAt: m.createdAt
+  };
+}
+
+// Halaman chat komunitas (wajib login)
+router.get('/community', ensureAuthenticated, (req, res) => {
+  res.render('community', {
+    title: 'Komunitas - AlexCloud',
+    user: req.user || null
+  });
+});
+
+// Ambil pesan (semua / hanya yang lebih baru dari ?after=ISO timestamp untuk polling)
+router.get('/api/community/messages', ensureAuthenticated, (req, res) => {
+  let messages = db.get('chatMessages').value() || [];
+  const after = req.query.after;
+  if (after) {
+    messages = messages.filter(m => m.createdAt > after);
+  } else {
+    messages = messages.slice(-100); // initial load: 100 terakhir
+  }
+  res.json({ messages: messages.map(publicMessage), serverTime: new Date().toISOString() });
+});
+
+// Kirim pesan
+router.post('/api/community/messages', ensureAuthenticated, chatPostRateLimit, (req, res) => {
+  let text = (req.body.text || '').toString().replace(/\s+$/, '').replace(/^\s+/, '');
+  if (!text) return res.status(400).json({ error: 'Pesan tidak boleh kosong.' });
+  if (text.length > MAX_CHAT_LEN) text = text.slice(0, MAX_CHAT_LEN);
+
+  const msg = {
+    id: uuidv4(),
+    userId: req.user.id,
+    userName: req.user.name || 'User',
+    userAvatar: req.user.avatar || null,
+    role: req.user.role === 'admin' ? 'admin' : 'user',
+    text,
+    createdAt: new Date().toISOString()
+  };
+
+  const coll = db.get('chatMessages');
+  coll.push(msg).write();
+
+  const all = coll.value();
+  if (all.length > MAX_CHAT_MESSAGES) {
+    db.set('chatMessages', all.slice(-MAX_CHAT_MESSAGES)).write();
+  }
+
+  res.json({ message: publicMessage(msg) });
+});
+
+// Hapus pesan (admin: pesan siapa pun, user: hanya miliknya) — permanen
+router.post('/api/community/messages/:id/delete', ensureAuthenticated, (req, res) => {
+  const id = req.params.id;
+  const msg = db.get('chatMessages').find({ id }).value();
+  if (!msg) return res.status(404).json({ error: 'Pesan tidak ditemukan.' });
+  const isAdmin = req.user.role === 'admin';
+  const isOwner = msg.userId === req.user.id;
+  if (!isAdmin && !isOwner) return res.status(403).json({ error: 'Kamu tidak boleh menghapus pesan ini.' });
+  db.get('chatMessages').remove({ id }).write();
+  res.json({ ok: true });
+});
+
 // Dashboard
 router.get('/dashboard', ensureAuthenticated, (req, res) => {
   const orders = db.get('orders').filter({ userId: req.user.id }).sortBy('createdAt').reverse().value();

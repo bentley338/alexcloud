@@ -686,4 +686,33 @@ router.post('/testimonials/:id/edit', ensureAdmin, (req, res) => {
   });
 });
 
+// ─── Moderasi Chat Komunitas ────────────────────────────────────────────────
+router.get('/community', ensureAdmin, (req, res) => {
+  const messages = (db.get('chatMessages').value() || []).slice(-150).reverse();
+  res.render('admin/community', {
+    title: 'Moderasi Komunitas - AlexCloud Admin',
+    user: req.user, messages, moment,
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
+// Hapus pesan (permanen)
+router.post('/community/:id/delete', ensureAdmin, (req, res) => {
+  const msg = db.get('chatMessages').find({ id: req.params.id }).value();
+  if (msg) {
+    db.get('chatMessages').remove({ id: req.params.id }).write();
+    req.flash('success', `Pesan dari "${msg.userName}" berhasil dihapus permanen.`);
+  } else {
+    req.flash('error', 'Pesan tidak ditemukan.');
+  }
+  res.redirect('/admin/community');
+});
+
+// Bersihkan SEMUA pesan (nuke) — untuk situasi darurat
+router.post('/community/clear-all', ensureAdmin, (req, res) => {
+  db.set('chatMessages', []).write();
+  req.flash('success', 'Semua pesan komunitas telah dibersihkan.');
+  res.redirect('/admin/community');
+});
+
 module.exports = router;
