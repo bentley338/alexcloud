@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" style="background-color: #06060a; color-scheme: dark;">
+<html lang="id" style="background-color: #07070f; color-scheme: dark;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,7 +76,7 @@
 
   <!-- ═══ CRITICAL CSS: Inlined for instant first paint ═══ -->
   <style>
-    :root{--bg-primary:#06060a;--bg-secondary:#0c0c14;--bg-card:#111119;--bg-card-hover:#18182a;--bg-elevated:#1c1c2e;--accent-blue:#ff6b2b;--accent-purple:#c0392b;--accent-green:#22c55e;--accent-orange:#ff6b2b;--accent-secondary:#6366f1;--text-primary:#f0f0f5;--text-secondary:#9090a0;--text-muted:#505068;--border:rgba(255,255,255,0.06);--border-hover:rgba(255,107,43,0.4);--border-glass:rgba(255,255,255,0.1);--glow-blue:0 4px 30px rgba(255,107,43,0.2),0 0 60px rgba(255,107,43,0.05);--shadow-card:0 4px 24px rgba(0,0,0,0.4);--shadow-card-hover:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(255,107,43,0.08);--gradient-main:linear-gradient(135deg,#ff6b2b 0%,#e8401a 50%,#c0392b 100%);--gradient-dark:linear-gradient(180deg,#06060a 0%,#0c0c14 100%);--gradient-glass:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 100%);--gradient-accent:linear-gradient(135deg,#ff6b2b 0%,#6366f1 100%);--font-display:'Plus Jakarta Sans','Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:12px;--radius-lg:20px;--radius-xl:28px;--transition:0.3s cubic-bezier(0.4,0,0.2,1);--transition-fast:0.15s cubic-bezier(0.4,0,0.2,1)}
+    :root{--bg-primary:#07070f;--bg-secondary:#0d0d18;--bg-card:#12121e;--bg-card-hover:#1a1a2b;--bg-elevated:#1e1e32;--bg-surface:#16161f;--accent-blue:#ff6b2b;--accent-purple:#8b5cf6;--accent-green:#22c55e;--accent-orange:#ff6b2b;--accent-secondary:#6366f1;--accent-indigo:#6366f1;--accent-violet:#8b5cf6;--text-primary:#f0f0f5;--text-secondary:#9090a0;--text-muted:#505068;--border:rgba(255,255,255,0.06);--border-hover:rgba(255,107,43,0.4);--border-glass:rgba(255,255,255,0.1);--glow-blue:0 4px 30px rgba(255,107,43,0.2),0 0 60px rgba(255,107,43,0.05);--shadow-card:0 4px 24px rgba(0,0,0,0.4);--shadow-card-hover:0 20px 60px rgba(0,0,0,0.62),0 0 42px rgba(255,107,43,0.10),0 0 60px rgba(99,102,241,0.05);--gradient-main:linear-gradient(135deg,#ff7a3d 0%,#ff4d6b 54%,#7c5cff 100%);--gradient-warm:linear-gradient(135deg,#ff8a3d 0%,#ff5e3a 100%);--gradient-dark:linear-gradient(180deg,#07070f 0%,#0d0d18 100%);--gradient-glass:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 100%);--gradient-accent:linear-gradient(135deg,#ff6b2b 0%,#6366f1 100%);--font-display:'Plus Jakarta Sans','Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:12px;--radius-lg:20px;--radius-xl:28px;--transition:0.3s cubic-bezier(0.4,0,0.2,1);--transition-fast:0.15s cubic-bezier(0.4,0,0.2,1)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
     body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
@@ -95,7 +95,7 @@
     .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;margin-left:auto}
     .nav-toggle span{display:block;width:24px;height:2px;background:var(--text-primary);border-radius:2px}
     .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px;overflow:hidden}
-    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 70% 45%,rgba(255,107,43,0.07) 0%,transparent 65%),radial-gradient(ellipse 40% 50% at 15% 70%,rgba(192,57,43,0.05) 0%,transparent 55%)}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 70% 45%,rgba(255,107,43,0.08) 0%,transparent 65%),radial-gradient(ellipse 45% 55% at 12% 72%,rgba(99,102,241,0.07) 0%,transparent 58%),radial-gradient(ellipse 35% 40% at 85% 85%,rgba(124,92,255,0.05) 0%,transparent 55%)}
     .hero-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:80px 80px}
     .hero-container{max-width:1280px;margin:0 auto;padding:4rem 2rem;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
     .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,107,43,0.1);border:1px solid rgba(255,107,43,0.3);color:var(--accent-blue);padding:0.4rem 1rem;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem}
@@ -124,8 +124,8 @@
   </style>
 
   <!-- Main CSS: loaded async (non-render-blocking) -->
-  <link href="/css/main.css?v=2.3" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="/css/main.css?v=2.3"></noscript>
+  <link href="/css/main.css?v=2.4" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="/css/main.css?v=2.4"></noscript>
 
   <!-- Google Fonts: Inter + Plus Jakarta Sans — async load -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
