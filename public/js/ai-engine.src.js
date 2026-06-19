@@ -404,6 +404,13 @@
         askAI(chip.getAttribute('data-ai-ask'));
       });
     });
+
+    // If the user clicked the chat toggle before this (lazy-loaded) engine was
+    // ready, the loader stub flagged it — open the chat now.
+    if (window.__aiOpenPending) {
+      window.__aiOpenPending = false;
+      toggleAIChat();
+    }
   }
 
   // Boot

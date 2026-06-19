@@ -516,6 +516,9 @@
   function initHeroParticles() {
     var container = document.querySelector('.hero-particles');
     if (!container) return;
+    // Mobile: skip particles entirely — barely visible, but the 20 animated
+    // nodes add continuous main-thread/compositor work that hurts mobile TBT.
+    if (window.innerWidth <= 768) return;
     for (var i = 0; i < 20; i++) {
       var dot = document.createElement('div');
       dot.className = 'hero-particle';

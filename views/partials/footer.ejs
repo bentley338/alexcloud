@@ -107,7 +107,26 @@
     </div>
   </div>
 
-  <script src="/js/ai-engine.js?v=2.4" defer fetchpriority="low"></script>
+  <!-- Chatbot engine: lazy-loaded on idle (or first toggle click) to keep it off the critical path / out of mobile TBT -->
+  <script>
+    (function () {
+      var loaded = false;
+      function loadAIEngine() {
+        if (loaded) return;
+        loaded = true;
+        var s = document.createElement('script');
+        s.src = '/js/ai-engine.js?v=2.5';
+        document.body.appendChild(s);
+      }
+      // Stub: if the chat is opened before the engine loads, flag it and load now.
+      window.toggleAIChat = function () { window.__aiOpenPending = true; loadAIEngine(); };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadAIEngine, { timeout: 3000 });
+      } else {
+        setTimeout(loadAIEngine, 1800);
+      }
+    })();
+  </script>
   <script src="/js/main.js?v=2.4" defer></script>
 </body>
 </html>

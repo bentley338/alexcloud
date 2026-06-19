@@ -298,7 +298,11 @@
       chip.addEventListener('click', function () {
         askAI(chip.getAttribute('data-ai-ask'));
       });
-    });
+    });
+    if (window.__aiOpenPending) {
+      window.__aiOpenPending = false;
+      toggleAIChat();
+    }
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

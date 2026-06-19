@@ -398,7 +398,8 @@
   }
   function initHeroParticles() {
     var container = document.querySelector('.hero-particles');
-    if (!container) return;
+    if (!container) return;
+    if (window.innerWidth <= 768) return;
     for (var i = 0; i < 20; i++) {
       var dot = document.createElement('div');
       dot.className = 'hero-particle';
