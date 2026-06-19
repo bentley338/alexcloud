@@ -69,10 +69,11 @@
   <!-- Preconnect untuk performa -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <!-- DNS prefetch for external image CDNs -->
   <link rel="dns-prefetch" href="https://shared.fastly.steamstatic.com">
   <link rel="dns-prefetch" href="https://api.dicebear.com">
+  <!-- Preload subset icon font (above-the-fold navbar/hero icons) -->
+  <link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- ═══ CRITICAL CSS: Inlined for instant first paint ═══ -->
   <style>
@@ -127,13 +128,13 @@
   <link href="/css/main.css?v=2.5" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="/css/main.css?v=2.5"></noscript>
 
-  <!-- Google Fonts: Inter + Plus Jakarta Sans — async load -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <!-- Google Fonts: Inter + Plus Jakarta Sans — async load (weights trimmed to those actually used) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"></noscript>
 
-  <!-- FontAwesome: load non-blocking -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"></noscript>
+  <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
+  <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="/css/fontawesome.min.css?v=1"></noscript>
 </head>
 <body>
   <!-- Scroll Progress Indicator -->
