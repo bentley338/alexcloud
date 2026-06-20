@@ -3081,11 +3081,12 @@ input:focus-visible,
   .nav-links {
     display: none;
     position: fixed;
-    top: 58px; left: 0; right: 0; bottom: 0;
+    top: 58px; left: 0; right: 0;
+    max-height: calc(100vh - 58px);
     background: rgba(6, 6, 10, 0.98);
-    padding: 1.25rem 1.25rem 2.5rem;
+    padding: 0.85rem 1rem 1.25rem;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.25rem;
     border-top: 1px solid var(--border);
     border-bottom: none;
     backdrop-filter: blur(30px);
@@ -3105,10 +3106,10 @@ input:focus-visible,
   }
   .nav-toggle { display: flex; }
 
-  /* Nav links — bigger touch targets, ALL links visible */
+  /* Nav links — compact so ALL links fit on screen at once (no scroll) */
   .nav-link {
-    padding: 0.9rem 1.25rem;
-    font-size: 1.05rem;
+    padding: 0.65rem 1rem;
+    font-size: 1rem;
     border-radius: var(--radius);
     width: 100%;
     color: var(--text-primary);
@@ -3126,9 +3127,9 @@ input:focus-visible,
   .btn-nav-cta {
     width: 100%;
     text-align: center;
-    padding: 1rem;
-    margin-top: 1rem;
-    font-size: 1.05rem;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    font-size: 1rem;
     border-radius: var(--radius);
     display: block;
   }
