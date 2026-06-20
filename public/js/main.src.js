@@ -455,6 +455,18 @@
     navbar = document.getElementById('navbar') || document.querySelector('.navbar');
     backToTopBtn = document.getElementById('backToTop');
 
+    // Mobile nav toggle — bind directly (more robust than inline onclick).
+    // stopPropagation so the document click-handler below doesn't see this same
+    // click and immediately re-close the menu we just opened.
+    var navToggleBtn = document.getElementById('navToggleBtn');
+    if (navToggleBtn) {
+      navToggleBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleNav();
+      });
+    }
+
     // Scroll listener
     window.addEventListener('scroll', onScroll, { passive: true });
 

@@ -352,7 +352,15 @@
       setViewMode(savedMode);
     }
     navbar = document.getElementById('navbar') || document.querySelector('.navbar');
-    backToTopBtn = document.getElementById('backToTop');
+    backToTopBtn = document.getElementById('backToTop');
+    var navToggleBtn = document.getElementById('navToggleBtn');
+    if (navToggleBtn) {
+      navToggleBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleNav();
+      });
+    }
     window.addEventListener('scroll', onScroll, { passive: true });
     initLazyLoading();
     initBackToTop();
