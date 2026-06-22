@@ -77,8 +77,10 @@ function createRateLimiter({ windowMs, maxRequests }) {
 }
 
 // ─── FR3 API Helper (centralized HTTP call to FR3 NewEra gateway) ───────────
-function fr3Request(endpoint, method, payload, timeoutMs) {
-  const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
+// Single HTTP attempt to the FR3 gateway. Resolves with parsed JSON, or rejects
+// on a network-level failure (timeout / connection reset / unparseable body).
+function fr3RequestOnce(endpoint, method, payload, timeoutMs) {
+  const FR3_API_KEY = process.env.FR3_API_KEY;
   const FR3_BASE = 'https://fr3newera.com/api/v1';
 
   return new Promise((resolve, reject) => {
@@ -110,14 +112,40 @@ function fr3Request(endpoint, method, payload, timeoutMs) {
     });
 
     req.on('error', reject);
-    req.setTimeout(timeoutMs || 20000, () => {
-      req.destroy();
-      reject(new Error(`FR3 Gateway Timeout (${(timeoutMs || 20000) / 1000}s)`));
+    req.setTimeout(timeoutMs || 8000, () => {
+      // Destroy so the (possibly dead) keep-alive socket is dropped from the pool
+      // and the next attempt opens a fresh connection.
+      req.destroy(new Error(`FR3 Gateway Timeout (${(timeoutMs || 8000) / 1000}s)`));
     });
 
     if (body) req.write(body);
     req.end();
   });
+}
+
+// FR3's backend (behind Cloudflare) intermittently accepts the TCP+TLS connection
+// but never sends a response, so requests hang until they time out. DNS/TCP/TLS all
+// succeed in <100ms — the stall is purely the upstream not replying. A short
+// per-attempt timeout + a couple of retries gives each order several chances to
+// catch a moment the gateway is responsive before we fall back to manual payment.
+async function fr3Request(endpoint, method, payload, timeoutMs, maxAttempts) {
+  const perAttempt = timeoutMs || 8000;
+  const attempts = maxAttempts || 1;
+  let lastErr;
+
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      // If the gateway answers at all (even an error JSON), that's a real response — return it.
+      return await fr3RequestOnce(endpoint, method, payload, perAttempt);
+    } catch (e) {
+      lastErr = e;
+      if (i < attempts) {
+        console.warn(`[FR3] Attempt ${i}/${attempts} failed (${e.message}) — retrying ${endpoint}`);
+        await new Promise(r => setTimeout(r, 300)); // brief backoff before the next try
+      }
+    }
+  }
+  throw lastErr;
 }
 
 // ─── Shared User-Agent Header ──────────────────────────────────────────────

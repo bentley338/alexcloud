@@ -361,7 +361,8 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   const nominal = actualPrice + localUniqueCode;
 
   try {
-    fr3Data = await fr3Request('/topup', 'POST', { nominal }, 20000);
+    // 7s per attempt, up to 3 tries (~21s worst case) — intermittent FR3 gateway hangs
+    fr3Data = await fr3Request('/topup', 'POST', { nominal }, 7000, 3);
 
     if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
       throw new Error(fr3Data?.message || 'API did not return a transaction ID');
@@ -432,7 +433,7 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
   if (!order) return res.json({ error: 'Order tidak ditemukan' });
   if (!order.fr3TrxId) return res.json({ status: order.status, method: 'manual' });
 
-  const FR3_API_KEY = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
+  const FR3_API_KEY = process.env.FR3_API_KEY;
 
   try {
     const statusEndpoint = `/check-status?apikey=${encodeURIComponent(FR3_API_KEY)}&idTransaksi=${encodeURIComponent(order.fr3TrxId)}`;
@@ -537,7 +538,7 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
   // Coba cancel ke FR3 jika ada trxId
   if (order.fr3TrxId) {
     try {
-      const fr3Result = await fr3Request('/topup/cancel', 'POST', { trxId: order.fr3TrxId }, 10000);
+      const fr3Result = await fr3Request('/topup/cancel', 'POST', { trxId: order.fr3TrxId }, 6000, 2);
       console.log('[FR3] Cancel response:', fr3Result);
 
       // Jika FR3 mengembalikan status selain 200, kita log warning saja dan biarkan local DB membatalkan pesanan.
@@ -800,7 +801,7 @@ JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) 
 // Secure endpoint to add testimonial from Bot
 router.post('/api/testimonials', async (req, res) => {
   const apiKey = req.headers['x-api-key'] || req.query.apikey;
-  const expectedApiKey = process.env.FR3_API_KEY || 'FR3_shact6823052026ehmlukrxggvoax';
+  const expectedApiKey = process.env.FR3_API_KEY;
   
   if (!apiKey || apiKey !== expectedApiKey) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Invalid API key' });
