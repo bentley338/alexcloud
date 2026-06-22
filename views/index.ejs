@@ -144,6 +144,37 @@
   </div>
 </section>
 
+<!-- HOW IT WORKS / CARA PAKAI -->
+<section class="how-section" id="how-it-works">
+  <div class="how-container">
+    <div class="section-header animate-on-scroll">
+      <div class="section-tag">Cara Pakai</div>
+      <h2 class="section-title">Mulai Main dalam <span class="accent">3 Langkah</span></h2>
+      <p class="section-desc">Tanpa download berat, tanpa install ribet. Cukup punya internet — langsung gas.</p>
+    </div>
+    <div class="how-steps">
+      <div class="how-step animate-on-scroll" data-delay="0">
+        <div class="how-step-num">1</div>
+        <div class="how-step-icon"><i class="fas fa-shopping-cart" aria-hidden="true"></i></div>
+        <h3 class="how-step-title">Pilih Paket</h3>
+        <p class="how-step-desc">Daftar gratis, lalu pilih paket mulai Rp 40.000/minggu sesuai kebutuhanmu.</p>
+      </div>
+      <div class="how-step animate-on-scroll" data-delay="130">
+        <div class="how-step-num">2</div>
+        <div class="how-step-icon"><i class="fas fa-laptop" aria-hidden="true"></i></div>
+        <h3 class="how-step-title">Buka di Perangkat Apa Saja</h3>
+        <p class="how-step-desc">HP, laptop, tablet, atau Smart TV — cukup lewat browser, tanpa PC mahal.</p>
+      </div>
+      <div class="how-step animate-on-scroll" data-delay="260">
+        <div class="how-step-num">3</div>
+        <div class="how-step-icon"><i class="fas fa-play" aria-hidden="true"></i></div>
+        <h3 class="how-step-title">Langsung Main</h3>
+        <p class="how-step-desc">Game AAA jalan instan dari cloud — 4K 60fps, ping rendah, tanpa loading lama.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- POPULAR GAMES with View Mode Toggle -->
 <section class="games-section" id="games-section">
   <div class="games-container">
@@ -170,8 +201,8 @@
     </div>
 
     <div class="games-grid" id="gamesDisplay">
-      <% games.slice(0, 8).forEach(game => { %>
-      <div class="game-card">
+      <% games.slice(0, 8).forEach((game, i) => { %>
+      <div class="game-card animate-on-scroll" data-delay="<%= (i % 4) * 70 %>">
         <div class="game-img-wrap">
           <img src="<%= game.image %>" alt="<%= game.name %>" width="300" height="450" loading="lazy" decoding="async">
           <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
@@ -235,8 +266,8 @@
       <p class="section-desc">Harga bersahabat untuk semua kalangan gamer. Semakin lama, semakin hemat!</p>
     </div>
     <div class="pricing-grid">
-      <% plans.forEach(plan => { %>
-      <div class="plan-card <%= plan.popular ? 'popular' : '' %>">
+      <% plans.forEach((plan, i) => { %>
+      <div class="plan-card <%= plan.popular ? 'popular' : '' %> animate-on-scroll" data-delay="<%= i * 90 %>">
         <% if (plan.popular) { %><div class="popular-badge">PALING POPULER</div><% } %>
         <div class="plan-name"><%= plan.name %></div>
         <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>"><%= plan.priceDisplay %></div>
