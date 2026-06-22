@@ -9,7 +9,7 @@
     <div class="admin-stat-label"><i class="fas fa-users"></i> Total User</div>
   </div>
   <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:#ffd700"><%= stats.totalOrders %></div>
+    <div class="admin-stat-value" style="color:#fbbf24"><%= stats.totalOrders %></div>
     <div class="admin-stat-label"><i class="fas fa-shopping-cart"></i> Total Order</div>
   </div>
   <div class="admin-stat-card">
@@ -33,7 +33,7 @@
     <div class="admin-stat-label"><i class="fas fa-tag"></i> Promo Aktif</div>
   </div>
   <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:#ffd700"><%= stats.totalTestimonials %></div>
+    <div class="admin-stat-value" style="color:#fbbf24"><%= stats.totalTestimonials %></div>
     <div class="admin-stat-label"><i class="fas fa-star"></i> Total Testimoni</div>
   </div>
 </div>
@@ -49,9 +49,9 @@
 
 <!-- Pending Orders Alert -->
 <% if (stats.pendingOrders > 0) { %>
-<div style="background:rgba(255,200,0,0.08); border:1px solid rgba(255,200,0,0.3); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:2rem; display:flex; align-items:center; gap:0.75rem; font-family:var(--font-ui);">
-  <i class="fas fa-bell" style="color:#ffd700; font-size:1.1rem;"></i>
-  <span>Ada <strong style="color:#ffd700"><%= stats.pendingOrders %> order</strong> yang menunggu konfirmasi!</span>
+<div style="background:rgba(251, 191, 36,0.08); border:1px solid rgba(251, 191, 36,0.3); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:2rem; display:flex; align-items:center; gap:0.75rem; font-family:var(--font-ui);">
+  <i class="fas fa-bell" style="color:#fbbf24; font-size:1.1rem;"></i>
+  <span>Ada <strong style="color:#fbbf24"><%= stats.pendingOrders %> order</strong> yang menunggu konfirmasi!</span>
   <a href="/admin/orders" style="margin-left:auto; color:var(--accent-blue); text-decoration:none; font-weight:600;">Konfirmasi Sekarang →</a>
 </div>
 <% } %>

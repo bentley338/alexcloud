@@ -1,6 +1,6 @@
 <%- include('partials/header') %>
 
-<div style="padding: 5rem 0 2rem; text-align:center; background: linear-gradient(180deg, rgba(232,115,42,0.04), transparent);">
+<div style="padding: 5rem 0 2rem; text-align:center; background: linear-gradient(180deg, rgba(59, 130, 246,0.04), transparent);">
   <div class="container">
     <div class="section-tag" style="margin-bottom:1rem;"><i class="fas fa-wifi"></i> Network Test</div>
     <h1 class="section-title">Test <span class="accent">Kecepatan Jaringan</span> Kamu</h1>
@@ -26,7 +26,7 @@
           <defs>
             <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#ff4444"/>
-              <stop offset="40%" stop-color="#ffd700"/>
+              <stop offset="40%" stop-color="#fbbf24"/>
               <stop offset="100%" stop-color="#00ff88"/>
             </linearGradient>
           </defs>
@@ -134,7 +134,7 @@
             <td style="padding:0.6rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);">5–10 Mbps</td>
             <td style="padding:0.6rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);">Minimum</td>
             <td style="padding:0.6rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);">720p/30fps</td>
-            <td style="padding:0.6rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);"><span style="color:#ffd700; font-weight:700;">⚠️ Bisa Tapi Tidak Ideal</span></td>
+            <td style="padding:0.6rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);"><span style="color:#fbbf24; font-weight:700;">⚠️ Bisa Tapi Tidak Ideal</span></td>
           </tr>
           <tr>
             <td style="padding:0.6rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);">10–25 Mbps</td>
@@ -196,7 +196,7 @@
   top: 0; left: 50%;
   transform: translateX(-50%);
   width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(232,115,42,0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(59, 130, 246,0.04) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -239,7 +239,7 @@
   padding: 1rem 0.5rem;
   transition: 0.3s;
 }
-.stat-box.active { border-color: var(--accent-blue); background: rgba(232,115,42,0.05); }
+.stat-box.active { border-color: var(--accent-blue); background: rgba(59, 130, 246,0.05); }
 .stat-box i { color: var(--text-muted); font-size: 1rem; margin-bottom: 0.4rem; display: block; }
 .stat-box-val {
   font-family: var(--font-display);
@@ -265,10 +265,10 @@
   font-weight: 800;
   cursor: pointer;
   transition: 0.3s;
-  box-shadow: 0 0 30px rgba(232,115,42,0.25);
+  box-shadow: 0 0 30px rgba(59, 130, 246,0.25);
   letter-spacing: 0.5px;
 }
-.speedtest-btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(232,115,42,0.4); }
+.speedtest-btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(59, 130, 246,0.4); }
 .speedtest-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 .result-badge {
@@ -535,11 +535,11 @@ function showResult(downloadMbps, ping) {
     </div>`;
   } else if (downloadMbps >= 5) {
     level = '⚠️ Koneksi Cukup — Bisa tapi tidak optimal';
-    color = '#ffd700'; bg = 'rgba(255,215,0,0.06)';
+    color = '#fbbf24'; bg = 'rgba(255,215,0,0.06)';
     iconClass = 'fas fa-exclamation-triangle';
     desc.textContent = `${downloadMbps.toFixed(1)} Mbps — Bisa 720p di AlexCloud, tapi mungkin ada lag`;
     recHtml = `<div style="padding:1rem; background:rgba(255,215,0,0.06); border:1px solid rgba(255,215,0,0.2); border-radius:var(--radius); font-family:var(--font-ui);">
-      <div style="font-weight:700; color:#ffd700; margin-bottom:0.5rem;">⚠️ Koneksi bisa digunakan tapi kurang ideal</div>
+      <div style="font-weight:700; color:#fbbf24; margin-bottom:0.5rem;">⚠️ Koneksi bisa digunakan tapi kurang ideal</div>
       <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:0.5rem;">Tips untuk meningkatkan kecepatan:</p>
       <ul style="list-style:none; padding:0; margin:0; font-size:0.85rem; color:var(--text-secondary);">
         <li style="padding:0.2rem 0;">🔌 Gunakan kabel LAN langsung ke router</li>

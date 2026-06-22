@@ -90,7 +90,7 @@
           <div class="trending-name"><%= game.name %></div>
           <div class="trending-genre"><%= game.genre %></div>
           <div class="trending-rating">
-            <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < Math.floor(game.rating) ? '#ffd700' : '#333' %>;font-size:0.65rem;"></i><%}%>
+            <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < Math.floor(game.rating) ? '#fbbf24' : '#333' %>;font-size:0.65rem;"></i><%}%>
             <span><%= game.rating %></span>
           </div>
         </div>
@@ -249,7 +249,7 @@
           <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
           <% if (plan.duration >= 30) { %><li><i class="fas fa-check"></i> Prioritas Antrian Server</li><% } %>
           <% if (plan.duration >= 60) { %><li><i class="fas fa-check"></i> Bonus 5 Hari Gratis</li><% } %>
-          <% if (plan.duration >= 90) { %><li><i class="fas fa-star" style="color:#ffd700"></i> Akses Game Baru Early</li><% } %>
+          <% if (plan.duration >= 90) { %><li><i class="fas fa-star" style="color:#fbbf24"></i> Akses Game Baru Early</li><% } %>
         </ul>
         <% if (typeof user !== 'undefined' && user) { %>
           <a href="/order/<%= plan.id %>" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
@@ -285,7 +285,7 @@
           <% } %>
           <div class="testi-content">
             <div class="testi-stars">
-              <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < t.rating ? '#ffd700' : '#333' %>"></i><%}%>
+              <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < t.rating ? '#fbbf24' : '#333' %>"></i><%}%>
             </div>
             <p class="testi-text"><span class="testi-quote-mark" aria-hidden="true">❝</span><%= t.text %></p>
             <div class="testi-author">

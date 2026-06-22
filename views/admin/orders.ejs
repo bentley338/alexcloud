@@ -13,7 +13,7 @@
 <!-- Filter Tabs -->
 <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.5rem;" id="filterTabs">
   <button onclick="filterOrders('all')" class="btn-action btn-confirm" id="tab-all" style="border-radius:50px;">Semua (<%= orders.length %>)</button>
-  <button onclick="filterOrders('pending')" class="btn-action" id="tab-pending" style="border-radius:50px; background:rgba(255,200,0,0.1); color:#ffd700;">Pending (<%= orders.filter(o=>o.status==='pending').length %>)</button>
+  <button onclick="filterOrders('pending')" class="btn-action" id="tab-pending" style="border-radius:50px; background:rgba(251, 191, 36,0.1); color:#fbbf24;">Pending (<%= orders.filter(o=>o.status==='pending').length %>)</button>
   <button onclick="filterOrders('confirmed')" class="btn-action" id="tab-confirmed" style="border-radius:50px; background:rgba(0,255,136,0.1); color:var(--accent-green);">Confirmed (<%= orders.filter(o=>o.status==='confirmed').length %>)</button>
   <button onclick="filterOrders('rejected')" class="btn-action" id="tab-rejected" style="border-radius:50px; background:rgba(255,68,68,0.1); color:#ff6666;">Rejected (<%= orders.filter(o=>o.status==='rejected').length %>)</button>
 </div>

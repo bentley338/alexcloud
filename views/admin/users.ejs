@@ -92,7 +92,7 @@
               <!-- Reset Password -->
               <% if (!u.googleId) { %>
               <form action="/admin/users/<%= u.id %>/reset-password" method="POST" style="display:inline;">
-                <button type="submit" class="btn-action" style="width:100%; background:rgba(255,170,0,0.15); color:#ffaa00; border:1px solid rgba(255,170,0,0.3);"
+                <button type="submit" class="btn-action" style="width:100%; background:rgba(251, 191, 36,0.15); color:#fbbf24; border:1px solid rgba(251, 191, 36,0.3);"
                   onclick="return confirm('Reset password <%= u.name %>? Password baru akan ditampilkan di halaman ini.')">
                   🔑 Reset Password
                 </button>
