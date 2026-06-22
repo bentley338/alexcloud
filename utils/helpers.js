@@ -148,6 +148,48 @@ async function fr3Request(endpoint, method, payload, timeoutMs, maxAttempts) {
   throw lastErr;
 }
 
+// ─── SayaBayar API Helper (backup gateway — https://api.sayabayar.com/v1) ────
+// Auth via X-API-Key header. Resolves parsed JSON, rejects on network failure.
+function sayabayarRequest(method, endpoint, payload, timeoutMs) {
+  const KEY = process.env.SAYABAYAR_API_KEY;
+  const BASE = 'https://api.sayabayar.com/v1';
+
+  return new Promise((resolve, reject) => {
+    const body = payload ? JSON.stringify(payload) : null;
+    const urlObj = new URL(`${BASE}${endpoint}`);
+
+    const options = {
+      hostname: urlObj.hostname,
+      path: urlObj.pathname + urlObj.search,
+      method: method || 'GET',
+      agent: sharedHttpsAgent,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': KEY || ''
+      }
+    };
+
+    if (body) options.headers['Content-Length'] = Buffer.byteLength(body);
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { reject(new Error('Invalid JSON from SayaBayar')); }
+      });
+    });
+
+    req.on('error', reject);
+    req.setTimeout(timeoutMs || 15000, () => {
+      req.destroy(new Error(`SayaBayar Timeout (${(timeoutMs || 15000) / 1000}s)`));
+    });
+
+    if (body) req.write(body);
+    req.end();
+  });
+}
+
 // ─── Shared User-Agent Header ──────────────────────────────────────────────
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
@@ -157,6 +199,7 @@ module.exports = {
   createCachedGetter,
   createRateLimiter,
   fr3Request,
+  sayabayarRequest,
   BROWSER_UA,
   path
 };

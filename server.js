@@ -7,6 +7,7 @@ const { cleanEnvVar } = require('./utils/helpers');
 // Fix common copy-paste and quote wrapping mistakes for env vars
 cleanEnvVar('CLOUDINARY_URL');
 cleanEnvVar('FR3_API_KEY');
+cleanEnvVar('SAYABAYAR_API_KEY');
 
 const express = require('express');
 const session = require('express-session');

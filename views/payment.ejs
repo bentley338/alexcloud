@@ -13,7 +13,31 @@
       <div class="pay-logo">⚡</div>
     </div>
 
-    <% if (fr3Success) { %>
+    <% if (typeof qrisGenerating !== 'undefined' && qrisGenerating) { %>
+    <!-- ======= GENERATING QRIS (async) ======= -->
+    <div class="pay-card qris-card">
+      <div class="pay-status-bar">
+        <div class="pay-status-dot pending"></div>
+        <span>Menyiapkan QRIS...</span>
+      </div>
+      <div class="qr-section">
+        <div class="qr-box" style="min-height:236px; flex-direction:column; gap:1.1rem;">
+          <div class="qris-spinner"></div>
+          <div style="color:#333; font-family:var(--font-ui); font-size:0.85rem; font-weight:600;">Membuat kode pembayaran...</div>
+        </div>
+        <div style="font-family:var(--font-ui); font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
+          Gateway sedang memproses pesananmu. Biasanya beberapa detik — mohon jangan tutup halaman ini.
+        </div>
+        <div id="genSlowNote" style="display:none; margin-top:1rem; font-size:0.8rem; color:#ffb86b;">
+          <i class="fas fa-clock"></i> Gateway agak lambat merespons, mohon tunggu sebentar lagi...
+        </div>
+      </div>
+    </div>
+    <style>
+      .qris-spinner { width:52px; height:52px; border:4px solid rgba(0,0,0,0.1); border-top-color:#e8732a; border-radius:50%; animation: qrisSpin 0.8s linear infinite; }
+      @keyframes qrisSpin { to { transform: rotate(360deg); } }
+    </style>
+    <% } else if (fr3Success) { %>
     <!-- ======= FR3 QRIS PAYMENT ======= -->
     <div class="pay-card qris-card">
 
@@ -973,6 +997,33 @@ startTimer();
 startPolling();
 // Check once immediately after 2 seconds
 setTimeout(checkStatus, 2000);
+</script>
+<% } %>
+
+<% if (typeof qrisGenerating !== 'undefined' && qrisGenerating) { %>
+<script>
+const GEN_ORDER_ID = <%- JSON.stringify(order.orderId) %>;
+let genTries = 0;
+const genPoll = setInterval(async () => {
+  genTries++;
+  try {
+    const r = await fetch(`/api/payment/qris/${GEN_ORDER_ID}`);
+    const d = await r.json();
+    if (d.qrisStatus === 'ready' || d.qrisStatus === 'failed') {
+      clearInterval(genPoll);
+      window.location.href = `/payment/${GEN_ORDER_ID}`;
+      return;
+    }
+  } catch (e) { /* keep polling */ }
+  if (genTries === 8) {
+    const n = document.getElementById('genSlowNote');
+    if (n) n.style.display = 'block';
+  }
+  if (genTries > 30) { // ~60s safety net — reload to whatever state the order ended in
+    clearInterval(genPoll);
+    window.location.href = `/payment/${GEN_ORDER_ID}`;
+  }
+}, 2000);
 </script>
 <% } %>
 

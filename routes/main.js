@@ -7,7 +7,7 @@ const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const { sharedHttpsAgent, fr3Request, createRateLimiter, BROWSER_UA } = require('../utils/helpers');
+const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA } = require('../utils/helpers');
 
 // Rate limiters for API endpoints
 const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
@@ -351,37 +351,18 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
 
   const orderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
 
-  // ===== FR3 NEWERA Payment Gateway =====
-  let fr3Data = null;
-  let fr3Error = null;
+  // ===== FR3 NEWERA Payment Gateway (async generation) =====
+  // FR3's response latency is highly variable (sometimes >25s) and it occasionally
+  // never replies. Generating the QRIS synchronously would block checkout and drop
+  // slow-but-successful responses to manual. Instead we persist the order immediately
+  // in a 'generating' state, kick off the topup call in the background, and let the
+  // payment page poll until the QRIS is ready (or generation fails -> manual).
 
   // Generate a local unique code (10-99) if price is a multiple of 100 (round number)
   // to force the gateway to generate a unique QRIS and avoid payment matching failures.
   const localUniqueCode = (actualPrice % 100 === 0) ? (Math.floor(Math.random() * 90) + 10) : 0;
   const nominal = actualPrice + localUniqueCode;
 
-  try {
-    // FR3 receives the request and generates the QRIS even when slow — its response
-    // latency is highly variable (often 7–20s). Use a single generous-timeout attempt:
-    // long enough to catch a slow-but-successful response, and NO retry, since each
-    // retry that "times out" still generates a duplicate QRIS on FR3's side.
-    fr3Data = await fr3Request('/topup', 'POST', { nominal }, 25000);
-
-    if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
-      throw new Error(fr3Data?.message || 'API did not return a transaction ID');
-    }
-  } catch (e) {
-    fr3Error = e.message;
-    console.error('[FR3] Create topup error:', e.message);
-  }
-
-  // Check if API returned an error JSON instead of throwing a connection error
-  if (!fr3Error && fr3Data && (!fr3Data.data || !fr3Data.data.trxId)) {
-    fr3Error = fr3Data.message || 'API Gateway did not return transaction ID';
-    console.warn('[FR3] Create topup API warning:', fr3Error);
-  }
-
-  // Save order
   const order = {
     id: uuidv4(),
     orderId,
@@ -395,23 +376,123 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     discount,
     promoCode: appliedPromo ? appliedPromo.code : null,
     status: 'pending',
+    qrisStatus: 'generating',
+    nominal,
     createdAt: new Date().toISOString(),
     paidAt: null,
     activatedAt: null,
-    // FR3 data
-    fr3TrxId: fr3Data?.data?.trxId || null,
-    fr3QrString: fr3Data?.data?.qr_string || null,
-    fr3TotalTransfer: fr3Data?.data?.totalTransfer || nominal,
-    fr3UniqueCode: fr3Data?.data?.totalTransfer ? (fr3Data.data.totalTransfer - actualPrice) : localUniqueCode,
-    fr3Expiry: fr3Data?.data?.expiry || null,
-    fr3Error: fr3Error || null,
-    paymentMethod: fr3Data?.data?.trxId ? 'fr3_qris' : 'manual'
+    // FR3 data — filled in by the background generation
+    fr3TrxId: null,
+    fr3QrString: null,
+    fr3TotalTransfer: nominal,
+    fr3UniqueCode: localUniqueCode,
+    fr3Expiry: null,
+    fr3Error: null,
+    paymentMethod: 'fr3_qris'
   };
 
   db.get('orders').push(order).write();
 
-  const priceDisplay = 'Rp ' + actualPrice.toLocaleString('id-ID');
-  const totalDisplay = 'Rp ' + (order.fr3TotalTransfer).toLocaleString('id-ID');
+  // Fire-and-forget: build the QRIS in the background, update the order when done.
+  kickoffQrisGeneration(order.id, actualPrice, nominal);
+
+  // PRG pattern: redirect to a GET payment page so it can be polled/reloaded safely
+  // without re-submitting the order.
+  res.redirect('/payment/' + order.orderId);
+});
+
+// Generate a QRIS via FR3 — throws on any failure, marks the order 'ready' on success.
+async function tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal) {
+  const fr3Data = await fr3Request('/topup', 'POST', { nominal: fr3Nominal }, 25000);
+  if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
+    throw new Error(fr3Data?.message || 'API did not return a transaction ID');
+  }
+  const d = fr3Data.data;
+  const totalTransfer = d.totalTransfer || fr3Nominal;
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready',
+    gateway: 'fr3',
+    fr3TrxId: d.trxId,
+    fr3QrString: d.qr_string || null,
+    fr3TotalTransfer: totalTransfer,
+    fr3UniqueCode: totalTransfer - actualPrice,
+    fr3Expiry: d.expiry || null,
+    paymentMethod: 'fr3_qris',
+    fr3Error: null
+  }).write();
+}
+
+// Generate a QRIS via SayaBayar — throws on any failure, marks the order 'ready' on success.
+// SayaBayar adds its own unique code, so we send the base price (not the FR3 nominal).
+async function trySayabayarGateway(orderInternalId, actualPrice) {
+  const order = db.get('orders').find({ id: orderInternalId }).value();
+  const sb = await sayabayarRequest('POST', '/invoices', {
+    customer_name: order?.userName || 'Pelanggan AlexCloud',
+    customer_email: order?.userEmail || undefined,
+    amount: actualPrice,
+    description: order?.planName ? `AlexCloud - ${order.planName}` : 'AlexCloud Order',
+    payment_method: 'qris'
+  }, 20000);
+
+  const sd = sb && sb.data;
+  const qrString = sd && sd.payment_channel && sd.payment_channel.qris_string;
+  if (!sb || !sb.success || !qrString) {
+    throw new Error(sb?.error?.message || 'SayaBayar did not return a QRIS');
+  }
+  const totalTransfer = sd.amount_to_pay || (sd.payment_channel && sd.payment_channel.amount_to_pay) || actualPrice;
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready',
+    gateway: 'sayabayar',
+    fr3TrxId: sd.id, // reused as the reference id for status polling
+    sbInvoiceNumber: sd.invoice_number || null,
+    fr3QrString: qrString,
+    fr3TotalTransfer: totalTransfer,
+    fr3UniqueCode: sd.unique_code || (totalTransfer - actualPrice),
+    fr3Expiry: (sd.payment_channel && sd.payment_channel.expired_at) || sd.expired_at || null,
+    paymentMethod: 'sayabayar_qris',
+    fr3Error: null
+  }).write();
+}
+
+// Background QRIS generation — fire-and-forget right after an order is created.
+// Tries the configured primary gateway, then the other as fallback; if BOTH fail the
+// order is marked 'failed' and the payment page drops to manual. The QR fields live
+// under the existing fr3* keys (used by payment.ejs) regardless of which gateway won;
+// `order.gateway` records which API to poll for status.
+// Set PAYMENT_PRIMARY=sayabayar in .env to make SayaBayar the primary gateway.
+async function kickoffQrisGeneration(orderInternalId, actualPrice, fr3Nominal) {
+  const primary = (process.env.PAYMENT_PRIMARY || 'fr3').toLowerCase();
+  const sequence = primary === 'sayabayar' ? ['sayabayar', 'fr3'] : ['fr3', 'sayabayar'];
+
+  for (const gw of sequence) {
+    try {
+      if (gw === 'fr3') await tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal);
+      else await trySayabayarGateway(orderInternalId, actualPrice);
+      return; // success — order is now 'ready'
+    } catch (e) {
+      console.warn(`[PAY] Gateway ${gw} gagal:`, e.message);
+    }
+  }
+
+  // All gateways failed → manual
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'failed',
+    fr3Error: 'Semua gateway pembayaran (FR3 & SayaBayar) gagal merespons',
+    paymentMethod: 'manual'
+  }).write();
+}
+
+// Payment page (GET) — renders generating / QRIS-ready / manual view for an existing order.
+router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
+  const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
+  if (!order) return res.redirect('/dashboard');
+
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === order.planId) ||
+    { id: order.planId, name: order.planName, price: order.originalPrice };
+
+  const priceDisplay = 'Rp ' + order.price.toLocaleString('id-ID');
+  const totalDisplay = 'Rp ' + (order.fr3TotalTransfer || order.price).toLocaleString('id-ID');
 
   res.render('payment', {
     title: 'Pembayaran - AlexCloud',
@@ -420,11 +501,22 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     plan,
     priceDisplay,
     totalDisplay,
-    discount,
-    fr3Success: !!fr3Data?.data?.trxId,
-    fr3Error,
+    discount: order.discount || 0,
+    qrisGenerating: order.qrisStatus === 'generating',
+    fr3Success: order.qrisStatus === 'ready' || !!order.fr3TrxId,
+    fr3Error: order.fr3Error,
     qrisImage: process.env.QRIS_IMAGE || 'https://img1.pixhost.to/images/5339/592942381_rizzhosting.jpg',
     waNumber: process.env.WA_NUMBER || '82328437656'
+  });
+});
+
+// QRIS generation status — polled by the 'generating' state of the payment page.
+router.get('/api/payment/qris/:orderId', ensureAuthenticated, (req, res) => {
+  const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
+  if (!order) return res.json({ error: 'Order tidak ditemukan' });
+  res.json({
+    qrisStatus: order.qrisStatus || (order.fr3TrxId ? 'ready' : 'failed'),
+    error: order.fr3Error || null
   });
 });
 
@@ -436,36 +528,48 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
   if (!order) return res.json({ error: 'Order tidak ditemukan' });
   if (!order.fr3TrxId) return res.json({ status: order.status, method: 'manual' });
 
-  const FR3_API_KEY = process.env.FR3_API_KEY;
-
   try {
-    const statusEndpoint = `/check-status?apikey=${encodeURIComponent(FR3_API_KEY)}&idTransaksi=${encodeURIComponent(order.fr3TrxId)}`;
-    const FR3_BASE = 'https://fr3newera.com/api/v1';
-    const urlObj = new URL(`${FR3_BASE}${statusEndpoint}`);
+    // Normalized status across gateways: SUCCESS | PENDING | EXPIRED
+    let fr3St = 'PENDING';
 
-    const fr3Status = await new Promise((resolve, reject) => {
-      const options = {
-        hostname: urlObj.hostname,
-        path: urlObj.pathname + urlObj.search,
-        method: 'GET',
-        agent: sharedHttpsAgent,
-        headers: { 'User-Agent': BROWSER_UA },
-        timeout: 12000 // FR3 status checks observed taking ~7s+; give headroom
-      };
-      const r = https.request(options, (resp) => {
-        let body = '';
-        resp.on('data', d => body += d);
-        resp.on('end', () => {
-          try { resolve(JSON.parse(body)); }
-          catch { reject(new Error('Invalid JSON')); }
+    if (order.gateway === 'sayabayar') {
+      // SayaBayar: GET /invoices/:id → data.status = pending | paid | expired | cancelled
+      const sb = await sayabayarRequest('GET', `/invoices/${encodeURIComponent(order.fr3TrxId)}`, null, 12000);
+      const sbStatus = (sb?.data?.status || 'pending').toLowerCase();
+      fr3St = sbStatus === 'paid' ? 'SUCCESS'
+        : (sbStatus === 'expired' || sbStatus === 'cancelled') ? 'EXPIRED'
+        : 'PENDING';
+    } else {
+      // FR3: GET /check-status?apikey=...&idTransaksi=...
+      const FR3_API_KEY = process.env.FR3_API_KEY;
+      const statusEndpoint = `/check-status?apikey=${encodeURIComponent(FR3_API_KEY)}&idTransaksi=${encodeURIComponent(order.fr3TrxId)}`;
+      const FR3_BASE = 'https://fr3newera.com/api/v1';
+      const urlObj = new URL(`${FR3_BASE}${statusEndpoint}`);
+
+      const fr3Status = await new Promise((resolve, reject) => {
+        const options = {
+          hostname: urlObj.hostname,
+          path: urlObj.pathname + urlObj.search,
+          method: 'GET',
+          agent: sharedHttpsAgent,
+          headers: { 'User-Agent': BROWSER_UA },
+          timeout: 12000 // FR3 status checks observed taking ~7s+; give headroom
+        };
+        const r = https.request(options, (resp) => {
+          let body = '';
+          resp.on('data', d => body += d);
+          resp.on('end', () => {
+            try { resolve(JSON.parse(body)); }
+            catch { reject(new Error('Invalid JSON')); }
+          });
         });
+        r.on('error', reject);
+        r.on('timeout', () => { r.destroy(); reject(new Error('timeout')); });
+        r.end();
       });
-      r.on('error', reject);
-      r.on('timeout', () => { r.destroy(); reject(new Error('timeout')); });
-      r.end();
-    });
 
-    const fr3St = (fr3Status?.data?.status || 'PENDING').toUpperCase();
+      fr3St = (fr3Status?.data?.status || 'PENDING').toUpperCase();
+    }
 
     // Auto-confirm jika SUCCESS atau PAID
     if ((fr3St === 'SUCCESS' || fr3St === 'PAID' || fr3St === 'SETTLED') && order.status === 'pending') {
@@ -538,8 +642,8 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
     return res.json({ error: `Order sudah ${order.status}, tidak bisa dibatalkan` });
   }
 
-  // Coba cancel ke FR3 jika ada trxId
-  if (order.fr3TrxId) {
+  // Coba cancel ke FR3 jika ada trxId (SayaBayar tidak punya endpoint cancel API — cukup batalkan lokal)
+  if (order.fr3TrxId && order.gateway !== 'sayabayar') {
     try {
       const fr3Result = await fr3Request('/topup/cancel', 'POST', { trxId: order.fr3TrxId }, 12000);
       console.log('[FR3] Cancel response:', fr3Result);
