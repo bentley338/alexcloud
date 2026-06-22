@@ -115,7 +115,7 @@ app.use(express.json({ limit: '15mb' }));
 // Method override
 app.use(methodOverride('_method'));
 
-const { sessionStore } = require('./database/db');
+const { sessionStore, db } = require('./database/db');
 
 // Session — persisted in PostgreSQL via custom lowdb store
 app.use(session({
@@ -143,6 +143,15 @@ app.use(passport.session());
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
   res.locals.process = process;
+
+  // Site-wide announcement banner (managed from the admin panel)
+  try {
+    const settings = db.get('settings').value() || {};
+    const ann = settings.announcement;
+    res.locals.announcement = (ann && ann.enabled && ann.text) ? ann : null;
+  } catch (e) {
+    res.locals.announcement = null;
+  }
 
   // Dynamic canonical URL & OG URL for SEO indexing
   const host = req.get('host') || 'alexcloud.my.id';

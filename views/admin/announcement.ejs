@@ -1,0 +1,68 @@
+<% currentPage = 'announcement'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-bullhorn"></i> Pengumuman Situs</h1>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<div class="card" style="max-width:760px;">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-rectangle-ad"></i> Banner Pengumuman</div>
+    <span style="font-family:var(--font-ui); font-size:0.8rem; padding:0.2rem 0.6rem; border-radius:6px;
+      <%= announcement.enabled ? 'color:var(--accent-green); background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2);' : 'color:var(--text-muted); background:rgba(255,255,255,0.03); border:1px solid var(--border);' %>">
+      <%= announcement.enabled ? '● Aktif' : '○ Nonaktif' %>
+    </span>
+  </div>
+
+  <div style="padding:1.5rem;">
+    <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.5rem; line-height:1.6;">
+      Banner tampil di bagian paling atas semua halaman publik. Cocok untuk info promo, maintenance, atau pengumuman penting. Pengunjung bisa menutupnya, dan akan muncul lagi otomatis setiap kali kamu mengubah isinya.
+    </p>
+
+    <form action="/admin/announcement" method="POST">
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label class="form-label" style="display:flex; align-items:center; gap:0.6rem; cursor:pointer;">
+          <input type="checkbox" name="enabled" value="1" <%= announcement.enabled ? 'checked' : '' %> style="width:auto; transform:scale(1.2);">
+          Aktifkan banner pengumuman
+        </label>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label class="form-label">Tipe / Warna Banner</label>
+        <select name="type" class="form-input">
+          <option value="info"  <%= (announcement.type || 'info') === 'info'  ? 'selected' : '' %>>🔵 Info (biru-cyan)</option>
+          <option value="promo" <%= announcement.type === 'promo' ? 'selected' : '' %>>🟣 Promo (ungu-pink)</option>
+          <option value="warn"  <%= announcement.type === 'warn'  ? 'selected' : '' %>>🟠 Peringatan (oranye-merah)</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label class="form-label">Teks Pengumuman *</label>
+        <input type="text" name="text" class="form-input" maxlength="140"
+          value="<%= announcement.text || '' %>"
+          placeholder="Contoh: Promo Spesial! Pakai kode HEMAT20 untuk diskon 20% bulan ini 🎉">
+        <small style="color:var(--text-muted); font-size:0.78rem;">Maksimal 140 karakter agar rapi dalam satu baris.</small>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Link Tujuan <small style="color:var(--text-muted)">(opsional)</small></label>
+          <input type="text" name="link" class="form-input" value="<%= announcement.link || '' %>" placeholder="/pricing atau https://...">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Teks Link <small style="color:var(--text-muted)">(opsional)</small></label>
+          <input type="text" name="linkText" class="form-input" value="<%= announcement.linkText || '' %>" placeholder="Lihat Promo">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan Pengumuman</button>
+    </form>
+  </div>
+</div>
+
+<%- include('layout-footer') %>

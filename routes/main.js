@@ -7,7 +7,7 @@ const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA } = require('../utils/helpers');
+const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA, isJunkTestimonial, stripBotCommand } = require('../utils/helpers');
 
 // Rate limiters for API endpoints
 const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
@@ -15,7 +15,9 @@ const searchRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 60 });
 
 // Helper to filter out missing testimonial images and return dynamic URL for clean UI & high PageSpeed
 function getCleanTestimonials() {
-  const testimonials = db.get('testimonials').filter({ approved: true }).value() || [];
+  const testimonials = (db.get('testimonials').filter({ approved: true }).value() || [])
+    // Curation: never show raw bot-command leftovers (".testi Anonymous | Done | 5") on the public site
+    .filter(t => !isJunkTestimonial(t));
   return testimonials.map(t => {
     if (t.image && typeof t.image === 'string') {
       const trimmed = t.image.trim();
@@ -698,6 +700,42 @@ router.get('/faq', (req, res) => {
 });
 
 // =====================
+// Legal & Company Pages (Tentang Kami, Syarat, Privasi, Refund)
+// =====================
+const LEGAL_LAST_UPDATED = '22 Juni 2026';
+
+router.get('/about', (req, res) => {
+  res.render('about', {
+    title: 'Tentang Kami - AlexCloud',
+    user: req.user || null
+  });
+});
+
+router.get('/terms', (req, res) => {
+  res.render('terms', {
+    title: 'Syarat & Ketentuan - AlexCloud',
+    user: req.user || null,
+    lastUpdated: LEGAL_LAST_UPDATED
+  });
+});
+
+router.get('/privacy', (req, res) => {
+  res.render('privacy', {
+    title: 'Kebijakan Privasi - AlexCloud',
+    user: req.user || null,
+    lastUpdated: LEGAL_LAST_UPDATED
+  });
+});
+
+router.get('/refund', (req, res) => {
+  res.render('refund', {
+    title: 'Kebijakan Refund - AlexCloud',
+    user: req.user || null,
+    lastUpdated: LEGAL_LAST_UPDATED
+  });
+});
+
+// =====================
 // Network Speed Test Page
 // =====================
 router.get('/network-test', (req, res) => {
@@ -921,12 +959,20 @@ router.post('/api/testimonials', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Name and text are required' });
   }
 
+  // Curation at the source: strip any leading bot-command token, then reject junk
+  // so raw command leftovers never reach the database.
+  const cleanName = stripBotCommand(name) || name.trim();
+  const cleanText = stripBotCommand(text) || text.trim();
+  if (isJunkTestimonial({ name: cleanName, text: cleanText })) {
+    return res.status(422).json({ success: false, error: 'Testimonial looks like raw/command data and was rejected' });
+  }
+
   try {
     db.get('testimonials').push({
       id: uuidv4(),
-      name: name.trim(),
+      name: cleanName,
       role: role || 'Gamer',
-      text: text.trim(),
+      text: cleanText,
       rating: parseInt(rating) || 5,
       image: image || null,
       avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,

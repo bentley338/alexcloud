@@ -1,0 +1,88 @@
+<%- include('partials/header') %>
+
+<main class="legal-page" id="main-content">
+  <div class="legal-wrap">
+    <div class="legal-hero">
+      <div class="legal-tag"><i class="fas fa-rotate-left"></i> Refund</div>
+      <h1>Kebijakan <span class="accent">Refund</span></h1>
+      <p class="legal-updated">Terakhir diperbarui: <%= lastUpdated %></p>
+    </div>
+
+    <div class="legal-card">
+      <p class="legal-intro">
+        Kami ingin setiap transaksi di AlexCloud berlangsung adil dan transparan. Karena layanan kami berupa
+        produk digital yang aktif secara instan, mohon baca kebijakan refund ini dengan saksama sebelum membeli.
+      </p>
+
+      <div class="legal-callout warn">
+        <i class="fas fa-circle-info"></i>
+        <div>
+          <strong>Inti kebijakan:</strong> Pada dasarnya seluruh pembelian bersifat <strong>final dan tidak dapat
+          direfund</strong>. Pengembalian dana <strong>hanya</strong> diberikan apabila terjadi masalah/kegagalan
+          yang murni berasal dari pihak kami (penjual).
+        </div>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">1</span> Refund DAPAT Diberikan Jika…</h2>
+        <p>Pengembalian dana akan kami proses apabila masalah terbukti berasal dari sisi AlexCloud, seperti:</p>
+        <ul>
+          <li>Pembayaran sudah berhasil, namun layanan/akun <strong>tidak kunjung aktif</strong> dan tidak dapat kami perbaiki dalam waktu yang wajar.</li>
+          <li>Terjadi <strong>pembayaran ganda (double payment)</strong> untuk order yang sama akibat kesalahan sistem kami.</li>
+          <li>Layanan mengalami <strong>gangguan total dari pihak kami</strong> (server kami down) dalam jangka waktu signifikan selama masa langganan aktif, dan tidak bisa kami pulihkan.</li>
+          <li>Kamu ditagih untuk paket yang <strong>tidak pernah kamu pesan</strong> akibat kesalahan teknis kami.</li>
+        </ul>
+        <div class="legal-callout good">
+          <i class="fas fa-circle-check"></i>
+          <div>Dalam kasus di atas, kami akan menawarkan <strong>perpanjangan masa langganan, penggantian, atau pengembalian dana penuh</strong> sesuai kondisi yang paling adil.</div>
+        </div>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">2</span> Refund TIDAK Diberikan Jika…</h2>
+        <p>Pengembalian dana tidak berlaku untuk kondisi yang berada di luar kendali kami, antara lain:</p>
+        <ul>
+          <li>Koneksi internet kamu lambat, tidak stabil, atau kuota habis sehingga gaming terasa nge-lag.</li>
+          <li>Perangkat kamu tidak kompatibel atau tidak memenuhi rekomendasi minimum.</li>
+          <li>Kamu berubah pikiran, salah membeli paket, atau merasa "tidak jadi" setelah membeli.</li>
+          <li>Akun ditangguhkan/diblokir karena melanggar <a href="/terms">Syarat &amp; Ketentuan</a> (misalnya menjual ulang akun).</li>
+          <li>Game tertentu yang kamu inginkan belum/tidak tersedia, padahal informasi katalog sudah jelas sebelum pembelian.</li>
+          <li>Masa langganan sudah terpakai sebagian atau seluruhnya tanpa kendala dari sisi kami.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">3</span> Cara Mengajukan Refund</h2>
+        <p>Jika kamu mengalami masalah yang memenuhi syarat di poin 1, ikuti langkah berikut:</p>
+        <ul>
+          <li><strong>Langkah 1 —</strong> Hubungi admin kami via WhatsApp atau Telegram maksimal <strong>3×24 jam</strong> sejak masalah terjadi.</li>
+          <li><strong>Langkah 2 —</strong> Sertakan <strong>Order ID</strong>, bukti pembayaran, dan penjelasan/screenshot masalahnya.</li>
+          <li><strong>Langkah 3 —</strong> Tim kami akan memverifikasi (biasanya 1×24 jam kerja). Bila terbukti dari sisi kami, refund/penggantian diproses.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">4</span> Proses &amp; Waktu Pengembalian</h2>
+        <p>
+          Setelah pengajuan disetujui, dana akan dikembalikan ke metode/rekening yang kamu tentukan dalam waktu
+          <strong>maksimal 7 hari kerja</strong>. Refund diberikan secara proporsional apabila sebagian masa
+          langganan sudah kamu gunakan sebelum gangguan terjadi.
+        </p>
+      </div>
+
+      <div class="legal-callout">
+        <i class="fas fa-handshake-angle"></i>
+        <div>Kami selalu mengutamakan solusi yang adil. Sebelum mengajukan refund, beri kami kesempatan untuk memperbaiki masalahnya terlebih dahulu — sering kali kendala bisa kami selesaikan dengan cepat.</div>
+      </div>
+
+      <div class="legal-contact-box">
+        <p>Mengalami kendala dari sisi kami? Jangan ragu menghubungi admin.</p>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" rel="noopener noreferrer" class="btn-primary">
+          <i class="fab fa-whatsapp"></i> Ajukan Lewat WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

@@ -3,6 +3,19 @@
 
 <h1 class="admin-page-title"><i class="fas fa-star"></i> Kelola Testimoni</h1>
 
+<% if (typeof junkCount !== 'undefined' && junkCount > 0) { %>
+<div class="alert alert-error" style="margin-bottom:1rem; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+  <i class="fas fa-broom"></i>
+  <span>Terdeteksi <strong><%= junkCount %></strong> testimoni berisi data mentah bot (mis. <code>.testi Anonymous | Done | 5</code>). Testimoni ini sudah otomatis disembunyikan dari halaman publik.</span>
+  <form action="/admin/testimonials/cleanup-junk" method="POST" style="margin-left:auto;">
+    <button type="submit" class="btn-action btn-danger" style="font-size:0.82rem;"
+      onclick="return confirm('Hapus permanen <%= junkCount %> testimoni sampah yang terdeteksi?')">
+      <i class="fas fa-trash"></i> Bersihkan <%= junkCount %> Sampah
+    </button>
+  </form>
+</div>
+<% } %>
+
 <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
 <% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
 <% } %>
@@ -140,9 +153,16 @@
             <div style="color:var(--text-muted); font-size:0.75rem;"><%= t.role %></div>
           </div>
         </div>
-        <span class="status-badge <%= t.approved ? 'status-active' : 'status-rejected' %>" style="flex-shrink:0; font-size:0.72rem;">
-          <%= t.approved ? '✅ Tampil' : '🙈 Hidden' %>
-        </span>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.3rem; flex-shrink:0;">
+          <span class="status-badge <%= t.approved ? 'status-active' : 'status-rejected' %>" style="font-size:0.72rem;">
+            <%= t.approved ? '✅ Tampil' : '🙈 Hidden' %>
+          </span>
+          <% if (t.isJunk) { %>
+          <span class="status-badge" style="font-size:0.68rem; background:rgba(255,68,68,0.12); color:#ff6666; border:1px solid rgba(255,68,68,0.3);" title="Terdeteksi data mentah bot — disembunyikan dari publik">
+            ⚠ Data mentah
+          </span>
+          <% } %>
+        </div>
       </div>
 
       <!-- Rating -->

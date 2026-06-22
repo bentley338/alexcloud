@@ -1,0 +1,97 @@
+<%- include('partials/header') %>
+
+<main class="legal-page" id="main-content">
+  <div class="legal-wrap">
+    <div class="legal-hero">
+      <div class="legal-tag"><i class="fas fa-user-shield"></i> Privasi</div>
+      <h1>Kebijakan <span class="accent">Privasi</span></h1>
+      <p class="legal-updated">Terakhir diperbarui: <%= lastUpdated %></p>
+    </div>
+
+    <div class="legal-card">
+      <p class="legal-intro">
+        Privasi kamu penting bagi kami. Kebijakan ini menjelaskan data apa yang kami kumpulkan, bagaimana kami
+        menggunakannya, dan hak kamu atas data tersebut saat menggunakan AlexCloud.
+      </p>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">1</span> Data yang Kami Kumpulkan</h2>
+        <ul>
+          <li><strong>Data akun:</strong> nama, alamat email, dan kata sandi (disimpan dalam bentuk terenkripsi/hash).</li>
+          <li><strong>Data login Google:</strong> jika kamu mendaftar via Google, kami menerima nama, email, dan foto profil dari Google.</li>
+          <li><strong>Data transaksi:</strong> riwayat order, paket yang dibeli, dan status pembayaran. Kami <strong>tidak menyimpan</strong> nomor kartu atau PIN dompet digital kamu.</li>
+          <li><strong>Data teknis:</strong> alamat IP, jenis perangkat, dan browser untuk keperluan keamanan dan peningkatan layanan.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">2</span> Bagaimana Kami Menggunakan Data</h2>
+        <ul>
+          <li>Membuat dan mengelola akun serta langganan kamu.</li>
+          <li>Memproses pembayaran dan mengaktifkan layanan secara otomatis.</li>
+          <li>Mengirim notifikasi penting terkait order, langganan, atau keamanan akun.</li>
+          <li>Memberikan dukungan pelanggan melalui WhatsApp, Telegram, atau live chat.</li>
+          <li>Meningkatkan kualitas, performa, dan keamanan layanan.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">3</span> Berbagi Data dengan Pihak Ketiga</h2>
+        <p>Kami <strong>tidak menjual</strong> data pribadi kamu. Data hanya dibagikan secara terbatas kepada:</p>
+        <ul>
+          <li><strong>Penyedia pembayaran (payment gateway QRIS)</strong> — untuk memproses transaksi.</li>
+          <li><strong>Penyedia infrastruktur</strong> — untuk hosting dan penyimpanan data.</li>
+          <li><strong>Aparat berwenang</strong> — apabila diwajibkan oleh hukum yang berlaku.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">4</span> Cookie &amp; Sesi</h2>
+        <p>
+          Kami menggunakan cookie sesi untuk menjaga kamu tetap login dan menjalankan fitur dasar situs.
+          Cookie ini diperlukan agar layanan berfungsi dan tidak digunakan untuk pelacakan iklan.
+        </p>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">5</span> Keamanan Data</h2>
+        <p>
+          Kata sandi disimpan menggunakan hashing (bcrypt) dan tidak pernah disimpan dalam bentuk teks biasa.
+          Kami menerapkan langkah keamanan teknis dan organisasi yang wajar untuk melindungi data kamu. Meski
+          demikian, tidak ada sistem yang 100% kebal — jaga kerahasiaan kata sandimu dengan baik.
+        </p>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">6</span> Hak Kamu</h2>
+        <ul>
+          <li>Mengakses dan memperbarui data profil kamu kapan saja melalui halaman Profil.</li>
+          <li>Meminta penghapusan akun beserta data pribadimu dengan menghubungi admin.</li>
+          <li>Menarik persetujuan atas pemrosesan data tertentu (dapat memengaruhi ketersediaan layanan).</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">7</span> Data Anak</h2>
+        <p>
+          Layanan tidak ditujukan bagi anak di bawah 13 tahun. Jika kamu yakin kami tanpa sengaja mengumpulkan
+          data anak di bawah usia tersebut, hubungi kami agar data dapat dihapus.
+        </p>
+      </div>
+
+      <div class="legal-callout">
+        <i class="fas fa-lock"></i>
+        <div>Kami berkomitmen menjaga data kamu. Jika kamu punya pertanyaan tentang privasi atau ingin menghapus data, hubungi kami kapan saja.</div>
+      </div>
+
+      <div class="legal-contact-box">
+        <p>Pertanyaan seputar privasi &amp; data kamu?</p>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" rel="noopener noreferrer" class="btn-primary">
+          <i class="fab fa-whatsapp"></i> Hubungi Kami
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

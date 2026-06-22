@@ -3,6 +3,13 @@
 
 <h1 class="admin-page-title"><i class="fas fa-id-card"></i> Subscriptions</h1>
 
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:1rem; margin-bottom:2rem;">
   <div class="admin-stat-card">
     <div class="admin-stat-value" style="color:var(--accent-green)"><%= subscriptions.filter(s=>s.status==='active').length %></div>
@@ -29,11 +36,12 @@
           <th>Mulai</th>
           <th>Berakhir</th>
           <th>Sisa Hari</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody>
         <% if (subscriptions.length === 0) { %>
-        <tr><td colspan="6" style="text-align:center; padding:3rem; color:var(--text-muted);">Belum ada subscription.</td></tr>
+        <tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-muted);">Belum ada subscription.</td></tr>
         <% } %>
         <% subscriptions.forEach(sub => { %>
         <% const daysLeft = sub.status === 'active' ? Math.max(0, Math.ceil((new Date(sub.expiresAt) - new Date()) / (1000*60*60*24))) : 0; %>
@@ -62,6 +70,25 @@
             <% } else { %>
             <span style="color:var(--text-muted)">—</span>
             <% } %>
+          </td>
+          <td>
+            <div style="display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap;">
+              <form action="/admin/subscriptions/<%= sub.id %>/extend" method="POST" style="display:flex; gap:0.3rem; align-items:center;">
+                <input type="number" name="days" value="30" min="1" max="365" title="Jumlah hari"
+                  style="width:58px; padding:0.3rem 0.4rem; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:0.8rem;">
+                <button type="submit" class="btn-action btn-confirm" style="font-size:0.78rem;" title="Perpanjang / aktifkan kembali">
+                  <i class="fas fa-plus"></i> Perpanjang
+                </button>
+              </form>
+              <% if (sub.status === 'active') { %>
+              <form action="/admin/subscriptions/<%= sub.id %>/revoke" method="POST">
+                <button type="submit" class="btn-action btn-reject" style="font-size:0.78rem;"
+                  onclick="return confirm('Cabut subscription <%= sub.user ? sub.user.name : 'user ini' %>?')" title="Cabut subscription">
+                  <i class="fas fa-ban"></i> Cabut
+                </button>
+              </form>
+              <% } %>
+            </div>
           </td>
         </tr>
         <% }) %>

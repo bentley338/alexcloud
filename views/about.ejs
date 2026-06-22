@@ -1,0 +1,87 @@
+<%- include('partials/header') %>
+
+<main class="legal-page" id="main-content">
+  <div class="legal-wrap">
+    <div class="legal-hero">
+      <div class="legal-tag"><i class="fas fa-cloud"></i> Tentang Kami</div>
+      <h1>Kenalan dengan <span class="accent">AlexCloud</span></h1>
+      <p class="legal-updated">Platform cloud gaming yang dibuat gamer, untuk gamer Indonesia.</p>
+    </div>
+
+    <div class="legal-card">
+      <p class="legal-intro">
+        <strong>AlexCloud</strong> adalah layanan cloud gaming premium asal Indonesia yang membuat siapa saja
+        bisa memainkan game AAA terbaru — seperti EA FC 26, GTA VI, dan Cyberpunk 2077 — langsung dari HP,
+        laptop, tablet, atau Smart TV tanpa harus membeli PC mahal. Cukup koneksi internet, semua game berat
+        berjalan dari server kami yang dioptimalkan untuk ping rendah di Indonesia.
+      </p>
+
+      <div class="about-stats-grid">
+        <div class="about-stat"><span class="about-stat-num">100+</span><div class="about-stat-label">Game Premium</div></div>
+        <div class="about-stat"><span class="about-stat-num">4K</span><div class="about-stat-label">Resolusi Maksimal</div></div>
+        <div class="about-stat"><span class="about-stat-num">&lt;30ms</span><div class="about-stat-label">Latensi Server Lokal</div></div>
+        <div class="about-stat"><span class="about-stat-num">24/7</span><div class="about-stat-label">Dukungan Admin</div></div>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num"><i class="fas fa-bullseye" style="font-size:0.8rem;"></i></span> Misi Kami</h2>
+        <p>
+          Kami percaya gaming berkualitas tinggi tidak seharusnya hanya milik mereka yang sanggup membeli PC
+          puluhan juta rupiah. Misi AlexCloud adalah <strong>mendemokratisasi akses gaming AAA</strong> di
+          Indonesia — dengan harga mulai Rp 40.000 saja, kamu bisa merasakan pengalaman gaming yang biasanya
+          butuh hardware mahal.
+        </p>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num"><i class="fas fa-heart" style="font-size:0.8rem;"></i></span> Nilai yang Kami Pegang</h2>
+        <div class="about-values-grid">
+          <div class="about-value-card">
+            <div class="about-value-icon"><i class="fas fa-shield-halved"></i></div>
+            <h3>Transaksi Aman</h3>
+            <p>Pembayaran lewat QRIS resmi (DANA, GoPay, OVO, ShopeePay, m-banking) dengan konfirmasi otomatis. Tidak ada biaya tersembunyi.</p>
+          </div>
+          <div class="about-value-card">
+            <div class="about-value-icon"><i class="fas fa-bolt"></i></div>
+            <h3>Performa Nyata</h3>
+            <p>Server lokal dengan latensi di bawah 30ms. Bukan janji — bisa kamu buktikan sendiri lewat halaman Speed Test kami.</p>
+          </div>
+          <div class="about-value-card">
+            <div class="about-value-icon"><i class="fas fa-headset"></i></div>
+            <h3>Support Responsif</h3>
+            <p>Tim kami siap membantu lewat WhatsApp, Telegram, dan live chat AI 24/7. Masalah kamu, prioritas kami.</p>
+          </div>
+          <div class="about-value-card">
+            <div class="about-value-icon"><i class="fas fa-handshake-angle"></i></div>
+            <h3>Jujur &amp; Transparan</h3>
+            <p>Kami berani memberi garansi: kalau gangguan murni dari pihak kami, dana kamu kami kembalikan. Selengkapnya di <a href="/refund">Kebijakan Refund</a>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num"><i class="fas fa-rocket" style="font-size:0.8rem;"></i></span> Kenapa Memilih AlexCloud?</h2>
+        <ul>
+          <li><strong>Hemat hingga 10x lipat</strong> — Rp 60.000/bulan vs PC gaming Rp 15-50 juta.</li>
+          <li><strong>Tanpa ribet</strong> — tidak perlu install, update driver, atau upgrade hardware.</li>
+          <li><strong>Main di mana saja</strong> — progress tersimpan di cloud, lanjut di perangkat lain kapan pun.</li>
+          <li><strong>Selalu update</strong> — koleksi game terus bertambah mengikuti rilis terbaru.</li>
+        </ul>
+      </div>
+
+      <div class="legal-callout good">
+        <i class="fas fa-circle-check"></i>
+        <div>AlexCloud dikelola langsung oleh tim lokal yang juga seorang gamer. Setiap masukan dari kamu kami dengarkan untuk membuat layanan ini makin baik.</div>
+      </div>
+
+      <div class="legal-contact-box">
+        <p>Punya pertanyaan atau ingin tahu lebih banyak? Kami senang ngobrol denganmu.</p>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" rel="noopener noreferrer" class="btn-primary">
+          <i class="fab fa-whatsapp"></i> Hubungi Kami
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

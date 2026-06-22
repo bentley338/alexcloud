@@ -47,7 +47,9 @@
     },
     "sameAs": [
       "https://wa.me/6282328437656",
-      "https://www.tiktok.com/@bentleysaja_"
+      "https://www.tiktok.com/@bentleysaja_",
+      "https://www.instagram.com/beentley16",
+      "https://t.me/bentley160"
     ]
   }
   </script>
@@ -135,13 +137,44 @@
   <!-- Main CSS: render-blocking on purpose — first paint uses final layout, so the
        desktop hero (hero-visual card, styled only in main.css) doesn't reflow when
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
-  <link href="/css/main.css?v=4.1" rel="stylesheet">
+  <link href="/css/main.css?v=4.2" rel="stylesheet">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="/css/fontawesome.min.css?v=1"></noscript>
 </head>
 <body>
+  <!-- Site Announcement Banner (managed from admin panel) -->
+  <% if (typeof announcement !== 'undefined' && announcement) { %>
+  <div class="site-announce site-announce--<%= announcement.type || 'info' %>" id="siteAnnounce" data-ann-id="<%= announcement.id || 'default' %>">
+    <div class="site-announce-inner">
+      <i class="fas fa-<%= announcement.type === 'promo' ? 'gift' : (announcement.type === 'warn' ? 'triangle-exclamation' : 'bullhorn') %>" aria-hidden="true"></i>
+      <span class="site-announce-text"><%= announcement.text %></span>
+      <% if (announcement.link && announcement.linkText) { %>
+        <a href="<%= announcement.link %>" class="site-announce-link"><%= announcement.linkText %> →</a>
+      <% } %>
+    </div>
+    <button class="site-announce-close" type="button" onclick="dismissAnnounce()" aria-label="Tutup pengumuman">✕</button>
+  </div>
+  <script>
+    document.body.classList.add('has-announcement');
+    (function () {
+      var el = document.getElementById('siteAnnounce');
+      if (!el) return;
+      var id = el.getAttribute('data-ann-id') || 'default';
+      try { if (localStorage.getItem('annDismissed') === id) { el.remove(); document.body.classList.remove('has-announcement'); } } catch (e) {}
+    })();
+    function dismissAnnounce() {
+      var el = document.getElementById('siteAnnounce');
+      if (!el) return;
+      var id = el.getAttribute('data-ann-id') || 'default';
+      try { localStorage.setItem('annDismissed', id); } catch (e) {}
+      el.remove();
+      document.body.classList.remove('has-announcement');
+    }
+  </script>
+  <% } %>
+
   <!-- Scroll Progress Indicator -->
   <div class="scroll-progress" id="scrollProgress"></div>
 

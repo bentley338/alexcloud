@@ -193,6 +193,47 @@ function sayabayarRequest(method, endpoint, payload, timeoutMs) {
 // ─── Shared User-Agent Header ──────────────────────────────────────────────
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
+// ─── Testimonial Curation Helpers ────────────────────────────────────────────
+// Some testimonials were captured straight from the WhatsApp bot and stored as raw
+// command leftovers (e.g. ".testi Anonymous | Done | 5"). These detect & clean them
+// so the public site only ever shows real, presentable testimonials.
+
+const TRIVIAL_TESTI_TEXT = new Set([
+  'done', 'ok', 'oke', 'okay', 'test', 'testing', 'tes', 'coba', 'cuba',
+  'anonymous', 'anonim', 'p', 'halo', 'hi', 'hai', '-', '.', '..', '...', 'mantap', 'good', 'nice'
+]);
+
+// Strip a leading bot-command token like ".testi", "/testi", "!review" from a string.
+function stripBotCommand(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/^\s*[.\/!]\s*[a-zA-Z]+\b[\s:|-]*/, '').trim();
+}
+
+// Returns true when a testimonial looks like raw bot/command junk rather than a
+// genuine review — used to hide it from the public site and offer admin cleanup.
+function isJunkTestimonial(t) {
+  if (!t) return true;
+  const name = (t.name || '').toString().trim();
+  const text = (t.text || '').toString().trim();
+
+  if (!name || !text) return true;
+
+  // Starts with a bot command token (.testi / /review / !ok ...)
+  const cmdLike = /^\s*[.\/!]\s*[a-zA-Z]+/;
+  if (cmdLike.test(name) || cmdLike.test(text)) return true;
+
+  // Raw pipe-delimited payload such as "Anonymous | Done | 5"
+  if (name.includes('|') || /\|\s*\d?\s*$/.test(text) || (text.match(/\|/g) || []).length >= 1) return true;
+
+  // Placeholder / non-meaningful content
+  if (TRIVIAL_TESTI_TEXT.has(text.toLowerCase())) return true;
+
+  // Too short to be a real testimonial (ignoring punctuation/digits)
+  if (text.replace(/[^a-zA-ZÀ-ɏ]/g, '').length < 8) return true;
+
+  return false;
+}
+
 module.exports = {
   sharedHttpsAgent,
   cleanEnvVar,
@@ -201,5 +242,7 @@ module.exports = {
   fr3Request,
   sayabayarRequest,
   BROWSER_UA,
+  isJunkTestimonial,
+  stripBotCommand,
   path
 };

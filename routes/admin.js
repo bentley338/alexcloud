@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache } = require('../database/db');
 const { ensureAdmin } = require('../middleware/auth');
+const { isJunkTestimonial } = require('../utils/helpers');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const bcrypt = require('bcryptjs');
@@ -179,6 +180,45 @@ router.post('/orders/:id/reject', ensureAdmin, (req, res) => {
   db.get('orders').find({ id: req.params.id }).assign({ status: 'rejected' }).write();
   req.flash('success', 'Order ditolak.');
   res.redirect('/admin/orders');
+});
+
+// =====================
+// SITE ANNOUNCEMENT BANNER
+// =====================
+router.get('/announcement', ensureAdmin, (req, res) => {
+  const settings = db.get('settings').value() || {};
+  res.render('admin/announcement', {
+    title: 'Pengumuman Situs - AlexCloud Admin',
+    user: req.user,
+    announcement: settings.announcement || {},
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
+router.post('/announcement', ensureAdmin, (req, res) => {
+  const { enabled, type, text, link, linkText } = req.body;
+  const cleanText = (text || '').trim();
+
+  if (enabled && !cleanText) {
+    req.flash('error', 'Teks pengumuman wajib diisi jika ingin diaktifkan.');
+    return res.redirect('/admin/announcement');
+  }
+
+  db.get('settings').assign({
+    announcement: {
+      enabled: !!enabled,
+      type: ['info', 'promo', 'warn'].includes(type) ? type : 'info',
+      text: cleanText,
+      link: (link || '').trim(),
+      linkText: (linkText || '').trim(),
+      // Bump the id on every save so dismissed banners reappear for users when content changes
+      id: 'ann' + Date.now().toString(36),
+      updatedAt: new Date().toISOString()
+    }
+  }).write();
+
+  req.flash('success', `Pengumuman berhasil ${enabled ? 'diaktifkan' : 'disimpan & dinonaktifkan'}.`);
+  res.redirect('/admin/announcement');
 });
 
 // =====================
@@ -463,8 +503,52 @@ router.get('/subscriptions', ensureAdmin, (req, res) => {
   const subsWithUser = subs.map(s => ({ ...s, user: userMap.get(s.userId) }));
   res.render('admin/subscriptions', {
     title: 'Subscriptions - AlexCloud Admin',
-    user: req.user, subscriptions: subsWithUser, moment
+    user: req.user, subscriptions: subsWithUser, moment,
+    success: req.flash('success'), error: req.flash('error')
   });
+});
+
+// Perpanjang (atau aktifkan kembali) subscription sebanyak N hari
+router.post('/subscriptions/:id/extend', ensureAdmin, (req, res) => {
+  const sub = db.get('subscriptions').find({ id: req.params.id }).value();
+  if (!sub) { req.flash('error', 'Subscription tidak ditemukan.'); return res.redirect('/admin/subscriptions'); }
+
+  const days = parseInt(req.body.days, 10);
+  if (!days || days <= 0) { req.flash('error', 'Jumlah hari tidak valid.'); return res.redirect('/admin/subscriptions'); }
+
+  // Perpanjang dari tanggal berakhir saat ini, atau dari sekarang jika sudah lewat
+  const now = new Date();
+  const base = new Date(sub.expiresAt) > now ? new Date(sub.expiresAt) : now;
+  base.setDate(base.getDate() + days);
+
+  db.get('subscriptions').find({ id: sub.id }).assign({
+    expiresAt: base.toISOString(),
+    status: 'active'
+  }).write();
+  db.get('users').find({ id: sub.userId }).assign({ isActive: true }).write();
+
+  req.flash('success', `Subscription diperpanjang ${days} hari → berakhir ${moment(base).format('DD MMM YYYY')}.`);
+  res.redirect('/admin/subscriptions');
+});
+
+// Cabut / nonaktifkan subscription
+router.post('/subscriptions/:id/revoke', ensureAdmin, (req, res) => {
+  const sub = db.get('subscriptions').find({ id: req.params.id }).value();
+  if (!sub) { req.flash('error', 'Subscription tidak ditemukan.'); return res.redirect('/admin/subscriptions'); }
+
+  db.get('subscriptions').find({ id: sub.id }).assign({
+    status: 'expired',
+    expiredAt: new Date().toISOString()
+  }).write();
+
+  // Nonaktifkan user hanya jika tidak punya subscription aktif lain
+  const stillActive = db.get('subscriptions').find({ userId: sub.userId, status: 'active' }).value();
+  if (!stillActive) {
+    db.get('users').find({ id: sub.userId }).assign({ isActive: false }).write();
+  }
+
+  req.flash('success', 'Subscription berhasil dicabut.');
+  res.redirect('/admin/subscriptions');
 });
 
 // =====================
@@ -549,12 +633,28 @@ router.post('/plans/:id/edit', ensureAdmin, (req, res) => {
 // TESTIMONIALS — dengan upload PNG langsung
 // =====================
 router.get('/testimonials', ensureAdmin, (req, res) => {
-  const testimonials = db.get('testimonials').sortBy('createdAt').reverse().value();
+  const testimonials = db.get('testimonials').sortBy('createdAt').reverse().value()
+    // Tag raw bot-command leftovers so the admin UI can flag them for cleanup
+    .map(t => ({ ...t, isJunk: isJunkTestimonial(t) }));
+  const junkCount = testimonials.filter(t => t.isJunk).length;
   res.render('admin/testimonials', {
     title: 'Kelola Testimoni - AlexCloud Admin',
-    user: req.user, testimonials, moment,
+    user: req.user, testimonials, junkCount, moment,
     success: req.flash('success'), error: req.flash('error')
   });
+});
+
+// Bulk cleanup — permanently remove all testimonials detected as raw bot/command junk
+router.post('/testimonials/cleanup-junk', ensureAdmin, (req, res) => {
+  const all = db.get('testimonials').value() || [];
+  const junkIds = all.filter(t => isJunkTestimonial(t)).map(t => t.id);
+  if (junkIds.length === 0) {
+    req.flash('error', 'Tidak ada testimoni sampah yang terdeteksi.');
+    return res.redirect('/admin/testimonials');
+  }
+  db.get('testimonials').remove(t => junkIds.includes(t.id)).write();
+  req.flash('success', `${junkIds.length} testimoni sampah (data mentah bot) berhasil dibersihkan.`);
+  res.redirect('/admin/testimonials');
 });
 
 // POST tambah testimoni — support upload PNG atau URL

@@ -1,0 +1,112 @@
+<%- include('partials/header') %>
+
+<main class="legal-page" id="main-content">
+  <div class="legal-wrap">
+    <div class="legal-hero">
+      <div class="legal-tag"><i class="fas fa-file-contract"></i> Legal</div>
+      <h1>Syarat &amp; <span class="accent">Ketentuan</span></h1>
+      <p class="legal-updated">Terakhir diperbarui: <%= lastUpdated %></p>
+    </div>
+
+    <div class="legal-card">
+      <p class="legal-intro">
+        Selamat datang di AlexCloud. Dengan mendaftar, mengakses, atau menggunakan layanan kami, kamu dianggap
+        telah membaca, memahami, dan menyetujui seluruh Syarat &amp; Ketentuan di bawah ini. Mohon baca dengan
+        saksama sebelum melakukan pembelian.
+      </p>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">1</span> Definisi</h2>
+        <ul>
+          <li><strong>"AlexCloud"</strong>, "kami", atau "Layanan" merujuk pada platform cloud gaming AlexCloud.</li>
+          <li><strong>"Pengguna"</strong> atau "kamu" adalah setiap orang yang mendaftar dan/atau menggunakan layanan.</li>
+          <li><strong>"Langganan"</strong> adalah paket akses berbayar dengan durasi tertentu (1 minggu hingga 3 bulan).</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">2</span> Akun &amp; Pendaftaran</h2>
+        <ul>
+          <li>Kamu wajib memberikan data yang benar dan akurat saat mendaftar.</li>
+          <li>Kamu bertanggung jawab penuh menjaga kerahasiaan kata sandi dan seluruh aktivitas pada akunmu.</li>
+          <li>Satu akun langganan ditujukan untuk pemakaian pribadi. Berbagi akun ke banyak orang secara bersamaan dapat dibatasi.</li>
+          <li>Pengguna minimal berusia 13 tahun. Pengguna di bawah 17 tahun sebaiknya menggunakan layanan dengan pengawasan orang tua/wali.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">3</span> Layanan &amp; Langganan</h2>
+        <p>
+          AlexCloud menyediakan akses streaming game melalui server cloud. Kualitas pengalaman (resolusi, framerate,
+          latensi) bergantung pada kecepatan dan kestabilan koneksi internet kamu. Kami merekomendasikan minimal
+          10 Mbps untuk pengalaman optimal.
+        </p>
+        <p>
+          Langganan aktif secara otomatis setelah pembayaran terkonfirmasi dan berlaku selama durasi paket yang dibeli.
+          Langganan <strong>tidak diperpanjang otomatis</strong> — kamu perlu melakukan pembelian ulang setelah masa aktif berakhir.
+        </p>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">4</span> Pembayaran</h2>
+        <ul>
+          <li>Pembayaran dilakukan melalui QRIS (DANA, GoPay, OVO, ShopeePay, LinkAja, mobile banking) atau metode lain yang tersedia.</li>
+          <li>Harga yang ditampilkan sudah final dalam Rupiah (IDR), kecuali dinyatakan lain.</li>
+          <li>Akun akan aktif otomatis begitu sistem mendeteksi pembayaran berhasil. Jika dalam beberapa menit belum aktif, hubungi admin dengan bukti transfer.</li>
+          <li>Kode promo bersifat terbatas dan tunduk pada ketentuan masing-masing.</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">5</span> Penggunaan yang Dilarang</h2>
+        <p>Kamu setuju untuk <strong>tidak</strong>:</p>
+        <ul>
+          <li>Menjual kembali, menyewakan, atau mendistribusikan ulang akses tanpa izin tertulis dari kami.</li>
+          <li>Melakukan upaya peretasan, reverse engineering, atau merusak infrastruktur layanan.</li>
+          <li>Menggunakan layanan untuk aktivitas ilegal atau melanggar hukum yang berlaku di Indonesia.</li>
+          <li>Menyalahgunakan bug, eksploitasi, atau celah sistem untuk keuntungan tidak sah.</li>
+        </ul>
+        <div class="legal-callout warn">
+          <i class="fas fa-triangle-exclamation"></i>
+          <div>Pelanggaran terhadap ketentuan ini dapat mengakibatkan <strong>penangguhan atau pemblokiran akun tanpa pengembalian dana</strong>.</div>
+        </div>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">6</span> Ketersediaan Layanan</h2>
+        <p>
+          Kami berupaya menjaga layanan tetap online 24/7. Namun sewaktu-waktu dapat terjadi pemeliharaan terjadwal
+          atau gangguan teknis di luar kendali kami (misalnya gangguan dari penyedia infrastruktur pihak ketiga).
+          Apabila gangguan berasal dari pihak kami dan menyebabkan layanan tidak dapat digunakan, lihat
+          <a href="/refund">Kebijakan Refund</a> kami.
+        </p>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">7</span> Batasan Tanggung Jawab</h2>
+        <p>
+          AlexCloud tidak bertanggung jawab atas kerugian yang timbul akibat faktor di luar kendali kami, termasuk
+          namun tidak terbatas pada: koneksi internet pengguna yang buruk, perangkat yang tidak kompatibel, atau
+          gangguan dari penyedia game pihak ketiga.
+        </p>
+      </div>
+
+      <div class="legal-section">
+        <h2><span class="legal-num">8</span> Perubahan Ketentuan</h2>
+        <p>
+          Kami dapat memperbarui Syarat &amp; Ketentuan ini sewaktu-waktu. Perubahan berlaku sejak dipublikasikan di
+          halaman ini. Penggunaan layanan secara berkelanjutan setelah perubahan berarti kamu menyetujui ketentuan yang baru.
+        </p>
+      </div>
+
+      <div class="legal-contact-box">
+        <p>Ada yang ingin ditanyakan soal ketentuan ini? Tim kami siap membantu.</p>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" rel="noopener noreferrer" class="btn-primary">
+          <i class="fab fa-whatsapp"></i> Tanya Admin
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
