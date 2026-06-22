@@ -361,8 +361,11 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   const nominal = actualPrice + localUniqueCode;
 
   try {
-    // 7s per attempt, up to 3 tries (~21s worst case) — intermittent FR3 gateway hangs
-    fr3Data = await fr3Request('/topup', 'POST', { nominal }, 7000, 3);
+    // FR3 receives the request and generates the QRIS even when slow — its response
+    // latency is highly variable (often 7–20s). Use a single generous-timeout attempt:
+    // long enough to catch a slow-but-successful response, and NO retry, since each
+    // retry that "times out" still generates a duplicate QRIS on FR3's side.
+    fr3Data = await fr3Request('/topup', 'POST', { nominal }, 25000);
 
     if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
       throw new Error(fr3Data?.message || 'API did not return a transaction ID');
@@ -447,7 +450,7 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
         method: 'GET',
         agent: sharedHttpsAgent,
         headers: { 'User-Agent': BROWSER_UA },
-        timeout: 10000
+        timeout: 12000 // FR3 status checks observed taking ~7s+; give headroom
       };
       const r = https.request(options, (resp) => {
         let body = '';
@@ -538,7 +541,7 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
   // Coba cancel ke FR3 jika ada trxId
   if (order.fr3TrxId) {
     try {
-      const fr3Result = await fr3Request('/topup/cancel', 'POST', { trxId: order.fr3TrxId }, 6000, 2);
+      const fr3Result = await fr3Request('/topup/cancel', 'POST', { trxId: order.fr3TrxId }, 12000);
       console.log('[FR3] Cancel response:', fr3Result);
 
       // Jika FR3 mengembalikan status selain 200, kita log warning saja dan biarkan local DB membatalkan pesanan.
