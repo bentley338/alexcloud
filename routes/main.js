@@ -459,9 +459,11 @@ async function trySayabayarGateway(orderInternalId, actualPrice) {
 // order is marked 'failed' and the payment page drops to manual. The QR fields live
 // under the existing fr3* keys (used by payment.ejs) regardless of which gateway won;
 // `order.gateway` records which API to poll for status.
-// Set PAYMENT_PRIMARY=sayabayar in .env to make SayaBayar the primary gateway.
+// Default primary is SayaBayar (FR3 is currently unreliable — frequently accepts the
+// TCP/TLS connection but never replies, stalling every order ~12s before fallback).
+// Set PAYMENT_PRIMARY=fr3 in .env to flip back to FR3 as the primary gateway.
 async function kickoffQrisGeneration(orderInternalId, actualPrice, fr3Nominal) {
-  const primary = (process.env.PAYMENT_PRIMARY || 'fr3').toLowerCase();
+  const primary = (process.env.PAYMENT_PRIMARY || 'sayabayar').toLowerCase();
   const sequence = primary === 'sayabayar' ? ['sayabayar', 'fr3'] : ['fr3', 'sayabayar'];
 
   for (const gw of sequence) {
