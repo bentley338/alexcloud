@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache } = require('../database/db');
 const { ensureAdmin } = require('../middleware/auth');
-const { isJunkTestimonial } = require('../utils/helpers');
+const { isJunkTestimonial, normalizeTestimonial } = require('../utils/helpers');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const bcrypt = require('bcryptjs');
@@ -634,8 +634,9 @@ router.post('/plans/:id/edit', ensureAdmin, (req, res) => {
 // =====================
 router.get('/testimonials', ensureAdmin, (req, res) => {
   const testimonials = db.get('testimonials').sortBy('createdAt').reverse().value()
-    // Tag raw bot-command leftovers so the admin UI can flag them for cleanup
-    .map(t => ({ ...t, isJunk: isJunkTestimonial(t) }));
+    // Show the cleaned version (command + "Name | Msg | Rating" stripped) and flag any
+    // that have no real content left so the admin can clean them up.
+    .map(t => ({ ...normalizeTestimonial(t), isJunk: isJunkTestimonial(t) }));
   const junkCount = testimonials.filter(t => t.isJunk).length;
   res.render('admin/testimonials', {
     title: 'Kelola Testimoni - AlexCloud Admin',

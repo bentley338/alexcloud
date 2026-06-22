@@ -194,42 +194,69 @@ function sayabayarRequest(method, endpoint, payload, timeoutMs) {
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 // ─── Testimonial Curation Helpers ────────────────────────────────────────────
-// Some testimonials were captured straight from the WhatsApp bot and stored as raw
-// command leftovers (e.g. ".testi Anonymous | Done | 5"). These detect & clean them
-// so the public site only ever shows real, presentable testimonials.
+// Testimonials are pushed in via a WhatsApp bot command (e.g. ".uptesti Budi | Mantap
+// mainnya lancar | 5"). The raw command token + pipe formatting must NOT be shown on
+// the site — so we strip the command and parse the "Name | Message | Rating" payload
+// into clean fields at display & ingest time. The bot command itself keeps working.
 
+// Plain placeholder words that aren't a real testimonial on their own.
 const TRIVIAL_TESTI_TEXT = new Set([
   'done', 'ok', 'oke', 'okay', 'test', 'testing', 'tes', 'coba', 'cuba',
-  'anonymous', 'anonim', 'p', 'halo', 'hi', 'hai', '-', '.', '..', '...', 'mantap', 'good', 'nice'
+  'anonymous', 'anonim', 'p', 'halo', 'hi', 'hai', '-', '.', '..', '...'
 ]);
 
-// Strip a leading bot-command token like ".testi", "/testi", "!review" from a string.
+// Strip a leading bot-command token like ".uptesti", ".testi", "/review", "!ok".
 function stripBotCommand(str) {
   if (!str || typeof str !== 'string') return '';
   return str.replace(/^\s*[.\/!]\s*[a-zA-Z]+\b[\s:|-]*/, '').trim();
 }
 
-// Returns true when a testimonial looks like raw bot/command junk rather than a
-// genuine review — used to hide it from the public site and offer admin cleanup.
+// Clean a testimonial for display/storage: remove the bot command token and, if the
+// content was packed as "Name | Message | Rating" into one field, split it into proper
+// name / text / rating. Returns a shallow-cloned, presentable testimonial object.
+function normalizeTestimonial(t) {
+  if (!t) return t;
+  const out = { ...t };
+
+  let name = stripBotCommand((t.name || '').toString()) || (t.name || '').toString().trim();
+  let text = stripBotCommand((t.text || '').toString()) || (t.text || '').toString().trim();
+  let rating = t.rating;
+
+  // The WA bot often dumps the whole "Name | Message | Rating" payload into one field.
+  const packed = text.includes('|') ? text : (name.includes('|') ? name : null);
+  if (packed) {
+    const parts = packed.split('|').map(s => s.trim()).filter(s => s.length > 0);
+    // A trailing 1–5 number is the rating
+    if (parts.length && /^[1-5]$/.test(parts[parts.length - 1])) {
+      rating = parseInt(parts.pop(), 10);
+    }
+    if (parts.length >= 2) {
+      name = parts[0];
+      text = parts.slice(1).join(' — ');
+    } else if (parts.length === 1) {
+      text = parts[0];
+    }
+  }
+
+  // Final safety: drop any stray leading/trailing pipes
+  out.name = name.replace(/^\|+|\|+$/g, '').trim();
+  out.text = text.replace(/^\|+|\|+$/g, '').trim();
+  if (rating) out.rating = parseInt(rating, 10) || out.rating;
+  return out;
+}
+
+// Returns true when a (preferably already-normalized) testimonial has no real content
+// worth showing — e.g. a bare ".testi Anonymous | Done | 5" that cleans down to "Done".
 function isJunkTestimonial(t) {
-  if (!t) return true;
-  const name = (t.name || '').toString().trim();
-  const text = (t.text || '').toString().trim();
+  const norm = normalizeTestimonial(t);
+  const name = (norm.name || '').trim();
+  const text = (norm.text || '').trim();
 
   if (!name || !text) return true;
-
-  // Starts with a bot command token (.testi / /review / !ok ...)
-  const cmdLike = /^\s*[.\/!]\s*[a-zA-Z]+/;
-  if (cmdLike.test(name) || cmdLike.test(text)) return true;
-
-  // Raw pipe-delimited payload such as "Anonymous | Done | 5"
-  if (name.includes('|') || /\|\s*\d?\s*$/.test(text) || (text.match(/\|/g) || []).length >= 1) return true;
-
-  // Placeholder / non-meaningful content
   if (TRIVIAL_TESTI_TEXT.has(text.toLowerCase())) return true;
 
-  // Too short to be a real testimonial (ignoring punctuation/digits)
-  if (text.replace(/[^a-zA-ZÀ-ɏ]/g, '').length < 8) return true;
+  // Too short to be a meaningful testimonial (ignoring punctuation/digits)
+  if (text.replace(/[^a-zA-ZÀ-ɏ]/g, '').length < 5) return true;
 
   return false;
 }
@@ -243,6 +270,7 @@ module.exports = {
   sayabayarRequest,
   BROWSER_UA,
   isJunkTestimonial,
+  normalizeTestimonial,
   stripBotCommand,
   path
 };

@@ -7,7 +7,7 @@ const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA, isJunkTestimonial, stripBotCommand } = require('../utils/helpers');
+const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA, isJunkTestimonial, normalizeTestimonial } = require('../utils/helpers');
 
 // Rate limiters for API endpoints
 const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
@@ -16,7 +16,9 @@ const searchRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 60 });
 // Helper to filter out missing testimonial images and return dynamic URL for clean UI & high PageSpeed
 function getCleanTestimonials() {
   const testimonials = (db.get('testimonials').filter({ approved: true }).value() || [])
-    // Curation: never show raw bot-command leftovers (".testi Anonymous | Done | 5") on the public site
+    // Clean the WA-bot command + "Name | Message | Rating" formatting so it never shows raw…
+    .map(normalizeTestimonial)
+    // …then drop only the ones that have no real content left (e.g. ".testi … | Done | 5")
     .filter(t => !isJunkTestimonial(t));
   return testimonials.map(t => {
     if (t.image && typeof t.image === 'string') {
@@ -959,21 +961,21 @@ router.post('/api/testimonials', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Name and text are required' });
   }
 
-  // Curation at the source: strip any leading bot-command token, then reject junk
-  // so raw command leftovers never reach the database.
-  const cleanName = stripBotCommand(name) || name.trim();
-  const cleanText = stripBotCommand(text) || text.trim();
-  if (isJunkTestimonial({ name: cleanName, text: cleanText })) {
-    return res.status(422).json({ success: false, error: 'Testimonial looks like raw/command data and was rejected' });
+  // Clean the WA-bot command token (".uptesti") + "Name | Message | Rating" formatting
+  // before saving, so the website never displays the raw command text. The upload still
+  // goes through — we only reject if there's no actual message left after cleaning.
+  const norm = normalizeTestimonial({ name, text, rating });
+  if (!norm.text) {
+    return res.status(400).json({ success: false, error: 'Testimonial text is empty after cleaning' });
   }
 
   try {
     db.get('testimonials').push({
       id: uuidv4(),
-      name: cleanName,
+      name: norm.name || name.trim(),
       role: role || 'Gamer',
-      text: cleanText,
-      rating: parseInt(rating) || 5,
+      text: norm.text,
+      rating: parseInt(norm.rating) || parseInt(rating) || 5,
       image: image || null,
       avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
       createdAt: new Date().toISOString(),
