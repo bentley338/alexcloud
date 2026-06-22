@@ -7,7 +7,7 @@ const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA, isJunkTestimonial, normalizeTestimonial } = require('../utils/helpers');
+const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
 
 // Rate limiters for API endpoints
 const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
@@ -16,10 +16,10 @@ const searchRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 60 });
 // Helper to filter out missing testimonial images and return dynamic URL for clean UI & high PageSpeed
 function getCleanTestimonials() {
   const testimonials = (db.get('testimonials').filter({ approved: true }).value() || [])
-    // Clean the WA-bot command + "Name | Message | Rating" formatting so it never shows raw…
+    // Clean the WA-bot command + "Name | Message | Rating" formatting so it never shows raw.
     .map(normalizeTestimonial)
-    // …then drop only the ones that have no real content left (e.g. ".testi … | Done | 5")
-    .filter(t => !isJunkTestimonial(t));
+    // Only drop entries with literally no text left — never hide a real testimonial.
+    .filter(t => t.name && t.name.trim() && t.text && t.text.trim());
   return testimonials.map(t => {
     if (t.image && typeof t.image === 'string') {
       const trimmed = t.image.trim();
@@ -962,27 +962,27 @@ router.post('/api/testimonials', async (req, res) => {
   }
 
   // Clean the WA-bot command token (".uptesti") + "Name | Message | Rating" formatting
-  // before saving, so the website never displays the raw command text. The upload still
-  // goes through — we only reject if there's no actual message left after cleaning.
+  // before saving, so the website never displays the raw command text. The upload ALWAYS
+  // goes through — if cleaning somehow empties the text, we fall back to the raw values so
+  // a real testimonial is never silently dropped.
   const norm = normalizeTestimonial({ name, text, rating });
-  if (!norm.text) {
-    return res.status(400).json({ success: false, error: 'Testimonial text is empty after cleaning' });
-  }
+  const finalName = (norm.name || '').trim() || name.trim();
+  const finalText = (norm.text || '').trim() || text.trim();
 
   try {
     db.get('testimonials').push({
       id: uuidv4(),
-      name: norm.name || name.trim(),
+      name: finalName,
       role: role || 'Gamer',
-      text: norm.text,
+      text: finalText,
       rating: parseInt(norm.rating) || parseInt(rating) || 5,
       image: image || null,
-      avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+      avatar: avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(finalName)}`,
       createdAt: new Date().toISOString(),
       approved: true
     }).write();
 
-    console.log(`[BOT API] Testimonial from ${name} successfully added!`);
+    console.log(`[BOT API] Testimonial from ${finalName} successfully added!`);
     return res.json({ success: true, message: 'Testimonial successfully added!' });
   } catch (err) {
     console.error('[BOT API Error]', err);

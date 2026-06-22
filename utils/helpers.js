@@ -199,6 +199,11 @@ const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 // the site — so we strip the command and parse the "Name | Message | Rating" payload
 // into clean fields at display & ingest time. The bot command itself keeps working.
 
+// Generic/placeholder names the bot may send when no real name is given.
+const GENERIC_TESTI_NAMES = new Set([
+  'anonymous', 'anonim', 'user', 'customer', 'pelanggan', 'gamer', 'admin', 'no name', 'noname'
+]);
+
 // Plain placeholder words that aren't a real testimonial on their own.
 const TRIVIAL_TESTI_TEXT = new Set([
   'done', 'ok', 'oke', 'okay', 'test', 'testing', 'tes', 'coba', 'cuba',
@@ -223,18 +228,23 @@ function normalizeTestimonial(t) {
   let rating = t.rating;
 
   // The WA bot often dumps the whole "Name | Message | Rating" payload into one field.
-  const packed = text.includes('|') ? text : (name.includes('|') ? name : null);
+  const packedInText = text.includes('|');
+  const packed = packedInText ? text : (name.includes('|') ? name : null);
   if (packed) {
     const parts = packed.split('|').map(s => s.trim()).filter(s => s.length > 0);
     // A trailing 1–5 number is the rating
     if (parts.length && /^[1-5]$/.test(parts[parts.length - 1])) {
       rating = parseInt(parts.pop(), 10);
     }
-    if (parts.length >= 2) {
+    // Only treat the first segment as the name when the bot didn't already give a real
+    // one (avoids turning a real review like "Bagus | mantap" into name="Bagus").
+    const provided = (t.name || '').trim().toLowerCase();
+    const nameIsGeneric = GENERIC_TESTI_NAMES.has(provided) || provided === '';
+    if (parts.length >= 2 && (packedInText ? nameIsGeneric : true)) {
       name = parts[0];
       text = parts.slice(1).join(' — ');
-    } else if (parts.length === 1) {
-      text = parts[0];
+    } else if (parts.length >= 1) {
+      text = parts.join(' — ');
     }
   }
 
