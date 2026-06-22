@@ -311,21 +311,8 @@
   }
 
   /* ==========================================================
-     13. Mouse Move Hover Card Glow Effect
+     13. (removed) Mouse-follow card spotlight — dropped in the professional redesign
   ========================================================== */
-  if (window.innerWidth > 768) {
-    document.querySelectorAll('.feature-card, .game-card, .plan-card, .trending-card').forEach(function (card) {
-      var rect;
-      card.addEventListener('mouseenter', function () {
-        rect = card.getBoundingClientRect();
-      });
-      card.addEventListener('mousemove', function (e) {
-        if (!rect) rect = card.getBoundingClientRect();
-        card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
-        card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
-      });
-    });
-  }
 
   /* ==========================================================
      14. Lazy Image Loading
@@ -526,17 +513,9 @@
      Hero Floating Particles
   ========================================================== */
   function initHeroParticles() {
-    var container = document.querySelector('.hero-particles');
-    if (!container) return;
-    // Mobile: skip particles entirely — barely visible, but the 20 animated
-    // nodes add continuous main-thread/compositor work that hurts mobile TBT.
-    if (window.innerWidth <= 768) return;
-    for (var i = 0; i < 20; i++) {
-      var dot = document.createElement('div');
-      dot.className = 'hero-particle';
-      dot.style.cssText = 'left:' + Math.random()*100 + '%;top:' + Math.random()*100 + '%;animation-delay:' + (Math.random()*8) + 's;animation-duration:' + (6+Math.random()*8) + 's;width:' + (2+Math.random()*3) + 'px;height:' + (2+Math.random()*3) + 'px;opacity:' + (0.15+Math.random()*0.35);
-      container.appendChild(dot);
-    }
+    // Floating particles removed in the professional redesign — kept as a no-op
+    // so any existing callers stay safe.
+    return;
   }
 
   if (document.readyState === 'loading') {

@@ -48,10 +48,10 @@
     </div>
     <div class="hero-visual">
       <div class="hero-card-stack">
-        <div class="floating-badge badge-price">🔥 Mulai Rp 40.000</div>
+        <div class="floating-badge badge-price">Mulai Rp 40.000</div>
         <div class="hero-main-card">
           <div class="hero-card-header">
-            <div class="hero-card-icon">🎮</div>
+            <div class="hero-card-icon"><i class="fas fa-gamepad"></i></div>
             <div>
               <div class="hero-card-title">AlexCloud Gaming</div>
               <div class="hero-card-sub">Server Online • Low Latency</div>
@@ -67,7 +67,7 @@
             <% }) %>
           </div>
         </div>
-        <div class="floating-badge badge-users">👥 Ribuan Gamer Aktif</div>
+        <div class="floating-badge badge-users">Ribuan Gamer Aktif</div>
       </div>
     </div>
   </div>
@@ -77,7 +77,7 @@
 <section class="trending-section">
   <div class="trending-container">
     <div class="section-header">
-      <div class="section-tag">🤖 AI Trending</div>
+      <div class="section-tag">Trending</div>
       <h2 class="section-title">Game <span class="accent">Trending Minggu Ini</span></h2>
       <p class="section-desc">Rekomendasi cerdas AI berdasarkan rating & popularitas terkini</p>
     </div>
@@ -237,7 +237,7 @@
     <div class="pricing-grid">
       <% plans.forEach(plan => { %>
       <div class="plan-card <%= plan.popular ? 'popular' : '' %>">
-        <% if (plan.popular) { %><div class="popular-badge">⭐ PALING POPULER</div><% } %>
+        <% if (plan.popular) { %><div class="popular-badge">PALING POPULER</div><% } %>
         <div class="plan-name"><%= plan.name %></div>
         <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>"><%= plan.priceDisplay %></div>
         <div class="plan-period">per <%= plan.name.toLowerCase() %></div>
@@ -248,7 +248,7 @@
           <li><i class="fas fa-check"></i> AI Assistant 24/7</li>
           <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
           <% if (plan.duration >= 30) { %><li><i class="fas fa-check"></i> Prioritas Antrian Server</li><% } %>
-          <% if (plan.duration >= 60) { %><li><i class="fas fa-check"></i> 🔥 Bonus 5 Hari Gratis</li><% } %>
+          <% if (plan.duration >= 60) { %><li><i class="fas fa-check"></i> Bonus 5 Hari Gratis</li><% } %>
           <% if (plan.duration >= 90) { %><li><i class="fas fa-star" style="color:#ffd700"></i> Akses Game Baru Early</li><% } %>
         </ul>
         <% if (typeof user !== 'undefined' && user) { %>
@@ -270,7 +270,7 @@
 <section class="testimonials-section" id="testimonials">
   <div class="testi-container">
     <div class="section-header">
-      <div class="section-tag">⭐ Testimoni</div>
+      <div class="section-tag">Testimoni</div>
       <h2 class="section-title">Apa Kata <span class="accent">Gamer Kita?</span></h2>
       <p class="section-desc">Ribuan gamer puas bermain bersama AlexCloud. Ini cerita mereka.</p>
     </div>
@@ -323,7 +323,7 @@
     <div class="cta-card">
       <div class="cta-bg" aria-hidden="true"></div>
       <div class="cta-content">
-        <div class="section-tag" style="margin-bottom: 1.5rem;">🚀 Mulai Sekarang</div>
+        <div class="section-tag" style="margin-bottom: 1.5rem;">Mulai Sekarang</div>
         <h2 class="section-title">Siap Masuk ke Dunia <span class="accent">Cloud Gaming?</span></h2>
         <p class="section-desc" style="margin-bottom: 2.5rem;">Daftar gratis sekarang dan nikmati pengalaman gaming premium tanpa batas!</p>
         <div class="cta-actions">

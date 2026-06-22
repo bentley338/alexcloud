@@ -243,19 +243,6 @@
   if (document.querySelectorAll('.testi-card').length > 1) {
     startTestiAutoPlay();
   }
-  if (window.innerWidth > 768) {
-    document.querySelectorAll('.feature-card, .game-card, .plan-card, .trending-card').forEach(function (card) {
-      var rect;
-      card.addEventListener('mouseenter', function () {
-        rect = card.getBoundingClientRect();
-      });
-      card.addEventListener('mousemove', function (e) {
-        if (!rect) rect = card.getBoundingClientRect();
-        card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
-        card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
-      });
-    });
-  }
   function initLazyLoading() {
     var lazyImages = document.querySelectorAll('img[loading="lazy"]');
     if (!lazyImages.length) return;
@@ -404,16 +391,8 @@
       animateCounters();
     }
   }
-  function initHeroParticles() {
-    var container = document.querySelector('.hero-particles');
-    if (!container) return;
-    if (window.innerWidth <= 768) return;
-    for (var i = 0; i < 20; i++) {
-      var dot = document.createElement('div');
-      dot.className = 'hero-particle';
-      dot.style.cssText = 'left:' + Math.random()*100 + '%;top:' + Math.random()*100 + '%;animation-delay:' + (Math.random()*8) + 's;animation-duration:' + (6+Math.random()*8) + 's;width:' + (2+Math.random()*3) + 'px;height:' + (2+Math.random()*3) + 'px;opacity:' + (0.15+Math.random()*0.35);
-      container.appendChild(dot);
-    }
+  function initHeroParticles() {
+    return;
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

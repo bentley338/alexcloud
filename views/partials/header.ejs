@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" style="background-color: #07070f; color-scheme: dark;">
+<html lang="id" style="background-color: #0e0e10; color-scheme: dark;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
   <meta name="author" content="AlexCloud">
   <link rel="canonical" href="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'https://alexcloud.my.id/' %>">
-  <meta name="theme-color" content="#ff6b2b">
+  <meta name="theme-color" content="#0e0e10">
 
   <!-- Open Graph / Facebook (Tampilan premium saat di-share di WhatsApp/Sosmed) -->
   <meta property="og:type" content="website">
@@ -77,15 +77,15 @@
 
   <!-- ═══ CRITICAL CSS: Inlined for instant first paint ═══ -->
   <style>
-    :root{--bg-primary:#07070f;--bg-secondary:#0d0d18;--bg-card:#12121e;--bg-card-hover:#1a1a2b;--bg-elevated:#1e1e32;--bg-surface:#16161f;--accent-blue:#ff6b2b;--accent-purple:#8b5cf6;--accent-green:#22c55e;--accent-orange:#ff6b2b;--accent-secondary:#6366f1;--accent-indigo:#6366f1;--accent-violet:#8b5cf6;--text-primary:#f0f0f5;--text-secondary:#9090a0;--text-muted:#505068;--border:rgba(255,255,255,0.06);--border-hover:rgba(255,107,43,0.4);--border-glass:rgba(255,255,255,0.1);--glow-blue:0 4px 30px rgba(255,107,43,0.2),0 0 60px rgba(255,107,43,0.05);--shadow-card:0 4px 24px rgba(0,0,0,0.4);--shadow-card-hover:0 20px 60px rgba(0,0,0,0.62),0 0 42px rgba(255,107,43,0.10),0 0 60px rgba(99,102,241,0.05);--gradient-main:linear-gradient(135deg,#ff7a3d 0%,#ff4d6b 54%,#7c5cff 100%);--gradient-warm:linear-gradient(135deg,#ff8a3d 0%,#ff5e3a 100%);--gradient-dark:linear-gradient(180deg,#07070f 0%,#0d0d18 100%);--gradient-glass:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 100%);--gradient-accent:linear-gradient(135deg,#ff6b2b 0%,#6366f1 100%);--font-display:'Plus Jakarta Sans','Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:12px;--radius-lg:20px;--radius-xl:28px;--transition:0.3s cubic-bezier(0.4,0,0.2,1);--transition-fast:0.15s cubic-bezier(0.4,0,0.2,1)}
+    :root{--bg-primary:#0e0e10;--bg-secondary:#141416;--bg-card:#161618;--bg-card-hover:#1d1d20;--bg-elevated:#202024;--bg-surface:#19191c;--accent:#e2622f;--accent-hover:#ef6f3c;--accent-soft:rgba(226,98,47,0.12);--accent-line:rgba(226,98,47,0.30);--accent-blue:#e2622f;--accent-purple:#e2622f;--accent-orange:#e2622f;--accent-secondary:#e2622f;--accent-indigo:#e2622f;--accent-violet:#e2622f;--accent-green:#3fb950;--text-primary:#f4f4f5;--text-secondary:#a1a1aa;--text-muted:#6c6c75;--border:rgba(255,255,255,0.08);--border-hover:rgba(255,255,255,0.18);--border-glass:rgba(255,255,255,0.08);--glow-blue:0 8px 28px rgba(0,0,0,0.45);--shadow-card:0 1px 2px rgba(0,0,0,0.3),0 6px 18px rgba(0,0,0,0.28);--shadow-card-hover:0 12px 36px rgba(0,0,0,0.5);--gradient-main:linear-gradient(135deg,#ef6f3c 0%,#d4541f 100%);--gradient-warm:linear-gradient(135deg,#ef6f3c 0%,#d4541f 100%);--gradient-dark:linear-gradient(180deg,#0e0e10 0%,#141416 100%);--gradient-glass:linear-gradient(135deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.02) 100%);--gradient-accent:linear-gradient(135deg,#ef6f3c 0%,#d4541f 100%);--font-display:'Plus Jakarta Sans','Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:10px;--radius-lg:14px;--radius-xl:20px;--transition:0.2s cubic-bezier(0.4,0,0.2,1);--transition-fast:0.12s cubic-bezier(0.4,0,0.2,1)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
     body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
     .scroll-progress{display:none;position:fixed;top:0;left:0;width:0%;height:3px;background:var(--gradient-main);z-index:10001}
     .skip-link{position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:var(--gradient-main);color:#000;padding:0.75rem 1.5rem;border-radius:0 0 var(--radius) var(--radius);z-index:10000;font-weight:700;text-decoration:none;transition:top 0.3s ease}
     .skip-link:focus{top:0}
-    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.85rem 0;background:rgba(6,6,10,0.7);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.04);transition:var(--transition)}
-    .navbar.scrolled{background:rgba(6,6,10,0.95);border-bottom-color:rgba(255,107,43,0.15);box-shadow:0 1px 0 rgba(255,107,43,0.1),0 8px 40px rgba(0,0,0,0.7)}
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.85rem 0;background:rgba(14,14,16,0.72);backdrop-filter:blur(20px) saturate(120%);-webkit-backdrop-filter:blur(20px) saturate(120%);border-bottom:1px solid var(--border);transition:var(--transition)}
+    .navbar.scrolled{background:rgba(14,14,16,0.92);border-bottom-color:var(--border);box-shadow:0 1px 0 rgba(0,0,0,0.4),0 8px 30px rgba(0,0,0,0.5)}
     .nav-container{max-width:1280px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:2rem}
     .nav-logo{text-decoration:none;display:flex;align-items:center;gap:0.6rem;flex-shrink:0}
     .logo-text{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--text-primary);letter-spacing:2px}
@@ -96,16 +96,16 @@
     .nav-toggle{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:42px;height:42px;background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:12px;cursor:pointer;padding:0;margin-left:auto;transition:var(--transition)}
     .nav-toggle span{display:block;width:20px;height:2px;background:var(--text-primary);border-radius:2px}
     .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px;overflow:hidden}
-    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 70% 45%,rgba(255,107,43,0.08) 0%,transparent 65%),radial-gradient(ellipse 45% 55% at 12% 72%,rgba(99,102,241,0.07) 0%,transparent 58%),radial-gradient(ellipse 35% 40% at 85% 85%,rgba(124,92,255,0.05) 0%,transparent 55%)}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 72% 40%,rgba(226,98,47,0.06) 0%,transparent 62%)}
     .hero-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:80px 80px}
     .hero-container{max-width:1280px;margin:0 auto;padding:4rem 2rem;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
-    .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,107,43,0.1);border:1px solid rgba(255,107,43,0.3);color:var(--accent-blue);padding:0.4rem 1rem;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem}
+    .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent);padding:0.4rem 1rem;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem}
     .hero-title{font-family:var(--font-display);font-size:clamp(2.5rem,5vw,4.5rem);font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:1.5rem;color:var(--text-primary)}
     .hero-title .accent{background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .hero-subtitle{font-size:1.15rem;color:var(--text-secondary);max-width:500px;margin-bottom:2.5rem;line-height:1.7}
     .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
-    .btn-primary{display:inline-flex;align-items:center;gap:0.5rem;background:var(--gradient-main);color:#fff;text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:700;padding:0.9rem 2.2rem;border-radius:var(--radius);transition:var(--transition);border:none;cursor:pointer;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
-    .btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.04);color:var(--text-primary);text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:0.9rem 2.2rem;border-radius:var(--radius);border:1px solid var(--border-hover);transition:var(--transition);cursor:pointer;backdrop-filter:blur(8px)}
+    .btn-primary{display:inline-flex;align-items:center;gap:0.5rem;background:var(--accent);color:#fff;text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:700;padding:0.9rem 2.2rem;border-radius:var(--radius);transition:var(--transition);border:none;cursor:pointer;position:relative}
+    .btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;background:transparent;color:var(--text-primary);text-decoration:none;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:0.9rem 2.2rem;border-radius:var(--radius);border:1px solid var(--border);transition:var(--transition);cursor:pointer}
     .hero-stats{display:flex;gap:2rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border)}
     .stat-item{text-align:center}
     .stat-num{display:block;font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent-blue)}
@@ -135,7 +135,7 @@
   <!-- Main CSS: render-blocking on purpose — first paint uses final layout, so the
        desktop hero (hero-visual card, styled only in main.css) doesn't reflow when
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
-  <link href="/css/main.css?v=2.8" rel="stylesheet">
+  <link href="/css/main.css?v=3.0" rel="stylesheet">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
@@ -150,11 +150,11 @@
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <a href="/" class="nav-logo">
-        <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px rgba(255, 107, 43, 0.45)); flex-shrink:0;">
+        <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
           <defs>
             <linearGradient id="logoIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ff6b2b" />
-              <stop offset="100%" stop-color="#c0392b" />
+              <stop offset="0%" stop-color="#ef6f3c" />
+              <stop offset="100%" stop-color="#d4541f" />
             </linearGradient>
           </defs>
           <!-- Stylized Cloud outline -->
@@ -170,7 +170,7 @@
       <div class="nav-search-wrap" id="navSearchWrap">
         <div class="nav-search-box">
           <i class="fas fa-search nav-search-icon"></i>
-          <input type="text" id="navSearchInput" class="nav-search-input" placeholder="🤖 AI Search game...">
+          <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Cari game...">
           <div class="search-results-dropdown" id="searchDropdown"></div>
         </div>
       </div>
@@ -186,7 +186,7 @@
         <% if (typeof user !== 'undefined' && user) { %>
           <a href="/dashboard" class="nav-link">Dashboard</a>
           <% if (user.role === 'admin') { %>
-            <a href="/admin" class="nav-link nav-admin">⚙ Admin</a>
+            <a href="/admin" class="nav-link nav-admin"><i class="fas fa-cog" style="font-size:0.8rem;"></i> Admin</a>
           <% } %>
           <div class="nav-user-menu">
             <button class="nav-user-btn" onclick="toggleUserMenu()">
