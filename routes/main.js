@@ -426,6 +426,11 @@ async function tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal) {
   }).write();
 }
 
+// Pull the QRIS string out of a SayaBayar invoice object (create OR detail response).
+function extractSbQris(sd) {
+  return sd && sd.payment_channel && sd.payment_channel.qris_string;
+}
+
 // Generate a QRIS via SayaBayar — throws on any failure, marks the order 'ready' on success.
 // SayaBayar adds its own unique code, so we send the base price (not the FR3 nominal).
 async function trySayabayarGateway(orderInternalId, actualPrice) {
@@ -438,17 +443,39 @@ async function trySayabayarGateway(orderInternalId, actualPrice) {
     payment_method: 'qris'
   }, 20000);
 
-  const sd = sb && sb.data;
-  const qrString = sd && sd.payment_channel && sd.payment_channel.qris_string;
-  if (!sb || !sb.success || !qrString) {
-    throw new Error(sb?.error?.message || 'SayaBayar did not return a QRIS');
+  let sd = sb && sb.data;
+  // The invoice must have been created (success + an id). If it was created but the
+  // create response didn't inline the QRIS string yet (SayaBayar populates the
+  // payment_channel a beat later), fetch it from the invoice-detail endpoint, which
+  // reliably carries payment_channel.qris_string. This is the common failure that
+  // previously dropped every order to manual even though the invoice DID exist.
+  if (!sb || !sb.success || !sd || !sd.id) {
+    throw new Error(sb?.error?.message || 'SayaBayar did not create an invoice');
   }
-  const totalTransfer = sd.amount_to_pay || (sd.payment_channel && sd.payment_channel.amount_to_pay) || actualPrice;
+  let qrString = extractSbQris(sd);
+  for (let i = 0; i < 4 && !qrString; i++) {
+    await new Promise(r => setTimeout(r, 1500));
+    try {
+      const detail = await sayabayarRequest('GET', `/invoices/${sd.id}`, null, 10000);
+      if (detail && detail.success && detail.data) {
+        sd = detail.data;
+        qrString = extractSbQris(sd);
+      }
+    } catch (e) {
+      console.warn(`[SayaBayar] detail poll ${i + 1}/4 gagal: ${e.message}`);
+    }
+  }
+  if (!qrString) {
+    throw new Error('SayaBayar invoice created but QRIS string never appeared');
+  }
+  const totalTransfer = sd.amount_unique || sd.amount_to_pay ||
+    (sd.payment_channel && sd.payment_channel.amount_to_pay) || actualPrice;
   db.get('orders').find({ id: orderInternalId }).assign({
     qrisStatus: 'ready',
     gateway: 'sayabayar',
     fr3TrxId: sd.id, // reused as the reference id for status polling
     sbInvoiceNumber: sd.invoice_number || null,
+    sbPaymentUrl: sd.payment_url || null, // hosted-checkout fallback link
     fr3QrString: qrString,
     fr3TotalTransfer: totalTransfer,
     fr3UniqueCode: sd.unique_code || (totalTransfer - actualPrice),
