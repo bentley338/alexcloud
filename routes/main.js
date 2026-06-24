@@ -947,6 +947,37 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
   return res.json({ success: true, message: 'Pesanan berhasil dibatalkan' });
 });
 
+// =====================
+// DEBUG (admin): IP egress server — untuk di-whitelist di dashboard MustikaPay.
+// IP keluar Railway hanya terlihat DARI DALAM server (request ini berasal dari IP
+// egress itu). Buka /api/debug/egress-ip sebagai admin → catat ipv4 → whitelist.
+// Hapus route ini setelah selesai. family:4 dipakai karena call MustikaPay juga v4.
+// =====================
+router.get('/api/debug/egress-ip', ensureAuthenticated, async (req, res) => {
+  if (!req.user || req.user.role !== 'admin') return res.status(403).json({ error: 'admin only' });
+
+  function fetchIp(family) {
+    return new Promise((resolve) => {
+      const r = https.request({
+        hostname: 'api.ipify.org', path: '/?format=json', method: 'GET', family, timeout: 8000
+      }, (resp) => {
+        let b = ''; resp.on('data', d => b += d);
+        resp.on('end', () => { try { resolve(JSON.parse(b).ip); } catch { resolve(null); } });
+      });
+      r.on('error', () => resolve(null));
+      r.on('timeout', () => { r.destroy(); resolve(null); });
+      r.end();
+    });
+  }
+
+  const [ipv4, ipv6] = await Promise.all([fetchIp(4), fetchIp(6)]);
+  res.json({
+    note: 'Whitelist ipv4 ini di MustikaPay (call MustikaPay pakai IPv4). Hapus route ini setelah selesai.',
+    ipv4: ipv4 || '(gagal ambil)',
+    ipv6: ipv6 || '(tidak ada / gagal)'
+  });
+});
+
 // Profile
 router.get('/profile', ensureAuthenticated, (req, res) => {
   res.render('profile', {
