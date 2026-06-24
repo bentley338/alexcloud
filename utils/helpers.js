@@ -210,7 +210,7 @@ function sayabayarRequest(method, endpoint, payload, timeoutMs) {
 // Auth via X-Api-Key header. Endpoint POST "classic" memakai
 // application/x-www-form-urlencoded; endpoint GET (check status) memakai query
 // string. Resolves parsed JSON, rejects on network failure / non-JSON body.
-function mustikapayRequest(method, endpoint, payload, timeoutMs) {
+function mustikapayRequestOnce(method, endpoint, payload, timeoutMs) {
   const KEY = process.env.MUSTIKAPAY_API_KEY;
   const BASE = 'https://mustikapayment.com';
   const m = (method || 'GET').toUpperCase();
@@ -274,6 +274,31 @@ function mustikapayRequest(method, endpoint, payload, timeoutMs) {
     if (bodyStr) req.write(bodyStr);
     req.end();
   });
+}
+
+// Cloudflare di depan MustikaPay kadang melempar bot-challenge (HTTP 403 halaman
+// HTML "just a moment") secara intermiten — edge node lain di percobaan berikutnya
+// sering lolos. Jadi ulangi beberapa kali khusus untuk kegagalan bertipe challenge
+// (403 / balasan HTML), bukan untuk error bisnis (JSON valid yang resolve normal).
+async function mustikapayRequest(method, endpoint, payload, timeoutMs, maxAttempts) {
+  const attempts = maxAttempts || 3;
+  let lastErr;
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      return await mustikapayRequestOnce(method, endpoint, payload, timeoutMs);
+    } catch (e) {
+      lastErr = e;
+      // Hanya retry kalau ini indikasi challenge/transport (403, non-JSON, timeout),
+      // bukan kalau MustikaPay sudah membalas JSON (itu sudah resolve, tak masuk sini).
+      const retryable = /HTTP 403|non-JSON|Timeout|ECONNRESET|EAI_AGAIN|socket hang up/i.test(e.message || '');
+      if (i < attempts && retryable) {
+        await new Promise(r => setTimeout(r, 400 * i)); // backoff bertingkat
+        continue;
+      }
+      break;
+    }
+  }
+  throw lastErr;
 }
 
 // ─── Shared User-Agent Header ──────────────────────────────────────────────
