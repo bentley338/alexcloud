@@ -543,6 +543,27 @@ router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
   });
 });
 
+// Retry QRIS generation — lets a failed/manual order re-attempt the gateways
+// (useful when a gateway was temporarily down: the order is no longer stuck on manual).
+router.post('/payment/:orderId/retry', ensureAuthenticated, (req, res) => {
+  const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
+  if (!order) return res.redirect('/dashboard');
+  // Don't retry an order that's already paid/active.
+  if (order.status === 'paid' || order.status === 'active') {
+    return res.redirect('/payment/' + order.orderId);
+  }
+  db.get('orders').find({ id: order.id }).assign({
+    qrisStatus: 'generating',
+    fr3Error: null,
+    fr3TrxId: null,
+    fr3QrString: null,
+    paymentMethod: 'fr3_qris'
+  }).write();
+  const nominal = order.nominal || order.fr3TotalTransfer || order.price;
+  kickoffQrisGeneration(order.id, order.price, nominal);
+  res.redirect('/payment/' + order.orderId);
+});
+
 // QRIS generation status — polled by the 'generating' state of the payment page.
 router.get('/api/payment/qris/:orderId', ensureAuthenticated, (req, res) => {
   const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();

@@ -232,7 +232,7 @@
       </div>
 
       <% if (fr3Error && typeof user !== 'undefined' && user && user.role === 'admin') { %>
-      <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start; margin: 1.25rem; padding: 1rem; border-radius: 12px; background: rgba(255, 68, 68, 0.07); border: 1px solid rgba(255, 68, 68, 0.15); color: #ff8888; text-align: left;">
+      <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start; margin: 1.25rem; padding: 1rem; border-radius: 12px; background: rgba(255, 68, 68, 0.07); border: 1px solid rgba(255, 68, 68, 0.15); color: #ff8888; text-align: left;">
         <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700;">
           <i class="fas fa-exclamation-triangle"></i>
           <span>Debug Admin: API Gateway Error</span>
@@ -240,6 +240,13 @@
         <span style="font-size:0.8rem; font-family:monospace; word-break:break-all;"><%= fr3Error %></span>
       </div>
       <% } %>
+
+      <!-- Retry: re-attempt the automatic QRIS gateways (e.g. after a temporary outage) -->
+      <form action="/payment/<%= order.orderId %>/retry" method="POST" style="margin: 0 1.25rem 0.25rem;">
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
+          <i class="fas fa-rotate-right"></i> Buat ulang QRIS otomatis
+        </button>
+      </form>
 
       <div style="padding: 1.25rem 1.25rem 0;">
         <div style="font-family:var(--font-ui); font-size:0.85rem; color:var(--text-muted); background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:16px; padding:1.25rem; text-align:left;">
