@@ -436,6 +436,11 @@ function extractSbQris(sd) {
 // SayaBayar adds its own unique code, so we send the base price (not the FR3 nominal).
 async function trySayabayarGateway(orderInternalId, actualPrice) {
   const order = db.get('orders').find({ id: orderInternalId }).value();
+  // Penyebab umum di server: .env tidak memuat SAYABAYAR_API_KEY (file .env tidak
+  // ikut git). Beri pesan eksplisit alih-alih meneruskan "Token/API key diperlukan".
+  if (!process.env.SAYABAYAR_API_KEY) {
+    throw new Error('SAYABAYAR_API_KEY belum di-set di .env server');
+  }
   // SayaBayar menolak amount < 100 (VALIDATION_ERROR "must be >= 100"). Tangkap lebih
   // awal dengan pesan jelas agar tidak tampak seperti gateway "gagal merespons".
   if (!Number.isFinite(actualPrice) || actualPrice < 100) {
