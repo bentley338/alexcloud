@@ -1,6 +1,6 @@
 <%- include('partials/header') %>
 
-<div style="padding: 5rem 0 2rem; text-align:center; background: linear-gradient(180deg, rgba(124, 58, 237,0.04), transparent);">
+<div style="padding: 5rem 0 2rem; text-align:center; background: linear-gradient(180deg, rgba(255, 255, 255,0.04), transparent);">
   <div class="container">
     <div class="section-tag" style="margin-bottom:1rem;"><i class="fas fa-wifi"></i> Network Test</div>
     <h1 class="section-title">Test <span class="accent">Kecepatan Jaringan</span> Kamu</h1>
@@ -146,7 +146,7 @@
             <td style="padding:0.6rem 0.75rem;">25+ Mbps</td>
             <td style="padding:0.6rem 0.75rem;">Excellent</td>
             <td style="padding:0.6rem 0.75rem;">4K/60fps</td>
-            <td style="padding:0.6rem 0.75rem;"><span style="color:#F43F5E; font-weight:700;">🚀 Ultra Gaming!</span></td>
+            <td style="padding:0.6rem 0.75rem;"><span style="color:#a3a3a3; font-weight:700;">🚀 Ultra Gaming!</span></td>
           </tr>
         </tbody>
       </table>
@@ -196,7 +196,7 @@
   top: 0; left: 50%;
   transform: translateX(-50%);
   width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(124,58,237,0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255,0.04) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -239,7 +239,7 @@
   padding: 1rem 0.5rem;
   transition: 0.3s;
 }
-.stat-box.active { border-color: var(--accent-blue); background: rgba(124,58,237,0.05); }
+.stat-box.active { border-color: var(--accent-blue); background: rgba(255, 255, 255,0.05); }
 .stat-box i { color: var(--text-muted); font-size: 1rem; margin-bottom: 0.4rem; display: block; }
 .stat-box-val {
   font-family: var(--font-display);
@@ -265,10 +265,10 @@
   font-weight: 800;
   cursor: pointer;
   transition: 0.3s;
-  box-shadow: 0 0 30px rgba(124,58,237,0.25);
+  box-shadow: 0 0 30px rgba(255, 255, 255,0.25);
   letter-spacing: 0.5px;
 }
-.speedtest-btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(124,58,237,0.4); }
+.speedtest-btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(255, 255, 255,0.4); }
 .speedtest-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 .result-badge {
@@ -516,11 +516,11 @@ function showResult(downloadMbps, ping) {
 
   if (downloadMbps >= 25) {
     level = '🚀 Koneksi Ultra — Sempurna untuk 4K Gaming!';
-    color = '#F43F5E'; bg = 'rgba(244, 63, 94,0.08)';
+    color = '#a3a3a3'; bg = 'rgba(255, 255, 255,0.08)';
     iconClass = 'fas fa-rocket';
     desc.textContent = `${downloadMbps.toFixed(1)} Mbps — Bisa streaming 4K/60fps di AlexCloud!`;
-    recHtml = `<div style="padding:1rem; background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.2); border-radius:var(--radius); font-family:var(--font-ui);">
-      <div style="font-weight:700; color:#F43F5E; margin-bottom:0.5rem;">🚀 Koneksi kamu luar biasa!</div>
+    recHtml = `<div style="padding:1rem; background:rgba(255, 255, 255,0.08); border:1px solid rgba(255, 255, 255,0.2); border-radius:var(--radius); font-family:var(--font-ui);">
+      <div style="font-weight:700; color:#a3a3a3; margin-bottom:0.5rem;">🚀 Koneksi kamu luar biasa!</div>
       <p style="color:var(--text-secondary); font-size:0.9rem;">Internet kamu mendukung resolusi <strong>4K Ultra HD / 60fps</strong> dengan sangat lancar. Aktifkan paket AlexCloud sekarang dan nikmati gaming terbaik!</p>
     </div>`;
   } else if (downloadMbps >= 10) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" style="background-color: #0F0F23; color-scheme: dark;">
+<html lang="id" style="background-color: #0a0b0d; color-scheme: dark;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
   <meta name="author" content="AlexCloud">
   <link rel="canonical" href="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'https://alexcloud.my.id/' %>">
-  <meta name="theme-color" content="#0F0F23">
+  <meta name="theme-color" content="#0a0b0d">
 
   <!-- Open Graph / Facebook (Tampilan premium saat di-share di WhatsApp/Sosmed) -->
   <meta property="og:type" content="website">
@@ -83,15 +83,15 @@
 
   <!-- ═══ CRITICAL CSS: Inlined for instant first paint ═══ -->
   <style>
-    :root{--bg-primary:#0F0F23;--bg-secondary:#14142b;--bg-card:#1E1C35;--bg-card-hover:#26244A;--bg-elevated:#20222f;--bg-surface:#171534;--accent:#7C3AED;--accent-hover:#9061F9;--accent-cyan:#F43F5E;--accent-soft:rgba(124, 58, 237,0.12);--accent-line:rgba(124,58,237,0.30);--accent-blue:#7C3AED;--accent-purple:#7C3AED;--accent-orange:#7C3AED;--accent-secondary:#7C3AED;--accent-indigo:#7C3AED;--accent-violet:#7C3AED;--accent-green:#34d399;--text-primary:#f4f5fb;--text-secondary:#a3a8bd;--text-muted:#6b7088;--border:rgba(255,255,255,0.07);--border-hover:rgba(255,255,255,0.16);--border-glass:rgba(255,255,255,0.07);--glow-blue:0 8px 28px rgba(0,0,0,0.45);--shadow-card:0 1px 2px rgba(0,0,0,0.3),0 6px 18px rgba(0,0,0,0.28);--shadow-card-hover:0 14px 40px rgba(0,0,0,0.55);--gradient-main:linear-gradient(135deg,#7C3AED 0%,#F43F5E 100%);--gradient-warm:linear-gradient(135deg,#7C3AED 0%,#F43F5E 100%);--gradient-dark:linear-gradient(180deg,#0F0F23 0%,#14142b 100%);--gradient-glass:linear-gradient(135deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.02) 100%);--gradient-accent:linear-gradient(135deg,#7C3AED 0%,#F43F5E 100%);--font-display:'Poppins','Plus Jakarta Sans','Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:10px;--radius-lg:14px;--radius-xl:20px;--transition:0.2s cubic-bezier(0.4,0,0.2,1);--transition-fast:0.12s cubic-bezier(0.4,0,0.2,1)}
+    :root{--bg-primary:#0a0b0d;--bg-secondary:#0f1013;--bg-card:#131418;--bg-card-hover:#1a1c22;--bg-elevated:#20222a;--bg-surface:#16171c;--accent:#38bdf8;--accent-hover:#5fcdff;--accent-cyan:#22d3ee;--accent-soft:rgba(255, 255, 255,0.12);--accent-line:rgba(255, 255, 255,0.30);--accent-blue:#ffffff;--accent-purple:#ffffff;--accent-orange:#ffffff;--accent-secondary:#ffffff;--accent-indigo:#ffffff;--accent-violet:#ffffff;--accent-green:#34d399;--text-primary:#ededf0;--text-secondary:#a3a8bd;--text-muted:#6b7088;--border:rgba(255,255,255,0.07);--border-hover:rgba(255,255,255,0.16);--border-glass:rgba(255,255,255,0.07);--glow-blue:0 8px 28px rgba(0,0,0,0.45);--shadow-card:0 1px 2px rgba(0,0,0,0.3),0 6px 18px rgba(0,0,0,0.28);--shadow-card-hover:0 14px 40px rgba(0,0,0,0.55);--gradient-main:linear-gradient(120deg,#38bdf8 0%,#22d3ee 100%);--gradient-warm:linear-gradient(135deg,#ffffff 0%,#a3a3a3 100%);--gradient-dark:linear-gradient(180deg,#0a0b0d 0%,#0f1013 100%);--gradient-glass:linear-gradient(135deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.02) 100%);--gradient-accent:linear-gradient(120deg,#38bdf8 0%,#22d3ee 100%);--font-display:'Poppins','Plus Jakarta Sans','Inter','Segoe UI',sans-serif;--font-body:'Inter','Segoe UI',sans-serif;--font-ui:'Inter','Segoe UI',sans-serif;--radius:10px;--radius-lg:14px;--radius-xl:20px;--transition:0.2s cubic-bezier(0.4,0,0.2,1);--transition-fast:0.12s cubic-bezier(0.4,0,0.2,1)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
     body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
     .scroll-progress{display:none;position:fixed;top:0;left:0;width:0%;height:3px;background:var(--gradient-main);z-index:10001}
     .skip-link{position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:var(--gradient-main);color:#fff;padding:0.75rem 1.5rem;border-radius:0 0 var(--radius) var(--radius);z-index:10000;font-weight:700;text-decoration:none;transition:top 0.3s ease}
     .skip-link:focus{top:0}
-    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.85rem 0;background:rgba(11,13,17,0.72);backdrop-filter:blur(20px) saturate(120%);-webkit-backdrop-filter:blur(20px) saturate(120%);border-bottom:1px solid var(--border);transition:var(--transition)}
-    .navbar.scrolled{background:rgba(11,13,17,0.92);border-bottom-color:var(--border);box-shadow:0 1px 0 rgba(0,0,0,0.4),0 8px 30px rgba(0,0,0,0.5)}
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.85rem 0;background:rgba(11,12,15,0.70);backdrop-filter:blur(20px) saturate(120%);-webkit-backdrop-filter:blur(20px) saturate(120%);border-bottom:1px solid var(--border);transition:var(--transition)}
+    .navbar.scrolled{background:rgba(11,12,15,0.88);border-bottom-color:var(--border);box-shadow:0 1px 0 rgba(0,0,0,0.4),0 8px 30px rgba(0,0,0,0.5)}
     .nav-container{max-width:1280px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:2rem}
     .nav-logo{text-decoration:none;display:flex;align-items:center;gap:0.6rem;flex-shrink:0}
     .logo-text{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--text-primary);letter-spacing:2px}
@@ -102,7 +102,7 @@
     .nav-toggle{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:42px;height:42px;background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:12px;cursor:pointer;padding:0;margin-left:auto;transition:var(--transition)}
     .nav-toggle span{display:block;width:20px;height:2px;background:var(--text-primary);border-radius:2px}
     .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px;overflow:hidden}
-    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 72% 40%,rgba(124,58,237,0.06) 0%,transparent 62%)}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 72% 40%,rgba(255, 255, 255,0.06) 0%,transparent 62%)}
     .hero-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:80px 80px}
     .hero-container{max-width:1280px;margin:0 auto;padding:4rem 2rem;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
     .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent);padding:0.4rem 1rem;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem}
@@ -141,7 +141,7 @@
   <!-- Main CSS: render-blocking on purpose — first paint uses final layout, so the
        desktop hero (hero-visual card, styled only in main.css) doesn't reflow when
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
-  <link href="/css/main.css?v=6.0" rel="stylesheet">
+  <link href="/css/main.css?v=6.2" rel="stylesheet">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
@@ -190,8 +190,8 @@
         <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
           <defs>
             <linearGradient id="logoIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#7C3AED" />
-              <stop offset="100%" stop-color="#F43F5E" />
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#22d3ee" />
             </linearGradient>
           </defs>
           <!-- Stylized Cloud outline -->
