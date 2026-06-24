@@ -7,7 +7,30 @@ const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const { sharedHttpsAgent, fr3Request, sayabayarRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
+const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
+
+// ─── MustikaPay metode & opsi (dipakai selector di payment.ejs) ──────────────
+// VA: subset bank populer yang didukung MustikaPay (BCA, BNI, BRI, dst).
+const MP_BANKS = [
+  { code: 'BCA', name: 'BCA' },
+  { code: 'BNI', name: 'BNI' },
+  { code: 'BRI', name: 'BRI' },
+  { code: 'MANDIRI', name: 'Mandiri' },
+  { code: 'PERMATA', name: 'Permata' },
+  { code: 'CIMB', name: 'CIMB Niaga' },
+  { code: 'DANAMON', name: 'Danamon' },
+  { code: 'BSI', name: 'BSI' }
+];
+// E-Money: peta provider -> product_code MustikaPay.
+const MP_EWALLETS = [
+  { code: 'PAYDANA', name: 'DANA' },
+  { code: 'PAYSHOPEE', name: 'ShopeePay' },
+  { code: 'PAYOVO', name: 'OVO' },
+  { code: 'PAYLINK', name: 'LinkAja' }
+];
+// Batas nominal minimum per metode (IDR) menurut dokumentasi MustikaPay.
+const MP_MIN_AMOUNT = { qris: 1000, va: 10000, emoney: 1000, retail: 15000 };
+const MP_MAX_AMOUNT = { retail: 5000000 };
 
 // Rate limiters for API endpoints
 const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });   // 15 msgs/min
@@ -360,18 +383,10 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
 
   const orderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
 
-  // ===== FR3 NEWERA Payment Gateway (async generation) =====
-  // FR3's response latency is highly variable (sometimes >25s) and it occasionally
-  // never replies. Generating the QRIS synchronously would block checkout and drop
-  // slow-but-successful responses to manual. Instead we persist the order immediately
-  // in a 'generating' state, kick off the topup call in the background, and let the
-  // payment page poll until the QRIS is ready (or generation fails -> manual).
-
-  // Generate a local unique code (10-99) if price is a multiple of 100 (round number)
-  // to force the gateway to generate a unique QRIS and avoid payment matching failures.
-  const localUniqueCode = (actualPrice % 100 === 0) ? (Math.floor(Math.random() * 90) + 10) : 0;
-  const nominal = actualPrice + localUniqueCode;
-
+  // ===== MustikaPay multi-metode =====
+  // Pembeli memilih metode (QRIS / VA / E-Wallet / Retail) di halaman pembayaran.
+  // Order dibuat dulu dalam status 'awaiting_method' (belum ada instrumen bayar);
+  // instrumen di-generate on-demand lewat POST /api/payment/create saat metode dipilih.
   const order = {
     id: uuidv4(),
     orderId,
@@ -385,30 +400,179 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     discount,
     promoCode: appliedPromo ? appliedPromo.code : null,
     status: 'pending',
-    qrisStatus: 'generating',
-    nominal,
+    qrisStatus: 'awaiting_method', // belum ada instrumen bayar
+    payMethodType: null,           // 'qris' | 'va' | 'emoney' | 'retail'
+    gateway: null,                 // 'mustikapay' | 'sayabayar' | 'fr3'
+    nominal: actualPrice,
     createdAt: new Date().toISOString(),
     paidAt: null,
     activatedAt: null,
-    // FR3 data — filled in by the background generation
-    fr3TrxId: null,
-    fr3QrString: null,
-    fr3TotalTransfer: nominal,
-    fr3UniqueCode: localUniqueCode,
+    // Instrumen bayar — diisi oleh /api/payment/create. fr3* dipertahankan sebagai
+    // field generik (dipakai payment.ejs) terlepas dari gateway/metode mana yang menang.
+    fr3TrxId: null,        // ref_no / id transaksi untuk polling status
+    fr3QrString: null,     // payload QRIS (metode qris)
+    fr3TotalTransfer: actualPrice,
+    fr3UniqueCode: 0,
     fr3Expiry: null,
     fr3Error: null,
-    paymentMethod: 'fr3_qris'
+    // MustikaPay — extra per metode
+    mpPaymentLink: null,   // link checkout / deep-link e-wallet
+    mpVaNumber: null, mpVaName: null, mpBankCode: null,
+    mpPaymentCode: null, mpRetailOutlet: null,
+    mpEwalletProvider: null,
+    paymentMethod: null
   };
 
   db.get('orders').push(order).write();
 
-  // Fire-and-forget: build the QRIS in the background, update the order when done.
-  kickoffQrisGeneration(order.id, actualPrice, nominal);
-
-  // PRG pattern: redirect to a GET payment page so it can be polled/reloaded safely
-  // without re-submitting the order.
+  // PRG pattern: redirect ke GET payment page (selector metode) supaya aman di-reload.
   res.redirect('/payment/' + order.orderId);
 });
+
+// URL redirect dikirim ke gateway agar pembeli kembali ke halaman pembayaran
+// kita setelah menyelesaikan pembayaran di app e-wallet / halaman hosted.
+function paymentRedirectUrl(order) {
+  const base = (process.env.BASE_URL || '').replace(/\/$/, '');
+  return base ? `${base}/payment/${order.orderId}` : undefined;
+}
+
+// Ambil payload QRIS dari qr_url MustikaPay (format: .../api/qr?data=00020101...&ref_no=...).
+function extractMpQrString(qrUrl) {
+  if (!qrUrl) return null;
+  try { return new URL(qrUrl).searchParams.get('data'); } catch { return null; }
+}
+
+function mpProductName(order) {
+  return order && order.planName ? `AlexCloud - ${order.planName}` : 'AlexCloud Order';
+}
+
+function ensureMpKey() {
+  if (!process.env.MUSTIKAPAY_API_KEY) {
+    throw new Error('MUSTIKAPAY_API_KEY belum di-set di .env server');
+  }
+}
+
+// ─── MustikaPay: QRIS ────────────────────────────────────────────────────────
+async function tryMustikapayQris(orderInternalId, actualPrice, order) {
+  ensureMpKey();
+  if (actualPrice < MP_MIN_AMOUNT.qris) {
+    throw new Error(`Nominal Rp${actualPrice} di bawah minimum QRIS (Rp${MP_MIN_AMOUNT.qris.toLocaleString('id-ID')})`);
+  }
+  const r = await mustikapayRequest('POST', '/api/v1/create/qris', {
+    amount: actualPrice,
+    product_name: mpProductName(order),
+    customer_name: order?.userName || 'Pelanggan AlexCloud',
+    expiry: 10,
+    redirect_url: paymentRedirectUrl(order)
+  }, 15000);
+  if (!r || r.status !== 'success' || !r.ref_no) {
+    throw new Error(r?.message || 'MustikaPay tidak membuat transaksi QRIS');
+  }
+  const qrString = extractMpQrString(r.qr_url);
+  if (!qrString) throw new Error('MustikaPay QRIS dibuat tapi payload QR tidak ditemukan');
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready', gateway: 'mustikapay', payMethodType: 'qris',
+    fr3TrxId: r.ref_no, fr3QrString: qrString,
+    fr3TotalTransfer: r.amount || actualPrice, fr3UniqueCode: 0,
+    fr3Expiry: Date.now() + 10 * 60 * 1000,
+    mpPaymentLink: r.payment_link || null,
+    paymentMethod: 'mustikapay_qris', fr3Error: null
+  }).write();
+}
+
+// ─── MustikaPay: Virtual Account ──────────────────────────────────────────────
+async function tryMustikapayVa(orderInternalId, actualPrice, order, bankCode) {
+  ensureMpKey();
+  if (!bankCode || !MP_BANKS.some(b => b.code === bankCode)) throw new Error('Bank tidak valid');
+  if (actualPrice < MP_MIN_AMOUNT.va) {
+    throw new Error(`Nominal Rp${actualPrice} di bawah minimum VA (Rp${MP_MIN_AMOUNT.va.toLocaleString('id-ID')})`);
+  }
+  const r = await mustikapayRequest('POST', '/api/v1/create/va', {
+    amount: actualPrice, bank_code: bankCode,
+    name: order?.userName || 'Pelanggan AlexCloud',
+    phone: undefined,
+    product_name: mpProductName(order),
+    expiry: 1440,
+    redirect_url: paymentRedirectUrl(order)
+  }, 15000);
+  const d = r && r.data;
+  if (!r || r.status !== 'success' || !r.ref_no || !d || !d.virtualAccountNo) {
+    throw new Error(r?.message || 'MustikaPay tidak membuat Virtual Account');
+  }
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready', gateway: 'mustikapay', payMethodType: 'va',
+    fr3TrxId: r.ref_no, fr3QrString: null,
+    fr3TotalTransfer: actualPrice, fr3UniqueCode: 0,
+    fr3Expiry: Date.now() + 1440 * 60 * 1000,
+    mpVaNumber: d.virtualAccountNo, mpVaName: d.virtualAccountName || null, mpBankCode: bankCode,
+    mpPaymentLink: r.payment_link || null,
+    paymentMethod: 'mustikapay_va', fr3Error: null
+  }).write();
+}
+
+// ─── MustikaPay: E-Money (DANA / ShopeePay / OVO / LinkAja) ───────────────────
+async function tryMustikapayEmoney(orderInternalId, actualPrice, order, productCode, phone) {
+  ensureMpKey();
+  if (!productCode || !MP_EWALLETS.some(e => e.code === productCode)) throw new Error('Provider e-wallet tidak valid');
+  if (!phone || !/^0\d{8,14}$/.test(phone)) throw new Error('Nomor HP e-wallet tidak valid (contoh: 081234567890)');
+  if (actualPrice < MP_MIN_AMOUNT.emoney) {
+    throw new Error(`Nominal Rp${actualPrice} di bawah minimum E-Money (Rp${MP_MIN_AMOUNT.emoney.toLocaleString('id-ID')})`);
+  }
+  const r = await mustikapayRequest('POST', '/api/v1/create/emoney', {
+    amount: actualPrice, product_code: productCode, phone,
+    name: order?.userName || 'Pelanggan AlexCloud',
+    product_name: mpProductName(order),
+    order_id: order.orderId,
+    expiry: 15,
+    redirect_url: paymentRedirectUrl(order)
+  }, 15000);
+  if (!r || r.status !== 'success' || !r.ref_no) {
+    throw new Error(r?.message || 'MustikaPay tidak membuat transaksi E-Money');
+  }
+  const link = r.payment_link || (r.data && r.data.urlPayment) || null;
+  const provider = (MP_EWALLETS.find(e => e.code === productCode) || {}).name || productCode;
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready', gateway: 'mustikapay', payMethodType: 'emoney',
+    fr3TrxId: r.ref_no, fr3QrString: null,
+    fr3TotalTransfer: actualPrice, fr3UniqueCode: 0,
+    fr3Expiry: Date.now() + 15 * 60 * 1000,
+    mpPaymentLink: link, mpEwalletProvider: provider,
+    paymentMethod: 'mustikapay_emoney', fr3Error: null
+  }).write();
+}
+
+// ─── MustikaPay: Retail (Alfamart / Indomaret) ────────────────────────────────
+async function tryMustikapayRetail(orderInternalId, actualPrice, order, outlet, phone) {
+  ensureMpKey();
+  if (!['ALFAMART', 'INDOMARET'].includes(outlet)) throw new Error('Gerai retail tidak valid');
+  if (actualPrice < MP_MIN_AMOUNT.retail) {
+    throw new Error(`Nominal Rp${actualPrice} di bawah minimum Retail (Rp${MP_MIN_AMOUNT.retail.toLocaleString('id-ID')})`);
+  }
+  if (actualPrice > MP_MAX_AMOUNT.retail) {
+    throw new Error(`Nominal Rp${actualPrice} melebihi maksimum Retail (Rp${MP_MAX_AMOUNT.retail.toLocaleString('id-ID')})`);
+  }
+  const r = await mustikapayRequest('POST', '/api/v1/create/retail', {
+    amount: actualPrice, retail_outlet: outlet,
+    name: order?.userName || 'Pelanggan AlexCloud',
+    phone: phone || undefined,
+    product_name: mpProductName(order),
+    expiry: 4320,
+    redirect_url: paymentRedirectUrl(order)
+  }, 15000);
+  const d = r && r.data;
+  if (!r || r.status !== 'success' || !r.ref_no || !d || !d.paymentCode) {
+    throw new Error(r?.message || 'MustikaPay tidak membuat pembayaran Retail');
+  }
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready', gateway: 'mustikapay', payMethodType: 'retail',
+    fr3TrxId: r.ref_no, fr3QrString: null,
+    fr3TotalTransfer: actualPrice, fr3UniqueCode: 0,
+    fr3Expiry: Date.now() + 4320 * 60 * 1000,
+    mpPaymentCode: d.paymentCode, mpRetailOutlet: outlet,
+    mpPaymentLink: r.payment_link || null,
+    paymentMethod: 'mustikapay_retail', fr3Error: null
+  }).write();
+}
 
 // Generate a QRIS via FR3 — throws on any failure, marks the order 'ready' on success.
 async function tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal) {
@@ -422,6 +586,7 @@ async function tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal) {
   db.get('orders').find({ id: orderInternalId }).assign({
     qrisStatus: 'ready',
     gateway: 'fr3',
+    payMethodType: 'qris',
     fr3TrxId: d.trxId,
     fr3QrString: d.qr_string || null,
     fr3TotalTransfer: totalTransfer,
@@ -489,6 +654,7 @@ async function trySayabayarGateway(orderInternalId, actualPrice) {
   db.get('orders').find({ id: orderInternalId }).assign({
     qrisStatus: 'ready',
     gateway: 'sayabayar',
+    payMethodType: 'qris',
     fr3TrxId: sd.id, // reused as the reference id for status polling
     sbInvoiceNumber: sd.invoice_number || null,
     sbPaymentUrl: sd.payment_url || null, // hosted-checkout fallback link
@@ -501,42 +667,34 @@ async function trySayabayarGateway(orderInternalId, actualPrice) {
   }).write();
 }
 
-// Background QRIS generation — fire-and-forget right after an order is created.
-// Tries the configured primary gateway, then the other as fallback; if BOTH fail the
-// order is marked 'failed' and the payment page drops to manual. The QR fields live
-// under the existing fr3* keys (used by payment.ejs) regardless of which gateway won;
-// `order.gateway` records which API to poll for status.
-// Default primary is SayaBayar (FR3 is currently unreliable — frequently accepts the
-// TCP/TLS connection but never replies, stalling every order ~12s before fallback).
-// Set PAYMENT_PRIMARY=fr3 in .env to flip back to FR3 as the primary gateway.
-async function kickoffQrisGeneration(orderInternalId, actualPrice, fr3Nominal) {
-  const primary = (process.env.PAYMENT_PRIMARY || 'sayabayar').toLowerCase();
-  const sequence = primary === 'sayabayar' ? ['sayabayar', 'fr3'] : ['fr3', 'sayabayar'];
+// Generate QRIS dengan fallback berurutan: MustikaPay → SayaBayar → FR3.
+// Hanya QRIS yang punya fallback (ketiga gateway mendukung QRIS); VA/E-Money/Retail
+// eksklusif MustikaPay. Urutan diawali PAYMENT_PRIMARY. Throws kalau semua gagal.
+async function generateQris(orderInternalId, actualPrice, order) {
+  const primary = (process.env.PAYMENT_PRIMARY || 'mustikapay').toLowerCase();
+  const all = ['mustikapay', 'sayabayar', 'fr3'];
+  const sequence = [primary, ...all.filter(g => g !== primary)];
 
   const errors = {};
   for (const gw of sequence) {
     try {
-      if (gw === 'fr3') await tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal);
-      else await trySayabayarGateway(orderInternalId, actualPrice);
-      return; // success — order is now 'ready'
+      if (gw === 'mustikapay') await tryMustikapayQris(orderInternalId, actualPrice, order);
+      else if (gw === 'sayabayar') await trySayabayarGateway(orderInternalId, actualPrice);
+      else {
+        // FR3 butuh kode unik tertanam di nominal QR untuk pencocokan pembayaran.
+        const uniq = (actualPrice % 100 === 0) ? (Math.floor(Math.random() * 90) + 10) : 0;
+        await tryFr3Gateway(orderInternalId, actualPrice, actualPrice + uniq);
+      }
+      return; // sukses — order kini 'ready'
     } catch (e) {
       errors[gw] = e.message;
-      console.warn(`[PAY] Gateway ${gw} gagal:`, e.message);
+      console.warn(`[PAY] QRIS ${gw} gagal:`, e.message);
     }
   }
-
-  // All gateways failed → manual. Simpan alasan ASLI tiap gateway (bukan pesan generik)
-  // supaya penyebab nyata terlihat di admin/log — mis. limit invoice gratis SayaBayar
-  // atau blokir Cloudflare FR3 — bukan disangka sekadar "gagal merespons".
-  const reason = `Gateway gagal — SayaBayar: ${errors.sayabayar || 'tidak dicoba'} | FR3: ${errors.fr3 || 'tidak dicoba'}`;
-  db.get('orders').find({ id: orderInternalId }).assign({
-    qrisStatus: 'failed',
-    fr3Error: reason,
-    paymentMethod: 'manual'
-  }).write();
+  throw new Error(`MustikaPay: ${errors.mustikapay || '-'} | SayaBayar: ${errors.sayabayar || '-'} | FR3: ${errors.fr3 || '-'}`);
 }
 
-// Payment page (GET) — renders generating / QRIS-ready / manual view for an existing order.
+// Payment page (GET) — selector metode / instrumen-siap / manual untuk satu order.
 router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
   const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
   if (!order) return res.redirect('/dashboard');
@@ -548,6 +706,14 @@ router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
   const priceDisplay = 'Rp ' + order.price.toLocaleString('id-ID');
   const totalDisplay = 'Rp ' + (order.fr3TotalTransfer || order.price).toLocaleString('id-ID');
 
+  // Tiga state halaman:
+  //  - 'instrument' : instrumen bayar sudah dibuat (render QR/VA/e-wallet/retail + polling)
+  //  - 'manual'     : semua gateway gagal → fallback transfer manual via WA
+  //  - 'select'     : belum memilih metode → tampilkan selector
+  let payState = 'select';
+  if (order.qrisStatus === 'ready' && order.payMethodType) payState = 'instrument';
+  else if (order.qrisStatus === 'failed') payState = 'manual';
+
   res.render('payment', {
     title: 'Pembayaran - AlexCloud',
     user: req.user,
@@ -556,47 +722,76 @@ router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
     priceDisplay,
     totalDisplay,
     discount: order.discount || 0,
-    qrisGenerating: order.qrisStatus === 'generating',
-    fr3Success: order.qrisStatus === 'ready' || !!order.fr3TrxId,
+    payState,
+    methodType: order.payMethodType || null,
     fr3Error: order.fr3Error,
+    banks: MP_BANKS,
+    ewallets: MP_EWALLETS,
+    minAmount: MP_MIN_AMOUNT,
+    maxAmount: MP_MAX_AMOUNT,
     qrisImage: process.env.QRIS_IMAGE || 'https://img1.pixhost.to/images/5339/592942381_rizzhosting.jpg',
     waNumber: process.env.WA_NUMBER || '82328437656'
   });
 });
 
-// Retry QRIS generation — lets a failed/manual order re-attempt the gateways
-// (useful when a gateway was temporarily down: the order is no longer stuck on manual).
-router.post('/payment/:orderId/retry', ensureAuthenticated, (req, res) => {
+// Buat instrumen pembayaran on-demand sesuai metode yang dipilih pembeli.
+// QRIS: MustikaPay → SayaBayar → FR3 (fallback). VA/E-Money/Retail: MustikaPay saja.
+router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res) => {
+  const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
+  if (!order) return res.status(404).json({ error: 'Order tidak ditemukan' });
+  if (order.status !== 'pending') return res.status(400).json({ error: `Order sudah ${order.status}` });
+
+  const { method, bank_code, product_code, phone, retail_outlet } = req.body || {};
+  const amount = order.price;
+
+  try {
+    if (method === 'qris') {
+      await generateQris(order.id, amount, order);
+    } else if (method === 'va') {
+      await tryMustikapayVa(order.id, amount, order, String(bank_code || '').toUpperCase());
+    } else if (method === 'emoney') {
+      await tryMustikapayEmoney(order.id, amount, order, String(product_code || '').toUpperCase(), String(phone || '').trim());
+    } else if (method === 'retail') {
+      await tryMustikapayRetail(order.id, amount, order, String(retail_outlet || '').toUpperCase(), String(phone || '').trim());
+    } else {
+      return res.status(400).json({ error: 'Metode pembayaran tidak valid' });
+    }
+    return res.json({ ok: true });
+  } catch (e) {
+    console.warn(`[PAY] create ${method} gagal:`, e.message);
+    return res.status(502).json({ error: e.message });
+  }
+});
+
+// Reset instrumen — kembali ke selector metode (mis. mau ganti metode, atau buat ulang
+// setelah QRIS gagal/expired). Tidak menyentuh order yang sudah dibayar/aktif.
+router.post('/payment/:orderId/reset', ensureAuthenticated, (req, res) => {
   const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
   if (!order) return res.redirect('/dashboard');
-  // Don't retry an order that's already paid/active.
-  if (order.status === 'paid' || order.status === 'active') {
+  if (order.status === 'confirmed' || order.status === 'paid' || order.status === 'active') {
     return res.redirect('/payment/' + order.orderId);
   }
   db.get('orders').find({ id: order.id }).assign({
-    qrisStatus: 'generating',
+    qrisStatus: 'awaiting_method',
+    payMethodType: null,
+    gateway: null,
     fr3Error: null,
     fr3TrxId: null,
     fr3QrString: null,
-    paymentMethod: 'fr3_qris'
+    fr3TotalTransfer: order.price,
+    fr3UniqueCode: 0,
+    fr3Expiry: null,
+    mpPaymentLink: null,
+    mpVaNumber: null, mpVaName: null, mpBankCode: null,
+    mpPaymentCode: null, mpRetailOutlet: null,
+    mpEwalletProvider: null,
+    paymentMethod: null
   }).write();
-  const nominal = order.nominal || order.fr3TotalTransfer || order.price;
-  kickoffQrisGeneration(order.id, order.price, nominal);
   res.redirect('/payment/' + order.orderId);
 });
 
-// QRIS generation status — polled by the 'generating' state of the payment page.
-router.get('/api/payment/qris/:orderId', ensureAuthenticated, (req, res) => {
-  const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
-  if (!order) return res.json({ error: 'Order tidak ditemukan' });
-  res.json({
-    qrisStatus: order.qrisStatus || (order.fr3TrxId ? 'ready' : 'failed'),
-    error: order.fr3Error || null
-  });
-});
-
 // =====================
-// FR3 Payment Status API (polling)
+// Payment Status API (polling) — MustikaPay / SayaBayar / FR3
 // =====================
 router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res) => {
   const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
@@ -607,7 +802,15 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
     // Normalized status across gateways: SUCCESS | PENDING | EXPIRED
     let fr3St = 'PENDING';
 
-    if (order.gateway === 'sayabayar') {
+    if (order.gateway === 'mustikapay') {
+      // MustikaPay: GET /api/v1/check/{qris|emoney|va|retail}?ref_no=... → status pending|success|expired
+      const type = order.payMethodType || 'qris';
+      const mp = await mustikapayRequest('GET', `/api/v1/check/${type}`, { ref_no: order.fr3TrxId }, 12000);
+      const mpStatus = (mp?.status || 'pending').toLowerCase();
+      fr3St = mpStatus === 'success' ? 'SUCCESS'
+        : (mpStatus === 'expired' || mpStatus === 'cancelled' || mpStatus === 'failed') ? 'EXPIRED'
+        : 'PENDING';
+    } else if (order.gateway === 'sayabayar') {
       // SayaBayar: GET /invoices/:id → data.status = pending | paid | expired | cancelled
       const sb = await sayabayarRequest('GET', `/invoices/${encodeURIComponent(order.fr3TrxId)}`, null, 12000);
       const sbStatus = (sb?.data?.status || 'pending').toLowerCase();
@@ -673,8 +876,10 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
       }
 
       // Trigger Notifications for Admin
+      const methodLabels = { qris: 'QRIS', va: 'Virtual Account', emoney: 'E-Wallet', retail: 'Retail' };
+      const methodLabel = methodLabels[order.payMethodType] || 'QRIS';
       const formattedPrice = 'Rp ' + order.price.toLocaleString('id-ID');
-      const textMsg = `🎉 *PEMBAYARAN QRIS SUKSES*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
+      const textMsg = `🎉 *PEMBAYARAN SUKSES (${methodLabel})*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
       
       // WhatsApp
       const { sendWhatsAppNotification } = require('../utils/whatsapp');
@@ -717,8 +922,8 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
     return res.json({ error: `Order sudah ${order.status}, tidak bisa dibatalkan` });
   }
 
-  // Coba cancel ke FR3 jika ada trxId (SayaBayar tidak punya endpoint cancel API — cukup batalkan lokal)
-  if (order.fr3TrxId && order.gateway !== 'sayabayar') {
+  // Hanya FR3 yang punya endpoint cancel; MustikaPay & SayaBayar cukup dibatalkan lokal.
+  if (order.fr3TrxId && order.gateway === 'fr3') {
     try {
       const fr3Result = await fr3Request('/topup/cancel', 'POST', { trxId: order.fr3TrxId }, 12000);
       console.log('[FR3] Cancel response:', fr3Result);

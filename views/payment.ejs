@@ -1,5 +1,10 @@
 <%- include('partials/header') %>
 
+<%
+  // Lookup label bank/provider untuk tampilan instrumen.
+  const vaBankName = (banks.find(b => b.code === order.mpBankCode) || {}).name || order.mpBankCode || 'Bank';
+%>
+
 <div class="payment-page">
   <div class="payment-container">
 
@@ -13,52 +18,134 @@
       <div class="pay-logo">⚡</div>
     </div>
 
-    <% if (typeof qrisGenerating !== 'undefined' && qrisGenerating) { %>
-    <!-- ======= GENERATING QRIS (async) ======= -->
-    <div class="pay-card qris-card">
+    <% if (payState === 'select') { %>
+    <!-- ======= PILIH METODE PEMBAYARAN ======= -->
+    <div class="pay-card">
       <div class="pay-status-bar">
         <div class="pay-status-dot pending"></div>
-        <span>Menyiapkan QRIS...</span>
+        <span>Pilih metode pembayaran</span>
       </div>
-      <div class="qr-section">
-        <div class="qr-box" style="min-height:236px; flex-direction:column; gap:1.1rem;">
-          <div class="qris-spinner"></div>
-          <div style="color:#333; font-family:var(--font-ui); font-size:0.85rem; font-weight:600;">Membuat kode pembayaran...</div>
+
+      <!-- Ringkasan singkat -->
+      <div class="pay-summary">
+        <div class="pay-sum-row">
+          <span>Paket</span>
+          <span><strong><%= plan.name %></strong></span>
         </div>
-        <div style="font-family:var(--font-ui); font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
-          Gateway sedang memproses pesananmu. Biasanya beberapa detik — mohon jangan tutup halaman ini.
+        <% if (discount > 0) { %>
+        <div class="pay-sum-row" style="color:var(--accent-green);">
+          <span>Diskon Promo</span>
+          <span>- Rp <%= discount.toLocaleString('id-ID') %></span>
         </div>
-        <div id="genSlowNote" style="display:none; margin-top:1rem; font-size:0.8rem; color:#fbbf24;">
-          <i class="fas fa-clock"></i> Gateway agak lambat merespons, mohon tunggu sebentar lagi...
+        <% } %>
+        <div class="pay-sum-row total-row">
+          <span>Total Bayar</span>
+          <span class="total-val"><%= priceDisplay %></span>
         </div>
+      </div>
+
+      <!-- Daftar metode -->
+      <div class="method-list">
+        <%
+          const vaOk = order.price >= minAmount.va;
+          const retailOk = order.price >= minAmount.retail && order.price <= maxAmount.retail;
+        %>
+        <button type="button" class="method-card" data-method="qris">
+          <div class="method-ic"><i class="fas fa-qrcode"></i></div>
+          <div class="method-body">
+            <div class="method-name">QRIS</div>
+            <div class="method-desc">GoPay, OVO, DANA, ShopeePay, m-Banking</div>
+          </div>
+          <i class="fas fa-chevron-right method-arrow"></i>
+        </button>
+
+        <button type="button" class="method-card<%= vaOk ? '' : ' disabled' %>" data-method="va" <%= vaOk ? '' : 'data-disabled="1"' %>>
+          <div class="method-ic"><i class="fas fa-building-columns"></i></div>
+          <div class="method-body">
+            <div class="method-name">Virtual Account</div>
+            <div class="method-desc"><%= vaOk ? 'BCA, BNI, BRI, Mandiri, Permata, dll' : ('Min. Rp' + minAmount.va.toLocaleString('id-ID')) %></div>
+          </div>
+          <i class="fas fa-chevron-right method-arrow"></i>
+        </button>
+
+        <button type="button" class="method-card" data-method="emoney">
+          <div class="method-ic"><i class="fas fa-wallet"></i></div>
+          <div class="method-body">
+            <div class="method-name">E-Wallet</div>
+            <div class="method-desc">DANA, ShopeePay, OVO, LinkAja</div>
+          </div>
+          <i class="fas fa-chevron-right method-arrow"></i>
+        </button>
+
+        <button type="button" class="method-card<%= retailOk ? '' : ' disabled' %>" data-method="retail" <%= retailOk ? '' : 'data-disabled="1"' %>>
+          <div class="method-ic"><i class="fas fa-store"></i></div>
+          <div class="method-body">
+            <div class="method-name">Retail / Minimarket</div>
+            <div class="method-desc"><%= retailOk ? 'Alfamart, Indomaret' : ('Rp' + minAmount.retail.toLocaleString('id-ID') + ' – Rp' + maxAmount.retail.toLocaleString('id-ID')) %></div>
+          </div>
+          <i class="fas fa-chevron-right method-arrow"></i>
+        </button>
+      </div>
+
+      <!-- Sub-opsi per metode -->
+      <div id="subPanes" style="padding:0 1.25rem;">
+        <div class="sub-pane" id="sub-va">
+          <label class="sub-label">Pilih Bank</label>
+          <select id="vaBank" class="sub-select">
+            <% banks.forEach(function(b){ %>
+            <option value="<%= b.code %>"><%= b.name %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div class="sub-pane" id="sub-emoney">
+          <label class="sub-label">Provider E-Wallet</label>
+          <select id="ewProvider" class="sub-select">
+            <% ewallets.forEach(function(e){ %>
+            <option value="<%= e.code %>"><%= e.name %></option>
+            <% }); %>
+          </select>
+          <label class="sub-label" style="margin-top:0.75rem;">No. HP terdaftar di e-wallet</label>
+          <input type="tel" id="ewPhone" class="sub-input" placeholder="081234567890" inputmode="numeric">
+        </div>
+
+        <div class="sub-pane" id="sub-retail">
+          <label class="sub-label">Pilih Gerai</label>
+          <select id="retailOutlet" class="sub-select">
+            <option value="ALFAMART">Alfamart</option>
+            <option value="INDOMARET">Indomaret</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="createError" class="create-error" style="display:none;"></div>
+
+      <div style="padding:0.5rem 1.25rem 1.25rem;">
+        <button id="createBtn" class="btn-primary" style="width:100%; justify-content:center;" disabled>
+          <i class="fas fa-lock"></i> Pilih metode dulu
+        </button>
       </div>
     </div>
-    <style>
-      .qris-spinner { width:52px; height:52px; border:4px solid rgba(0,0,0,0.1); border-top-color:#ffffff; border-radius:50%; animation: qrisSpin 0.8s linear infinite; }
-      @keyframes qrisSpin { to { transform: rotate(360deg); } }
-    </style>
-    <% } else if (fr3Success) { %>
-    <!-- ======= FR3 QRIS PAYMENT ======= -->
+
+    <% } else if (payState === 'instrument') { %>
+    <!-- ======= INSTRUMEN PEMBAYARAN ======= -->
     <div class="pay-card qris-card">
 
       <!-- Status bar -->
       <div class="pay-status-bar" id="statusBar">
         <div class="pay-status-dot pending" id="statusDot"></div>
         <span id="statusText">Menunggu pembayaran...</span>
-        <span class="pay-timer" id="payTimer">09:59</span>
+        <span class="pay-timer" id="payTimer">--:--</span>
       </div>
 
-      <!-- QR Code Section -->
+      <% if (methodType === 'qris') { %>
+      <!-- QRIS -->
       <div class="qr-section">
         <div class="qr-brand-row">
           <img src="/images/qris-logo.svg" alt="QRIS" style="height:28px;">
           <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); border-left:1px solid var(--border); padding-left:0.75rem; margin-left:0.25rem;">Scan dengan semua e-wallet</span>
         </div>
-
-        <!-- QR Code rendered from qr_string -->
         <div class="qr-box" id="qrBox">
-          <!-- Rendered client-side from the QRIS string (self-hosted qrcode lib),
-               so it tidak bergantung ke layanan QR eksternal yang bisa diblokir ISP. -->
           <% if (order.fr3QrString) { %>
           <div id="qrRender" style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;"></div>
           <% } else { %>
@@ -70,19 +157,14 @@
             <div class="qr-expired-inner">
               <i class="fas fa-clock" style="font-size:2rem; color:#ff6666; margin-bottom:0.5rem;"></i>
               <div style="font-weight:700; color:#ff6666;">QR Kadaluarsa</div>
-              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">Buat order baru</div>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">Buat ulang pembayaran</div>
             </div>
           </div>
         </div>
-
-        <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">
-          Bayar sejumlah tepat:
-        </div>
+        <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">Bayar sejumlah tepat:</div>
         <div class="pay-total-amount">
           Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %>
-          <% if (order.fr3UniqueCode > 0) { %>
-          <span class="unique-code-badge">+<%= order.fr3UniqueCode %> kode unik</span>
-          <% } %>
+          <% if (order.fr3UniqueCode > 0) { %><span class="unique-code-badge">+<%= order.fr3UniqueCode %> kode unik</span><% } %>
         </div>
         <% if (order.fr3UniqueCode > 0) { %>
         <div class="unique-code-note">
@@ -91,6 +173,65 @@
         </div>
         <% } %>
       </div>
+
+      <% } else if (methodType === 'va') { %>
+      <!-- VIRTUAL ACCOUNT -->
+      <div class="instr-section">
+        <div class="instr-head"><i class="fas fa-building-columns"></i> <%= vaBankName %> Virtual Account</div>
+        <div class="copy-field">
+          <div class="copy-label">Nomor Virtual Account</div>
+          <div class="copy-row">
+            <span class="copy-value" id="copyVa"><%= order.mpVaNumber %></span>
+            <button class="copy-btn" data-copy="<%= order.mpVaNumber %>"><i class="fas fa-copy"></i> Salin</button>
+          </div>
+        </div>
+        <% if (order.mpVaName) { %>
+        <div class="instr-sub">a.n. <strong><%= order.mpVaName %></strong></div>
+        <% } %>
+        <div class="instr-amount">Total: Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %></div>
+        <ol class="instr-steps">
+          <li>Buka m-banking / ATM, pilih menu <strong>Transfer → Virtual Account</strong>.</li>
+          <li>Masukkan nomor VA di atas, pastikan nama & nominal sesuai.</li>
+          <li>Selesaikan pembayaran. Status terkonfirmasi otomatis di halaman ini.</li>
+        </ol>
+      </div>
+
+      <% } else if (methodType === 'emoney') { %>
+      <!-- E-WALLET -->
+      <div class="instr-section">
+        <div class="instr-head"><i class="fas fa-wallet"></i> <%= order.mpEwalletProvider || 'E-Wallet' %></div>
+        <div class="instr-amount" style="margin-top:0.25rem;">Total: Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %></div>
+        <% if (order.mpPaymentLink) { %>
+        <a href="<%= order.mpPaymentLink %>" target="_blank" rel="noopener" class="btn-primary instr-open">
+          <i class="fas fa-arrow-up-right-from-square"></i> Buka aplikasi <%= order.mpEwalletProvider || 'E-Wallet' %>
+        </a>
+        <% } %>
+        <ol class="instr-steps">
+          <li>Klik tombol di atas <% if (!order.mpPaymentLink) { %>atau <% } %>buka aplikasi <strong><%= order.mpEwalletProvider || 'e-wallet' %></strong> kamu.</li>
+          <li>Cek notifikasi tagihan masuk, periksa nominalnya, lalu <strong>setujui pembayaran</strong>.</li>
+          <li>Status akan terkonfirmasi otomatis di halaman ini.</li>
+        </ol>
+      </div>
+
+      <% } else if (methodType === 'retail') { %>
+      <!-- RETAIL -->
+      <div class="instr-section">
+        <div class="instr-head"><i class="fas fa-store"></i> <%= (order.mpRetailOutlet === 'INDOMARET') ? 'Indomaret' : 'Alfamart' %></div>
+        <div class="copy-field">
+          <div class="copy-label">Kode Pembayaran</div>
+          <div class="copy-row">
+            <span class="copy-value" id="copyCode"><%= order.mpPaymentCode %></span>
+            <button class="copy-btn" data-copy="<%= order.mpPaymentCode %>"><i class="fas fa-copy"></i> Salin</button>
+          </div>
+        </div>
+        <div class="instr-amount">Total: Rp <%= order.fr3TotalTransfer.toLocaleString('id-ID') %></div>
+        <ol class="instr-steps">
+          <li>Datang ke kasir <strong><%= (order.mpRetailOutlet === 'INDOMARET') ? 'Indomaret' : 'Alfamart' %></strong> terdekat.</li>
+          <li>Sebutkan ingin bayar <strong>tagihan / kode pembayaran</strong>, lalu berikan kode di atas.</li>
+          <li>Bayar tunai sesuai total. Status terkonfirmasi otomatis di halaman ini.</li>
+        </ol>
+      </div>
+      <% } %>
 
       <!-- Order Summary -->
       <div class="pay-summary">
@@ -120,42 +261,37 @@
         </div>
       </div>
 
-      <!-- Supported wallets -->
-      <div class="wallet-row">
-        <div class="wallet-item">GoPay</div>
-        <div class="wallet-item">OVO</div>
-        <div class="wallet-item">DANA</div>
-        <div class="wallet-item">ShopeePay</div>
-        <div class="wallet-item">m-Banking</div>
-        <div class="wallet-item">LinkAja</div>
-      </div>
-
       <!-- Manual confirmation helper if stuck -->
       <div class="pay-stuck-helper" style="margin: 1.5rem 0; text-align: center; border-top: 1px dashed var(--border); padding-top: 1.5rem;">
         <div style="font-family: var(--font-ui); font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-          Sudah transfer tapi status belum terkonfirmasi otomatis?
+          Sudah bayar tapi status belum terkonfirmasi otomatis?
         </div>
-        <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud! 👋\n\nSaya sudah sukses membayar via QRIS otomatis namun statusnya masih stuck.\n\n📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: Rp ' + order.fr3TotalTransfer.toLocaleString('id-ID') + '\n\nMohon bantuannya untuk mengaktifkan akun saya. Terima kasih!') %>" target="_blank" class="wa-confirm-btn" style="margin: 0 auto; max-width: 320px; display: flex;">
+        <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud! 👋\n\nSaya sudah membayar namun statusnya masih stuck.\n\n📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: Rp ' + order.fr3TotalTransfer.toLocaleString('id-ID') + '\n\nMohon bantuannya untuk mengaktifkan akun saya. Terima kasih!') %>" target="_blank" class="wa-confirm-btn" style="margin: 0 auto; max-width: 320px; display: flex;">
           <i class="fab fa-whatsapp"></i> Konfirmasi Manual via WA
         </a>
       </div>
+
+      <!-- Ganti metode -->
+      <form action="/payment/<%= order.orderId %>/reset" method="POST" style="margin:0 1.25rem 0.25rem;">
+        <button type="submit" class="btn-secondary" style="width:100%; justify-content:center;">
+          <i class="fas fa-rotate-left"></i> Ganti metode pembayaran
+        </button>
+      </form>
 
       <!-- Cancel -->
       <button class="cancel-btn" id="cancelBtn" onclick="cancelPayment()">
         <i class="fas fa-times"></i> Batalkan Pembayaran
       </button>
 
-      <!-- Gorgeous Custom Cancel Confirmation Modal -->
+      <!-- Cancel Confirmation Modal -->
       <div id="cancelConfirmModal" class="custom-modal" style="display: none;">
         <div class="modal-backdrop" onclick="closeCancelModal()"></div>
         <div class="modal-card">
           <div class="modal-glow"></div>
-          <div class="modal-icon-wrap">
-            <i class="fas fa-exclamation-triangle"></i>
-          </div>
+          <div class="modal-icon-wrap"><i class="fas fa-exclamation-triangle"></i></div>
           <h3 class="modal-title">Batalkan Pesanan?</h3>
           <p class="modal-desc">
-            Apakah Anda yakin ingin membatalkan pesanan ini? Kode unik transaksi ini akan dibebaskan dan transaksi Anda akan ditutup secara permanen.
+            Apakah Anda yakin ingin membatalkan pesanan ini? Transaksi ini akan ditutup secara permanen.
           </p>
           <div class="modal-buttons">
             <button class="btn-confirm-yes" onclick="confirmCancelPayment()">Ya, Batalkan</button>
@@ -173,7 +309,6 @@
         <div class="success-title">Pembayaran Berhasil! 🎉</div>
         <div class="success-sub">Transaksi kamu sudah terkonfirmasi otomatis oleh sistem.</div>
 
-        <!-- Order recap -->
         <div class="success-recap">
           <div class="success-recap-row">
             <span><i class="fas fa-box"></i> Paket</span>
@@ -189,14 +324,13 @@
           </div>
         </div>
 
-        <!-- WA Confirmation Step -->
         <div class="wa-step-box">
           <div class="wa-step-title">
             <i class="fas fa-exclamation-circle" style="color:#fbbf24;"></i>
             Langkah Terakhir!
           </div>
           <div class="wa-step-desc">
-            Klik tombol di bawah untuk konfirmasi ke Admin via WhatsApp agar akun cloud gaming kamu segera dikirimkan. 
+            Klik tombol di bawah untuk konfirmasi ke Admin via WhatsApp agar akun cloud gaming kamu segera dikirimkan.
             <strong style="color:white;">Jangan lewatkan langkah ini!</strong>
           </div>
           <a id="waConfirmBtn" href="#" target="_blank" class="wa-confirm-final">
@@ -216,10 +350,8 @@
     </div>
 
     <% } else { %>
-    <!-- ======= FALLBACK: Manual Payment (Premium Design) ======= -->
+    <!-- ======= FALLBACK: Pembayaran Manual (semua gateway gagal) ======= -->
     <div class="pay-card qris-card">
-      
-      <!-- Status bar -->
       <div class="pay-status-bar" style="background: rgba(255, 255, 255,0.05); border-bottom: 1px solid rgba(255, 255, 255,0.1);">
         <div class="pay-status-dot pending" style="background: #ffffff; box-shadow: 0 0 8px #ffffff;"></div>
         <span>Pembayaran Manual (WhatsApp)</span>
@@ -229,16 +361,16 @@
       <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start; margin: 1.25rem; padding: 1rem; border-radius: 12px; background: rgba(255, 68, 68, 0.07); border: 1px solid rgba(255, 68, 68, 0.15); color: #ff8888; text-align: left;">
         <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700;">
           <i class="fas fa-exclamation-triangle"></i>
-          <span>Debug Admin: API Gateway Error</span>
+          <span>Debug Admin: Gateway Error</span>
         </div>
         <span style="font-size:0.8rem; font-family:monospace; word-break:break-all;"><%= fr3Error %></span>
       </div>
       <% } %>
 
-      <!-- Retry: re-attempt the automatic QRIS gateways (e.g. after a temporary outage) -->
-      <form action="/payment/<%= order.orderId %>/retry" method="POST" style="margin: 0 1.25rem 0.25rem;">
+      <!-- Reset: kembali ke selector untuk coba metode/gateway lagi -->
+      <form action="/payment/<%= order.orderId %>/reset" method="POST" style="margin: 0 1.25rem 0.25rem;">
         <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
-          <i class="fas fa-rotate-right"></i> Buat ulang QRIS otomatis
+          <i class="fas fa-rotate-right"></i> Coba pilih metode lagi
         </button>
       </form>
 
@@ -262,7 +394,6 @@
         <div class="qr-brand-row" style="margin-bottom:0.75rem;">
           <img src="/images/qris-logo.svg" alt="QRIS" style="height:24px;">
         </div>
-
         <div class="qr-box" style="padding:0.5rem; margin-bottom:0.75rem;">
           <% if (qrisImage) { %>
           <img src="<%= qrisImage %>" alt="QRIS" width="200" height="200" style="border-radius:8px; display:block; object-fit: contain; margin:0 auto;">
@@ -272,7 +403,6 @@
           </div>
           <% } %>
         </div>
-
         <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); margin-bottom:0.25rem;">
           Jumlah yang harus dibayar:
         </div>
@@ -290,7 +420,7 @@
         </div>
       </div>
 
-      <% 
+      <%
         let waMsg = 'Halo Admin AlexCloud! 👋\n\n';
         waMsg += 'Saya mau konfirmasi pembayaran manual:\n';
         waMsg += '📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: ' + priceDisplay + '\n\nMohon dibantu prosesnya. Terima kasih!';
@@ -305,8 +435,10 @@
     <div class="pay-info-box">
       <i class="fas fa-shield-alt" style="color:var(--accent-blue); margin-top:2px;"></i>
       <div>
-        <% if (fr3Success) { %>
-        Pembayaran diproses otomatis. Akun akan diaktifkan dalam <strong>hitungan detik</strong> setelah pembayaran sukses. QRIS berlaku <strong>10 menit</strong>.
+        <% if (payState === 'instrument') { %>
+        Pembayaran diproses otomatis. Akun aktif dalam <strong>hitungan detik</strong> setelah pembayaran sukses & terkonfirmasi.
+        <% } else if (payState === 'select') { %>
+        Pilih metode pembayaran yang paling kamu sukai. Semua pembayaran diproses otomatis & aman.
         <% } else { %>
         Setelah transfer, kirim bukti ke admin WhatsApp untuk konfirmasi. Akun aktif dalam 1–15 menit.
         <% } %>
@@ -393,6 +525,123 @@
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255,0.2);
 }
+
+/* ── Method selector ─────────────────────────────────────────── */
+.method-list { padding: 1rem 1.25rem 0.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.method-card {
+  display: flex; align-items: center; gap: 0.85rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: 0.18s;
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+}
+.method-card:hover:not(.disabled) { border-color: var(--accent-blue); background: rgba(255,255,255,0.05); }
+.method-card.active { border-color: var(--accent-blue); background: rgba(0,212,255,0.08); box-shadow: 0 0 0 1px var(--accent-blue) inset; }
+.method-card.disabled { opacity: 0.4; cursor: not-allowed; }
+.method-ic {
+  width: 42px; height: 42px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  color: var(--accent-blue);
+  font-size: 1.1rem;
+}
+.method-body { flex: 1; min-width: 0; }
+.method-name { font-weight: 800; font-size: 0.95rem; }
+.method-desc { font-size: 0.74rem; color: var(--text-muted); margin-top: 0.15rem; }
+.method-arrow { color: var(--text-muted); font-size: 0.8rem; }
+
+.sub-pane { display: none; padding: 0.75rem 0 0.25rem; }
+.sub-pane.show { display: block; }
+.sub-label { display: block; font-family: var(--font-ui); font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600; }
+.sub-select, .sub-input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+.sub-select:focus, .sub-input:focus { outline: none; border-color: var(--accent-blue); }
+.create-error {
+  margin: 0 1.25rem;
+  padding: 0.7rem 0.85rem;
+  background: rgba(255,68,68,0.08);
+  border: 1px solid rgba(255,68,68,0.2);
+  border-radius: 10px;
+  color: #ff8888;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+}
+
+/* ── Instrument (VA / e-wallet / retail) ─────────────────────── */
+.instr-section { padding: 1.5rem; text-align: center; border-bottom: 1px solid var(--border); }
+.instr-head {
+  font-family: var(--font-display);
+  font-weight: 800; font-size: 1.05rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.instr-head i { color: var(--accent-blue); }
+.copy-field {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+.copy-label { font-family: var(--font-ui); font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+.copy-row { display: flex; align-items: center; gap: 0.6rem; }
+.copy-value {
+  flex: 1; min-width: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+.copy-btn {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--gradient-main, rgba(0,212,255,0.15));
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 9px;
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 0.75rem; font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.copy-btn:hover { opacity: 0.9; }
+.copy-btn.copied { background: var(--accent-green); color: #04210f; }
+.instr-sub { font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+.instr-amount {
+  font-family: var(--font-display);
+  font-size: 1.3rem; font-weight: 900;
+  background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin: 0.5rem 0 0.75rem;
+}
+.instr-open { width: 100%; justify-content: center; margin: 0.25rem 0 0.75rem; }
+.instr-steps {
+  text-align: left;
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.instr-steps li { margin-bottom: 0.25rem; }
 
 .qr-section { padding: 1.5rem; text-align: center; border-bottom: 1px solid var(--border); }
 .qr-brand-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
@@ -483,23 +732,21 @@
   background-clip: text;
 }
 
-.wallet-row {
-  display: flex;
-  gap: 0.4rem;
-  padding: 0.85rem 1.5rem;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--border);
-}
-.wallet-item {
-  font-family: var(--font-ui);
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: rgba(255,255,255,0.05);
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  background: rgba(255,255,255,0.04);
   border: 1px solid var(--border);
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
-  color: var(--text-muted);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.2s;
+  text-decoration: none;
 }
+.btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: var(--border-hover); }
 
 .cancel-btn {
   width: 100%;
@@ -562,7 +809,6 @@
   margin-bottom: 1.25rem;
 }
 
-/* Order recap inside success */
 .success-recap {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
@@ -585,7 +831,6 @@
 .success-recap-row span:first-child { display: flex; align-items: center; gap: 0.4rem; }
 .success-recap-row i { width: 14px; text-align: center; color: var(--accent-blue); }
 
-/* WA Step Box */
 .wa-step-box {
   background: linear-gradient(135deg, rgba(37,211,102,0.08), rgba(18,140,126,0.06));
   border: 1.5px solid rgba(37,211,102,0.25);
@@ -833,27 +1078,106 @@
 }
 </style>
 
-<% if (fr3Success) { %>
+<% if (payState === 'select') { %>
+<script>
+const SEL_ORDER_ID = <%- JSON.stringify(order.orderId) %>;
+let selectedMethod = null;
+
+const cards = document.querySelectorAll('.method-card');
+const createBtn = document.getElementById('createBtn');
+const errBox = document.getElementById('createError');
+
+function showPane(method) {
+  document.querySelectorAll('.sub-pane').forEach(p => p.classList.remove('show'));
+  const pane = document.getElementById('sub-' + method);
+  if (pane) pane.classList.add('show');
+}
+
+cards.forEach(card => {
+  card.addEventListener('click', () => {
+    if (card.dataset.disabled) return;
+    cards.forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    selectedMethod = card.dataset.method;
+    showPane(selectedMethod);
+    errBox.style.display = 'none';
+    createBtn.disabled = false;
+    createBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Lanjut Bayar';
+  });
+});
+
+function gatherPayload() {
+  const p = { method: selectedMethod };
+  if (selectedMethod === 'va') p.bank_code = document.getElementById('vaBank').value;
+  if (selectedMethod === 'emoney') {
+    p.product_code = document.getElementById('ewProvider').value;
+    p.phone = document.getElementById('ewPhone').value.trim();
+  }
+  if (selectedMethod === 'retail') p.retail_outlet = document.getElementById('retailOutlet').value;
+  return p;
+}
+
+createBtn.addEventListener('click', async () => {
+  if (!selectedMethod) return;
+  const payload = gatherPayload();
+
+  if (selectedMethod === 'emoney' && !/^0\d{8,14}$/.test(payload.phone || '')) {
+    errBox.textContent = 'Masukkan nomor HP e-wallet yang valid (contoh: 081234567890).';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  errBox.style.display = 'none';
+  createBtn.disabled = true;
+  createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat pembayaran...';
+
+  try {
+    const r = await fetch(`/api/payment/create/${SEL_ORDER_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if (r.ok && data.ok) {
+      window.location.reload();
+    } else {
+      errBox.textContent = data.error || 'Gagal membuat pembayaran. Coba metode lain.';
+      errBox.style.display = 'block';
+      createBtn.disabled = false;
+      createBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Lanjut Bayar';
+    }
+  } catch (e) {
+    errBox.textContent = 'Terjadi kesalahan jaringan. Coba lagi.';
+    errBox.style.display = 'block';
+    createBtn.disabled = false;
+    createBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Lanjut Bayar';
+  }
+});
+</script>
+<% } %>
+
+<% if (payState === 'instrument') { %>
 <!-- Self-hosted dulu (same-origin, paling andal); cdnjs hanya cadangan kalau gagal -->
 <script src="/js/qrcode.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';document.head.appendChild(s);})()"></script>
 <script>
 const ORDER_ID = <%- JSON.stringify(order.orderId) %>;
+const METHOD = <%- JSON.stringify(methodType || 'qris') %>;
 const QR_STRING = <%- JSON.stringify(order.fr3QrString || '') %>;
 const EXPIRY = <%- order.fr3Expiry ? (typeof order.fr3Expiry === 'number' ? order.fr3Expiry : new Date(order.fr3Expiry).getTime()) : (Date.now() + 10 * 60 * 1000) %>;
+const METHOD_LABELS = { qris: 'QRIS', va: 'Virtual Account', emoney: 'E-Wallet', retail: 'Retail' };
 
 let pollInterval;
 let timerInterval;
 let cancelled = false;
 
-// Render QRIS di sisi browser. Utama: library qrcode lokal (tanpa jaringan).
-// Cadangan: gambar dari api.qrserver.com. Kalau dua-duanya gagal: pesan jelas.
+// ── QRIS render (hanya untuk metode qris) ──
 function qrServerFallback(target) {
   const img = document.createElement('img');
   img.width = 220; img.height = 220; img.alt = 'QRIS Payment Code';
   img.style.cssText = 'border-radius:8px;display:block;';
   img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=' + encodeURIComponent(QR_STRING);
   img.onerror = function () {
-    target.innerHTML = '<div style="color:#999;font-size:0.8rem;text-align:center;"><i class="fas fa-exclamation-circle"></i><br>QR gagal dimuat<br>gunakan tombol salin di bawah</div>';
+    target.innerHTML = '<div style="color:#999;font-size:0.8rem;text-align:center;"><i class="fas fa-exclamation-circle"></i><br>QR gagal dimuat</div>';
   };
   target.innerHTML = '';
   target.appendChild(img);
@@ -878,48 +1202,61 @@ function renderQR() {
   qrServerFallback(target);
 }
 
-// Countdown timer
+// ── Tombol salin (VA / kode retail) ──
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const val = btn.getAttribute('data-copy') || '';
+    try { await navigator.clipboard.writeText(val); }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = val; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+    const orig = btn.innerHTML;
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="fas fa-check"></i> Tersalin';
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 1800);
+  });
+});
+
+// ── Countdown timer ──
+function markExpired() {
+  clearInterval(timerInterval);
+  clearInterval(pollInterval);
+  const t = document.getElementById('payTimer'); if (t) t.textContent = '00:00';
+  const ov = document.getElementById('qrExpired'); if (ov) ov.style.display = 'flex';
+  const dot = document.getElementById('statusDot'); if (dot) dot.className = 'pay-status-dot expired';
+  const st = document.getElementById('statusText'); if (st) st.textContent = 'Pembayaran Kadaluarsa';
+  const cb = document.getElementById('cancelBtn'); if (cb) cb.style.display = 'none';
+}
+
 function startTimer() {
   timerInterval = setInterval(() => {
     const remaining = EXPIRY - Date.now();
-    if (remaining <= 0) {
-      clearInterval(timerInterval);
-      clearInterval(pollInterval);
-      document.getElementById('payTimer').textContent = '00:00';
-      document.getElementById('qrExpired').style.display = 'flex';
-      document.getElementById('statusDot').className = 'pay-status-dot expired';
-      document.getElementById('statusText').textContent = 'QRIS Kadaluarsa';
-      document.getElementById('cancelBtn').style.display = 'none';
-      return;
-    }
+    if (remaining <= 0) { markExpired(); return; }
     const m = Math.floor(remaining / 60000);
     const s = Math.floor((remaining % 60000) / 1000);
-    document.getElementById('payTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const t = document.getElementById('payTimer');
+    if (t) t.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }, 1000);
 }
 
-// Poll payment status every 5 seconds
-function startPolling() {
-  pollInterval = setInterval(checkStatus, 5000);
-}
+// ── Poll payment status ──
+function startPolling() { pollInterval = setInterval(checkStatus, 5000); }
 
 async function checkStatus() {
   if (cancelled) return;
   try {
     const r = await fetch(`/api/payment/status/${ORDER_ID}`);
     const data = await r.json();
-
     const st = (data.fr3Status || '').toUpperCase();
     if (st === 'SUCCESS' || st === 'PAID' || st === 'SETTLED' || data.status === 'confirmed') {
       clearInterval(pollInterval);
       clearInterval(timerInterval);
       showSuccess();
-    } else if (data.fr3Status === 'EXPIRED' || data.status === 'expired') {
-      clearInterval(pollInterval);
-      clearInterval(timerInterval);
-      document.getElementById('qrExpired').style.display = 'flex';
-      document.getElementById('statusDot').className = 'pay-status-dot expired';
-      document.getElementById('statusText').textContent = 'Pembayaran Kadaluarsa';
+    } else if (st === 'EXPIRED' || data.status === 'expired') {
+      markExpired();
     }
   } catch(e) {
     console.warn('Status check failed:', e);
@@ -927,15 +1264,13 @@ async function checkStatus() {
 }
 
 function showSuccess() {
-  // Update status bar
   document.getElementById('statusBar').style.background = 'rgba(0,255,136,0.06)';
   document.getElementById('statusBar').style.borderColor = 'rgba(0,255,136,0.15)';
   document.getElementById('statusDot').className = 'pay-status-dot success';
   document.getElementById('statusText').textContent = '✅ Pembayaran Dikonfirmasi!';
-  document.getElementById('payTimer').style.display = 'none';
-  document.getElementById('cancelBtn').style.display = 'none';
+  const t = document.getElementById('payTimer'); if (t) t.style.display = 'none';
+  const cb = document.getElementById('cancelBtn'); if (cb) cb.style.display = 'none';
 
-  // Generate WhatsApp link dengan info order
   const waNumber = <%- JSON.stringify(waNumber || '82328437656') %>;
   const userName = <%- JSON.stringify(user.name || '') %>;
   const userEmail = <%- JSON.stringify(user.email || '') %>;
@@ -951,7 +1286,7 @@ function showSuccess() {
     `📧 Email: ${userEmail}`,
     `📦 Paket: *${planName}*`,
     `💰 Total Bayar: ${totalBayar}`,
-    `💳 Metode: QRIS (FR3 Gateway)`,
+    `💳 Metode: ${METHOD_LABELS[METHOD] || 'QRIS'} (MustikaPay)`,
     '',
     '✅ Pembayaran sudah terkonfirmasi otomatis.',
     'Mohon segera kirimkan akun cloud gaming saya.',
@@ -961,18 +1296,12 @@ function showSuccess() {
   const waLink = `https://wa.me/62${waNumber.replace(/^0/, '')}?text=${encodeURIComponent(waMsg)}`;
   document.getElementById('waConfirmBtn').href = waLink;
 
-  // Show success state
   document.getElementById('successState').style.display = 'block';
   document.getElementById('successState').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-function cancelPayment() {
-  document.getElementById('cancelConfirmModal').style.display = 'flex';
-}
-
-function closeCancelModal() {
-  document.getElementById('cancelConfirmModal').style.display = 'none';
-}
+function cancelPayment() { document.getElementById('cancelConfirmModal').style.display = 'flex'; }
+function closeCancelModal() { document.getElementById('cancelConfirmModal').style.display = 'none'; }
 
 async function confirmCancelPayment() {
   closeCancelModal();
@@ -999,41 +1328,13 @@ async function confirmCancelPayment() {
 }
 
 // Start
-renderQR();
-// Kalau library belum siap saat render pertama (mis. cdnjs cadangan masih loading),
-// render ulang sekali setelah jeda singkat supaya QR tetap muncul.
-if (typeof QRCode === 'undefined') setTimeout(renderQR, 700);
+if (METHOD === 'qris') {
+  renderQR();
+  if (typeof QRCode === 'undefined') setTimeout(renderQR, 700);
+}
 startTimer();
 startPolling();
-// Check once immediately after 2 seconds
 setTimeout(checkStatus, 2000);
-</script>
-<% } %>
-
-<% if (typeof qrisGenerating !== 'undefined' && qrisGenerating) { %>
-<script>
-const GEN_ORDER_ID = <%- JSON.stringify(order.orderId) %>;
-let genTries = 0;
-const genPoll = setInterval(async () => {
-  genTries++;
-  try {
-    const r = await fetch(`/api/payment/qris/${GEN_ORDER_ID}`);
-    const d = await r.json();
-    if (d.qrisStatus === 'ready' || d.qrisStatus === 'failed') {
-      clearInterval(genPoll);
-      window.location.href = `/payment/${GEN_ORDER_ID}`;
-      return;
-    }
-  } catch (e) { /* keep polling */ }
-  if (genTries === 8) {
-    const n = document.getElementById('genSlowNote');
-    if (n) n.style.display = 'block';
-  }
-  if (genTries > 30) { // ~60s safety net — reload to whatever state the order ended in
-    clearInterval(genPoll);
-    window.location.href = `/payment/${GEN_ORDER_ID}`;
-  }
-}, 2000);
 </script>
 <% } %>
 

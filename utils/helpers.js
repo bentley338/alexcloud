@@ -206,6 +206,69 @@ function sayabayarRequest(method, endpoint, payload, timeoutMs) {
   });
 }
 
+// ─── MustikaPay API Helper (primary gateway — https://mustikapayment.com) ────
+// Auth via X-Api-Key header. Endpoint POST "classic" memakai
+// application/x-www-form-urlencoded; endpoint GET (check status) memakai query
+// string. Resolves parsed JSON, rejects on network failure / non-JSON body.
+function mustikapayRequest(method, endpoint, payload, timeoutMs) {
+  const KEY = process.env.MUSTIKAPAY_API_KEY;
+  const BASE = 'https://mustikapayment.com';
+  const m = (method || 'GET').toUpperCase();
+
+  return new Promise((resolve, reject) => {
+    let bodyStr = null;
+    let urlStr = `${BASE}${endpoint}`;
+
+    if (payload) {
+      // Buang field kosong supaya param opsional tidak terkirim sebagai "undefined".
+      const clean = {};
+      for (const [k, v] of Object.entries(payload)) {
+        if (v !== undefined && v !== null && v !== '') clean[k] = v;
+      }
+      const encoded = new URLSearchParams(clean).toString();
+      if (m === 'GET') urlStr += (endpoint.includes('?') ? '&' : '?') + encoded;
+      else bodyStr = encoded;
+    }
+
+    const urlObj = new URL(urlStr);
+    const options = {
+      hostname: urlObj.hostname,
+      path: urlObj.pathname + urlObj.search,
+      method: m,
+      agent: sharedHttpsAgent,
+      headers: {
+        'Accept': 'application/json',
+        'X-Api-Key': KEY || ''
+      }
+    };
+
+    if (bodyStr) {
+      options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      options.headers['Content-Length'] = Buffer.byteLength(bodyStr);
+    }
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        const trimmed = (data || '').trim();
+        try { resolve(JSON.parse(trimmed)); }
+        catch {
+          reject(new Error(`MustikaPay balas non-JSON (HTTP ${res.statusCode}): ${trimmed.slice(0, 80)}`));
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.setTimeout(timeoutMs || 15000, () => {
+      req.destroy(new Error(`MustikaPay Timeout (${(timeoutMs || 15000) / 1000}s)`));
+    });
+
+    if (bodyStr) req.write(bodyStr);
+    req.end();
+  });
+}
+
 // ─── Shared User-Agent Header ──────────────────────────────────────────────
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
@@ -294,6 +357,7 @@ module.exports = {
   createRateLimiter,
   fr3Request,
   sayabayarRequest,
+  mustikapayRequest,
   BROWSER_UA,
   isJunkTestimonial,
   normalizeTestimonial,

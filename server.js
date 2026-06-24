@@ -10,10 +10,11 @@ const { cleanEnvVar } = require('./utils/helpers');
 cleanEnvVar('CLOUDINARY_URL');
 cleanEnvVar('FR3_API_KEY');
 cleanEnvVar('SAYABAYAR_API_KEY');
+cleanEnvVar('MUSTIKAPAY_API_KEY');
 
 // Peringatan boot yang jelas kalau gateway pembayaran utama tak akan jalan.
-if (!process.env.SAYABAYAR_API_KEY) {
-  console.warn('[BOOT] ⚠️  SAYABAYAR_API_KEY KOSONG — pembayaran SayaBayar akan gagal. Set di .env server lalu restart.');
+if (!process.env.MUSTIKAPAY_API_KEY) {
+  console.warn('[BOOT] ⚠️  MUSTIKAPAY_API_KEY KOSONG — gateway utama (QRIS/VA/E-Money/Retail) akan gagal. Set di .env server lalu restart.');
 }
 
 const express = require('express');
