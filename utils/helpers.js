@@ -238,7 +238,14 @@ function mustikapayRequest(method, endpoint, payload, timeoutMs) {
       agent: sharedHttpsAgent,
       headers: {
         'Accept': 'application/json',
-        'X-Api-Key': KEY || ''
+        'X-Api-Key': KEY || '',
+        // MustikaPay di belakang Cloudflare: request tanpa header browser (terutama
+        // User-Agent) kena bot-challenge (HTTP 403 halaman HTML "just a moment"),
+        // mis. pada endpoint e-money. Header browser lengkap menurunkan kemungkinan diblok.
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+        'Origin': 'https://mustikapayment.com',
+        'Referer': 'https://mustikapayment.com/'
       }
     };
 

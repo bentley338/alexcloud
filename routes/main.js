@@ -10,16 +10,17 @@ const moment = require('moment');
 const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
 
 // ─── MustikaPay metode & opsi (dipakai selector di payment.ejs) ──────────────
-// VA: subset bank populer yang didukung MustikaPay (BCA, BNI, BRI, dst).
+// VA: kode bank MustikaPay = kode numerik Bank Indonesia (BUKAN singkatan —
+// "BCA" ditolak, harus "014"). Diverifikasi langsung ke API.
 const MP_BANKS = [
-  { code: 'BCA', name: 'BCA' },
-  { code: 'BNI', name: 'BNI' },
-  { code: 'BRI', name: 'BRI' },
-  { code: 'MANDIRI', name: 'Mandiri' },
-  { code: 'PERMATA', name: 'Permata' },
-  { code: 'CIMB', name: 'CIMB Niaga' },
-  { code: 'DANAMON', name: 'Danamon' },
-  { code: 'BSI', name: 'BSI' }
+  { code: '014', name: 'BCA' },
+  { code: '009', name: 'BNI' },
+  { code: '002', name: 'BRI' },
+  { code: '008', name: 'Mandiri' },
+  { code: '013', name: 'Permata' },
+  { code: '022', name: 'CIMB Niaga' },
+  { code: '011', name: 'Danamon' },
+  { code: '451', name: 'BSI' }
 ];
 // E-Money: peta provider -> product_code MustikaPay.
 const MP_EWALLETS = [
