@@ -1894,11 +1894,11 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .site-announce--promo { background: linear-gradient(135deg, #ffffff 0%, #db2777 100%); }
 .site-announce--warn  { background: linear-gradient(135deg, #d97706 0%, #dc2626 100%); }
 .site-announce-inner {
-  display: flex; align-items: center; gap: 0.6rem; max-width: 1100px;
-  overflow: hidden; white-space: nowrap;
+  display: flex; align-items: center; gap: 0.6rem; max-width: 100%;
+  overflow: hidden; white-space: nowrap; min-width: 0;
 }
 .site-announce-inner i { flex-shrink: 0; }
-.site-announce-text { overflow: hidden; text-overflow: ellipsis; }
+.site-announce-text { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .site-announce-link { color: #fff; font-weight: 700; text-decoration: underline; white-space: nowrap; flex-shrink: 0; }
 .site-announce-close {
   position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
