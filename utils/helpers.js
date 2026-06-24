@@ -94,7 +94,12 @@ function fr3RequestOnce(endpoint, method, payload, timeoutMs) {
       agent: sharedHttpsAgent,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'Accept': 'application/json',
+        // Header browser lengkap menurunkan kemungkinan kena Cloudflare bot-challenge.
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+        'Origin': 'https://fr3newera.com',
+        'Referer': 'https://fr3newera.com/'
       }
     };
 
@@ -106,8 +111,19 @@ function fr3RequestOnce(endpoint, method, payload, timeoutMs) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch { reject(new Error('Invalid JSON from FR3')); }
+        const trimmed = (data || '').trim();
+        try { resolve(JSON.parse(trimmed)); return; }
+        catch { /* bukan JSON — diagnosa di bawah */ }
+        // FR3 di belakang Cloudflare: kalau diblok, body-nya halaman HTML challenge,
+        // bukan JSON. Beri pesan jelas (status + indikasi Cloudflare) supaya admin
+        // tahu ini blokir Cloudflare, bukan sekadar "Invalid JSON".
+        const isHtml = /^\s*</.test(trimmed) || /<html|just a moment|cloudflare/i.test(trimmed);
+        const status = res.statusCode;
+        if (isHtml || status === 403 || status === 503) {
+          reject(new Error(`FR3 diblok Cloudflare (HTTP ${status}) — IP server tidak lolos challenge`));
+        } else {
+          reject(new Error(`FR3 balas non-JSON (HTTP ${status}): ${trimmed.slice(0, 80)}`));
+        }
       });
     });
 

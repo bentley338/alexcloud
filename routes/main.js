@@ -407,7 +407,8 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
 
 // Generate a QRIS via FR3 — throws on any failure, marks the order 'ready' on success.
 async function tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal) {
-  const fr3Data = await fr3Request('/topup', 'POST', { nominal: fr3Nominal }, 25000);
+  // 3 percobaan: Cloudflare/stall FR3 sering hanya intermittent, beri beberapa kesempatan.
+  const fr3Data = await fr3Request('/topup', 'POST', { nominal: fr3Nominal }, 25000, 3);
   if (!fr3Data || !fr3Data.data || !fr3Data.data.trxId) {
     throw new Error(fr3Data?.message || 'API did not return a transaction ID');
   }
