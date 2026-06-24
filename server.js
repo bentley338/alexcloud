@@ -1,4 +1,6 @@
-require('dotenv').config();
+// Muat .env dari folder file ini (bukan CWD) agar tetap terbaca walau server
+// dijalankan dari direktori lain (pm2/systemd/cron) — penyebab umum env kosong.
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const fs = require('fs');
 const path = require('path');
@@ -8,6 +10,11 @@ const { cleanEnvVar } = require('./utils/helpers');
 cleanEnvVar('CLOUDINARY_URL');
 cleanEnvVar('FR3_API_KEY');
 cleanEnvVar('SAYABAYAR_API_KEY');
+
+// Peringatan boot yang jelas kalau gateway pembayaran utama tak akan jalan.
+if (!process.env.SAYABAYAR_API_KEY) {
+  console.warn('[BOOT] ⚠️  SAYABAYAR_API_KEY KOSONG — pembayaran SayaBayar akan gagal. Set di .env server lalu restart.');
+}
 
 const express = require('express');
 const session = require('express-session');
