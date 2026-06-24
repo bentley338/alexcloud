@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 
 <div class="page-wrap" id="main-content">
-  <div style="padding: 4rem 0 3rem; background: linear-gradient(180deg, rgba(79, 70, 229,0.04) 0%, transparent 100%);">
+  <div style="padding: 4rem 0 3rem; background: linear-gradient(180deg, rgba(124,58,237,0.04) 0%, transparent 100%);">
     <div class="container">
       <div class="section-tag" style="margin-bottom:1rem;">Game Library</div>
       <h1 class="section-title"><span class="accent">Semua Game</span> Tersedia</h1>
@@ -13,12 +13,12 @@
     <!-- Genre Filter -->
     <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:2.5rem;">
       <a href="/games" class="btn-action <%= activeGenre === 'all' ? 'btn-confirm' : '' %>"
-        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === 'all' ? 'rgba(79, 70, 229,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === 'all' ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === 'all' ? 'rgba(79, 70, 229,0.3)' : 'var(--border)' %>">
+        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === 'all' ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === 'all' ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === 'all' ? 'rgba(124,58,237,0.3)' : 'var(--border)' %>">
         Semua (<%= (genres.length > 0 ? games.length : 0) + (activeGenre === 'all' ? games.length : 0) %>)
       </a>
       <% genres.forEach(genre => { %>
       <a href="/games?genre=<%= encodeURIComponent(genre) %>" class="btn-action"
-        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === genre ? 'rgba(79, 70, 229,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === genre ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === genre ? 'rgba(79, 70, 229,0.3)' : 'var(--border)' %>">
+        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === genre ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === genre ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === genre ? 'rgba(124,58,237,0.3)' : 'var(--border)' %>">
         <%= genre %>
       </a>
       <% }) %>

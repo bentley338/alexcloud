@@ -134,7 +134,7 @@
     var toast = document.createElement('div');
     toast.innerHTML = msg;
     toast.style.cssText = 'position: fixed; bottom: 5rem; right: 2rem; z-index: 99999; ' +
-      'background: ' + (toastType === 'success' ? 'linear-gradient(135deg, #3b82f6, #06b6d4)' : '#ff4444') + '; ' +
+      'background: ' + (toastType === 'success' ? 'linear-gradient(135deg, #F43F5E, #FB7185)' : '#ff4444') + '; ' +
       'color: #fff; font-family: system-ui, -apple-system, sans-serif; font-weight: 700; ' +
       'padding: 0.85rem 1.5rem; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); ' +
       'font-size: 0.95rem; max-width: 320px; transition: opacity 0.3s ease;';
