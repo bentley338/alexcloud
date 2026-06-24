@@ -210,8 +210,13 @@ function sayabayarRequest(method, endpoint, payload, timeoutMs) {
 // Auth via X-Api-Key header. Endpoint POST "classic" memakai
 // application/x-www-form-urlencoded; endpoint GET (check status) memakai query
 // string. Resolves parsed JSON, rejects on network failure / non-JSON body.
+//
+// Opsional: set MUSTIKAPAY_PROXY (mis. http://user:pass@host:port) untuk merutekan
+// semua call MustikaPay lewat proxy berIP bersih — solusi saat IP server (mis. egress
+// datacenter Railway) diblok Cloudflare MustikaPay. Tanpa env ini, jalur normal dipakai.
 function mustikapayRequestOnce(method, endpoint, payload, timeoutMs) {
   const KEY = process.env.MUSTIKAPAY_API_KEY;
+  const PROXY = process.env.MUSTIKAPAY_PROXY;
   const BASE = 'https://mustikapayment.com';
   const m = (method || 'GET').toUpperCase();
 
@@ -231,48 +236,82 @@ function mustikapayRequestOnce(method, endpoint, payload, timeoutMs) {
     }
 
     const urlObj = new URL(urlStr);
-    const options = {
-      hostname: urlObj.hostname,
-      path: urlObj.pathname + urlObj.search,
-      method: m,
-      agent: sharedHttpsAgent,
-      headers: {
-        'Accept': 'application/json',
-        'X-Api-Key': KEY || '',
-        // MustikaPay di belakang Cloudflare: request tanpa header browser (terutama
-        // User-Agent) kena bot-challenge (HTTP 403 halaman HTML "just a moment"),
-        // mis. pada endpoint e-money. Header browser lengkap menurunkan kemungkinan diblok.
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
-        'Origin': 'https://mustikapayment.com',
-        'Referer': 'https://mustikapayment.com/'
-      }
+    const headers = {
+      'Accept': 'application/json',
+      'X-Api-Key': KEY || '',
+      // MustikaPay di belakang Cloudflare: request tanpa header browser (terutama
+      // User-Agent) kena bot-challenge (HTTP 403 halaman HTML "just a moment"),
+      // mis. pada endpoint e-money. Header browser lengkap menurunkan kemungkinan diblok.
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+      'Origin': 'https://mustikapayment.com',
+      'Referer': 'https://mustikapayment.com/'
     };
-
     if (bodyStr) {
-      options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      options.headers['Content-Length'] = Buffer.byteLength(bodyStr);
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      headers['Content-Length'] = Buffer.byteLength(bodyStr);
     }
 
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        const trimmed = (data || '').trim();
-        try { resolve(JSON.parse(trimmed)); }
-        catch {
-          reject(new Error(`MustikaPay balas non-JSON (HTTP ${res.statusCode}): ${trimmed.slice(0, 80)}`));
-        }
+    // Kirim request HTTPS — pakai socket (hasil tunnel proxy) bila disediakan.
+    const fire = (socket) => {
+      const options = {
+        hostname: urlObj.hostname,
+        port: 443,
+        path: urlObj.pathname + urlObj.search,
+        method: m,
+        headers,
+        servername: urlObj.hostname
+      };
+      if (socket) { options.createConnection = () => socket; options.agent = false; }
+      else { options.agent = sharedHttpsAgent; }
+
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          const trimmed = (data || '').trim();
+          try { resolve(JSON.parse(trimmed)); }
+          catch {
+            reject(new Error(`MustikaPay balas non-JSON (HTTP ${res.statusCode}): ${trimmed.slice(0, 80)}`));
+          }
+        });
       });
-    });
+      req.on('error', reject);
+      req.setTimeout(timeoutMs || 15000, () => {
+        req.destroy(new Error(`MustikaPay Timeout (${(timeoutMs || 15000) / 1000}s)`));
+      });
+      if (bodyStr) req.write(bodyStr);
+      req.end();
+    };
 
-    req.on('error', reject);
-    req.setTimeout(timeoutMs || 15000, () => {
-      req.destroy(new Error(`MustikaPay Timeout (${(timeoutMs || 15000) / 1000}s)`));
-    });
+    if (!PROXY) { fire(null); return; }
 
-    if (bodyStr) req.write(bodyStr);
-    req.end();
+    // Rute via proxy: buka tunnel CONNECT lalu TLS handshake di atasnya.
+    let pu;
+    try { pu = new URL(PROXY); } catch { reject(new Error('MUSTIKAPAY_PROXY URL tidak valid')); return; }
+    const http = require('http');
+    const tls = require('tls');
+    const connHeaders = {};
+    if (pu.username) {
+      const cred = `${decodeURIComponent(pu.username)}:${decodeURIComponent(pu.password || '')}`;
+      connHeaders['Proxy-Authorization'] = 'Basic ' + Buffer.from(cred).toString('base64');
+    }
+    const creq = http.request({
+      host: pu.hostname,
+      port: Number(pu.port) || 80,
+      method: 'CONNECT',
+      path: `${urlObj.hostname}:443`,
+      headers: connHeaders,
+      timeout: 10000
+    });
+    creq.on('connect', (res, sock) => {
+      if (res.statusCode !== 200) { reject(new Error(`Proxy CONNECT gagal (HTTP ${res.statusCode})`)); return; }
+      const tlsSock = tls.connect({ socket: sock, servername: urlObj.hostname }, () => fire(tlsSock));
+      tlsSock.on('error', reject);
+    });
+    creq.on('error', reject);
+    creq.on('timeout', () => creq.destroy(new Error('Proxy CONNECT timeout')));
+    creq.end();
   });
 }
 
