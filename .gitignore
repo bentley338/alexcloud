@@ -5,3 +5,6 @@ database/db.json
 .DS_Store
 
 sessions/
+
+# PageSpeed Insights dump (one-off, jangan di-commit)
+psi_d.json
