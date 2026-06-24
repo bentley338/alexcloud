@@ -435,6 +435,11 @@ function extractSbQris(sd) {
 // SayaBayar adds its own unique code, so we send the base price (not the FR3 nominal).
 async function trySayabayarGateway(orderInternalId, actualPrice) {
   const order = db.get('orders').find({ id: orderInternalId }).value();
+  // SayaBayar menolak amount < 100 (VALIDATION_ERROR "must be >= 100"). Tangkap lebih
+  // awal dengan pesan jelas agar tidak tampak seperti gateway "gagal merespons".
+  if (!Number.isFinite(actualPrice) || actualPrice < 100) {
+    throw new Error(`Nominal Rp${actualPrice} tidak valid (min SayaBayar Rp100)`);
+  }
   const sb = await sayabayarRequest('POST', '/invoices', {
     customer_name: order?.userName || 'Pelanggan AlexCloud',
     customer_email: order?.userEmail || undefined,
@@ -497,20 +502,25 @@ async function kickoffQrisGeneration(orderInternalId, actualPrice, fr3Nominal) {
   const primary = (process.env.PAYMENT_PRIMARY || 'sayabayar').toLowerCase();
   const sequence = primary === 'sayabayar' ? ['sayabayar', 'fr3'] : ['fr3', 'sayabayar'];
 
+  const errors = {};
   for (const gw of sequence) {
     try {
       if (gw === 'fr3') await tryFr3Gateway(orderInternalId, actualPrice, fr3Nominal);
       else await trySayabayarGateway(orderInternalId, actualPrice);
       return; // success — order is now 'ready'
     } catch (e) {
+      errors[gw] = e.message;
       console.warn(`[PAY] Gateway ${gw} gagal:`, e.message);
     }
   }
 
-  // All gateways failed → manual
+  // All gateways failed → manual. Simpan alasan ASLI tiap gateway (bukan pesan generik)
+  // supaya penyebab nyata terlihat di admin/log — mis. limit invoice gratis SayaBayar
+  // atau blokir Cloudflare FR3 — bukan disangka sekadar "gagal merespons".
+  const reason = `Gateway gagal — SayaBayar: ${errors.sayabayar || 'tidak dicoba'} | FR3: ${errors.fr3 || 'tidak dicoba'}`;
   db.get('orders').find({ id: orderInternalId }).assign({
     qrisStatus: 'failed',
-    fr3Error: 'Semua gateway pembayaran (FR3 & SayaBayar) gagal merespons',
+    fr3Error: reason,
     paymentMethod: 'manual'
   }).write();
 }
