@@ -57,16 +57,10 @@
 
         <!-- QR Code rendered from qr_string -->
         <div class="qr-box" id="qrBox">
-          <!-- Primary: render via QR server API (100% reliable) -->
+          <!-- Rendered client-side from the QRIS string (self-hosted qrcode lib),
+               so it tidak bergantung ke layanan QR eksternal yang bisa diblokir ISP. -->
           <% if (order.fr3QrString) { %>
-          <img 
-            id="qrImg"
-            src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=<%= encodeURIComponent(order.fr3QrString) %>"
-            width="220" height="220"
-            alt="QRIS Payment Code"
-            style="border-radius:8px; display:block;"
-            onerror="this.onerror=null; renderQRFallback();"
-          >
+          <div id="qrRender" style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;"></div>
           <% } else { %>
           <div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;">
             <div style="color:#999;font-size:0.8rem;text-align:center;"><i class="fas fa-exclamation-circle"></i><br>QR tidak tersedia</div>
@@ -840,7 +834,8 @@
 </style>
 
 <% if (fr3Success) { %>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Self-hosted dulu (same-origin, paling andal); cdnjs hanya cadangan kalau gagal -->
+<script src="/js/qrcode.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';document.head.appendChild(s);})()"></script>
 <script>
 const ORDER_ID = <%- JSON.stringify(order.orderId) %>;
 const QR_STRING = <%- JSON.stringify(order.fr3QrString || '') %>;
@@ -850,33 +845,37 @@ let pollInterval;
 let timerInterval;
 let cancelled = false;
 
-// Fallback jika img dari qrserver.com gagal load
-function renderQRFallback() {
-  if (!QR_STRING) return;
-  const qrBox = document.getElementById('qrBox');
-  const oldImg = document.getElementById('qrImg');
-  if (oldImg) oldImg.remove();
+// Render QRIS di sisi browser. Utama: library qrcode lokal (tanpa jaringan).
+// Cadangan: gambar dari api.qrserver.com. Kalau dua-duanya gagal: pesan jelas.
+function qrServerFallback(target) {
+  const img = document.createElement('img');
+  img.width = 220; img.height = 220; img.alt = 'QRIS Payment Code';
+  img.style.cssText = 'border-radius:8px;display:block;';
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=' + encodeURIComponent(QR_STRING);
+  img.onerror = function () {
+    target.innerHTML = '<div style="color:#999;font-size:0.8rem;text-align:center;"><i class="fas fa-exclamation-circle"></i><br>QR gagal dimuat<br>gunakan tombol salin di bawah</div>';
+  };
+  target.innerHTML = '';
+  target.appendChild(img);
+}
 
-  const qrDiv = document.createElement('div');
-  qrDiv.id = 'qrDiv';
-  const overlay = document.getElementById('qrExpired');
-  qrBox.insertBefore(qrDiv, overlay);
-
+function renderQR() {
+  const target = document.getElementById('qrRender');
+  if (!target || !QR_STRING) return;
   if (typeof QRCode !== 'undefined') {
     try {
-      new QRCode(qrDiv, {
+      target.innerHTML = '';
+      new QRCode(target, {
         text: QR_STRING,
         width: 220, height: 220,
         colorDark: '#000000',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
-    } catch(e) {
-      qrDiv.innerHTML = '<img src="https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl=' + encodeURIComponent(QR_STRING) + '" width="220" height="220">';
-    }
-  } else {
-    qrDiv.innerHTML = '<img src="https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl=' + encodeURIComponent(QR_STRING) + '" width="220" height="220">';
+      return;
+    } catch (e) { /* jatuh ke qrserver di bawah */ }
   }
+  qrServerFallback(target);
 }
 
 // Countdown timer
@@ -1000,6 +999,10 @@ async function confirmCancelPayment() {
 }
 
 // Start
+renderQR();
+// Kalau library belum siap saat render pertama (mis. cdnjs cadangan masih loading),
+// render ulang sekali setelah jeda singkat supaya QR tetap muncul.
+if (typeof QRCode === 'undefined') setTimeout(renderQR, 700);
 startTimer();
 startPolling();
 // Check once immediately after 2 seconds
