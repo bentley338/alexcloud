@@ -305,6 +305,11 @@ router.post('/api/promo/validate', ensureAuthenticated, (req, res) => {
     return res.json({ valid: false, message: 'Kode promo sudah mencapai batas penggunaan.' });
   }
 
+  // Check minimum purchase
+  if (promo.minPurchase && plan.price < promo.minPurchase) {
+    return res.json({ valid: false, message: `Promo ini hanya berlaku untuk pembelian min. Rp ${promo.minPurchase.toLocaleString('id-ID')}.` });
+  }
+
   const originalPrice = plan.price;
   let discount = 0;
   let finalPrice = originalPrice;
@@ -341,7 +346,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   // Validate promo if provided
   if (promoCode && promoId) {
     const promo = db.get('promoCodes').find({ id: promoId, code: promoCode.toUpperCase(), isActive: true }).value();
-    if (promo && !(promo.expiresAt && new Date(promo.expiresAt) < new Date()) && !(promo.maxUses && promo.usedCount >= promo.maxUses)) {
+    if (promo && !(promo.expiresAt && new Date(promo.expiresAt) < new Date()) && !(promo.maxUses && promo.usedCount >= promo.maxUses) && !(promo.minPurchase && plan.price < promo.minPurchase)) {
       if (promo.discountType === 'percent') {
         discount = Math.round(plan.price * promo.discountValue / 100);
       } else {

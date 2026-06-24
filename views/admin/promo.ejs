@@ -40,6 +40,11 @@
           <input type="number" name="maxUses" class="form-input" placeholder="Kosong = unlimited" min="1">
         </div>
         <div class="form-group" style="margin:0;">
+          <label class="form-label">Min. Pembelian (Rp)</label>
+          <input type="number" name="minPurchase" class="form-input" placeholder="cth: 100000" min="0" step="1000">
+          <small style="color:var(--text-muted); font-size:0.78rem;">Promo hanya berlaku jika harga ≥ nilai ini. Kosong = tanpa syarat</small>
+        </div>
+        <div class="form-group" style="margin:0;">
           <label class="form-label">Berlaku Hingga</label>
           <input type="datetime-local" name="expiresAt" class="form-input">
           <small style="color:var(--text-muted); font-size:0.78rem;">Kosongkan = tidak ada batas</small>
@@ -94,6 +99,7 @@
                 Rp <%= p.discountValue.toLocaleString('id-ID') %>
               <% } %>
             </span>
+            <% if (p.minPurchase) { %><br><small style="color:var(--text-muted); font-size:0.78rem;">min. Rp <%= p.minPurchase.toLocaleString('id-ID') %></small><% } %>
           </td>
           <td style="font-family:var(--font-ui); text-align:center;"><%= p.usedCount || 0 %>x</td>
           <td style="font-family:var(--font-ui); text-align:center; color:var(--text-muted);">

@@ -564,7 +564,7 @@ router.get('/promo', ensureAdmin, (req, res) => {
 });
 
 router.post('/promo', ensureAdmin, (req, res) => {
-  const { code, discountType, discountValue, maxUses, expiresAt, description } = req.body;
+  const { code, discountType, discountValue, maxUses, minPurchase, expiresAt, description } = req.body;
   if (!code || !discountType || !discountValue) {
     req.flash('error', 'Kode, tipe, dan nilai diskon wajib diisi.');
     return res.redirect('/admin/promo');
@@ -576,6 +576,7 @@ router.post('/promo', ensureAdmin, (req, res) => {
     code: code.toUpperCase(),
     discountType, discountValue: parseFloat(discountValue),
     maxUses: maxUses ? parseInt(maxUses) : null,
+    minPurchase: minPurchase ? parseInt(minPurchase) : null,
     usedCount: 0,
     expiresAt: expiresAt || null,
     description: description || '',
