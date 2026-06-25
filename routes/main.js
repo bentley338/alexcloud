@@ -680,20 +680,16 @@ async function trySayabayarGateway(orderInternalId, actualPrice) {
   }).write();
 }
 
-// Generate QRIS dengan fallback berurutan: MustikaPay → SayaBayar → FR3.
-// Hanya QRIS yang punya fallback (ketiga gateway mendukung QRIS); VA/E-Money/Retail
-// eksklusif MustikaPay. Urutan diawali PAYMENT_PRIMARY. Throws kalau semua gagal.
+// Generate QRIS dengan fallback berurutan: MustikaPay → FR3 (SayaBayar dinonaktifkan).
+// Hanya QRIS yang punya fallback; VA/E-Money/Retail eksklusif MustikaPay.
 async function generateQris(orderInternalId, actualPrice, order) {
-  const primary = (process.env.PAYMENT_PRIMARY || 'mustikapay').toLowerCase();
-  const all = ['mustikapay', 'sayabayar', 'fr3'];
-  const sequence = [primary, ...all.filter(g => g !== primary)];
+  const sequence = ['mustikapay', 'fr3'];
 
   const errors = {};
   for (const gw of sequence) {
     try {
       if (gw === 'mustikapay') await tryMustikapayQris(orderInternalId, actualPrice, order);
-      else if (gw === 'sayabayar') await trySayabayarGateway(orderInternalId, actualPrice);
-      else {
+      else if (gw === 'fr3') {
         // FR3 butuh kode unik tertanam di nominal QR untuk pencocokan pembayaran.
         const uniq = (actualPrice % 100 === 0) ? (Math.floor(Math.random() * 90) + 10) : 0;
         await tryFr3Gateway(orderInternalId, actualPrice, actualPrice + uniq);
@@ -704,7 +700,7 @@ async function generateQris(orderInternalId, actualPrice, order) {
       console.warn(`[PAY] QRIS ${gw} gagal:`, e.message);
     }
   }
-  throw new Error(`MustikaPay: ${errors.mustikapay || '-'} | SayaBayar: ${errors.sayabayar || '-'} | FR3: ${errors.fr3 || '-'}`);
+  throw new Error(`MustikaPay: ${errors.mustikapay || '-'} | FR3: ${errors.fr3 || '-'}`);
 }
 
 // Payment page (GET) — selector metode / instrumen-siap / manual untuk satu order.
