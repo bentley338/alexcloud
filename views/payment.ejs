@@ -66,10 +66,10 @@
             <div class="method-name">QRIS</div>
             <div class="method-desc">GoPay, OVO, DANA, ShopeePay, m-Banking</div>
             <div class="method-logos">
-              <img src="/images/dana-logo.svg" alt="DANA">
-              <img src="/images/ovo-logo.svg" alt="OVO">
-              <img src="/images/gopay-logo.svg" alt="GoPay">
-              <img src="/images/shopeepay-logo.svg" alt="ShopeePay">
+              <div class="method-logo-badge"><img src="/images/dana-logo.svg" alt="DANA"></div>
+              <div class="method-logo-badge"><img src="/images/ovo-logo.svg" alt="OVO"></div>
+              <div class="method-logo-badge"><img src="/images/gopay-logo.svg" alt="GoPay"></div>
+              <div class="method-logo-badge"><img src="/images/shopeepay-logo.svg" alt="ShopeePay"></div>
             </div>
           </div>
           <i class="fas fa-chevron-right method-arrow"></i>
@@ -86,10 +86,10 @@
             <div class="method-desc"><%= vaOk ? 'BCA, BNI, BRI, Mandiri, Permata, dll' : ('Min. Rp' + minAmount.va.toLocaleString('id-ID')) %></div>
             <% if (vaOk) { %>
             <div class="method-logos">
-              <img src="/images/bca-logo.svg" alt="BCA">
-              <img src="/images/bni-logo.svg" alt="BNI">
-              <img src="/images/bri-logo.svg" alt="BRI">
-              <img src="/images/mandiri-logo.svg" alt="Mandiri">
+              <div class="method-logo-badge"><img src="/images/bca-logo.svg" alt="BCA"></div>
+              <div class="method-logo-badge"><img src="/images/bni-logo.svg" alt="BNI"></div>
+              <div class="method-logo-badge"><img src="/images/bri-logo.svg" alt="BRI"></div>
+              <div class="method-logo-badge"><img src="/images/mandiri-logo.svg" alt="Mandiri"></div>
             </div>
             <% } %>
           </div>
@@ -108,10 +108,10 @@
             <div class="method-name">E-Wallet</div>
             <div class="method-desc">DANA, ShopeePay, OVO, LinkAja</div>
             <div class="method-logos">
-              <img src="/images/dana-logo.svg" alt="DANA">
-              <img src="/images/shopeepay-logo.svg" alt="ShopeePay">
-              <img src="/images/ovo-logo.svg" alt="OVO">
-              <img src="/images/linkaja-logo.svg" alt="LinkAja">
+              <div class="method-logo-badge"><img src="/images/dana-logo.svg" alt="DANA"></div>
+              <div class="method-logo-badge"><img src="/images/shopeepay-logo.svg" alt="ShopeePay"></div>
+              <div class="method-logo-badge"><img src="/images/ovo-logo.svg" alt="OVO"></div>
+              <div class="method-logo-badge"><img src="/images/linkaja-logo.svg" alt="LinkAja"></div>
             </div>
           </div>
           <i class="fas fa-chevron-right method-arrow"></i>
@@ -130,8 +130,8 @@
             <div class="method-desc"><%= retailOk ? 'Alfamart, Indomaret' : ('Rp' + minAmount.retail.toLocaleString('id-ID') + ' – Rp' + maxAmount.retail.toLocaleString('id-ID')) %></div>
             <% if (retailOk) { %>
             <div class="method-logos">
-              <img src="/images/alfamart-logo.svg" alt="Alfamart">
-              <img src="/images/indomaret-logo.svg" alt="Indomaret">
+              <div class="method-logo-badge"><img src="/images/alfamart-logo.svg" alt="Alfamart"></div>
+              <div class="method-logo-badge"><img src="/images/indomaret-logo.svg" alt="Indomaret"></div>
             </div>
             <% } %>
           </div>
@@ -621,22 +621,32 @@
 .method-logos {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  margin-top: 0.4rem;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
   flex-wrap: wrap;
 }
-.method-logos img {
-  height: 12px;
-  max-width: 38px;
-  object-fit: contain;
-  opacity: 0.45;
-  filter: brightness(0) invert(1);
-  transition: opacity 0.2s, filter 0.2s;
+.method-logo-badge {
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: transform 0.2s, opacity 0.2s;
+  opacity: 0.8;
 }
-.method-card:hover:not(.disabled) .method-logos img,
-.method-card.active .method-logos img {
-  opacity: 0.95;
-  filter: none;
+.method-logo-badge img {
+  height: 14px;
+  max-width: 40px;
+  object-fit: contain;
+  display: block;
+}
+.method-card:hover:not(.disabled) .method-logo-badge,
+.method-card.active .method-logo-badge {
+  opacity: 1;
+  transform: scale(1.05);
 }
 .method-arrow { color: var(--text-muted); font-size: 0.8rem; }
 
