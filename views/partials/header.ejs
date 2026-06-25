@@ -147,39 +147,67 @@
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="/css/fontawesome.min.css?v=1"></noscript>
+  <!-- CSRF token + auto-injeksi ke form & fetch/XHR (lihat middleware/csrf.js) -->
+  <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+  <script>
+  (function () {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    var token = meta ? (meta.getAttribute('content') || '') : '';
+    if (!token) return;
+    function decorate(form) {
+      if (!form || (form.getAttribute('method') || form.method || '').toUpperCase() === 'GET') return;
+      var enc = (form.getAttribute('enctype') || form.enctype || '').toLowerCase();
+      if (enc.indexOf('multipart') !== -1) {
+        // Body multipart diparse oleh multer SETELAH middleware CSRF → kirim via query.
+        if (form.action.indexOf('_csrf=') === -1) {
+          form.action += (form.action.indexOf('?') === -1 ? '?' : '&') + '_csrf=' + encodeURIComponent(token);
+        }
+      } else if (!form.querySelector('input[name="_csrf"]')) {
+        var i = document.createElement('input');
+        i.type = 'hidden'; i.name = '_csrf'; i.value = token;
+        form.appendChild(i);
+      }
+    }
+    document.addEventListener('submit', function (e) {
+      if (e.target && e.target.tagName === 'FORM') decorate(e.target);
+    }, true);
+    document.addEventListener('DOMContentLoaded', function () {
+      var forms = document.querySelectorAll('form');
+      for (var i = 0; i < forms.length; i++) decorate(forms[i]);
+    });
+    function mutating(m) { m = (m || 'GET').toUpperCase(); return m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS'; }
+    function sameOrigin(url) {
+      if (!url || url.indexOf('http') !== 0) return true; // relatif = same-origin
+      return url.indexOf(window.location.origin) === 0;
+    }
+    if (window.fetch) {
+      var origFetch = window.fetch;
+      window.fetch = function (input, init) {
+        init = init || {};
+        var method = init.method || (typeof input === 'object' && input && input.method) || 'GET';
+        var url = typeof input === 'string' ? input : (input && input.url) || '';
+        if (mutating(method) && sameOrigin(url)) {
+          var headers = new Headers(init.headers || (typeof input === 'object' && input ? input.headers : null) || {});
+          if (!headers.has('x-csrf-token')) headers.set('x-csrf-token', token);
+          init.headers = headers;
+        }
+        return origFetch.call(this, input, init);
+      };
+    }
+    var origOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method) {
+      this.__csrf = mutating(method);
+      return origOpen.apply(this, arguments);
+    };
+    var origSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function () {
+      if (this.__csrf) { try { this.setRequestHeader('x-csrf-token', token); } catch (e) {} }
+      return origSend.apply(this, arguments);
+    };
+  })();
+  </script>
 </head>
 <body>
-  <!-- Site Announcement Banner (managed from admin panel) -->
-  <% if (typeof announcement !== 'undefined' && announcement) { %>
-  <div class="site-announce site-announce--<%= announcement.type || 'info' %>" id="siteAnnounce" data-ann-id="<%= announcement.id || 'default' %>">
-    <div class="site-announce-inner">
-      <i class="fas fa-<%= announcement.type === 'promo' ? 'gift' : (announcement.type === 'warn' ? 'triangle-exclamation' : 'bullhorn') %>" aria-hidden="true"></i>
-      <span class="site-announce-text"><%= announcement.text %></span>
-      <% if (announcement.link && announcement.linkText) { %>
-        <a href="<%= announcement.link %>" class="site-announce-link"><%= announcement.linkText %> →</a>
-      <% } %>
-    </div>
-    <button class="site-announce-close" type="button" onclick="dismissAnnounce()" aria-label="Tutup pengumuman">✕</button>
-  </div>
-  <script>
-    document.body.classList.add('has-announcement');
-    (function () {
-      var el = document.getElementById('siteAnnounce');
-      if (!el) return;
-      var id = el.getAttribute('data-ann-id') || 'default';
-      try { if (localStorage.getItem('annDismissed') === id) { el.remove(); document.body.classList.remove('has-announcement'); } } catch (e) {}
-    })();
-    function dismissAnnounce() {
-      var el = document.getElementById('siteAnnounce');
-      if (!el) return;
-      var id = el.getAttribute('data-ann-id') || 'default';
-      try { localStorage.setItem('annDismissed', id); } catch (e) {}
-      el.remove();
-      document.body.classList.remove('has-announcement');
-    }
-  </script>
-  <% } %>
-
   <!-- Scroll Progress Indicator -->
   <div class="scroll-progress" id="scrollProgress"></div>
 

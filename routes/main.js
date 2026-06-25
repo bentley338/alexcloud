@@ -89,7 +89,19 @@ router.get('/api/testimonials/:id/image', (req, res) => {
       return res.sendFile(filePath);
     }
   } else if (trimmed.startsWith('http')) {
-    return res.redirect(trimmed);
+    // Cegah open redirect: hanya teruskan ke host gambar tepercaya via HTTPS.
+    // (Halaman menyajikan URL http(s) langsung; endpoint ini hanya jalur cadangan.)
+    const ALLOWED_IMAGE_HOSTS = [
+      'res.cloudinary.com', 'wsrv.nl', 'api.dicebear.com',
+      'placehold.co', 'pixhost.to', 'imgur.com', 'ibb.co'
+    ];
+    try {
+      const u = new URL(trimmed);
+      const host = u.hostname.toLowerCase();
+      const ok = u.protocol === 'https:' &&
+        ALLOWED_IMAGE_HOSTS.some(h => host === h || host.endsWith('.' + h));
+      if (ok) return res.redirect(trimmed);
+    } catch (e) { /* URL rusak → jatuh ke 404 */ }
   }
 
   return res.status(404).send('Image Not Found');
@@ -947,117 +959,6 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
   return res.json({ success: true, message: 'Pesanan berhasil dibatalkan' });
 });
 
-// =====================
-// DEBUG (admin): IP egress server — untuk di-whitelist di dashboard MustikaPay.
-// IP keluar Railway hanya terlihat DARI DALAM server (request ini berasal dari IP
-// egress itu). Buka /api/debug/egress-ip sebagai admin → catat ipv4 → whitelist.
-// Hapus route ini setelah selesai. family:4 dipakai karena call MustikaPay juga v4.
-// =====================
-router.get('/api/debug/egress-ip', ensureAuthenticated, async (req, res) => {
-  if (!req.user || req.user.role !== 'admin') return res.status(403).json({ error: 'admin only' });
-
-  function fetchIp(family) {
-    return new Promise((resolve) => {
-      const r = https.request({
-        hostname: 'api.ipify.org', path: '/?format=json', method: 'GET', family, timeout: 8000
-      }, (resp) => {
-        let b = ''; resp.on('data', d => b += d);
-        resp.on('end', () => { try { resolve(JSON.parse(b).ip); } catch { resolve(null); } });
-      });
-      r.on('error', () => resolve(null));
-      r.on('timeout', () => { r.destroy(); resolve(null); });
-      r.end();
-    });
-  }
-
-  const [ipv4, ipv6] = await Promise.all([fetchIp(4), fetchIp(6)]);
-  res.json({
-    note: 'Whitelist ipv4 ini di MustikaPay (call MustikaPay pakai IPv4). Hapus route ini setelah selesai.',
-    ipv4: ipv4 || '(gagal ambil)',
-    ipv6: ipv6 || '(tidak ada / gagal)'
-  });
-});
-
-// =====================
-// DEBUG (admin): cek apakah MUSTIKAPAY_PROXY benar-benar kebaca di proses produksi
-// + lakukan call MustikaPay sungguhan lewat jalur yang dipakai app. Kalau proxy
-// kepakai → balas JSON (proxyEngaged true). Kalau env kosong → call langsung kena
-// Cloudflare 403 (proxyEngaged false). Hapus route ini setelah selesai diagnosa.
-// =====================
-router.get('/api/debug/mustikapay', ensureAuthenticated, async (req, res) => {
-  if (!req.user || req.user.role !== 'admin') return res.status(403).json({ error: 'admin only' });
-
-  const raw = process.env.MUSTIKAPAY_PROXY || '';
-  let proxyInfo = { set: false };
-  if (raw) {
-    try {
-      const u = new URL(raw);
-      proxyInfo = {
-        set: true,
-        host: u.hostname,
-        port: u.port,
-        hasAuth: !!u.username,
-        // value mentah disensor: tampilkan panjang + apakah ada kutip/spasi nyasar
-        rawLength: raw.length,
-        looksQuoted: /^["']|["']$/.test(raw),
-        hasStraySpace: raw !== raw.trim()
-      };
-    } catch (e) {
-      proxyInfo = { set: true, parseError: e.message, rawLength: raw.length };
-    }
-  }
-
-  // Exit IP yang benar-benar dilihat server tujuan saat lewat proxy (ipify via
-  // tunnel CONNECT). Ini IP yang harus di-whitelist di MustikaPay — BUKAN host gateway.
-  // Kalau exit IP di produksi beda dari lokal, berarti proxy sticky per-sumber.
-  async function proxyExitIp() {
-    if (!raw) return null;
-    let pu; try { pu = new URL(raw); } catch { return '(proxy URL invalid)'; }
-    const http = require('http'), tls = require('tls');
-    return new Promise((resolve) => {
-      const ch = {};
-      if (pu.username) {
-        const cred = `${decodeURIComponent(pu.username)}:${decodeURIComponent(pu.password || '')}`;
-        ch['Proxy-Authorization'] = 'Basic ' + Buffer.from(cred).toString('base64');
-      }
-      const creq = http.request({ host: pu.hostname, port: Number(pu.port) || 80, method: 'CONNECT', path: 'api.ipify.org:443', headers: ch, timeout: 12000 });
-      creq.on('connect', (cres, sock) => {
-        if (cres.statusCode !== 200) { resolve('CONNECT ' + cres.statusCode); return; }
-        const t = tls.connect({ socket: sock, servername: 'api.ipify.org' }, () => {
-          const r = https.request({ createConnection: () => t, agent: false, hostname: 'api.ipify.org', path: '/?format=json', method: 'GET', headers: { Host: 'api.ipify.org' } }, (resp) => {
-            let b = ''; resp.on('data', d => b += d); resp.on('end', () => { try { resolve(JSON.parse(b).ip); } catch { resolve('(parse fail)'); } });
-          });
-          r.on('error', e => resolve('err:' + e.message)); r.end();
-        });
-        t.on('error', e => resolve('tlserr:' + e.message));
-      });
-      creq.on('error', e => resolve('connerr:' + e.message));
-      creq.on('timeout', () => { creq.destroy(); resolve('timeout'); });
-      creq.end();
-    });
-  }
-
-  // Call MustikaPay sungguhan (read-only check, ref_no palsu) lewat jalur app.
-  let call;
-  const t0 = Date.now();
-  try {
-    const r = await mustikapayRequest('GET', '/api/v1/check/qris', { ref_no: 'DEBUGPING' }, 15000, 1);
-    call = { ok: true, ms: Date.now() - t0, body: r };
-  } catch (e) {
-    call = { ok: false, ms: Date.now() - t0, error: (e.message || '').slice(0, 160) };
-  }
-
-  const exitIp = await proxyExitIp();
-
-  res.json({
-    note: 'whitelist proxyExitIp ini di MustikaPay (BUKAN host gateway). proxyEngaged true = call tembus JSON. Hapus route ini setelah selesai.',
-    ipMode: process.env.MUSTIKAPAY_IPV6 === '1' ? 'ipv6 (direct)' : 'ipv4 (direct/proxy)',
-    proxyEnv: proxyInfo,
-    proxyExitIp: exitIp,
-    proxyEngaged: call.ok,
-    call
-  });
-});
 
 // Profile
 router.get('/profile', ensureAuthenticated, (req, res) => {

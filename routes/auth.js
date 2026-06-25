@@ -6,6 +6,34 @@ const { v4: uuidv4 } = require('uuid');
 const { db } = require('../database/db');
 const { ensureGuest, ensureAuthenticated } = require('../middleware/auth');
 
+// ─── Rate limit untuk login/register (cegah brute-force kredensial) ──────────
+// Per-IP, redirect dengan flash agar UX tetap konsisten (bukan JSON mentah).
+function authRateLimiter({ windowMs, maxAttempts, redirectTo }) {
+  const hits = new Map();
+  setInterval(() => {
+    const now = Date.now();
+    for (const [k, e] of hits) if (now - e.start > windowMs) hits.delete(k);
+  }, 60000).unref();
+  return function (req, res, next) {
+    const key = req.ip || (req.connection && req.connection.remoteAddress) || 'unknown';
+    const now = Date.now();
+    let e = hits.get(key);
+    if (!e || now - e.start > windowMs) {
+      hits.set(key, { count: 1, start: now });
+      return next();
+    }
+    e.count++;
+    if (e.count > maxAttempts) {
+      req.flash('error', 'Terlalu banyak percobaan. Silakan coba lagi dalam beberapa menit.');
+      return res.redirect(redirectTo);
+    }
+    next();
+  };
+}
+
+const loginLimiter = authRateLimiter({ windowMs: 60000, maxAttempts: 10, redirectTo: '/login' });
+const registerLimiter = authRateLimiter({ windowMs: 60000, maxAttempts: 5, redirectTo: '/register' });
+
 // Login page
 router.get('/login', ensureGuest, (req, res) => {
   res.render('auth/login', {
@@ -26,7 +54,7 @@ router.get('/register', ensureGuest, (req, res) => {
 });
 
 // Register POST
-router.post('/register', ensureGuest, (req, res) => {
+router.post('/register', ensureGuest, registerLimiter, (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
   if (!name || !email || !password) {
     req.flash('error', 'Semua field wajib diisi.');
@@ -63,7 +91,7 @@ router.post('/register', ensureGuest, (req, res) => {
 });
 
 // Login POST — cek isBanned + Remember Me
-router.post('/login', ensureGuest, (req, res, next) => {
+router.post('/login', ensureGuest, loginLimiter, (req, res, next) => {
   const rememberMe = req.body.rememberMe === 'on';
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);

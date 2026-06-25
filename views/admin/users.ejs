@@ -4,7 +4,7 @@
 <h1 class="admin-page-title"><i class="fas fa-users"></i> Kelola User</h1>
 
 <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
-<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%- s %></div><% }) %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
 <% } %>
 <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
 <% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>

@@ -189,7 +189,7 @@ function seedAdmin() {
       id: uuidv4(),
       name: 'Admin AlexCloud',
       email: process.env.ADMIN_EMAIL || 'admin@alexcloud.com',
-      password: bcrypt.hashSync('Admin@123', 10),
+      password: bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'Admin@123', 10),
       role: 'admin',
       avatar: null,
       googleId: null,

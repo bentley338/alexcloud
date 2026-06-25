@@ -347,7 +347,7 @@ router.post('/users/:id/reset-password', ensureAdmin, (req, res) => {
   const newPass = 'Alex' + Math.random().toString(36).slice(-6).toUpperCase();
   const hashed = bcrypt.hashSync(newPass, 10);
   db.get('users').find({ id: target.id }).assign({ password: hashed }).write();
-  req.flash('success', `🔑 Password ${target.name} direset → <strong>${newPass}</strong> (sampaikan ke user via WA)`);
+  req.flash('success', `🔑 Password ${target.name} direset → ${newPass} (sampaikan ke user via WA)`);
   res.redirect('/admin/users');
 });
 

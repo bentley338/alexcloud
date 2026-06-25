@@ -9,6 +9,64 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1">
   <link rel="stylesheet" href="/css/main.css">
+  <!-- CSRF token + auto-injeksi ke form & fetch/XHR (lihat middleware/csrf.js) -->
+  <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+  <script>
+  (function () {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    var token = meta ? (meta.getAttribute('content') || '') : '';
+    if (!token) return;
+    function decorate(form) {
+      if (!form || (form.getAttribute('method') || form.method || '').toUpperCase() === 'GET') return;
+      var enc = (form.getAttribute('enctype') || form.enctype || '').toLowerCase();
+      if (enc.indexOf('multipart') !== -1) {
+        if (form.action.indexOf('_csrf=') === -1) {
+          form.action += (form.action.indexOf('?') === -1 ? '?' : '&') + '_csrf=' + encodeURIComponent(token);
+        }
+      } else if (!form.querySelector('input[name="_csrf"]')) {
+        var i = document.createElement('input');
+        i.type = 'hidden'; i.name = '_csrf'; i.value = token;
+        form.appendChild(i);
+      }
+    }
+    document.addEventListener('submit', function (e) {
+      if (e.target && e.target.tagName === 'FORM') decorate(e.target);
+    }, true);
+    document.addEventListener('DOMContentLoaded', function () {
+      var forms = document.querySelectorAll('form');
+      for (var i = 0; i < forms.length; i++) decorate(forms[i]);
+    });
+    function mutating(m) { m = (m || 'GET').toUpperCase(); return m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS'; }
+    function sameOrigin(url) {
+      if (!url || url.indexOf('http') !== 0) return true;
+      return url.indexOf(window.location.origin) === 0;
+    }
+    if (window.fetch) {
+      var origFetch = window.fetch;
+      window.fetch = function (input, init) {
+        init = init || {};
+        var method = init.method || (typeof input === 'object' && input && input.method) || 'GET';
+        var url = typeof input === 'string' ? input : (input && input.url) || '';
+        if (mutating(method) && sameOrigin(url)) {
+          var headers = new Headers(init.headers || (typeof input === 'object' && input ? input.headers : null) || {});
+          if (!headers.has('x-csrf-token')) headers.set('x-csrf-token', token);
+          init.headers = headers;
+        }
+        return origFetch.call(this, input, init);
+      };
+    }
+    var origOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method) {
+      this.__csrf = mutating(method);
+      return origOpen.apply(this, arguments);
+    };
+    var origSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function () {
+      if (this.__csrf) { try { this.setRequestHeader('x-csrf-token', token); } catch (e) {} }
+      return origSend.apply(this, arguments);
+    };
+  })();
+  </script>
 </head>
 <body>
   <nav class="navbar" id="navbar">

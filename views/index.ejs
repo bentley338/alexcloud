@@ -6,6 +6,43 @@
   <div class="hero-grid-overlay"></div>
   <div class="hero-particles" aria-hidden="true"></div>
   <div class="hero-container">
+    <!-- Pengumuman dari admin — tampil di atas beranda (bukan banner fixed seluruh situs) -->
+    <% if (typeof announcement !== 'undefined' && announcement) { %>
+    <div class="home-announce home-announce--<%= announcement.type || 'info' %>" id="siteAnnounce" data-ann-id="<%= announcement.id || 'default' %>">
+      <i class="fas fa-<%= announcement.type === 'promo' ? 'gift' : (announcement.type === 'warn' ? 'triangle-exclamation' : 'bullhorn') %>" aria-hidden="true"></i>
+      <span class="home-announce-text"><%= announcement.text %></span>
+      <% if (announcement.link && announcement.linkText) { %>
+        <a href="<%= announcement.link %>" class="home-announce-link"><%= announcement.linkText %> →</a>
+      <% } %>
+      <button class="home-announce-close" type="button" onclick="dismissAnnounce()" aria-label="Tutup pengumuman">✕</button>
+    </div>
+    <style>
+      .home-announce{grid-column:1/-1;display:flex;align-items:center;gap:0.7rem;width:100%;margin-bottom:2rem;padding:0.85rem 1.1rem;border-radius:14px;font-family:var(--font-ui);font-size:0.92rem;font-weight:500;color:#fff;background:var(--gradient-main);box-shadow:0 8px 24px rgba(0,0,0,0.30);border:1px solid rgba(255,255,255,0.12)}
+      .home-announce--promo{background:linear-gradient(135deg,#7c3aed 0%,#db2777 100%)}
+      .home-announce--warn{background:linear-gradient(135deg,#d97706 0%,#dc2626 100%)}
+      .home-announce > i{flex-shrink:0;font-size:1.05rem}
+      .home-announce-text{flex:1;min-width:0;line-height:1.45}
+      .home-announce-link{color:#fff;font-weight:700;text-decoration:underline;white-space:nowrap;flex-shrink:0}
+      .home-announce-close{flex-shrink:0;background:rgba(255,255,255,0.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:0.8rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+      .home-announce-close:hover{background:rgba(255,255,255,0.38)}
+      @media(max-width:768px){.home-announce{font-size:0.84rem;margin-bottom:1.25rem;padding:0.7rem 0.9rem}}
+    </style>
+    <script>
+      (function () {
+        var el = document.getElementById('siteAnnounce');
+        if (!el) return;
+        var id = el.getAttribute('data-ann-id') || 'default';
+        try { if (localStorage.getItem('annDismissed') === id) { el.remove(); } } catch (e) {}
+      })();
+      function dismissAnnounce() {
+        var el = document.getElementById('siteAnnounce');
+        if (!el) return;
+        var id = el.getAttribute('data-ann-id') || 'default';
+        try { localStorage.setItem('annDismissed', id); } catch (e) {}
+        el.remove();
+      }
+    </script>
+    <% } %>
     <div class="hero-content">
       <div class="hero-badge">
         <i class="fas fa-bolt"></i>

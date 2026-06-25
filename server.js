@@ -15,6 +15,7 @@ cleanEnvVar('GOOGLE_CLIENT_ID');
 cleanEnvVar('GOOGLE_CLIENT_SECRET');
 cleanEnvVar('GOOGLE_CALLBACK_URL');
 cleanEnvVar('DATABASE_URL');
+cleanEnvVar('ADMIN_PASSWORD');
 
 // Peringatan boot yang jelas kalau gateway pembayaran utama tak akan jalan.
 if (!process.env.MUSTIKAPAY_API_KEY) {
@@ -33,6 +34,11 @@ runMinifier();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+// Di belakang reverse proxy (Cloudflare/nginx/pm2): percayai 1 hop proxy agar
+// req.ip benar (rate limiter) dan cookie `secure` berfungsi di balik TLS proxy.
+app.set('trust proxy', 1);
 
 
 
@@ -139,7 +145,9 @@ app.use(session({
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    // Hanya kirim cookie sesi via HTTPS di produksi (cegah pencurian sesi saat downgrade).
+    secure: IS_PROD
   }
 }));
 
@@ -150,6 +158,11 @@ app.use(flash());
 const passport = require('./middleware/passport');
 app.use(passport.initialize());
 app.use(passport.session());
+
+// CSRF protection — sesudah session+passport (butuh req.session), sebelum route.
+// Menyetel res.locals.csrfToken & memvalidasi semua request yang mengubah state.
+const { csrfProtection } = require('./middleware/csrf');
+app.use(csrfProtection);
 
 // Global locals
 app.use((req, res, next) => {
@@ -218,8 +231,6 @@ async function startServer() {
     console.log('║     ⚡  ALEXCLOUD SERVER READY  ⚡    ║');
     console.log('╠══════════════════════════════════════╣');
     console.log(`║  URL    : http://localhost:${PORT}       ║`);
-    console.log(`║  Admin  : admin@alexcloud.com         ║`);
-    console.log(`║  Pass   : Admin@123                   ║`);
     console.log('╚══════════════════════════════════════╝');
     console.log('');
   });
