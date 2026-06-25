@@ -89,22 +89,10 @@ async function run() {
       const game = games[i];
       const isPlaceholder = !game.image || game.image.includes('placehold.co');
       
-      let needsFix = false;
-      
       if (isPlaceholder) {
-        needsFix = true;
         console.log(`[CHECK] "${game.name}" is using a placeholder. Re-searching...`);
-      } else {
-        // Verify if the Steam URL is active
-        const isOk = await checkUrl(game.image);
-        if (!isOk) {
-          needsFix = true;
-          console.log(`[CHECK] "${game.name}" cover returns 404/error. Re-searching...`);
-        }
-      }
-      
-      if (needsFix) {
         const match = await searchSteam(game.name);
+        
         if (match) {
           const retinaUrl = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${match.id}/library_600x900_2x.jpg`;
           const standardUrl = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${match.id}/library_600x900.jpg`;
