@@ -978,6 +978,53 @@ router.get('/api/debug/egress-ip', ensureAuthenticated, async (req, res) => {
   });
 });
 
+// =====================
+// DEBUG (admin): cek apakah MUSTIKAPAY_PROXY benar-benar kebaca di proses produksi
+// + lakukan call MustikaPay sungguhan lewat jalur yang dipakai app. Kalau proxy
+// kepakai → balas JSON (proxyEngaged true). Kalau env kosong → call langsung kena
+// Cloudflare 403 (proxyEngaged false). Hapus route ini setelah selesai diagnosa.
+// =====================
+router.get('/api/debug/mustikapay', ensureAuthenticated, async (req, res) => {
+  if (!req.user || req.user.role !== 'admin') return res.status(403).json({ error: 'admin only' });
+
+  const raw = process.env.MUSTIKAPAY_PROXY || '';
+  let proxyInfo = { set: false };
+  if (raw) {
+    try {
+      const u = new URL(raw);
+      proxyInfo = {
+        set: true,
+        host: u.hostname,
+        port: u.port,
+        hasAuth: !!u.username,
+        // value mentah disensor: tampilkan panjang + apakah ada kutip/spasi nyasar
+        rawLength: raw.length,
+        looksQuoted: /^["']|["']$/.test(raw),
+        hasStraySpace: raw !== raw.trim()
+      };
+    } catch (e) {
+      proxyInfo = { set: true, parseError: e.message, rawLength: raw.length };
+    }
+  }
+
+  // Call MustikaPay sungguhan (read-only check, ref_no palsu) lewat jalur app.
+  let call;
+  const t0 = Date.now();
+  try {
+    const r = await mustikapayRequest('GET', '/api/v1/check/qris', { ref_no: 'DEBUGPING' }, 15000, 1);
+    call = { ok: true, ms: Date.now() - t0, body: r };
+  } catch (e) {
+    call = { ok: false, ms: Date.now() - t0, error: (e.message || '').slice(0, 160) };
+  }
+
+  res.json({
+    note: 'proxyEngaged true = proxy kepakai (call tembus JSON). Hapus route ini setelah selesai.',
+    proxyEnv: proxyInfo,
+    proxyEngaged: call.ok,
+    call
+  });
+});
+
 // Profile
 router.get('/profile', ensureAuthenticated, (req, res) => {
   res.render('profile', {
