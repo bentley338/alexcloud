@@ -12,6 +12,19 @@ const sharedHttpsAgent = new https.Agent({
   family: 4 // Force IPv4 to prevent Cloudflare/IPv6 connection hangs on cloud hosts
 });
 
+// Agent IPv6 KHUSUS call MustikaPay (opsional, aktif via env MUSTIKAPAY_IPV6=1).
+// Dipakai saat IPv4 egress server diblok Cloudflare MustikaPay tapi egress IPv6
+// (mis. Railway "Outbound IPv6") fresh/bersih. Cuma untuk MustikaPay; gateway lain
+// tetap IPv4. Catatan: butuh outbound IPv6 aktif di platform, kalau tidak akan hang.
+const mustikapayV6Agent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 10,
+  maxFreeSockets: 4,
+  timeout: 20000,
+  freeSocketTimeout: 30000,
+  family: 6
+});
+
 // ─── Env Var Cleaner (DRY — used by server.js) ──────────────────────────────
 function cleanEnvVar(varName) {
   let value = process.env[varName];
@@ -263,7 +276,8 @@ function mustikapayRequestOnce(method, endpoint, payload, timeoutMs) {
         servername: urlObj.hostname
       };
       if (socket) { options.createConnection = () => socket; options.agent = false; }
-      else { options.agent = sharedHttpsAgent; }
+      // Direct (tanpa proxy): IPv6 bila MUSTIKAPAY_IPV6=1, selain itu IPv4 default.
+      else { options.agent = process.env.MUSTIKAPAY_IPV6 === '1' ? mustikapayV6Agent : sharedHttpsAgent; }
 
       const req = https.request(options, (res) => {
         let data = '';

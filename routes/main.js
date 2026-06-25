@@ -1051,6 +1051,7 @@ router.get('/api/debug/mustikapay', ensureAuthenticated, async (req, res) => {
 
   res.json({
     note: 'whitelist proxyExitIp ini di MustikaPay (BUKAN host gateway). proxyEngaged true = call tembus JSON. Hapus route ini setelah selesai.',
+    ipMode: process.env.MUSTIKAPAY_IPV6 === '1' ? 'ipv6 (direct)' : 'ipv4 (direct/proxy)',
     proxyEnv: proxyInfo,
     proxyExitIp: exitIp,
     proxyEngaged: call.ok,
