@@ -11,6 +11,10 @@ cleanEnvVar('CLOUDINARY_URL');
 cleanEnvVar('FR3_API_KEY');
 cleanEnvVar('SAYABAYAR_API_KEY');
 cleanEnvVar('MUSTIKAPAY_API_KEY');
+cleanEnvVar('GOOGLE_CLIENT_ID');
+cleanEnvVar('GOOGLE_CLIENT_SECRET');
+cleanEnvVar('GOOGLE_CALLBACK_URL');
+cleanEnvVar('DATABASE_URL');
 
 // Peringatan boot yang jelas kalau gateway pembayaran utama tak akan jalan.
 if (!process.env.MUSTIKAPAY_API_KEY) {
