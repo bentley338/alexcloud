@@ -25,10 +25,41 @@
     </div>
 
     <div class="games-grid">
+      <% 
+        const getGradient = (name) => {
+          const gradients = [
+            'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)', // Slate
+            'radial-gradient(circle at center, #0f172a 0%, #1e1b4b 100%)', // Dark Indigo
+            'radial-gradient(circle at center, #180828 0%, #0a0b0d 100%)', // Dark Purple
+            'radial-gradient(circle at center, #2e1065 0%, #0f172a 100%)', // Violet
+            'radial-gradient(circle at center, #064e3b 0%, #022c22 100%)', // Emerald
+            'radial-gradient(circle at center, #831843 0%, #0f172a 100%)', // Rose
+            'radial-gradient(circle at center, #083344 0%, #0f172a 100%)'  // Teal/Dark
+          ];
+          let hash = 0;
+          for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+          }
+          const index = Math.abs(hash) % gradients.length;
+          return gradients[index];
+        };
+      %>
       <% games.forEach(game => { %>
+      <% const isPlaceholder = !game.image || game.image.includes('placehold.co'); %>
       <div class="game-card">
         <div class="game-img-wrap">
-          <img src="<%= game.image %>" alt="<%= game.name %>" width="300" height="450" loading="lazy" decoding="async">
+          <% if (isPlaceholder) { %>
+          <div class="game-img-fallback" style="display: flex; width: 100%; height: 100%; background: <%= getGradient(game.name) %>; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; box-sizing: border-box; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <i class="fas fa-gamepad" style="font-size: 2.2rem; color: var(--accent); opacity: 0.6; margin-bottom: 1rem;"></i>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: #fff; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><%= game.name %></div>
+          </div>
+          <% } else { %>
+          <img src="<%= game.image %>" alt="<%= game.name %>" width="300" height="450" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="game-img-fallback" style="display: none; width: 100%; height: 100%; background: <%= getGradient(game.name) %>; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; box-sizing: border-box; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <i class="fas fa-gamepad" style="font-size: 2.2rem; color: var(--accent); opacity: 0.6; margin-bottom: 1rem;"></i>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: #fff; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><%= game.name %></div>
+          </div>
+          <% } %>
           <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
         </div>
         <div class="game-body">
