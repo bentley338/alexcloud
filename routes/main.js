@@ -1007,6 +1007,36 @@ router.get('/api/debug/mustikapay', ensureAuthenticated, async (req, res) => {
     }
   }
 
+  // Exit IP yang benar-benar dilihat server tujuan saat lewat proxy (ipify via
+  // tunnel CONNECT). Ini IP yang harus di-whitelist di MustikaPay — BUKAN host gateway.
+  // Kalau exit IP di produksi beda dari lokal, berarti proxy sticky per-sumber.
+  async function proxyExitIp() {
+    if (!raw) return null;
+    let pu; try { pu = new URL(raw); } catch { return '(proxy URL invalid)'; }
+    const http = require('http'), tls = require('tls');
+    return new Promise((resolve) => {
+      const ch = {};
+      if (pu.username) {
+        const cred = `${decodeURIComponent(pu.username)}:${decodeURIComponent(pu.password || '')}`;
+        ch['Proxy-Authorization'] = 'Basic ' + Buffer.from(cred).toString('base64');
+      }
+      const creq = http.request({ host: pu.hostname, port: Number(pu.port) || 80, method: 'CONNECT', path: 'api.ipify.org:443', headers: ch, timeout: 12000 });
+      creq.on('connect', (cres, sock) => {
+        if (cres.statusCode !== 200) { resolve('CONNECT ' + cres.statusCode); return; }
+        const t = tls.connect({ socket: sock, servername: 'api.ipify.org' }, () => {
+          const r = https.request({ createConnection: () => t, agent: false, hostname: 'api.ipify.org', path: '/?format=json', method: 'GET', headers: { Host: 'api.ipify.org' } }, (resp) => {
+            let b = ''; resp.on('data', d => b += d); resp.on('end', () => { try { resolve(JSON.parse(b).ip); } catch { resolve('(parse fail)'); } });
+          });
+          r.on('error', e => resolve('err:' + e.message)); r.end();
+        });
+        t.on('error', e => resolve('tlserr:' + e.message));
+      });
+      creq.on('error', e => resolve('connerr:' + e.message));
+      creq.on('timeout', () => { creq.destroy(); resolve('timeout'); });
+      creq.end();
+    });
+  }
+
   // Call MustikaPay sungguhan (read-only check, ref_no palsu) lewat jalur app.
   let call;
   const t0 = Date.now();
@@ -1017,9 +1047,12 @@ router.get('/api/debug/mustikapay', ensureAuthenticated, async (req, res) => {
     call = { ok: false, ms: Date.now() - t0, error: (e.message || '').slice(0, 160) };
   }
 
+  const exitIp = await proxyExitIp();
+
   res.json({
-    note: 'proxyEngaged true = proxy kepakai (call tembus JSON). Hapus route ini setelah selesai.',
+    note: 'whitelist proxyExitIp ini di MustikaPay (BUKAN host gateway). proxyEngaged true = call tembus JSON. Hapus route ini setelah selesai.',
     proxyEnv: proxyInfo,
+    proxyExitIp: exitIp,
     proxyEngaged: call.ok,
     call
   });
