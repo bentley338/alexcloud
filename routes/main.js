@@ -26,6 +26,25 @@ router.post('/api/bot/mustikapay', express.json(), async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Endpoint untuk botwa mengambil daftar testimoni terbaru untuk disajikan ke chat
+router.post('/api/bot/testimonials', express.json(), (req, res) => {
+    try {
+        const { secret } = req.body;
+        if (secret !== 'alexcloud-botwa-secret-2026') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        const testimonials = getCleanTestimonials();
+        // Ambil 5 testimoni acak atau terbaru yang memiliki rating tinggi (4 atau 5)
+        const filtered = testimonials
+            .filter(t => t.rating >= 4)
+            .slice(-10); // ambil 10 terbaru
+        res.json(filtered);
+    } catch (err) {
+        console.error("[BOT TESTIMONIALS] Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
 // --------------------------
 
 // ─── MustikaPay metode & opsi (dipakai selector di payment.ejs) ──────────────
