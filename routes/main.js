@@ -9,6 +9,25 @@ const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
 
+// --- BOT PROXY ENDPOINT ---
+// Digunakan oleh botwa untuk melakukan request ke MustikaPay menggunakan server/proxy alexcloud
+router.post('/api/bot/mustikapay', express.json(), async (req, res) => {
+    try {
+        const { secret, method, endpoint, payload } = req.body;
+        // Secret sederhana agar tidak disalahgunakan pihak luar
+        if (secret !== 'alexcloud-botwa-secret-2026') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        
+        const responseData = await mustikapayRequest(method, endpoint, payload, 15000, 3);
+        res.json(responseData);
+    } catch (err) {
+        console.error("[BOT PROXY] Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+// --------------------------
+
 // ─── MustikaPay metode & opsi (dipakai selector di payment.ejs) ──────────────
 // VA: kode bank MustikaPay = kode numerik Bank Indonesia (BUKAN singkatan —
 // "BCA" ditolak, harus "014"). Diverifikasi langsung ke API.
