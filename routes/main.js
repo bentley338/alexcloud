@@ -8,6 +8,7 @@ const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
+const { ensureReferralCode } = require('../utils/referral');
 
 // --- BOT PROXY ENDPOINT ---
 // Digunakan oleh botwa untuk melakukan request ke MustikaPay menggunakan server/proxy alexcloud
@@ -210,6 +211,8 @@ router.get('/api/testimonials/:id/image', (req, res) => {
 
 // Homepage
 router.get('/', (req, res) => {
+  // Tangkap kode referral kalau share link mendarat di homepage (?ref=KODE).
+  if (req.query.ref) req.session.pendingRef = req.query.ref.toString().trim().toUpperCase();
   const games = getGames();
   const popularGames = games.filter(g => g.popular).slice(0, 8);
   const trendingGames = games.filter(g => g.rating >= 4.8).slice(0, 6);
@@ -393,6 +396,22 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
   const games = getGames();
   const plans = getPlans();
 
+  // ─── Referral ─────────────────────────────────────────────────────────────
+  const referralCode = ensureReferralCode(req.user);
+  const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+  const referralLink = `${baseUrl}/register?ref=${referralCode}`;
+  const myReferrals = db.get('referrals').filter({ referrerId: req.user.id }).value();
+  const referral = {
+    code: referralCode,
+    link: referralLink,
+    invitedCount: myReferrals.length,
+    rewardedCount: myReferrals.filter(r => r.status === 'rewarded').length,
+    // Kode diskon pribadi milik user yang masih bisa dipakai
+    myCoupons: db.get('promoCodes').value()
+      .filter(p => p.ownerUserId === req.user.id && p.isActive && (!p.maxUses || (p.usedCount || 0) < p.maxUses))
+      .map(p => ({ code: p.code, value: p.discountValue, kind: p.kind, description: p.description }))
+  };
+
   res.render('dashboard', {
     title: 'Dashboard - AlexCloud',
     user: req.user,
@@ -400,6 +419,7 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
     subscription: subInfo,
     plans,
     games,
+    referral,
     moment,
     rememberMe: req.session.rememberMe || false
   });
@@ -431,6 +451,11 @@ router.post('/api/promo/validate', ensureAuthenticated, (req, res) => {
 
   const promo = db.get('promoCodes').find({ code: code.toUpperCase(), isActive: true }).value();
   if (!promo) return res.json({ valid: false, message: 'Kode promo tidak valid atau sudah tidak aktif.' });
+
+  // Personal code (referral/welcome) hanya bisa dipakai pemiliknya
+  if (promo.ownerUserId && promo.ownerUserId !== req.user.id) {
+    return res.json({ valid: false, message: 'Kode ini hanya bisa dipakai oleh pemilik akunnya.' });
+  }
 
   // Check expiry
   if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) {
@@ -483,7 +508,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   // Validate promo if provided
   if (promoCode && promoId) {
     const promo = db.get('promoCodes').find({ id: promoId, code: promoCode.toUpperCase(), isActive: true }).value();
-    if (promo && !(promo.expiresAt && new Date(promo.expiresAt) < new Date()) && !(promo.maxUses && promo.usedCount >= promo.maxUses) && !(promo.minPurchase && plan.price < promo.minPurchase)) {
+    if (promo && !(promo.ownerUserId && promo.ownerUserId !== req.user.id) && !(promo.expiresAt && new Date(promo.expiresAt) < new Date()) && !(promo.maxUses && promo.usedCount >= promo.maxUses) && !(promo.minPurchase && plan.price < promo.minPurchase)) {
       if (promo.discountType === 'percent') {
         discount = Math.round(plan.price * promo.discountValue / 100);
       } else {

@@ -4,6 +4,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { db } = require('../database/db');
+const { ensureReferralCode, attachReferralOnRegister } = require('../utils/referral');
 
 // ─── User cache for fast deserializeUser lookups ────────────────────────────
 // Avoids scanning the full users array on every request for already-known users
@@ -44,8 +45,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'
-  }, (accessToken, refreshToken, profile, done) => {
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback',
+    passReqToCallback: true // butuh req untuk signupIp, sesi pendingRef, & set cookie referral
+  }, (req, accessToken, refreshToken, profile, done) => {
     let user = db.get('users').find({ googleId: profile.id }).value();
     if (!user) {
       user = db.get('users').find({ email: profile.emails[0].value.toLowerCase() }).value();
@@ -62,9 +64,16 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           avatar: profile.photos[0]?.value || null,
           googleId: profile.id,
           createdAt: new Date().toISOString(),
+          signupIp: req.ip,
+          referralCode: null,
+          referredBy: null,
           isActive: true
         };
         db.get('users').push(newUser).write();
+        // Referral: kode sendiri + proses kode pengajak (anti-abuse). Cookie via req.res.
+        ensureReferralCode(newUser);
+        attachReferralOnRegister(req, req.res, newUser, req.session && req.session.pendingRef);
+        if (req.session) delete req.session.pendingRef;
         user = newUser;
       }
     }

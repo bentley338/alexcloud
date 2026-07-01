@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { db } = require('../database/db');
 const { ensureGuest, ensureAuthenticated } = require('../middleware/auth');
+const { ensureReferralCode, attachReferralOnRegister } = require('../utils/referral');
 
 // ─── Rate limit untuk login/register (cegah brute-force kredensial) ──────────
 // Per-IP, redirect dengan flash agar UX tetap konsisten (bukan JSON mentah).
@@ -46,9 +47,13 @@ router.get('/login', ensureGuest, (req, res) => {
 
 // Register page
 router.get('/register', ensureGuest, (req, res) => {
+  // Tangkap kode referral dari link (?ref=KODE) → simpan di sesi + prefill form.
+  const refCode = (req.query.ref || '').toString().trim().toUpperCase();
+  if (refCode) req.session.pendingRef = refCode;
   res.render('auth/register', {
     title: 'Daftar - AlexCloud',
     error: req.flash('error'),
+    refCode: refCode || req.session.pendingRef || '',
     user: null
   });
 });
@@ -74,7 +79,7 @@ router.post('/register', ensureGuest, registerLimiter, (req, res) => {
     return res.redirect('/register');
   }
   const hashedPw = bcrypt.hashSync(password, 10);
-  db.get('users').push({
+  const newUser = {
     id: uuidv4(),
     name: name.trim(),
     email: email.toLowerCase(),
@@ -83,9 +88,18 @@ router.post('/register', ensureGuest, registerLimiter, (req, res) => {
     avatar: null,
     googleId: null,
     createdAt: new Date().toISOString(),
+    signupIp: req.ip,
+    referralCode: null,
+    referredBy: null,
     isActive: true,
     isBanned: false
-  }).write();
+  };
+  db.get('users').push(newUser).write();
+
+  // Referral: beri kode sendiri + proses kode pengajak (dengan anti-abuse).
+  ensureReferralCode(newUser);
+  const refResult = attachReferralOnRegister(req, res, newUser, req.body.refCode || req.session.pendingRef);
+  delete req.session.pendingRef;
 
   // Send WhatsApp Notification to Owner
   try {
@@ -100,7 +114,11 @@ router.post('/register', ensureGuest, registerLimiter, (req, res) => {
     console.error('[WA NOTIF REGISTRATION ERROR]', err.message);
   }
 
-  req.flash('success', 'Akun berhasil dibuat! Silakan login.');
+  if (refResult && refResult.status === 'pending' && refResult.welcomeCode) {
+    req.flash('success', `Akun berhasil dibuat! 🎁 Kamu dapat diskon welcome — cek kode di Dashboard. Silakan login.`);
+  } else {
+    req.flash('success', 'Akun berhasil dibuat! Silakan login.');
+  }
   res.redirect('/login');
 });
 

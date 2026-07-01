@@ -16,6 +16,7 @@ db.defaults({
   promoCodes: [],
   testimonials: [],
   plans: [],
+  referrals: [],
   settings: {},
   sessions: [],
   chatMessages: []
@@ -304,11 +305,35 @@ function updateGameImages() {
   }
 }
 
+// ─── Referral: default config + backfill kode untuk user lama ───────────────────
+function seedReferral() {
+  // Default config (admin-editable via /admin/referrals)
+  const settings = db.get('settings').value() || {};
+  if (!settings.referral) {
+    db.get('settings').assign({
+      referral: { welcomeDiscount: 10000, referrerReward: 10000, enabled: true }
+    }).write();
+    console.log('[DB] Referral config seeded');
+  }
+  // Backfill referralCode untuk semua user yang belum punya (pola seedAdmin:202).
+  // Lazy-require agar tidak circular dengan utils/referral.js.
+  try {
+    const { ensureReferralCode } = require('../utils/referral');
+    const users = db.get('users').value();
+    let n = 0;
+    users.forEach(u => { if (!u.referralCode) { ensureReferralCode(u); n++; } });
+    if (n) console.log(`[DB] Referral codes backfilled: ${n} user`);
+  } catch (e) {
+    console.error('[DB] Referral backfill error:', e.message);
+  }
+}
+
 function initDB() {
   seedAdmin();
   seedPlans();
   seedGames();
   seedTestimonials();
+  seedReferral();
   updateGameImages();
   cleanOldSessions();
 

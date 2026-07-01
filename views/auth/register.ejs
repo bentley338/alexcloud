@@ -56,6 +56,16 @@
           </button>
         </div>
       </div>
+      <div class="form-group">
+        <label for="refCode" class="form-label"><i class="fas fa-gift"></i> Kode Referral <span style="color:var(--text-muted); font-weight:400;">(opsional)</span></label>
+        <input type="text" id="refCode" name="refCode" class="form-input" placeholder="Punya kode dari teman?" autocomplete="off"
+               value="<%= typeof refCode !== 'undefined' ? refCode : '' %>" style="text-transform:uppercase;">
+        <% if (typeof refCode !== 'undefined' && refCode) { %>
+        <small style="display:block; margin-top:0.4rem; color:var(--accent); font-size:0.8rem;">
+          <i class="fas fa-check-circle"></i> Kode diterapkan — kamu dapat diskon welcome setelah daftar!
+        </small>
+        <% } %>
+      </div>
       <button type="submit" class="btn-auth-submit">
         <i class="fas fa-user-plus"></i> Daftar Sekarang
       </button>

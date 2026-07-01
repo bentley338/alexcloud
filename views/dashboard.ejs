@@ -133,6 +133,61 @@
         </div>
         <% } %>
 
+        <!-- ═══ AJAK TEMAN (Referral) ═══ -->
+        <% if (typeof referral !== 'undefined' && referral) { %>
+        <div class="card" style="margin-bottom:1.5rem; border:1px solid var(--accent-line); background:linear-gradient(160deg, var(--accent-soft) 0%, transparent 60%);">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-gift"></i> Ajak Teman, Dapat Diskon</div>
+          </div>
+          <div class="card-body">
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem; line-height:1.6;">
+              Bagikan kodemu. Teman dapat <strong style="color:var(--accent-hover)">diskon welcome</strong>, dan kamu dapat <strong style="color:var(--accent-hover)">kode diskon</strong> tiap teman berlangganan pertama kali. 🎉
+            </p>
+
+            <label style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.4rem;">Kode Referral Kamu</label>
+            <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+              <input id="refCodeInput" type="text" readonly value="<%= referral.code %>"
+                style="flex:1; font-family:var(--font-display); font-weight:700; letter-spacing:2px; color:var(--accent-hover); background:rgba(255,255,255,0.03); border:1px dashed var(--accent-line); border-radius:10px; padding:0.7rem 1rem; font-size:1.05rem;">
+              <button type="button" class="btn-action btn-confirm" onclick="copyRef('refCodeInput', this)" title="Salin kode"><i class="fas fa-copy"></i></button>
+            </div>
+
+            <label style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.4rem;">Link Undangan</label>
+            <div style="display:flex; gap:0.5rem; margin-bottom:1.25rem;">
+              <input id="refLinkInput" type="text" readonly value="<%= referral.link %>"
+                style="flex:1; min-width:0; color:var(--text-secondary); background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1rem; font-size:0.82rem;">
+              <button type="button" class="btn-action btn-confirm" onclick="copyRef('refLinkInput', this)" title="Salin link"><i class="fas fa-link"></i></button>
+            </div>
+
+            <div style="display:flex; gap:0.75rem; margin-bottom:0.5rem;">
+              <div style="flex:1; text-align:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:0.85rem;">
+                <div style="font-family:var(--font-display); font-size:1.5rem; font-weight:700; color:var(--text-primary);"><%= referral.invitedCount %></div>
+                <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Teman Diajak</div>
+              </div>
+              <div style="flex:1; text-align:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:0.85rem;">
+                <div style="font-family:var(--font-display); font-size:1.5rem; font-weight:700; color:var(--accent-green);"><%= referral.rewardedCount %></div>
+                <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Reward Cair</div>
+              </div>
+            </div>
+
+            <% if (referral.myCoupons && referral.myCoupons.length > 0) { %>
+            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+              <label style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.6rem;">Kupon Diskon Kamu</label>
+              <% referral.myCoupons.forEach(c => { %>
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; background:rgba(255,255,255,0.03); border:1px dashed var(--accent-line); border-radius:10px; padding:0.6rem 0.85rem; margin-bottom:0.5rem;">
+                <div>
+                  <div style="font-family:var(--font-display); font-weight:700; color:var(--accent-hover); letter-spacing:1px;"><%= c.code %></div>
+                  <div style="font-size:0.72rem; color:var(--text-muted);"><%= c.kind === 'welcome' ? '🎁 Welcome' : '⭐ Referral' %> · Potongan Rp <%= (c.value||0).toLocaleString('id-ID') %></div>
+                </div>
+                <button type="button" class="btn-action btn-confirm" style="flex-shrink:0;" onclick="copyText('<%= c.code %>', this)"><i class="fas fa-copy"></i></button>
+              </div>
+              <% }) %>
+              <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;">Pakai kode ini saat checkout paket.</p>
+            </div>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+
         <div class="card">
           <div class="card-header">
             <div class="card-title"><i class="fas fa-tags"></i> Pilih Paket</div>
@@ -159,5 +214,29 @@
     </div>
   </div>
 </div>
+
+<script>
+  function _flashCopied(btn) {
+    if (!btn) return;
+    var old = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    setTimeout(function () { btn.innerHTML = old; }, 1400);
+  }
+  function copyText(text, btn) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { _flashCopied(btn); });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand('copy'); _flashCopied(btn); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+  function copyRef(inputId, btn) {
+    var el = document.getElementById(inputId);
+    if (el) copyText(el.value, btn);
+  }
+</script>
 
 <%- include('partials/footer') %>

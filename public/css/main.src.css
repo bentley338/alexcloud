@@ -91,6 +91,9 @@ body::before {
   top: 0; left: 0; right: 0; bottom: 0;
   background:
     radial-gradient(ellipse 70% 50% at 50% -6%, rgba(220, 228, 240, 0.055) 0%, transparent 60%),
+    radial-gradient(ellipse 48% 42% at 84% 6%, rgba(56, 189, 248, 0.07) 0%, transparent 62%),
+    radial-gradient(ellipse 46% 44% at 10% 24%, rgba(129, 140, 248, 0.055) 0%, transparent 62%),
+    radial-gradient(ellipse 60% 46% at 50% 106%, rgba(34, 211, 238, 0.05) 0%, transparent 60%),
     radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
   pointer-events: none;
   z-index: 0;
@@ -4301,4 +4304,85 @@ input:focus-visible,
   top: 0; left: 50%; transform: translateX(-50%);
   width: min(1100px, 90%); height: 1px;
   background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.28), transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ✨ AESTHETIC POLISH v6.4 — richer glass, softer glow, gentle motion
+   Palette UNCHANGED (charcoal + azure→cyan, token-driven). This block
+   sits last so it wins the cascade; edit tokens in :root to re-skin.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Living brand text — slow azure→cyan drift on hero & section accents.
+   (The drop-shadow glow from the block above still applies alongside this.) */
+.hero-title .accent,
+.section-title .accent {
+  background: var(--gradient-aurora);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: accentDrift 8s ease-in-out infinite;
+}
+@keyframes accentDrift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* Glass surfaces — crisp top highlight for real depth (not flat) */
+.feature-card,
+.how-step,
+.hero-main-card,
+.pricing-card,
+.testi-card,
+.trending-card,
+.game-card {
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Hero stat chips — upgrade from flat card to true frosted glass */
+.stat-item.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.stat-item.glass:hover {
+  border-color: var(--accent-line);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Smoother, more diffused accent glow on card hover across the board */
+.feature-card:hover,
+.game-card:hover,
+.plan-card:hover,
+.pricing-card:hover,
+.trending-card:hover,
+.how-step:hover,
+.testi-card:hover {
+  box-shadow: var(--shadow-card-hover), var(--glow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Secondary button — subtle azure edge-glow on hover */
+.btn-secondary:hover {
+  box-shadow: 0 8px 22px rgba(56, 189, 248, 0.22), inset 0 0 0 1px rgba(56, 189, 248, 0.25);
+}
+
+/* Hero ambient aura — gentle breathing so the visual feels alive */
+.hero-visual::after {
+  animation: auroraDrift 14s ease-in-out infinite;
+}
+@keyframes auroraDrift {
+  0%, 100% { transform: scale(1) translate(0, 0);     opacity: 0.85; }
+  50%      { transform: scale(1.12) translate(2%, -2%); opacity: 1; }
+}
+
+/* Accessibility — kill the new ambient/text motion for reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  .hero-title .accent,
+  .section-title .accent,
+  .hero-visual::after {
+    animation: none !important;
+  }
 }

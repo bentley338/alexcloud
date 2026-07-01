@@ -3,6 +3,7 @@ const router = express.Router();
 const { db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache } = require('../database/db');
 const { ensureAdmin } = require('../middleware/auth');
 const { isJunkTestimonial, normalizeTestimonial } = require('../utils/helpers');
+const { rewardReferrerOnFirstOrder, getReferralConfig, setReferralConfig } = require('../utils/referral');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const bcrypt = require('bcryptjs');
@@ -129,7 +130,14 @@ router.post('/simulate-order', ensureAdmin, (req, res) => {
 
   db.get('users').find({ id: targetUser.id }).assign({ isActive: true }).write();
 
-  req.flash('success', `Simulasi Order #${orderId} berhasil untuk user ${targetUser.name}.`);
+  // Confirm hook referral (idempoten): simulasi = order pertama yang confirmed juga cairkan reward.
+  const reward = rewardReferrerOnFirstOrder(order);
+
+  let msg = `Simulasi Order #${orderId} berhasil untuk user ${targetUser.name}.`;
+  if (reward) {
+    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (kode ${reward.rewardCode}).`;
+  }
+  req.flash('success', msg);
   res.redirect('/admin/orders');
 });
 
@@ -172,7 +180,15 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
     status: 'active', startedAt: now.toISOString(), expiresAt: expiresAt.toISOString()
   }).write();
   db.get('users').find({ id: order.userId }).assign({ isActive: true }).write();
-  req.flash('success', `Order #${order.orderId} dikonfirmasi. Subscription aktif sampai ${moment(expiresAt).format('DD MMM YYYY')}.`);
+
+  // Confirm hook referral: order pertama yang di-confirm → cairkan reward pengajak (idempoten).
+  const reward = rewardReferrerOnFirstOrder(order);
+
+  let msg = `Order #${order.orderId} dikonfirmasi. Subscription aktif sampai ${moment(expiresAt).format('DD MMM YYYY')}.`;
+  if (reward) {
+    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (kode ${reward.rewardCode}).`;
+  }
+  req.flash('success', msg);
   res.redirect('/admin/orders');
 });
 
@@ -600,6 +616,57 @@ router.post('/promo/:id/delete', ensureAdmin, (req, res) => {
   db.get('promoCodes').remove({ id: req.params.id }).write();
   req.flash('success', 'Promo berhasil dihapus.');
   res.redirect('/admin/promo');
+});
+
+// =====================
+// REFERRAL / AFFILIATE
+// =====================
+router.get('/referrals', ensureAdmin, (req, res) => {
+  const cfg = getReferralConfig();
+  const users = db.get('users').value();
+  const userMap = new Map(users.map(u => [u.id, u]));
+
+  const referrals = db.get('referrals').sortBy('createdAt').reverse().value().map(r => {
+    const referrer = userMap.get(r.referrerId);
+    return {
+      ...r,
+      referrerName: referrer ? referrer.name : '(user terhapus)',
+      referrerCode: referrer ? referrer.referralCode : null
+    };
+  });
+
+  const stats = {
+    total: referrals.length,
+    pending: referrals.filter(r => r.status === 'pending').length,
+    rewarded: referrals.filter(r => r.status === 'rewarded').length,
+    blocked: referrals.filter(r => r.status === 'blocked').length
+  };
+
+  res.render('admin/referral', {
+    title: 'Kelola Referral - AlexCloud Admin',
+    user: req.user, cfg, referrals, stats, moment,
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
+router.post('/referrals/settings', ensureAdmin, (req, res) => {
+  const { enabled, welcomeDiscount, referrerReward } = req.body;
+  const welcome = parseInt(welcomeDiscount, 10);
+  const reward = parseInt(referrerReward, 10);
+
+  if (isNaN(welcome) || welcome < 0 || isNaN(reward) || reward < 0) {
+    req.flash('error', 'Nilai diskon welcome & reward harus angka ≥ 0.');
+    return res.redirect('/admin/referrals');
+  }
+
+  setReferralConfig({
+    enabled: !!enabled,
+    welcomeDiscount: welcome,
+    referrerReward: reward
+  });
+
+  req.flash('success', `Setelan referral disimpan${enabled ? ' & program aktif' : ' (program dinonaktifkan)'}.`);
+  res.redirect('/admin/referrals');
 });
 
 // =====================
