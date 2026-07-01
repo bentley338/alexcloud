@@ -386,7 +386,7 @@ router.post('/api/referral/redeem', ensureAuthenticated, express.json(), (req, r
 
   // Ensure signupIp exists for anti-abuse tracking
   if (!user.signupIp) {
-    user.signupIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || req.ip;
+    user.signupIp = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for']?.split(',')[0].trim()) || req.socket.remoteAddress || req.ip;
     db.get('users').find({ id: user.id }).assign({ signupIp: user.signupIp }).write();
   }
 
@@ -396,8 +396,10 @@ router.post('/api/referral/redeem', ensureAuthenticated, express.json(), (req, r
   if (result.status === 'self') return res.json({ success: false, message: 'Tidak bisa menggunakan kode milik sendiri.' });
   if (result.status === 'already') return res.json({ success: false, message: 'Anda sudah pernah menggunakan kode referral.' });
   if (result.status === 'blocked') {
-    // Dianggap success secara internal tapi sebenernya diblock (farming), atau kita kasi error explicit
-    return res.json({ success: false, message: 'Gagal! Terindikasi farming (device ini sudah pernah menggunakan kode referral atau mencapai batas).' });
+    let reasonText = 'device ini sudah mencapai batas max 1 referral';
+    if (result.reason === 'same_ip') reasonText = 'tidak bisa mereferralkan perangkat sendiri / IP yang sama';
+    else if (result.reason === 'cookie') reasonText = 'perangkat ini sudah pernah menggunakan kode referral sebelumnya';
+    return res.json({ success: false, message: `Gagal! Terindikasi abuse (${reasonText}).` });
   }
 
   return res.json({ success: true, message: 'Kode berhasil digunakan! Cek bagian kupon Anda.' });

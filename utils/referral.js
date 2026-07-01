@@ -164,7 +164,7 @@ function attachReferralOnRegister(req, res, newUser, refCodeRaw) {
       setRefCookie(res);
     }
     db.get('referrals').push(rec).write();
-    return { status: rec.status, referrerId: referrer.id, welcomeCode: rec.welcomeCode };
+    return { status: rec.status, referrerId: referrer.id, welcomeCode: rec.welcomeCode, reason: rec.reason };
   } catch (e) {
     console.error('[REFERRAL] attach error:', e.message);
     return { status: 'error' };
