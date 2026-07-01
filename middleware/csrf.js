@@ -15,7 +15,8 @@ const CSRF_EXEMPT = [
   '/api/testimonials', // dipanggil WA Bot eksternal, diautentikasi via header x-api-key
   '/api/chat',         // chatbot publik untuk pengunjung anonim (belum tentu punya session)
   '/api/bot/mustikapay', // dipanggil WA Bot eksternal untuk integrasi payment
-  '/api/bot/testimonials' // dipanggil WA Bot untuk ambil testi
+  '/api/bot/testimonials', // dipanggil WA Bot untuk ambil testi
+  '/api/bot'           // Whitelist semua endpoint botwa (/api/bot/*) dari proteksi CSRF
 ];
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
