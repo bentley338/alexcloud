@@ -86,6 +86,20 @@ router.post('/register', ensureGuest, registerLimiter, (req, res) => {
     isActive: true,
     isBanned: false
   }).write();
+
+  // Send WhatsApp Notification to Owner
+  try {
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    const notifMsg = `🔔 *NOTIFIKASI PENDAFTARAN BARU* 🔔\n\n` +
+      `👤 *Nama:* ${name.trim()}\n` +
+      `📧 *Email:* ${email.toLowerCase()}\n` +
+      `📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n` +
+      `Pengguna baru telah berhasil mendaftar di website AlexCloud.`;
+    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ERROR]', err.message));
+  } catch (err) {
+    console.error('[WA NOTIF REGISTRATION ERROR]', err.message);
+  }
+
   req.flash('success', 'Akun berhasil dibuat! Silakan login.');
   res.redirect('/login');
 });
