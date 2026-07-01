@@ -118,6 +118,7 @@ Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! ðŸ
           <div class="form-group" style="margin-bottom:1.25rem;">
             <label class="form-label">Provider WhatsApp Gateway</label>
             <select name="whatsappProvider" id="whatsappProviderSelect" class="form-input" onchange="toggleWaProvider(this.value)" style="background:var(--bg-input); color:white; outline:none; border:1px solid var(--border); border-radius:10px; padding:0.75rem 1rem;">
+              <option value="botwa" <%= settings.whatsappProvider === 'botwa' ? 'selected' : '' %>>WhatsApp Bot Pribadi (Railway - Rekomendasi)</option>
               <option value="callmebot" <%= settings.whatsappProvider === 'callmebot' || !settings.whatsappProvider ? 'selected' : '' %>>CallMeBot (WhatsApp Bot Gratisan)</option>
               <option value="twilio" <%= settings.whatsappProvider === 'twilio' ? 'selected' : '' %>>Twilio Sandbox (Gratis, Resmi, 100% Stabil & Cepat)</option>
             </select>
@@ -127,6 +128,15 @@ Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! ðŸ
             <label class="form-label">Nomor WhatsApp Anda (Gunakan kode negara, contoh: 628xxxxxx)</label>
             <input type="text" name="whatsappPhone" class="form-input" placeholder="Contoh: 6282328437656" value="<%= settings.whatsappPhone || '' %>" required>
             <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan tanpa menggunakan tanda tambah (+).</small>
+          </div>
+
+          <!-- FIELDS FOR BOTWA -->
+          <div id="wa-fields-botwa" class="provider-fields" style="display:none;">
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-label">URL WhatsApp Bot Railway (BOT_WA_URL)</label>
+              <input type="text" name="botWaUrl" class="form-input" placeholder="Contoh: https://botwa-production.up.railway.app" value="<%= settings.botWaUrl || '' %>">
+              <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan URL Railway publik tempat WhatsApp bot Anda di-deploy.</small>
+            </div>
           </div>
           
           <!-- FIELDS FOR CALLMEBOT -->
@@ -158,6 +168,23 @@ Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! ðŸ
             <i class="fas fa-save"></i> Simpan Setelan WhatsApp
           </button>
         </form>
+      </div>
+    </div>
+
+    <!-- Panduan WA Botwa -->
+    <div id="wa-guide-botwa" class="provider-guide card" style="display:none;">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-robot"></i> Cara Setup WhatsApp Bot Pribadi (Railway)</div>
+      </div>
+      <div style="padding:1.5rem; font-size:0.85rem; line-height:1.6; color:var(--text-secondary);">
+        <p style="margin-bottom:1rem;">Dengan menggunakan WhatsApp Bot pribadi di Railway, Anda memiliki **kontrol penuh tanpa limit pihak ketiga dan bisa menggunakan fitur AI Agent.**</p>
+        
+        <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
+          <li>Deploy project **botwa** ke Railway dari repository GitHub Anda.</li>
+          <li>Salin **Public Domain URL** yang diberikan Railway (contoh: <code style="font-family:monospace; color:white;">https://botwa-production.up.railway.app</code>).</li>
+          <li>Tempel URL tersebut ke kolom **URL WhatsApp Bot Railway (BOT_WA_URL)** di atas.</li>
+          <li>Simpan pengaturan. Sekarang notifikasi pendaftaran dan pembayaran akan otomatis terkirim lewat bot Anda!</li>
+        </ol>
       </div>
     </div>
 
