@@ -1321,12 +1321,16 @@ section { position: relative; z-index: 1; }
   grid-template-columns: 1.5fr 1fr;
   gap: 1.5rem;
 }
+.dashboard-grid > *, .content-grid > *, .pricing-grid > *, .features-grid > *, .games-grid > *, .payment-grid > *, .trust-grid > *, .admin-stats-grid > * {
+  min-width: 0;
+}
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  min-width: 0;
 }
 
 .card-header {
@@ -3340,7 +3344,7 @@ input:focus-visible,
   .payment-grid { grid-template-columns: 1fr; }
 
   .admin-sidebar { display: none; }
-  .admin-content { margin-left: 0; }
+  .admin-content { margin-left: 0; padding: 1rem; }
 
   /* Footer mobile */
   .footer-container {
