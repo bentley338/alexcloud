@@ -80,37 +80,31 @@ router.post('/api/bot/agent-execute', express.json(), async (req, res) => {
 });
 
 // Endpoint untuk menyimpan session botwa ke database website
-router.post('/api/bot/session/save', express.json({ limit: '15mb' }), (req, res) => {
+router.post('/api/bot/save-session', express.json({ limit: '15mb' }), (req, res) => {
     try {
-        const { secret, files } = req.body;
+        const { secret, sessionData } = req.body;
         if (secret !== 'alexcloud-botwa-secret-2026') {
             return res.status(403).json({ error: 'Forbidden' });
         }
-        
-        db.get('settings').assign({
-            botSession: files || {}
-        }).write();
-        
+        db.set('botSession', sessionData || {}).write();
         res.json({ success: true });
     } catch (err) {
-        console.error("[BOT SESSION SAVE] Error:", err.message);
+        console.error("[BOT SAVE SESSION] Error:", err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
 // Endpoint untuk memuat session botwa dari database website
-router.post('/api/bot/session/load', express.json(), (req, res) => {
+router.post('/api/bot/load-session', express.json(), (req, res) => {
     try {
         const { secret } = req.body;
         if (secret !== 'alexcloud-botwa-secret-2026') {
             return res.status(403).json({ error: 'Forbidden' });
         }
-        
-        const settings = db.get('settings').value() || {};
-        const files = settings.botSession || {};
-        res.json({ success: true, files });
+        const sessionData = db.get('botSession').value() || {};
+        res.json({ success: true, sessionData });
     } catch (err) {
-        console.error("[BOT SESSION LOAD] Error:", err.message);
+        console.error("[BOT LOAD SESSION] Error:", err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });
