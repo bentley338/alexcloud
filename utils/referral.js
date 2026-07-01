@@ -135,7 +135,8 @@ function attachReferralOnRegister(req, res, newUser, refCodeRaw) {
         .filter(r => r.status !== 'blocked' && fingerprintableIp(r.signupIp) === fpNew).length;
       ipCapped = fromIp >= 1;
     }
-    const abusive = sameIp || cookieSeen || ipCapped;
+    const isAdmin = newUser.role === 'admin';
+    const abusive = !isAdmin && (sameIp || cookieSeen || ipCapped);
 
     // Link pengajak selalu dicatat (immutable), reward hanya kalau tidak abusive.
     db.get('users').find({ id: newUser.id }).assign({ referredBy: referrer.id }).write();
