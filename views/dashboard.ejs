@@ -134,65 +134,113 @@
         <% } %>
 
         <!-- ═══ AJAK TEMAN (Referral) ═══ -->
-        <% if (typeof referral !== 'undefined' && referral) { %>
-        <div class="card" style="margin-bottom:1.5rem; border:1px solid var(--accent-line); background:linear-gradient(160deg, var(--accent-soft) 0%, transparent 60%);">
+        <% if (typeof referral !== 'undefined' && referral) {
+             const welcomeRp = 'Rp ' + (referral.welcomeDiscount || 0).toLocaleString('id-ID');
+             const rewardRp  = 'Rp ' + (referral.referrerReward || 0).toLocaleString('id-ID'); %>
+        <div class="card rf-card">
           <div class="card-header">
             <div class="card-title"><i class="fas fa-gift"></i> Ajak Teman, Dapat Diskon</div>
           </div>
           <div class="card-body">
-            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem; line-height:1.6;">
-              Bagikan kodemu. Teman dapat <strong style="color:var(--accent-hover)">diskon welcome</strong>, dan kamu dapat <strong style="color:var(--accent-hover)">kode diskon</strong> tiap teman berlangganan pertama kali. 🎉
+            <p class="rf-intro">
+              Ajak temanmu berlangganan AlexCloud. Mereka hemat <strong><%= welcomeRp %></strong>,
+              dan kamu dapat kode diskon <strong><%= rewardRp %></strong> tiap teman order pertama kali. 🎉
             </p>
 
-            <% if (!user.referredBy) { %>
-            <div style="margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border);">
-              <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-primary); font-weight:700; margin-bottom:0.5rem;">Punya Kode dari Teman?</label>
-              <div style="display:flex; gap:0.5rem;">
-                <input id="redeemCodeInput" type="text" placeholder="Masukkan kode referral" 
-                  style="flex:1; text-transform:uppercase; background:var(--bg-lighter); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1rem; font-size:0.9rem; color:var(--text-primary);">
-                <button type="button" class="btn-primary" onclick="redeemReferral()" style="padding:0.7rem 1.25rem;"><i class="fas fa-check"></i> Gunakan</button>
+            <!-- ── TUTORIAL: Cara Kerjanya ── -->
+            <div class="rf-tut">
+              <div class="rf-tut-title"><i class="fas fa-circle-info"></i> Cara Kerjanya</div>
+              <ol class="rf-steps">
+                <li class="rf-step">
+                  <span class="rf-step-num">1</span>
+                  <div class="rf-step-body">
+                    <div class="rf-step-head">Bagikan kode / link kamu</div>
+                    <div class="rf-step-desc">Kirim ke teman lewat WhatsApp, Instagram, atau Telegram pakai tombol di bawah.</div>
+                  </div>
+                </li>
+                <li class="rf-step">
+                  <span class="rf-step-num">2</span>
+                  <div class="rf-step-body">
+                    <div class="rf-step-head">Teman daftar pakai kodemu</div>
+                    <div class="rf-step-desc">Begitu daftar dengan kodemu, teman langsung dapat diskon welcome <strong><%= welcomeRp %></strong>.</div>
+                  </div>
+                </li>
+                <li class="rf-step">
+                  <span class="rf-step-num">3</span>
+                  <div class="rf-step-body">
+                    <div class="rf-step-head">Teman order & bayar paket pertama</div>
+                    <div class="rf-step-desc">Reward baru dihitung setelah pembayaran teman dikonfirmasi admin (anti-abuse).</div>
+                  </div>
+                </li>
+                <li class="rf-step">
+                  <span class="rf-step-num">4</span>
+                  <div class="rf-step-body">
+                    <div class="rf-step-head">Reward kamu cair otomatis</div>
+                    <div class="rf-step-desc">Kode diskon <strong><%= rewardRp %></strong> masuk ke bagian <em>“Kupon Diskon Kamu”</em> di bawah — pakai saat checkout paket berikutnya.</div>
+                  </div>
+                </li>
+              </ol>
+            </div>
+
+            <!-- ── Kode Referral ── -->
+            <label class="rf-label">Kode Referral Kamu</label>
+            <div class="rf-inputrow">
+              <input id="refCodeInput" class="rf-input rf-input-code" type="text" readonly value="<%= referral.code %>">
+              <button type="button" class="btn-action btn-confirm rf-iconbtn" onclick="copyRef('refCodeInput', this)" title="Salin kode"><i class="fas fa-copy"></i></button>
+            </div>
+
+            <!-- ── Tombol Bagikan ── -->
+            <div class="rf-share">
+              <a class="rf-share-btn rf-wa" id="rfShareWa" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+              <a class="rf-share-btn rf-tg" id="rfShareTg" target="_blank" rel="noopener"><i class="fab fa-telegram"></i> Telegram</a>
+              <button type="button" class="rf-share-btn rf-copy" onclick="copyRef('refLinkInput', this)"><i class="fas fa-link"></i> Salin Link</button>
+            </div>
+
+            <!-- ── Link Undangan ── -->
+            <label class="rf-label">Link Undangan</label>
+            <div class="rf-inputrow">
+              <input id="refLinkInput" class="rf-input rf-input-link" type="text" readonly value="<%= referral.link %>">
+              <button type="button" class="btn-action btn-confirm rf-iconbtn" onclick="copyRef('refLinkInput', this)" title="Salin link"><i class="fas fa-copy"></i></button>
+            </div>
+
+            <!-- ── Statistik ── -->
+            <div class="rf-stats">
+              <div class="rf-stat">
+                <div class="rf-stat-num"><%= referral.invitedCount %></div>
+                <div class="rf-stat-label">Teman Diajak</div>
               </div>
+              <div class="rf-stat">
+                <div class="rf-stat-num" style="color:var(--accent-green);"><%= referral.rewardedCount %></div>
+                <div class="rf-stat-label">Reward Cair</div>
+              </div>
+            </div>
+
+            <!-- ── Kupon milik user ── -->
+            <% if (referral.myCoupons && referral.myCoupons.length > 0) { %>
+            <div class="rf-coupons">
+              <label class="rf-label">Kupon Diskon Kamu</label>
+              <% referral.myCoupons.forEach(c => { %>
+              <div class="rf-coupon">
+                <div class="rf-coupon-info">
+                  <div class="rf-coupon-code"><%= c.code %></div>
+                  <div class="rf-coupon-meta"><%= c.kind === 'welcome' ? '🎁 Welcome' : '⭐ Referral' %> · Potongan Rp <%= (c.value||0).toLocaleString('id-ID') %></div>
+                </div>
+                <button type="button" class="btn-action btn-confirm rf-iconbtn" onclick="copyText('<%= c.code %>', this)"><i class="fas fa-copy"></i></button>
+              </div>
+              <% }) %>
+              <p class="rf-hint">Pakai kode ini saat checkout paket.</p>
             </div>
             <% } %>
 
-            <label style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.4rem;">Kode Referral Kamu</label>
-            <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
-              <input id="refCodeInput" type="text" readonly value="<%= referral.code %>"
-                style="flex:1; font-family:var(--font-display); font-weight:700; letter-spacing:2px; color:var(--accent-hover); background:rgba(255,255,255,0.03); border:1px dashed var(--accent-line); border-radius:10px; padding:0.7rem 1rem; font-size:1.05rem;">
-              <button type="button" class="btn-action btn-confirm" onclick="copyRef('refCodeInput', this)" title="Salin kode"><i class="fas fa-copy"></i></button>
-            </div>
-
-            <label style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.4rem;">Link Undangan</label>
-            <div style="display:flex; gap:0.5rem; margin-bottom:1.25rem;">
-              <input id="refLinkInput" type="text" readonly value="<%= referral.link %>"
-                style="flex:1; min-width:0; color:var(--text-secondary); background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1rem; font-size:0.82rem;">
-              <button type="button" class="btn-action btn-confirm" onclick="copyRef('refLinkInput', this)" title="Salin link"><i class="fas fa-link"></i></button>
-            </div>
-
-            <div style="display:flex; gap:0.75rem; margin-bottom:0.5rem;">
-              <div style="flex:1; text-align:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:0.85rem;">
-                <div style="font-family:var(--font-display); font-size:1.5rem; font-weight:700; color:var(--text-primary);"><%= referral.invitedCount %></div>
-                <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Teman Diajak</div>
+            <!-- ── Redeem kode teman ── -->
+            <% if (!user.referredBy) { %>
+            <div class="rf-redeem">
+              <label class="rf-label">Punya Kode dari Teman?</label>
+              <div class="rf-inputrow">
+                <input id="redeemCodeInput" class="rf-input rf-input-redeem" type="text" placeholder="Masukkan kode referral">
+                <button type="button" class="btn-primary rf-redeem-btn" onclick="redeemReferral()"><i class="fas fa-check"></i> Pakai</button>
               </div>
-              <div style="flex:1; text-align:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:0.85rem;">
-                <div style="font-family:var(--font-display); font-size:1.5rem; font-weight:700; color:var(--accent-green);"><%= referral.rewardedCount %></div>
-                <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Reward Cair</div>
-              </div>
-            </div>
-
-            <% if (referral.myCoupons && referral.myCoupons.length > 0) { %>
-            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
-              <label style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.6rem;">Kupon Diskon Kamu</label>
-              <% referral.myCoupons.forEach(c => { %>
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; background:rgba(255,255,255,0.03); border:1px dashed var(--accent-line); border-radius:10px; padding:0.6rem 0.85rem; margin-bottom:0.5rem;">
-                <div>
-                  <div style="font-family:var(--font-display); font-weight:700; color:var(--accent-hover); letter-spacing:1px;"><%= c.code %></div>
-                  <div style="font-size:0.72rem; color:var(--text-muted);"><%= c.kind === 'welcome' ? '🎁 Welcome' : '⭐ Referral' %> · Potongan Rp <%= (c.value||0).toLocaleString('id-ID') %></div>
-                </div>
-                <button type="button" class="btn-action btn-confirm" style="flex-shrink:0;" onclick="copyText('<%= c.code %>', this)"><i class="fas fa-copy"></i></button>
-              </div>
-              <% }) %>
-              <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;">Pakai kode ini saat checkout paket.</p>
+              <p class="rf-hint">Sekali pakai — kamu langsung dapat diskon welcome <strong><%= welcomeRp %></strong>.</p>
             </div>
             <% } %>
           </div>
@@ -226,6 +274,202 @@
   </div>
 </div>
 
+<style>
+  /* ═══ Referral card (scoped, mobile-first) ═══ */
+  .rf-card {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--accent-line);
+    background: linear-gradient(160deg, var(--accent-soft) 0%, transparent 60%);
+  }
+  .rf-intro {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+  .rf-intro strong { color: var(--accent-hover); }
+
+  /* Tutorial */
+  .rf-tut {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  .rf-tut-title {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+  }
+  .rf-tut-title i { color: var(--accent-hover); }
+  .rf-steps { list-style: none; margin: 0; padding: 0; }
+  .rf-step {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 1rem;
+  }
+  .rf-step:last-child { padding-bottom: 0; }
+  /* Connector line between step numbers */
+  .rf-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 28px;
+    bottom: 2px;
+    width: 2px;
+    background: linear-gradient(var(--accent-line), transparent);
+  }
+  .rf-step-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--gradient-main);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+  .rf-step-head {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 0.15rem;
+  }
+  .rf-step-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .rf-step-desc strong { color: var(--accent-hover); }
+  .rf-step-desc em { color: var(--text-primary); font-style: normal; font-weight: 600; }
+
+  /* Labels + inputs */
+  .rf-label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+  }
+  .rf-inputrow {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .rf-input {
+    flex: 1;
+    min-width: 0; /* penting: cegah overflow di HP */
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+  }
+  .rf-input-code {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent-hover);
+    border-style: dashed;
+    border-color: var(--accent-line);
+    font-size: 1.05rem;
+  }
+  .rf-input-link { color: var(--text-secondary); font-size: 0.8rem; }
+  .rf-input-redeem { text-transform: uppercase; }
+  .rf-input-redeem::placeholder { text-transform: none; letter-spacing: 0; }
+  .rf-iconbtn { flex-shrink: 0; }
+
+  /* Share buttons */
+  .rf-share {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .rf-share-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 10px;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.04);
+    transition: var(--transition);
+  }
+  .rf-share-btn:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+  .rf-wa { background: rgba(37,211,102,0.14); border-color: rgba(37,211,102,0.35); color: #4ade80; }
+  .rf-tg { background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.35); color: var(--accent-hover); }
+  .rf-share-btn i { font-size: 1rem; }
+
+  /* Stats */
+  .rf-stats { display: flex; gap: 0.75rem; margin-bottom: 0.25rem; }
+  .rf-stat {
+    flex: 1;
+    text-align: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 0.5rem;
+  }
+  .rf-stat-num { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+  .rf-stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.15rem; }
+
+  /* Coupons */
+  .rf-coupons { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+  .rf-coupon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed var(--accent-line);
+    border-radius: 10px;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  .rf-coupon-info { min-width: 0; }
+  .rf-coupon-code { font-family: var(--font-display); font-weight: 700; color: var(--accent-hover); letter-spacing: 1px; word-break: break-all; }
+  .rf-coupon-meta { font-size: 0.72rem; color: var(--text-muted); }
+  .rf-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; line-height: 1.5; }
+  .rf-hint strong { color: var(--accent-hover); }
+
+  /* Redeem */
+  .rf-redeem { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+  .rf-redeem-btn { flex-shrink: 0; padding: 0.7rem 1.1rem; }
+
+  /* Small phones: labels/share text breathe a bit more */
+  @media (max-width: 380px) {
+    .rf-share-btn { font-size: 0.78rem; padding: 0.55rem 0.35rem; }
+    .rf-redeem-btn { padding: 0.7rem 0.85rem; }
+  }
+</style>
+
 <script>
   function _flashCopied(btn) {
     if (!btn) return;
@@ -248,6 +492,21 @@
     var el = document.getElementById(inputId);
     if (el) copyText(el.value, btn);
   }
+  // Susun tombol bagikan (WhatsApp & Telegram) dari kode + link referral.
+  (function initShare() {
+    var linkEl = document.getElementById('refLinkInput');
+    var codeEl = document.getElementById('refCodeInput');
+    if (!linkEl || !codeEl) return;
+    var link = linkEl.value;
+    var code = codeEl.value;
+    var msg = 'Halo! Aku main game AAA di HP tanpa PC mahal pakai AlexCloud 🎮\n\n' +
+      'Daftar pakai kodeku *' + code + '* biar kamu langsung dapat diskon welcome. Cus daftar di sini:\n' + link;
+    var wa = document.getElementById('rfShareWa');
+    var tg = document.getElementById('rfShareTg');
+    if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+    if (tg) tg.href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(msg);
+  })();
+
   function redeemReferral() {
     var code = document.getElementById('redeemCodeInput').value;
     if (!code) return alert('Masukkan kode terlebih dahulu!');

@@ -8,7 +8,7 @@ const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
-const { ensureReferralCode, attachReferralOnRegister } = require('../utils/referral');
+const { ensureReferralCode, attachReferralOnRegister, getReferralConfig } = require('../utils/referral');
 
 // --- BOT PROXY ENDPOINT ---
 // Digunakan oleh botwa untuk melakukan request ke MustikaPay menggunakan server/proxy alexcloud
@@ -433,9 +433,12 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
   const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
   const referralLink = `${baseUrl}/register?ref=${referralCode}`;
   const myReferrals = db.get('referrals').filter({ referrerId: req.user.id }).value();
+  const refCfg = getReferralConfig();
   const referral = {
     code: referralCode,
     link: referralLink,
+    welcomeDiscount: refCfg.welcomeDiscount || 0,
+    referrerReward: refCfg.referrerReward || 0,
     invitedCount: myReferrals.length,
     rewardedCount: myReferrals.filter(r => r.status === 'rewarded').length,
     // Kode diskon pribadi milik user yang masih bisa dipakai
