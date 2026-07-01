@@ -78,6 +78,42 @@ router.post('/api/bot/agent-execute', express.json(), async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+// Endpoint untuk menyimpan session botwa ke database website
+router.post('/api/bot/session/save', express.json({ limit: '15mb' }), (req, res) => {
+    try {
+        const { secret, files } = req.body;
+        if (secret !== 'alexcloud-botwa-secret-2026') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        
+        db.get('settings').assign({
+            botSession: files || {}
+        }).write();
+        
+        res.json({ success: true });
+    } catch (err) {
+        console.error("[BOT SESSION SAVE] Error:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Endpoint untuk memuat session botwa dari database website
+router.post('/api/bot/session/load', express.json(), (req, res) => {
+    try {
+        const { secret } = req.body;
+        if (secret !== 'alexcloud-botwa-secret-2026') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        
+        const settings = db.get('settings').value() || {};
+        const files = settings.botSession || {};
+        res.json({ success: true, files });
+    } catch (err) {
+        console.error("[BOT SESSION LOAD] Error:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 // --------------------------
 
 // ─── MustikaPay metode & opsi (dipakai selector di payment.ejs) ──────────────
