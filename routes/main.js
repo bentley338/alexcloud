@@ -8,7 +8,7 @@ const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
-const { ensureReferralCode } = require('../utils/referral');
+const { ensureReferralCode, attachReferralOnRegister } = require('../utils/referral');
 
 // --- BOT PROXY ENDPOINT ---
 // Digunakan oleh botwa untuk melakukan request ke MustikaPay menggunakan server/proxy alexcloud
@@ -371,6 +371,36 @@ router.post('/api/community/messages/:id/delete', ensureAuthenticated, (req, res
   if (!isAdmin && !isOwner) return res.status(403).json({ error: 'Kamu tidak boleh menghapus pesan ini.' });
   db.get('chatMessages').remove({ id }).write();
   res.json({ ok: true });
+});
+
+// Redeem Referral (Dashboard)
+router.post('/api/referral/redeem', ensureAuthenticated, express.json(), (req, res) => {
+  const user = req.user;
+  if (user.referredBy) {
+    return res.json({ success: false, message: 'Anda sudah pernah menggunakan kode referral.' });
+  }
+  const refCodeRaw = req.body.refCode;
+  if (!refCodeRaw) {
+    return res.json({ success: false, message: 'Kode referral kosong.' });
+  }
+
+  // Ensure signupIp exists for anti-abuse tracking
+  if (!user.signupIp) {
+    user.signupIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || req.ip;
+    db.get('users').find({ id: user.id }).assign({ signupIp: user.signupIp }).write();
+  }
+
+  const result = attachReferralOnRegister(req, res, user, refCodeRaw);
+
+  if (result.status === 'none') return res.json({ success: false, message: 'Kode referral tidak ditemukan.' });
+  if (result.status === 'self') return res.json({ success: false, message: 'Tidak bisa menggunakan kode milik sendiri.' });
+  if (result.status === 'already') return res.json({ success: false, message: 'Anda sudah pernah menggunakan kode referral.' });
+  if (result.status === 'blocked') {
+    // Dianggap success secara internal tapi sebenernya diblock (farming), atau kita kasi error explicit
+    return res.json({ success: false, message: 'Gagal! Terindikasi farming (device ini sudah pernah menggunakan kode referral atau mencapai batas).' });
+  }
+
+  return res.json({ success: true, message: 'Kode berhasil digunakan! Cek bagian kupon Anda.' });
 });
 
 // Dashboard

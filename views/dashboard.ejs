@@ -144,6 +144,17 @@
               Bagikan kodemu. Teman dapat <strong style="color:var(--accent-hover)">diskon welcome</strong>, dan kamu dapat <strong style="color:var(--accent-hover)">kode diskon</strong> tiap teman berlangganan pertama kali. 🎉
             </p>
 
+            <% if (!user.referredBy) { %>
+            <div style="margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border);">
+              <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-primary); font-weight:700; margin-bottom:0.5rem;">Punya Kode dari Teman?</label>
+              <div style="display:flex; gap:0.5rem;">
+                <input id="redeemCodeInput" type="text" placeholder="Masukkan kode referral" 
+                  style="flex:1; text-transform:uppercase; background:var(--bg-lighter); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1rem; font-size:0.9rem; color:var(--text-primary);">
+                <button type="button" class="btn-primary" onclick="redeemReferral()" style="padding:0.7rem 1.25rem;"><i class="fas fa-check"></i> Gunakan</button>
+              </div>
+            </div>
+            <% } %>
+
             <label style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.4rem;">Kode Referral Kamu</label>
             <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
               <input id="refCodeInput" type="text" readonly value="<%= referral.code %>"
@@ -236,6 +247,28 @@
   function copyRef(inputId, btn) {
     var el = document.getElementById(inputId);
     if (el) copyText(el.value, btn);
+  }
+  function redeemReferral() {
+    var code = document.getElementById('redeemCodeInput').value;
+    if (!code) return alert('Masukkan kode terlebih dahulu!');
+    
+    fetch('/api/referral/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refCode: code })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        window.location.reload();
+      } else {
+        alert('Gagal: ' + data.message);
+      }
+    })
+    .catch(err => {
+      alert('Terjadi kesalahan sistem.');
+    });
   }
 </script>
 
