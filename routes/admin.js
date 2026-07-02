@@ -199,12 +199,50 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
     if (reward.bonusDays) msg += ` + Bonus langganan ${reward.bonusDays} hari gratis (Invoice #${reward.bonusOrderId})`;
     msg += '.';
   }
+
+  // Kirim notifikasi ke owner via WhatsApp
+  try {
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    let notifMsg = `✅ *MANUAL ORDER DIKONFIRMASI OLEH ADMIN* ✅\n\n` +
+      `📋 Order ID: *#${order.orderId}*\n` +
+      `👤 Pembeli: ${order.userName} (${order.userEmail})\n` +
+      `📦 Paket: *${plan ? plan.name : order.planName}*\n` +
+      `💰 Nominal: Rp ${order.price.toLocaleString('id-ID')}\n` +
+      `📅 Expired: ${moment(expiresAt).format('DD MMM YYYY')}`;
+    
+    if (reward) {
+      notifMsg += `\n\n🎁 *Referral Reward Cair!* Pengajak (${reward.referrerName}) mendapat kode ${reward.rewardCode}`;
+      if (reward.bonusDays) notifMsg += ` + Gratis langganan ${reward.bonusDays} hari (Invoice Rp0 #${reward.bonusOrderId})!`;
+    }
+    
+    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF CONFIRM ERROR]', err.message));
+  } catch (err) {
+    console.error('[WA NOTIF CONFIRM EXCEPTION]', err.message);
+  }
+
   req.flash('success', msg);
   res.redirect('/admin/orders');
 });
 
 router.post('/orders/:id/reject', ensureAdmin, (req, res) => {
+  const order = db.get('orders').find({ id: req.params.id }).value();
   db.get('orders').find({ id: req.params.id }).assign({ status: 'rejected' }).write();
+
+  // Kirim notifikasi ke owner via WhatsApp
+  if (order) {
+    try {
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      const notifMsg = `❌ *MANUAL ORDER DITOLAK OLEH ADMIN* ❌\n\n` +
+        `📋 Order ID: *#${order.orderId}*\n` +
+        `👤 Pembeli: ${order.userName} (${order.userEmail})\n` +
+        `📦 Paket: *${order.planName}*\n` +
+        `💰 Nominal: Rp ${order.price.toLocaleString('id-ID')}`;
+      sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF REJECT ERROR]', err.message));
+    } catch (err) {
+      console.error('[WA NOTIF REJECT EXCEPTION]', err.message);
+    }
+  }
+
   req.flash('success', 'Order ditolak.');
   res.redirect('/admin/orders');
 });

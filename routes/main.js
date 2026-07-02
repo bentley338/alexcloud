@@ -373,6 +373,19 @@ router.post('/api/referral/redeem', ensureAuthenticated, express.json(), (req, r
     return res.json({ success: false, message: `Gagal! Terindikasi abuse (${reasonText}).` });
   }
 
+  // Kirim notifikasi ke owner via WhatsApp
+  try {
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    const notifMsg = `🎁 *PENGGUNA KLAIM REFERRAL* 🎁\n\n` +
+      `👤 *Pengguna:* ${user.name} (${user.email})\n` +
+      `🔑 *Kode:* ${refCodeRaw.toUpperCase()}\n` +
+      `⚙️ *Status:* Sukses diklaim\n\n` +
+      `Diskon welcome telah ditambahkan ke kupon pengguna.`;
+    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF REFERRAL ERROR]', err.message));
+  } catch (err) {
+    console.error('[WA NOTIF REFERRAL EXCEPTION]', err.message);
+  }
+
   return res.json({ success: true, message: 'Kode berhasil digunakan! Cek bagian kupon Anda.' });
 });
 
@@ -1151,6 +1164,20 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
     cancelledAt: new Date().toISOString()
   }).write();
 
+  // Kirim notifikasi ke owner via WhatsApp
+  try {
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    const notifMsg = `❌ *ORDER DIBATALKAN OLEH PENGGUNA* ❌\n\n` +
+      `👤 *Pengguna:* ${order.userName} (${order.userEmail})\n` +
+      `📦 *Paket:* ${order.planName}\n` +
+      `💰 *Nominal:* Rp ${order.price.toLocaleString('id-ID')}\n` +
+      `📝 *ID Order:* ${order.orderId}\n\n` +
+      `Pesanan ini telah dibatalkan oleh pengguna.`;
+    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF CANCEL ERROR]', err.message));
+  } catch (err) {
+    console.error('[WA NOTIF CANCEL EXCEPTION]', err.message);
+  }
+
   return res.json({ success: true, message: 'Pesanan berhasil dibatalkan' });
 });
 
@@ -1468,6 +1495,21 @@ router.post('/api/testimonials', async (req, res) => {
     }).write();
 
     console.log(`[BOT API] Testimonial from ${finalName} successfully added!`);
+
+    // Kirim notifikasi ke owner via WhatsApp
+    try {
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      const stars = '⭐'.repeat(parseInt(norm.rating) || parseInt(rating) || 5);
+      const notifMsg = `📝 *TESTIMONI BARU DITERIMA* 📝\n\n` +
+        `👤 *Pengirim:* ${finalName}\n` +
+        `⭐ *Rating:* ${stars}\n` +
+        `💬 *Ulasan:* "${finalText}"\n\n` +
+        `Ulasan baru telah otomatis masuk dan ditampilkan di website.`;
+      sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF TESTI ERROR]', err.message));
+    } catch (err) {
+      console.error('[WA NOTIF TESTI EXCEPTION]', err.message);
+    }
+
     return res.json({ success: true, message: 'Testimonial successfully added!' });
   } catch (err) {
     console.error('[BOT API Error]', err);
