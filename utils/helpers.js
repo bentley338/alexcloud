@@ -535,7 +535,7 @@ Instruksi Laporan (Tulis dalam Bahasa Indonesia):
 
     for (const modelName of models) {
       try {
-        const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: "v1" });
+        const model = genAI.getGenerativeModel({ model: modelName });
         result = await model.generateContent(prompt);
         success = true;
         break;
