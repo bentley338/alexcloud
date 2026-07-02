@@ -507,7 +507,7 @@ async function runProactiveAnalysis(returnRaw = false) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" }, { apiVersion: "v1" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" }, { apiVersion: "v1" });
 
     const prompt = `Kamu adalah AI Chief Operating Officer (COO) & Penasihat Bisnis Proaktif website AlexCloud (alexcloud.my.id).
 Tugas kamu adalah memantau server, aktivitas bisnis, dan data website secara mandiri, lalu memberikan analisis proaktif serta saran bisnis cerdas untuk Owner.

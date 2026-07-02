@@ -77,13 +77,25 @@ function sendViaBotWa(settings, messageText) {
  * @param {string} messageText - The message content to send
  */
 async function sendWhatsAppNotification(messageText, isTest = false) {
+  // Clean up markdown for WhatsApp formatting (convert ** to * and fix headers)
+  let formattedMessage = '';
+  if (messageText) {
+    formattedMessage = messageText
+      .replace(/\*\*\*/g, '*') // Remove triple asterisks
+      .replace(/\*\*/g, '*')   // Convert double asterisks to single asterisks
+      .replace(/^####+ (.*)$/gm, '*$1*') // Convert h4+ headers to bold
+      .replace(/^### (.*)$/gm, '*$1*')   // Convert h3 headers to bold
+      .replace(/^## (.*)$/gm, '*$1*')     // Convert h2 headers to bold
+      .replace(/^# (.*)$/gm, '*$1*');    // Convert h1 headers to bold
+  }
+
   const settings = db.get('settings').value() || {};
   
   // Try sending via botwa first if BOT_WA_URL is configured
   const botWaUrl = process.env.BOT_WA_URL || settings.botWaUrl || '';
   if (botWaUrl) {
     try {
-      const res = await sendViaBotWa(settings, messageText);
+      const res = await sendViaBotWa(settings, formattedMessage);
       if (res.success) return res;
       console.warn('[WA NOTIF] Bot WA failed, trying fallback...', res.reason || res.body);
     } catch (e) {
@@ -102,9 +114,9 @@ async function sendWhatsAppNotification(messageText, isTest = false) {
 
   
   if (provider === 'twilio') {
-    return sendViaTwilio(settings, messageText);
+    return sendViaTwilio(settings, formattedMessage);
   } else {
-    return sendViaCallMeBot(settings, messageText);
+    return sendViaCallMeBot(settings, formattedMessage);
   }
 }
 
