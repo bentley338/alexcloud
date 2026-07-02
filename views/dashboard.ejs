@@ -95,7 +95,7 @@
               </thead>
               <tbody>
                 <% orders.forEach(order => { %>
-                <tr>
+                <tr onclick="window.location.href='/payment/<%= order.orderId %>'" style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
                   <td><span style="font-family:var(--font-display);font-size:0.8rem;color:var(--accent-blue)"><%= order.orderId %></span></td>
                   <td><%= order.planName %></td>
                   <td style="color:var(--accent-green)">Rp <%= order.price.toLocaleString('id-ID') %></td>
