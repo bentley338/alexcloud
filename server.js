@@ -281,7 +281,23 @@ async function gracefulShutdown(signal) {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-startServer().catch(err => {
+// Scheduler Analitik Proaktif AI
+function startProactiveAIAnalyst() {
+  console.log('[PROACTIVE AI] Scheduler initialized (running every 12 hours)...');
+  const { runProactiveAnalysis } = require('./utils/helpers');
+  // Jalankan 1 menit setelah startup agar tidak menghalangi booting
+  setTimeout(() => {
+    runProactiveAnalysis().catch(err => console.error('[PROACTIVE AI STARTUP RUN ERROR]', err.message));
+    // Loop setiap 12 jam
+    setInterval(() => {
+      runProactiveAnalysis().catch(err => console.error('[PROACTIVE AI CRON RUN ERROR]', err.message));
+    }, 12 * 60 * 60 * 1000);
+  }, 60000).unref();
+}
+
+startServer().then(() => {
+  startProactiveAIAnalyst();
+}).catch(err => {
   console.error('[FATAL]', err);
   process.exit(1);
 });

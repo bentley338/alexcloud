@@ -80,6 +80,23 @@ router.post('/api/bot/agent-execute', express.json(), async (req, res) => {
     }
 });
 
+// Secure endpoint untuk men-trigger laporan analitik bisnis proaktif AI secara manual
+router.post('/api/bot/proactive-report', express.json(), async (req, res) => {
+    try {
+        const { secret } = req.body;
+        if (!safeEqual(secret, getBotSecret())) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        
+        const { runProactiveAnalysis } = require('../utils/helpers');
+        const report = await runProactiveAnalysis(true); // Ambil teks mentah laporan
+        res.json({ success: true, report });
+    } catch (err) {
+        console.error("[BOT PROACTIVE REPORT] Error:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // Endpoint untuk menyimpan session botwa ke database website
 router.post('/api/bot/save-session', express.json({ limit: '15mb' }), (req, res) => {
     try {

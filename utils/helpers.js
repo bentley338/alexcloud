@@ -470,6 +470,83 @@ function isJunkTestimonial(t) {
   return false;
 }
 
+async function runProactiveAnalysis(returnRaw = false) {
+  try {
+    const { db, getPlans } = require('../database/db');
+    const users = db.get('users').value() || [];
+    const orders = db.get('orders').value() || [];
+    const subscriptions = db.get('subscriptions').value() || [];
+    const testimonials = db.get('testimonials').value() || [];
+    const promoCodes = db.get('promoCodes').value() || [];
+
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    // Calculate metrics
+    const totalUsers = users.filter(u => u.role !== 'admin').length;
+    const newUsers24h = users.filter(u => u.role !== 'admin' && new Date(u.createdAt) > oneDayAgo).length;
+
+    const orders24h = orders.filter(o => new Date(o.createdAt) > oneDayAgo);
+    const totalOrders24h = orders24h.length;
+    const confirmedOrders24h = orders24h.filter(o => o.status === 'confirmed');
+    const revenue24h = confirmedOrders24h.reduce((sum, o) => sum + o.price, 0);
+    const pendingOrders24h = orders24h.filter(o => o.status === 'pending').length;
+
+    const activeSubs = subscriptions.filter(s => s.status === 'active').length;
+    const recentTesti = testimonials.slice(-3).map(t => `"${t.text}" (Rating: ${t.rating}/5 oleh ${t.name})`).join('\n');
+    const activePromos = promoCodes.filter(p => p.isActive).map(p => `${p.code} (${p.discountValue}${p.discountType === 'percent' ? '%' : ' Rupiah'})`).join(', ');
+
+    // Call Gemini API
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      const errText = 'Gemini API Key not configured on server.';
+      if (returnRaw) return errText;
+      console.log(`[PROACTIVE AI] ${errText}`);
+      return;
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" }, { apiVersion: "v1" });
+
+    const prompt = `Kamu adalah AI Chief Operating Officer (COO) & Penasihat Bisnis Proaktif website AlexCloud (alexcloud.my.id).
+Tugas kamu adalah memantau server, aktivitas bisnis, dan data website secara mandiri, lalu memberikan analisis proaktif serta saran bisnis cerdas untuk Owner.
+
+Berikut adalah statistik website terupdate (24 jam terakhir):
+- Total Pengguna Terdaftar: ${totalUsers}
+- Pendaftaran baru: ${newUsers24h}
+- Jumlah Pesanan: ${totalOrders24h} (Lunas: ${confirmedOrders24h.length}, Pending: ${pendingOrders24h})
+- Omset/Pendapatan Hari Ini: Rp ${revenue24h.toLocaleString('id-ID')}
+- Langganan Aktif Saat Ini: ${activeSubs}
+- Kode Promo Aktif: [${activePromos || 'Tidak ada'}]
+- Testimoni Terbaru:
+${recentTesti || 'Tidak ada testimoni baru'}
+
+Instruksi Laporan (Tulis dalam Bahasa Indonesia):
+1. Mulai dengan sapaan hangat, cerdas, dan proaktif (seolah-olah kamu adalah COO digital yang sedang memantau sistem untuk Owner).
+2. Berikan analisis singkat tentang kinerja hari ini (apakah penjualan bagus, pendaftaran meningkat, dll.).
+3. Berikan **minimal 2 saran fitur baru, taktik promosi kreatif, ide kode promo baru, atau tindakan pencegahan** (misalnya mem-follow up user pending, membuat event berjangka, dll.) yang bisa diimplementasikan oleh Owner untuk meningkatkan omset.
+4. Buat agar saran-saran ini terkesan sangat cerdas, memiliki "otak", kontekstual, dan praktis untuk diimplementasikan.
+5. Gunakan emoji yang menarik, tebalkan informasi penting, dan buat daftar yang mudah dibaca. JANGAN gunakan format JSON atau istilah kode pemrograman.`;
+
+    const result = await model.generateContent(prompt);
+    const reportText = result.response.text().trim();
+
+    const notifMsg = `🧠 *PROACTIVE BUSINESS REPORT & ANALYTICS* 🧠\n\n` + reportText;
+
+    if (returnRaw) {
+      return notifMsg;
+    }
+
+    const { sendWhatsAppNotification } = require('./whatsapp');
+    await sendWhatsAppNotification(notifMsg);
+    console.log('[PROACTIVE AI] Analysis report sent to owner successfully!');
+  } catch (err) {
+    console.error('[PROACTIVE AI ERROR]', err.message);
+    if (returnRaw) return `Error running analysis: ${err.message}`;
+  }
+}
+
 module.exports = {
   sharedHttpsAgent,
   cleanEnvVar,
@@ -484,5 +561,6 @@ module.exports = {
   stripBotCommand,
   safeEqual,
   getBotSecret,
+  runProactiveAnalysis,
   path
 };
