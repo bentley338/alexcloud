@@ -74,6 +74,20 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         ensureReferralCode(newUser);
         attachReferralOnRegister(req, req.res, newUser, req.session && req.session.pendingRef);
         if (req.session) delete req.session.pendingRef;
+
+        // Send WhatsApp Notification to Owner
+        try {
+          const { sendWhatsAppNotification } = require('../utils/whatsapp');
+          const notifMsg = `🔔 *NOTIFIKASI PENDAFTARAN BARU (GOOGLE)* 🔔\n\n` +
+            `👤 *Nama:* ${newUser.name}\n` +
+            `📧 *Email:* ${newUser.email}\n` +
+            `📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n` +
+            `Pengguna baru telah berhasil mendaftar menggunakan Google OAuth di website AlexCloud.`;
+          sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ERROR]', err.message));
+        } catch (err) {
+          console.error('[WA NOTIF GOOGLE REGISTRATION ERROR]', err.message);
+        }
+
         user = newUser;
       }
     }
