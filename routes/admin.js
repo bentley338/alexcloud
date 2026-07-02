@@ -160,6 +160,7 @@ router.get('/orders', ensureAdmin, (req, res) => {
 router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
   const order = db.get('orders').find({ id: req.params.id }).value();
   if (!order) { req.flash('error', 'Order tidak ditemukan.'); return res.redirect('/admin/orders'); }
+  if (order.status !== 'pending') { req.flash('error', 'Order sudah diproses.'); return res.redirect('/admin/orders'); }
   const plans = getPlans();
   const plan = plans.find(p => p.id === order.planId);
   const now = new Date();

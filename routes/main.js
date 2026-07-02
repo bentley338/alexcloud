@@ -549,7 +549,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
       } else {
         discount = Math.min(promo.discountValue, plan.price);
       }
-      actualPrice = plan.price - discount;
+      actualPrice = Math.max(0, plan.price - discount);
       appliedPromo = promo;
     }
   }
@@ -1041,16 +1041,20 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
       fr3St = (fr3Status?.data?.status || 'PENDING').toUpperCase();
     }
 
+    // Re-fetch order from DB to prevent TOC-TOU race condition
+    const currentOrder = db.get('orders').find({ id: order.id }).value();
+    if (!currentOrder) return res.json({ status: 'error', message: 'Order hilang' });
+
     // Auto-confirm jika SUCCESS atau PAID
-    if ((fr3St === 'SUCCESS' || fr3St === 'PAID' || fr3St === 'SETTLED') && order.status === 'pending') {
+    if ((fr3St === 'SUCCESS' || fr3St === 'PAID' || fr3St === 'SETTLED') && currentOrder.status === 'pending') {
       db.get('orders').find({ id: order.id }).assign({
         status: 'confirmed',
         paidAt: new Date().toISOString()
       }).write();
 
       // Burn promo code
-      if (order.promoCode) {
-        const promo = db.get('promoCodes').find({ code: order.promoCode.toUpperCase() }).value();
+      if (currentOrder.promoCode) {
+        const promo = db.get('promoCodes').find({ code: currentOrder.promoCode.toUpperCase() }).value();
         if (promo) {
           db.get('promoCodes').find({ id: promo.id }).assign({ usedCount: (promo.usedCount || 0) + 1 }).write();
         }
@@ -1058,7 +1062,7 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
 
       // Auto-activate subscription
       const plans = getPlans();
-      const plan = plans.find(p => p.id === order.planId);
+      const plan = plans.find(p => p.id === currentOrder.planId);
       if (plan) {
         const expiresAt = new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString();
         db.get('subscriptions').remove({ userId: req.user.id, status: 'active' }).write();
@@ -1077,7 +1081,7 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
 
       // Trigger Referral Hook
       const { rewardReferrerOnFirstOrder } = require('../utils/referral');
-      const reward = rewardReferrerOnFirstOrder(order);
+      const reward = rewardReferrerOnFirstOrder(currentOrder);
 
       // Trigger Notifications for Admin
       const methodLabels = { qris: 'QRIS', va: 'Virtual Account', emoney: 'E-Wallet', retail: 'Retail' };
@@ -1144,6 +1148,12 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
     } catch (e) {
       console.error('[FR3] Cancel error (proceeding with local cancellation):', e.message);
     }
+  }
+
+  // Re-fetch order from DB to prevent TOC-TOU race condition
+  const currentOrder = db.get('orders').find({ id: order.id }).value();
+  if (currentOrder && (currentOrder.status === 'confirmed' || currentOrder.status === 'cancelled')) {
+    return res.json({ error: `Order sudah ${currentOrder.status}, pembatalan gagal` });
   }
 
   // Jika berhasil cancel di FR3 (atau tidak pakai QRIS), cancel di DB lokal
