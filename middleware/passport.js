@@ -81,7 +81,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           const notifMsg = `🔔 *NOTIFIKASI PENDAFTARAN BARU (GOOGLE)* 🔔\n\n` +
             `👤 *Nama:* ${newUser.name}\n` +
             `📧 *Email:* ${newUser.email}\n` +
-            `📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n` +
+            `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
             `Pengguna baru telah berhasil mendaftar menggunakan Google OAuth di website AlexCloud.`;
           sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ERROR]', err.message));
         } catch (err) {

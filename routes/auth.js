@@ -107,7 +107,7 @@ router.post('/register', ensureGuest, registerLimiter, (req, res) => {
     const notifMsg = `🔔 *NOTIFIKASI PENDAFTARAN BARU* 🔔\n\n` +
       `👤 *Nama:* ${name.trim()}\n` +
       `📧 *Email:* ${email.toLowerCase()}\n` +
-      `📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n` +
+      `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
       `Pengguna baru telah berhasil mendaftar di website AlexCloud.`;
     sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ERROR]', err.message));
   } catch (err) {

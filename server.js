@@ -1,3 +1,4 @@
+process.env.TZ = 'Asia/Jakarta';
 // Muat .env dari folder file ini (bukan CWD) agar tetap terbaca walau server
 // dijalankan dari direktori lain (pm2/systemd/cron) — penyebab umum env kosong.
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
@@ -255,7 +256,7 @@ async function gracefulShutdown(signal) {
     const notifMsg = `⚠️ *SERVER ALEXCLOUD OFFLINE (SHUTDOWN)* ⚠️\n\n` +
       `🖥️ *Server:* VPS AlexCloud\n` +
       `⚙️ *Sinyal:* ${signal}\n` +
-      `📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n` +
+      `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
       `Server sedang dimatikan secara tertib (misal karena restart, redeploy, atau shutdown manual).`;
     await sendWhatsAppNotification(notifMsg);
   } catch (err) {
