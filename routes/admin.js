@@ -201,6 +201,67 @@ router.post('/orders/:id/reject', ensureAdmin, (req, res) => {
 });
 
 // =====================
+// SIMULASI REFERRAL > 100K
+// =====================
+router.get('/simulate-referral', ensureAdmin, (req, res) => {
+  const admin = req.user;
+  if (!admin.referralCode) {
+    admin.referralCode = 'SIMULASI123';
+  }
+
+  const { v4: uuidv4 } = require('uuid');
+  const friendId = uuidv4();
+  db.get('users').push({
+    id: friendId,
+    name: 'Teman Simulasi',
+    email: 'teman_simulasi@example.com',
+    password: 'xxx',
+    role: 'user',
+    isActive: true,
+    referredBy: admin.id,
+    signupIp: '192.168.9.9'
+  }).write();
+
+  const refId = uuidv4();
+  db.get('referrals').push({
+    id: refId,
+    referrerId: admin.id,
+    referredUserId: friendId,
+    referredName: 'Teman Simulasi',
+    signupIp: '192.168.9.9',
+    orderId: null,
+    status: 'pending',
+    reason: null,
+    welcomeCode: 'WELCOME-SIMU',
+    rewardCode: null,
+    createdAt: new Date().toISOString(),
+    rewardedAt: null
+  }).write();
+
+  const orderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
+  db.get('orders').push({
+    id: uuidv4(),
+    orderId: orderId,
+    userId: friendId,
+    userName: 'Teman Simulasi',
+    userEmail: 'teman_simulasi@example.com',
+    planId: 'monthly_1',
+    planName: 'Cloud PC Bulanan (Simulasi > 100k)',
+    price: 125000,
+    originalPrice: 125000,
+    discount: 0,
+    status: 'pending',
+    qrisStatus: 'awaiting_method',
+    payMethodType: 'qris',
+    gateway: 'mustikapay',
+    createdAt: new Date().toISOString()
+  }).write();
+
+  req.flash('success', 'Order simulasi (Rp 125.000) dari Teman Simulasi berhasil dibuat! Silakan cari order ' + orderId + ' di bawah ini dan klik Confirm untuk memicu bonus referral.');
+  res.redirect('/admin/orders');
+});
+
+// =====================
 // SITE ANNOUNCEMENT BANNER
 // =====================
 router.get('/announcement', ensureAdmin, (req, res) => {
