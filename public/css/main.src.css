@@ -1313,8 +1313,9 @@ section { position: relative; z-index: 1; }
 .stat-icon.green { background: rgba(63, 185, 80, 0.1); color: var(--accent-green); }
 .stat-icon.orange { background: var(--accent-soft); color: var(--accent); }
 
-.stat-info .label { color: var(--text-muted); font-size: 0.8rem; font-family: var(--font-ui); }
-.stat-info .value { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.stat-info { flex: 1; min-width: 0; word-break: break-word; }
+.stat-info .label { color: var(--text-muted); font-size: 0.8rem; font-family: var(--font-ui); line-height: 1.3; margin-bottom: 0.2rem; }
+.stat-info .value { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
 
 .content-grid {
   display: grid;
@@ -1339,6 +1340,8 @@ section { position: relative; z-index: 1; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .card-title {
@@ -3339,7 +3342,7 @@ input:focus-visible,
   /* Show games on mobile too — just 4 items in 2 cols */
   .games-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
 
-  .dashboard-grid { grid-template-columns: 1fr 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; gap: 1.25rem; }
   .payment-grid { grid-template-columns: 1fr; }
 
