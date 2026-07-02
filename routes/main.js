@@ -551,7 +551,6 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
       }
       actualPrice = plan.price - discount;
       appliedPromo = promo;
-      db.get('promoCodes').find({ id: promo.id }).assign({ usedCount: (promo.usedCount || 0) + 1 }).write();
     }
   }
 
@@ -1048,6 +1047,14 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
         status: 'confirmed',
         paidAt: new Date().toISOString()
       }).write();
+
+      // Burn promo code
+      if (order.promoCode) {
+        const promo = db.get('promoCodes').find({ code: order.promoCode.toUpperCase() }).value();
+        if (promo) {
+          db.get('promoCodes').find({ id: promo.id }).assign({ usedCount: (promo.usedCount || 0) + 1 }).write();
+        }
+      }
 
       // Auto-activate subscription
       const plans = getPlans();

@@ -168,6 +168,14 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
   db.get('orders').find({ id: order.id }).assign({
     status: 'confirmed', paidAt: now.toISOString(), activatedAt: now.toISOString()
   }).write();
+
+  // Burn promo code
+  if (order.promoCode) {
+    const promo = db.get('promoCodes').find({ code: order.promoCode.toUpperCase() }).value();
+    if (promo) {
+      db.get('promoCodes').find({ id: promo.id }).assign({ usedCount: (promo.usedCount || 0) + 1 }).write();
+    }
+  }
   const existingSub = db.get('subscriptions').find({ userId: order.userId, status: 'active' }).value();
   if (existingSub) {
     db.get('subscriptions').find({ id: existingSub.id }).assign({
