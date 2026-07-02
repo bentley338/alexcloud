@@ -222,11 +222,11 @@
           Selamat! Bonus langganan 7 hari Anda sudah langsung aktif.
         </div>
         <div style="font-family: var(--font-ui); font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
-          Silakan konfirmasi ke Admin via WhatsApp untuk mengabari klaim bonus Anda (opsional tapi disarankan).
+          <strong style="color:var(--accent-red); font-weight:700;">WAJIB:</strong> Silakan klik tombol di bawah untuk meminta detail akun dan agar bonus langsung diproses!
         </div>
         <%
           let waBonusMsg = 'Halo Admin AlexCloud! 🎉\n\n';
-          waBonusMsg += 'Saya mau lapor klaim bonus ajak teman:\n';
+          waBonusMsg += 'Saya mau lapor klaim bonus ajak teman dan meminta detail akun saya agar bisa langsung bermain:\n';
           waBonusMsg += '📋 Invoice Bonus: *#' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + order.planName + '*\n\nTerima kasih!';
         %>
         <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent(waBonusMsg) %>" target="_blank" class="wa-confirm-btn" style="margin: 0 auto; max-width: 320px; display: flex;">
