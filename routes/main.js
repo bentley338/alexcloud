@@ -399,6 +399,23 @@ router.post('/api/referral/redeem', ensureAuthenticated, express.json(), (req, r
     let reasonText = 'device ini sudah mencapai batas max 1 referral';
     if (result.reason === 'same_ip') reasonText = 'tidak bisa mereferralkan perangkat sendiri / IP yang sama';
     else if (result.reason === 'cookie') reasonText = 'perangkat ini sudah pernah menggunakan kode referral sebelumnya';
+
+    // Kirim notifikasi perilaku tidak wajar (abuse referral) ke owner
+    try {
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      const ip = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for']?.split(',')[0].trim()) || req.socket.remoteAddress || req.ip;
+      const notifMsg = `🚨 *PERINGATAN DETEKSI ABUSE REFERRAL* 🚨\n\n` +
+        `👤 *Pengguna:* ${user.name} (${user.email})\n` +
+        `🔑 *Kode:* ${refCodeRaw.toUpperCase()}\n` +
+        `⚠️ *Jenis Abuse:* ${reasonText}\n` +
+        `🌐 *IP Address:* ${ip}\n` +
+        `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
+        `Sistem berhasil memblokir upaya klaim diskon referral ini karena terindikasi tidak wajar.`;
+      sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ABUSE ERROR]', err.message));
+    } catch (err) {
+      console.error('[WA NOTIF ABUSE EXCEPTION]', err.message);
+    }
+
     return res.json({ success: false, message: `Gagal! Terindikasi abuse (${reasonText}).` });
   }
 

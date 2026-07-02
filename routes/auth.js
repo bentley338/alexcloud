@@ -25,6 +25,21 @@ function authRateLimiter({ windowMs, maxAttempts, redirectTo }) {
     }
     e.count++;
     if (e.count > maxAttempts) {
+      if (e.count === maxAttempts + 1) {
+        // Kirim notifikasi pertama kali limit terlampaui
+        try {
+          const { sendWhatsAppNotification } = require('../utils/whatsapp');
+          const notifMsg = `🚨 *PERINGATAN PERCOBAAN PENYERANGAN (BRUTE-FORCE)* 🚨\n\n` +
+            `🌐 *IP Address:* ${key}\n` +
+            `📝 *Endpoint:* ${req.originalUrl}\n` +
+            `⚠️ *Detail:* Terlalu banyak percobaan (Limit: ${maxAttempts}x per ${windowMs / 1000}s)\n` +
+            `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
+            `Sistem telah memblokir sementara IP ini karena melakukan percobaan login/register berulang secara tidak wajar.`;
+          sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF LIMITER ERROR]', err.message));
+        } catch (err) {
+          console.error('[WA NOTIF LIMITER EXCEPTION]', err.message);
+        }
+      }
       req.flash('error', 'Terlalu banyak percobaan. Silakan coba lagi dalam beberapa menit.');
       return res.redirect(redirectTo);
     }

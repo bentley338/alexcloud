@@ -102,6 +102,21 @@ function createRateLimiter({ windowMs, maxRequests }) {
 
     entry.count++;
     if (entry.count > maxRequests) {
+      if (entry.count === maxRequests + 1) {
+        // Kirim notifikasi perilaku tidak wajar (abuse rate limit) ke owner via WhatsApp
+        try {
+          const { sendWhatsAppNotification } = require('./whatsapp');
+          const notifMsg = `🚨 *PERINGATAN DETEKSI SPAM / RATE LIMIT* 🚨\n\n` +
+            `🌐 *IP Address:* ${key}\n` +
+            `📝 *Endpoint:* ${req.originalUrl}\n` +
+            `⚠️ *Detail:* Melebihi batas aman (${maxRequests} requests per ${windowMs / 1000}s)\n` +
+            `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
+            `Sistem memblokir sementara IP ini karena melakukan spamming ke endpoint tersebut.`;
+          sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF SPAM ERROR]', err.message));
+        } catch (err) {
+          console.error('[WA NOTIF SPAM EXCEPTION]', err.message);
+        }
+      }
       res.setHeader('Retry-After', Math.ceil(windowMs / 1000));
       return res.status(429).json({ error: 'Terlalu banyak permintaan. Silakan coba lagi nanti.' });
     }
