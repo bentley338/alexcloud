@@ -881,7 +881,8 @@ router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
   //  - 'manual'     : semua gateway gagal → fallback transfer manual via WA
   //  - 'select'     : belum memilih metode → tampilkan selector
   let payState = 'select';
-  if (order.qrisStatus === 'ready' && order.payMethodType) payState = 'instrument';
+  if (order.payMethodType === 'bonus_referral') payState = 'bonus';
+  else if (order.qrisStatus === 'ready' && order.payMethodType) payState = 'instrument';
   else if (order.qrisStatus === 'failed') payState = 'manual';
 
   res.render('payment', {
@@ -1067,12 +1068,21 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
         db.get('orders').find({ id: order.id }).assign({ activatedAt: new Date().toISOString() }).write();
       }
 
+      // Trigger Referral Hook
+      const { rewardReferrerOnFirstOrder } = require('../utils/referral');
+      const reward = rewardReferrerOnFirstOrder(order);
+
       // Trigger Notifications for Admin
       const methodLabels = { qris: 'QRIS', va: 'Virtual Account', emoney: 'E-Wallet', retail: 'Retail' };
       const methodLabel = methodLabels[order.payMethodType] || 'QRIS';
       const formattedPrice = 'Rp ' + order.price.toLocaleString('id-ID');
-      const textMsg = `🎉 *PEMBAYARAN SUKSES (${methodLabel})*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
+      let textMsg = `🎉 *PEMBAYARAN SUKSES (${methodLabel})*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
       
+      if (reward) {
+        textMsg += `\n\n🎁 *Referral Reward Cair!* Pengajak (${reward.referrerName}) mendapat kode ${reward.rewardCode}`;
+        if (reward.bonusDays) textMsg += ` + Gratis langganan ${reward.bonusDays} hari (Invoice Rp0 #${reward.bonusOrderId})!`;
+      }
+
       // WhatsApp
       const { sendWhatsAppNotification } = require('../utils/whatsapp');
       sendWhatsAppNotification(textMsg).catch(err => {

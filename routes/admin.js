@@ -186,7 +186,9 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
 
   let msg = `Order #${order.orderId} dikonfirmasi. Subscription aktif sampai ${moment(expiresAt).format('DD MMM YYYY')}.`;
   if (reward) {
-    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (kode ${reward.rewardCode}).`;
+    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (kode ${reward.rewardCode})`;
+    if (reward.bonusDays) msg += ` + Bonus langganan ${reward.bonusDays} hari gratis (Invoice #${reward.bonusOrderId})`;
+    msg += '.';
   }
   req.flash('success', msg);
   res.redirect('/admin/orders');

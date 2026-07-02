@@ -194,6 +194,47 @@
       </div>
     </div>
 
+    <% } else if (payState === 'bonus') { %>
+    <!-- ======= BONUS REFERRAL INVOICE ======= -->
+    <div class="pay-card qris-card">
+      <div class="pay-status-bar" style="background: rgba(0, 255, 136, 0.1); border-bottom: 1px solid rgba(0, 255, 136, 0.2);">
+        <div class="pay-status-dot success"></div>
+        <span style="color: var(--accent-green);">Bonus Aktif / Lunas</span>
+      </div>
+
+      <div class="pay-summary" style="margin-top: 1rem;">
+        <div class="pay-sum-row">
+          <span>Tipe Invoice</span>
+          <span><strong>Bonus Referral (Ajak Teman)</strong></span>
+        </div>
+        <div class="pay-sum-row">
+          <span>Paket</span>
+          <span><strong><%= order.planName %></strong></span>
+        </div>
+        <div class="pay-sum-row total-row">
+          <span>Total Tagihan</span>
+          <span class="total-val">Rp 0</span>
+        </div>
+      </div>
+
+      <div class="pay-stuck-helper" style="margin: 1.5rem 0; text-align: center; border-top: 1px dashed var(--border); padding-top: 1.5rem;">
+        <div style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.75rem;">
+          Selamat! Bonus langganan 7 hari Anda sudah langsung aktif.
+        </div>
+        <div style="font-family: var(--font-ui); font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Silakan konfirmasi ke Admin via WhatsApp untuk mengabari klaim bonus Anda (opsional tapi disarankan).
+        </div>
+        <%
+          let waBonusMsg = 'Halo Admin AlexCloud! 🎉\n\n';
+          waBonusMsg += 'Saya mau lapor klaim bonus ajak teman:\n';
+          waBonusMsg += '📋 Invoice Bonus: *#' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + order.planName + '*\n\nTerima kasih!';
+        %>
+        <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent(waBonusMsg) %>" target="_blank" class="wa-confirm-btn" style="margin: 0 auto; max-width: 320px; display: flex;">
+          <i class="fab fa-whatsapp"></i> Konfirmasi Bonus ke Admin
+        </a>
+      </div>
+    </div>
+
     <% } else if (payState === 'instrument') { %>
     <!-- ======= INSTRUMEN PEMBAYARAN ======= -->
     <div class="pay-card qris-card">
