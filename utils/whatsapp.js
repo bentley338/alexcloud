@@ -77,16 +77,15 @@ function sendViaBotWa(settings, messageText) {
  * @param {string} messageText - The message content to send
  */
 async function sendWhatsAppNotification(messageText, isTest = false) {
-  // Clean up markdown for WhatsApp formatting (convert ** to * and fix headers)
+  // Clean up markdown for WhatsApp formatting (remove asterisks and header symbols completely)
   let formattedMessage = '';
   if (messageText) {
     formattedMessage = messageText
-      .replace(/\*\*\*/g, '*') // Remove triple asterisks
-      .replace(/\*\*/g, '*')   // Convert double asterisks to single asterisks
-      .replace(/^####+ (.*)$/gm, '*$1*') // Convert h4+ headers to bold
-      .replace(/^### (.*)$/gm, '*$1*')   // Convert h3 headers to bold
-      .replace(/^## (.*)$/gm, '*$1*')     // Convert h2 headers to bold
-      .replace(/^# (.*)$/gm, '*$1*');    // Convert h1 headers to bold
+      .replace(/^\s*\*\s+\*/gm, '•')
+      .replace(/^\s*\*\s+/gm, '• ')
+      .replace(/^#+\s+/gm, '')
+      .replace(/\*/g, '')
+      .trim();
   }
 
   const settings = db.get('settings').value() || {};

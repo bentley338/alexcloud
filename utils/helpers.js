@@ -532,14 +532,20 @@ Instruksi Laporan (Tulis dalam Bahasa Indonesia):
     const result = await model.generateContent(prompt);
     const reportText = result.response.text().trim();
 
-    const notifMsg = `🧠 *PROACTIVE BUSINESS REPORT & ANALYTICS* 🧠\n\n` + reportText;
+    const notifMsg = `🧠 PROACTIVE BUSINESS REPORT & ANALYTICS 🧠\n\n` + reportText;
+    const cleanedMsg = notifMsg
+      .replace(/^\s*\*\s+\*/gm, '•')
+      .replace(/^\s*\*\s+/gm, '• ')
+      .replace(/^#+\s+/gm, '')
+      .replace(/\*/g, '')
+      .trim();
 
     if (returnRaw) {
-      return notifMsg;
+      return cleanedMsg;
     }
 
     const { sendWhatsAppNotification } = require('./whatsapp');
-    await sendWhatsAppNotification(notifMsg);
+    await sendWhatsAppNotification(cleanedMsg);
     console.log('[PROACTIVE AI] Analysis report sent to owner successfully!');
   } catch (err) {
     console.error('[PROACTIVE AI ERROR]', err.message);
