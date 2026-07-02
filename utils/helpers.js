@@ -507,7 +507,6 @@ async function runProactiveAnalysis(returnRaw = false) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" }, { apiVersion: "v1" });
 
     const prompt = `Kamu adalah AI Chief Operating Officer (COO) & Penasihat Bisnis Proaktif website AlexCloud (alexcloud.my.id).
 Tugas kamu adalah memantau server, aktivitas bisnis, dan data website secara mandiri, lalu memberikan analisis proaktif serta saran bisnis cerdas untuk Owner.
@@ -529,7 +528,30 @@ Instruksi Laporan (Tulis dalam Bahasa Indonesia):
 4. Buat agar saran-saran ini terkesan sangat cerdas, memiliki "otak", kontekstual, dan praktis untuk diimplementasikan.
 5. Gunakan emoji yang menarik, tebalkan informasi penting, dan buat daftar yang mudah dibaca. JANGAN gunakan format JSON atau istilah kode pemrograman.`;
 
-    const result = await model.generateContent(prompt);
+    const models = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+    let result;
+    let success = false;
+    let lastError;
+
+    for (const modelName of models) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: "v1" });
+        result = await model.generateContent(prompt);
+        success = true;
+        break;
+      } catch (err) {
+        lastError = err;
+        console.warn(`[PROACTIVE AI] Model ${modelName} failed, trying fallback...`, err.message);
+        if (err.message.includes('429') || err.message.toLowerCase().includes('quota') || err.message.toLowerCase().includes('limit')) {
+          continue;
+        }
+        throw err;
+      }
+    }
+    if (!success) {
+      throw lastError;
+    }
+    
     const reportText = result.response.text().trim();
 
     const notifMsg = `🧠 PROACTIVE BUSINESS REPORT & ANALYTICS 🧠\n\n` + reportText;
