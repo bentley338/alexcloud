@@ -91,11 +91,12 @@
                   <th>Harga</th>
                   <th>Status</th>
                   <th>Tanggal</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 <% orders.forEach(order => { %>
-                <tr onclick="window.location.href='/payment/<%= order.orderId %>'" style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                <tr>
                   <td><span style="font-family:var(--font-display);font-size:0.8rem;color:var(--accent-blue)"><%= order.orderId %></span></td>
                   <td><%= order.planName %></td>
                   <td style="color:var(--accent-green)">Rp <%= order.price.toLocaleString('id-ID') %></td>
@@ -105,6 +106,9 @@
                     </span>
                   </td>
                   <td style="color:var(--text-muted); font-size:0.85rem;"><%= moment(order.createdAt).format('DD/MM/YY') %></td>
+                  <td>
+                    <a href="/payment/<%= order.orderId %>" class="btn-primary" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fas fa-file-invoice"></i> Invoice</a>
+                  </td>
                 </tr>
                 <% }) %>
               </tbody>
@@ -186,7 +190,7 @@
                   <span class="rf-step-num">5</span>
                   <div class="rf-step-body">
                     <div class="rf-step-head">Klaim Bonus SUPER 7 Hari</div>
-                    <div class="rf-step-desc">Setelah bonus otomatis masuk, silakan klik Invoice (Order Rp 0) pada tabel <strong>Riwayat Order</strong> di atas, lalu tekan tombol konfirmasi ke Admin agar akunmu segera diproses! (No Error)</div>
+                    <div class="rf-step-desc">Setelah bonus otomatis masuk, klik tombol <strong>Invoice</strong> pada baris order Rp 0 di tabel <strong>Riwayat Order</strong>, lalu tekan tombol konfirmasi WhatsApp ke Admin agar akunmu diproses!</div>
                   </div>
                 </li>
               </ol>
