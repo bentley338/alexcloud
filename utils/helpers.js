@@ -528,7 +528,7 @@ Instruksi Laporan (Tulis dalam Bahasa Indonesia):
 4. Buat agar saran-saran ini terkesan sangat cerdas, memiliki "otak", kontekstual, dan praktis untuk diimplementasikan.
 5. Gunakan emoji yang menarik, tebalkan informasi penting, dan buat daftar yang mudah dibaca. JANGAN gunakan format JSON atau istilah kode pemrograman.`;
 
-    const models = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+    const models = ["gemini-3.5-flash", "gemini-2.5-flash"];
     let result;
     let success = false;
     let lastError;
@@ -549,6 +549,9 @@ Instruksi Laporan (Tulis dalam Bahasa Indonesia):
       }
     }
     if (!success) {
+      if (lastError && (lastError.message.includes('429') || lastError.message.toLowerCase().includes('quota') || lastError.message.toLowerCase().includes('limit'))) {
+        throw new Error("⚠️ Rate limit API terlampaui. Silakan coba beberapa saat lagi.");
+      }
       throw lastError;
     }
     
