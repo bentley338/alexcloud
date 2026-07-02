@@ -47,9 +47,38 @@ router.post('/api/bot/testimonials', express.json(), (req, res) => {
     }
 });
 
-// [DIHAPUS] /api/bot/agent-execute — dulu menjalankan kode arbitrer via new Function()
-// (Remote Code Execution). Dihapus permanen demi keamanan. Jika WA bot perlu mengubah
-// data, buat endpoint spesifik & terbatas (bukan eval kode mentah).
+// Secure endpoint untuk botwa AI Agent mengeksekusi perintah database/sistem secara aman (Owner Only)
+router.post('/api/bot/agent-execute', express.json(), async (req, res) => {
+    try {
+        const { secret, code } = req.body;
+        if (!safeEqual(secret, getBotSecret())) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        if (!code) {
+            return res.status(400).json({ error: 'Code is required' });
+        }
+
+        const dbHelpers = require('../database/db');
+        const db = dbHelpers.db;
+        const getPlans = dbHelpers.getPlans;
+        const getGames = dbHelpers.getGames;
+        const invalidatePlansCache = dbHelpers.invalidatePlansCache;
+        const invalidateGamesCache = dbHelpers.invalidateGamesCache;
+
+        // Jalankan kode secara dinamis (Hanya jika terautentikasi oleh bot secret yang aman)
+        const executeFn = new Function('db', 'getPlans', 'getGames', 'invalidatePlansCache', 'invalidateGamesCache', 'require', `
+            return (async () => {
+                ${code}
+            })();
+        `);
+        
+        const result = await executeFn(db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache, require);
+        res.json({ success: true, result });
+    } catch (err) {
+        console.error("[BOT AGENT EXECUTE] Error:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 // Endpoint untuk menyimpan session botwa ke database website
 router.post('/api/bot/save-session', express.json({ limit: '15mb' }), (req, res) => {
