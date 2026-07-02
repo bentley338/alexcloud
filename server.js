@@ -246,8 +246,22 @@ async function startServer() {
 }
 
 // ─── Graceful Shutdown (drain connections, flush DB backup) ──────────────────
-function gracefulShutdown(signal) {
+async function gracefulShutdown(signal) {
   console.log(`\n[SHUTDOWN] ${signal} received. Closing server gracefully...`);
+  
+  // Kirim notifikasi server offline sebelum dimatikan
+  try {
+    const { sendWhatsAppNotification } = require('./utils/whatsapp');
+    const notifMsg = `⚠️ *SERVER ALEXCLOUD OFFLINE (SHUTDOWN)* ⚠️\n\n` +
+      `🖥️ *Server:* VPS AlexCloud\n` +
+      `⚙️ *Sinyal:* ${signal}\n` +
+      `📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n` +
+      `Server sedang dimatikan secara tertib (misal karena restart, redeploy, atau shutdown manual).`;
+    await sendWhatsAppNotification(notifMsg);
+  } catch (err) {
+    console.error('[WA NOTIF SHUTDOWN ERROR]', err.message);
+  }
+
   if (server) {
     server.close(() => {
       console.log('[SHUTDOWN] HTTP server closed.');
