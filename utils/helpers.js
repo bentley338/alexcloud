@@ -1,5 +1,25 @@
 const https = require('https');
 const path = require('path');
+const crypto = require('crypto');
+
+// ─── Perbandingan secret timing-safe (cegah timing attack pada auth) ─────────
+// Fail-closed: string kosong / tipe salah / panjang beda → false. Dua string kosong
+// TIDAK dianggap cocok (mencegah auth bypass saat env secret belum di-set).
+function safeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length === 0 || b.length === 0) {
+    return false;
+  }
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  try { return crypto.timingSafeEqual(ab, bb); } catch (e) { return false; }
+}
+
+// Shared secret untuk komunikasi server ↔ WA bot. WAJIB di-set di .env produksi.
+// Kalau kosong, semua pengecekan safeEqual di atas akan gagal (fail-closed).
+function getBotSecret() {
+  return process.env.BOT_SHARED_SECRET || '';
+}
 
 // ─── Shared HTTP Agent (connection pooling for all outbound HTTPS calls) ──────
 // Keeps TCP connections alive across requests to FR3, OpenAI, Gemini, Telegram, CallMeBot, Twilio
@@ -447,5 +467,7 @@ module.exports = {
   isJunkTestimonial,
   normalizeTestimonial,
   stripBotCommand,
+  safeEqual,
+  getBotSecret,
   path
 };

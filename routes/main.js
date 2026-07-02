@@ -7,7 +7,7 @@ const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial } = require('../utils/helpers');
+const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial, safeEqual, getBotSecret } = require('../utils/helpers');
 const { ensureReferralCode, attachReferralOnRegister, getReferralConfig } = require('../utils/referral');
 
 // --- BOT PROXY ENDPOINT ---
@@ -15,11 +15,11 @@ const { ensureReferralCode, attachReferralOnRegister, getReferralConfig } = requ
 router.post('/api/bot/mustikapay', express.json(), async (req, res) => {
     try {
         const { secret, method, endpoint, payload } = req.body;
-        // Secret sederhana agar tidak disalahgunakan pihak luar
-        if (secret !== 'alexcloud-botwa-secret-2026') {
+        // Auth via shared secret (env, dibandingkan timing-safe). Set BOT_SHARED_SECRET di .env.
+        if (!safeEqual(secret, getBotSecret())) {
             return res.status(403).json({ error: 'Forbidden' });
         }
-        
+
         const responseData = await mustikapayRequest(method, endpoint, payload, 15000, 3);
         res.json(responseData);
     } catch (err) {
@@ -32,7 +32,7 @@ router.post('/api/bot/mustikapay', express.json(), async (req, res) => {
 router.post('/api/bot/testimonials', express.json(), (req, res) => {
     try {
         const { secret } = req.body;
-        if (secret !== 'alexcloud-botwa-secret-2026') {
+        if (!safeEqual(secret, getBotSecret())) {
             return res.status(403).json({ error: 'Forbidden' });
         }
         const testimonials = getCleanTestimonials();
@@ -47,44 +47,15 @@ router.post('/api/bot/testimonials', express.json(), (req, res) => {
     }
 });
 
-// Endpoint untuk botwa AI Agent mengeksekusi perintah database/sistem secara aman (Owner Only)
-router.post('/api/bot/agent-execute', express.json(), async (req, res) => {
-    try {
-        const { secret, code } = req.body;
-        if (secret !== 'alexcloud-botwa-secret-2026') {
-            return res.status(403).json({ error: 'Forbidden' });
-        }
-        if (!code) {
-            return res.status(400).json({ error: 'Code is required' });
-        }
-
-        const dbHelpers = require('../database/db');
-        const db = dbHelpers.db;
-        const getPlans = dbHelpers.getPlans;
-        const getGames = dbHelpers.getGames;
-        const invalidatePlansCache = dbHelpers.invalidatePlansCache;
-        const invalidateGamesCache = dbHelpers.invalidateGamesCache;
-
-        // Jalankan kode secara dinamis
-        const executeFn = new Function('db', 'getPlans', 'getGames', 'invalidatePlansCache', 'invalidateGamesCache', 'require', `
-            return (async () => {
-                ${code}
-            })();
-        `);
-        
-        const result = await executeFn(db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache, require);
-        res.json({ success: true, result });
-    } catch (err) {
-        console.error("[BOT AGENT EXECUTE] Error:", err.message);
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
+// [DIHAPUS] /api/bot/agent-execute — dulu menjalankan kode arbitrer via new Function()
+// (Remote Code Execution). Dihapus permanen demi keamanan. Jika WA bot perlu mengubah
+// data, buat endpoint spesifik & terbatas (bukan eval kode mentah).
 
 // Endpoint untuk menyimpan session botwa ke database website
 router.post('/api/bot/save-session', express.json({ limit: '15mb' }), (req, res) => {
     try {
         const { secret, sessionData } = req.body;
-        if (secret !== 'alexcloud-botwa-secret-2026') {
+        if (!safeEqual(secret, getBotSecret())) {
             return res.status(403).json({ error: 'Forbidden' });
         }
         db.set('botSession', sessionData || {}).write();
@@ -99,7 +70,7 @@ router.post('/api/bot/save-session', express.json({ limit: '15mb' }), (req, res)
 router.post('/api/bot/load-session', express.json(), (req, res) => {
     try {
         const { secret } = req.body;
-        if (secret !== 'alexcloud-botwa-secret-2026') {
+        if (!safeEqual(secret, getBotSecret())) {
             return res.status(403).json({ error: 'Forbidden' });
         }
         const sessionData = db.get('botSession').value() || {};
@@ -475,6 +446,19 @@ router.get('/order/:planId', ensureAuthenticated, (req, res) => {
   });
 });
 
+// Anti-abuse: satu user tidak boleh memakai kode promo yang sama lebih dari sekali.
+// Mencegah user "memfarming" diskon kode publik lewat banyak order. Order yang sudah
+// batal/ditolak/kadaluarsa tidak dihitung, jadi user tetap bisa coba ulang setelah gagal.
+function userAlreadyUsedPromo(userId, code) {
+  if (!code) return false;
+  const up = String(code).toUpperCase();
+  return (db.get('orders').value() || []).some(o =>
+    o.userId === userId &&
+    o.promoCode && o.promoCode.toUpperCase() === up &&
+    !['cancelled', 'rejected', 'expired'].includes(o.status)
+  );
+}
+
 // Validate promo code API
 router.post('/api/promo/validate', ensureAuthenticated, (req, res) => {
   const { code, planId } = req.body;
@@ -500,6 +484,11 @@ router.post('/api/promo/validate', ensureAuthenticated, (req, res) => {
   // Check usage limit
   if (promo.maxUses && promo.usedCount >= promo.maxUses) {
     return res.json({ valid: false, message: 'Kode promo sudah mencapai batas penggunaan.' });
+  }
+
+  // Anti-abuse: cegah user memakai ulang kode yang sama
+  if (userAlreadyUsedPromo(req.user.id, promo.code)) {
+    return res.json({ valid: false, message: 'Kamu sudah pernah memakai kode promo ini.' });
   }
 
   // Check minimum purchase
@@ -543,7 +532,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   // Validate promo if provided
   if (promoCode && promoId) {
     const promo = db.get('promoCodes').find({ id: promoId, code: promoCode.toUpperCase(), isActive: true }).value();
-    if (promo && !(promo.ownerUserId && promo.ownerUserId !== req.user.id) && !(promo.expiresAt && new Date(promo.expiresAt) < new Date()) && !(promo.maxUses && promo.usedCount >= promo.maxUses) && !(promo.minPurchase && plan.price < promo.minPurchase)) {
+    if (promo && !(promo.ownerUserId && promo.ownerUserId !== req.user.id) && !(promo.expiresAt && new Date(promo.expiresAt) < new Date()) && !(promo.maxUses && promo.usedCount >= promo.maxUses) && !(promo.minPurchase && plan.price < promo.minPurchase) && !userAlreadyUsedPromo(req.user.id, promo.code)) {
       if (promo.discountType === 'percent') {
         discount = Math.round(plan.price * promo.discountValue / 100);
       } else {
@@ -1444,9 +1433,11 @@ JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) 
 // Secure endpoint to add testimonial from Bot
 router.post('/api/testimonials', async (req, res) => {
   const apiKey = req.headers['x-api-key'] || req.query.apikey;
-  const expectedApiKey = process.env.FR3_API_KEY;
-  
-  if (!apiKey || apiKey !== expectedApiKey) {
+  // Kunci khusus testimonial; fallback ke FR3_API_KEY demi kompatibilitas bot lama.
+  // Bandingkan timing-safe agar tidak bocor lewat timing attack.
+  const expectedApiKey = process.env.TESTIMONIAL_API_KEY || process.env.FR3_API_KEY;
+
+  if (!safeEqual(apiKey, expectedApiKey)) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Invalid API key' });
   }
 

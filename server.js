@@ -16,10 +16,17 @@ cleanEnvVar('GOOGLE_CLIENT_SECRET');
 cleanEnvVar('GOOGLE_CALLBACK_URL');
 cleanEnvVar('DATABASE_URL');
 cleanEnvVar('ADMIN_PASSWORD');
+cleanEnvVar('BOT_SHARED_SECRET');
+cleanEnvVar('TESTIMONIAL_API_KEY');
 
 // Peringatan boot yang jelas kalau gateway pembayaran utama tak akan jalan.
 if (!process.env.MUSTIKAPAY_API_KEY) {
   console.warn('[BOOT] ⚠️  MUSTIKAPAY_API_KEY KOSONG — gateway utama (QRIS/VA/E-Money/Retail) akan gagal. Set di .env server lalu restart.');
+}
+// Tanpa BOT_SHARED_SECRET, semua endpoint /api/bot/* akan menolak (fail-closed) dan
+// notifikasi WA via bot tak terkirim. Peringatkan jelas saat boot.
+if (!process.env.BOT_SHARED_SECRET) {
+  console.warn('[BOOT] ⚠️  BOT_SHARED_SECRET KOSONG — endpoint /api/bot/* akan menolak semua request & notif WA via bot gagal. Set di .env (nilai sama dengan WA bot) lalu restart.');
 }
 
 const express = require('express');
@@ -146,8 +153,10 @@ app.use(session({
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: 'lax',
-    // Hanya kirim cookie sesi via HTTPS di produksi (cegah pencurian sesi saat downgrade).
-    secure: IS_PROD
+    // Kirim cookie sesi hanya via HTTPS bila situs berjalan di HTTPS (cegah pencurian
+    // sesi saat downgrade). Aktif jika NODE_ENV=production ATAU BASE_URL sudah https,
+    // sehingga tetap aman walau NODE_ENV lupa di-set di server produksi.
+    secure: IS_PROD || (process.env.BASE_URL || '').startsWith('https://')
   }
 }));
 

@@ -20,7 +20,7 @@ function sendViaBotWa(settings, messageText) {
   }
   
   const postData = JSON.stringify({
-    secret: 'alexcloud-botwa-secret-2026',
+    secret: process.env.BOT_SHARED_SECRET || '',
     phone: phone,
     message: messageText
   });
