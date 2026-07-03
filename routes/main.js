@@ -1257,12 +1257,26 @@ router.get('/profile', ensureAuthenticated, (req, res) => {
 
 // Update profile
 router.post('/profile', ensureAuthenticated, (req, res) => {
-  const { name } = req.body;
+  const { name, phone } = req.body;
   if (!name) { req.flash('error', 'Nama tidak boleh kosong.'); return res.redirect('/profile'); }
-  db.get('users').find({ id: req.user.id }).assign({ name: name.trim() }).write();
+
+  // Sanitize phone: keep digits only, ensure starts with 62 (Indonesia)
+  let cleanPhone = null;
+  if (phone) {
+    cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+    if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.slice(1);
+    if (cleanPhone.length < 9 || cleanPhone.length > 15) cleanPhone = null;
+  }
+
+  const updates = { name: name.trim() };
+  if (cleanPhone !== null) updates.phone = cleanPhone;
+
+  db.get('users').find({ id: req.user.id }).assign(updates).write();
   req.flash('success', 'Profil berhasil diperbarui.');
   res.redirect('/profile');
 });
+
 
 // =====================
 // FAQ Page

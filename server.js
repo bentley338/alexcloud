@@ -291,8 +291,30 @@ function startProactiveAIAnalyst() {
   }, 12 * 60 * 60 * 1000);
 }
 
+// Scheduler Follow-Up Pesanan Pending/Expired — jalan setiap 1 jam
+function startPendingOrderFollowUp() {
+  console.log('[FOLLOWUP] Scheduler initialized (running every 1 hour)...');
+  const { runPendingOrderFollowUp } = require('./utils/followup');
+
+  // Delay 5 menit dari boot agar DB sudah terbaca semua dari Postgres
+  setTimeout(() => {
+    // Jalankan langsung sekali
+    runPendingOrderFollowUp().then(r =>
+      console.log(`[FOLLOWUP] Initial run done: sent=${r.sent}, skipped=${r.skipped}`)
+    ).catch(err => console.error('[FOLLOWUP INIT ERROR]', err.message));
+
+    // Lalu setiap 1 jam
+    setInterval(() => {
+      runPendingOrderFollowUp().catch(err =>
+        console.error('[FOLLOWUP CRON ERROR]', err.message)
+      );
+    }, 60 * 60 * 1000);
+  }, 5 * 60 * 1000);
+}
+
 startServer().then(() => {
   startProactiveAIAnalyst();
+  startPendingOrderFollowUp();
 }).catch(err => {
   console.error('[FATAL]', err);
   process.exit(1);

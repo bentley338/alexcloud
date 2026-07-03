@@ -995,4 +995,81 @@ router.post('/community/clear-all', ensureAdmin, (req, res) => {
   res.redirect('/admin/community');
 });
 
+// =====================
+// FOMO WELCOME CAMPAIGN — trigger manual dari admin
+// =====================
+router.post('/marketing/fomo-welcome', ensureAdmin, async (req, res) => {
+  try {
+    const { promoCode, discount, expiryHours } = req.body;
+    const { runFomoWelcome } = require('../utils/fomowelcome');
+    const result = await runFomoWelcome({
+      promoCode: (promoCode || '').trim().toUpperCase() || undefined,
+      discount: parseInt(discount || '5000', 10),
+      expiryHours: parseInt(expiryHours || '12', 10)
+    });
+    if (result.error) {
+      req.flash('error', `FOMO Campaign error: ${result.error}`);
+    } else {
+      req.flash('success',
+        `✅ FOMO Welcome Campaign selesai! ` +
+        `Terkirim: ${result.sent} | Gagal: ${result.skipped} | Kode Promo: ${result.promoCode}`
+      );
+    }
+  } catch (err) {
+    req.flash('error', `FOMO Campaign gagal: ${err.message}`);
+  }
+  res.redirect('/admin/marketing');
+});
+
+// =====================
+// MANUAL FOLLOW-UP TRIGGER — cek & kirim follow-up sekarang
+// =====================
+router.post('/marketing/trigger-followup', ensureAdmin, async (req, res) => {
+  try {
+    const { runPendingOrderFollowUp } = require('../utils/followup');
+    const result = await runPendingOrderFollowUp();
+    if (result.error) {
+      req.flash('error', `Follow-up error: ${result.error}`);
+    } else {
+      req.flash('success',
+        `✅ Follow-up selesai! Terkirim: ${result.sent} | Tidak ada delivery: ${result.skipped}`
+      );
+    }
+  } catch (err) {
+    req.flash('error', `Follow-up gagal: ${err.message}`);
+  }
+  res.redirect('/admin/marketing');
+});
+
+// =====================
+// MARKETING PAGE — halaman untuk trigger campaign
+// =====================
+router.get('/marketing', ensureAdmin, (req, res) => {
+  const orders = db.get('orders').value() || [];
+  const users  = db.get('users').value() || [];
+  const now    = Date.now();
+  const h24ago = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const h1ago  = new Date(now - 60 * 60 * 1000).toISOString();
+
+  const pendingExpired = orders.filter(o =>
+    ['pending','expired'].includes(o.status) &&
+    (o.followUpCount || 0) < 2 &&
+    o.createdAt < h1ago
+  );
+  const newUsers = users.filter(u =>
+    u.role !== 'admin' &&
+    u.createdAt >= h24ago &&
+    !u.fomoWelcomeSentAt
+  );
+
+  res.render('admin/marketing', {
+    title: 'Marketing & Campaign - AlexCloud',
+    user: req.user,
+    pendingExpiredCount: pendingExpired.length,
+    newUsersCount: newUsers.length,
+    success: req.flash('success'),
+    error: req.flash('error')
+  });
+});
+
 module.exports = router;

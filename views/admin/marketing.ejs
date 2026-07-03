@@ -1,0 +1,114 @@
+<%- include('layout-header') %>
+
+<div style="padding: 24px; max-width: 1000px; margin: 0 auto;">
+
+  <!-- Page Title -->
+  <div style="margin-bottom: 32px;">
+    <h1 style="font-family: 'Orbitron', sans-serif; font-size: 24px; color: #fff; margin: 0 0 8px;">
+      📢 Marketing & Campaign
+    </h1>
+    <p style="color: #9090a0; margin: 0;">Kelola follow-up otomatis dan campaign promosi untuk meningkatkan konversi.</p>
+  </div>
+
+  <!-- Flash Messages -->
+  <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+    <% success.forEach(function(msg) { %>
+      <div style="background: rgba(122,239,158,0.15); border: 1px solid #7aef9e; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; color: #7aef9e; font-size: 14px;">
+        ✅ <%= msg %>
+      </div>
+    <% }); %>
+  <% } %>
+  <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+    <% error.forEach(function(msg) { %>
+      <div style="background: rgba(255,80,80,0.15); border: 1px solid #ff5050; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; color: #ff8080; font-size: 14px;">
+        ❌ <%= msg %>
+      </div>
+    <% }); %>
+  <% } %>
+
+  <!-- Stats Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
+    <div style="background: linear-gradient(135deg, rgba(255,176,0,0.2), rgba(255,100,0,0.2)); border: 1px solid rgba(255,176,0,0.3); border-radius: 14px; padding: 20px; text-align: center;">
+      <div style="font-size: 36px; font-weight: 800; color: #ffb000; font-family: 'Orbitron', sans-serif;"><%= pendingExpiredCount %></div>
+      <div style="color: #c0a060; font-size: 13px; margin-top: 6px;">⏳ Order Perlu Follow-Up</div>
+      <div style="color: #908060; font-size: 11px; margin-top: 4px;">(pending/expired > 1 jam, max 2x)</div>
+    </div>
+    <div style="background: linear-gradient(135deg, rgba(240,147,251,0.2), rgba(245,87,108,0.2)); border: 1px solid rgba(240,147,251,0.3); border-radius: 14px; padding: 20px; text-align: center;">
+      <div style="font-size: 36px; font-weight: 800; color: #f093fb; font-family: 'Orbitron', sans-serif;"><%= newUsersCount %></div>
+      <div style="color: #c080c0; font-size: 13px; margin-top: 6px;">🆕 User Baru (< 24 jam)</div>
+      <div style="color: #907090; font-size: 11px; margin-top: 4px;">(belum dapat FOMO welcome)</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Follow-Up Otomatis -->
+  <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px; margin-bottom: 24px;">
+    <h2 style="font-family: 'Orbitron', sans-serif; font-size: 18px; color: #fff; margin: 0 0 8px;">
+      ⏰ Auto Follow-Up Pesanan Pending
+    </h2>
+    <p style="color: #9090a0; font-size: 14px; margin: 0 0 20px; line-height: 1.6;">
+      Sistem akan otomatis mengirim follow-up ke pembeli yang memiliki pesanan pending/expired.<br>
+      • <strong style="color: #c0c0d0;">Follow-up 1</strong>: 1 jam setelah order dibuat → kirim WA (jika ada nomor) + Email<br>
+      • <strong style="color: #c0c0d0;">Follow-up 2</strong>: 24 jam setelah order dibuat → pengingat terakhir<br>
+      • Scheduler otomatis jalan setiap <strong style="color: #7aef9e;">1 jam</strong>. Tombol di bawah untuk trigger manual.
+    </p>
+    <div style="background: rgba(102,126,234,0.1); border: 1px solid rgba(102,126,234,0.25); border-radius: 10px; padding: 14px; margin-bottom: 20px; font-size: 13px; color: #a0a0c0;">
+      💡 <strong>Tips:</strong> Minta pembeli untuk mengisi nomor WhatsApp di halaman profil agar follow-up WA otomatis bisa terkirim langsung ke mereka. Jika tidak ada nomor, follow-up via email akan dikirim otomatis.
+    </div>
+    <form method="POST" action="/admin/marketing/trigger-followup" onsubmit="return confirm('Jalankan follow-up sekarang untuk semua order pending/expired yang memenuhi syarat?')">
+      <button type="submit" style="background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Space Grotesk', sans-serif;">
+        ⚡ Trigger Follow-Up Sekarang (<%= pendingExpiredCount %> order)
+      </button>
+    </form>
+  </div>
+
+  <!-- Section 2: FOMO Welcome Campaign -->
+  <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px; margin-bottom: 24px;">
+    <h2 style="font-family: 'Orbitron', sans-serif; font-size: 18px; color: #fff; margin: 0 0 8px;">
+      🎁 FOMO Welcome Campaign
+    </h2>
+    <p style="color: #9090a0; font-size: 14px; margin: 0 0 20px; line-height: 1.6;">
+      Kirim email + notifikasi in-app ke semua user baru (< 24 jam, belum pernah dapat FOMO welcome) dengan kode promo eksklusif yang kedaluwarsa dalam waktu terbatas untuk menciptakan urgensi.
+    </p>
+    <form method="POST" action="/admin/marketing/fomo-welcome" onsubmit="return confirm('Kirim FOMO Welcome Campaign ke ' + <%= newUsersCount %> + ' user baru?')">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div>
+          <label style="display: block; color: #9090a0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Kode Promo</label>
+          <input type="text" name="promoCode" value="WELCOME-5AH7A" placeholder="WELCOME-XXXXX"
+            style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 14px; font-family: monospace; letter-spacing: 2px;">
+        </div>
+        <div>
+          <label style="display: block; color: #9090a0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Diskon (Rp)</label>
+          <input type="number" name="discount" value="5000" min="1000" max="100000" step="1000"
+            style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 14px;">
+        </div>
+        <div>
+          <label style="display: block; color: #9090a0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Kadaluarsa (jam)</label>
+          <input type="number" name="expiryHours" value="12" min="1" max="72"
+            style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 14px;">
+        </div>
+      </div>
+      <button type="submit" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Space Grotesk', sans-serif;">
+        🚀 Kirim FOMO Campaign ke <%= newUsersCount %> User Baru
+      </button>
+    </form>
+  </div>
+
+  <!-- Section 3: Setup Guide -->
+  <div style="background: rgba(102,126,234,0.08); border: 1px solid rgba(102,126,234,0.2); border-radius: 16px; padding: 24px;">
+    <h3 style="color: #a0a8ff; font-size: 16px; margin: 0 0 16px;">⚙️ Setup Email (Wajib untuk Follow-Up & FOMO)</h3>
+    <p style="color: #8080a0; font-size: 13px; margin: 0 0 12px;">Tambahkan environment variable berikut di Railway/VPS agar email terkirim:</p>
+    <div style="background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; color: #7aef9e; line-height: 2;">
+      SMTP_HOST=smtp.gmail.com<br>
+      SMTP_PORT=587<br>
+      SMTP_USER=youremail@gmail.com<br>
+      SMTP_PASS=xxxx xxxx xxxx xxxx  <span style="color: #607060;"># Gmail App Password (bukan password biasa)</span><br>
+      SMTP_FROM="AlexCloud Store" &lt;youremail@gmail.com&gt;
+    </div>
+    <p style="color: #706060; font-size: 12px; margin: 12px 0 0;">
+      📖 Cara buat Gmail App Password: myaccount.google.com → Security → 2-Step Verification → App Passwords
+    </p>
+  </div>
+
+</div>
+
+<%- include('layout-footer') %>
