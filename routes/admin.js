@@ -1065,6 +1065,7 @@ router.get('/marketing', ensureAdmin, (req, res) => {
   res.render('admin/marketing', {
     title: 'Marketing & Campaign - AlexCloud',
     user: req.user,
+    currentPage: 'marketing',
     pendingExpiredCount: pendingExpired.length,
     newUsersCount: newUsers.length,
     success: req.flash('success'),

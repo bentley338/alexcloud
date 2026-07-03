@@ -184,12 +184,13 @@ function invalidateGamesCache() { _gamesCacheTs = 0; }
 
 // ─── Seed functions ────────────────────────────────────────────────────────────
 function seedAdmin() {
-  const existing = db.get('users').find({ email: process.env.ADMIN_EMAIL || 'admin@alexcloud.com' }).value();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@alexcloud.com').toLowerCase().trim();
+  const existing = db.get('users').find({ email: adminEmail }).value();
   if (!existing) {
     db.get('users').push({
       id: uuidv4(),
       name: 'Admin AlexCloud',
-      email: process.env.ADMIN_EMAIL || 'admin@alexcloud.com',
+      email: adminEmail,
       password: bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'Admin@123', 10),
       role: 'admin',
       avatar: null,
@@ -198,8 +199,13 @@ function seedAdmin() {
       isActive: true,
       isBanned: false
     }).write();
-    console.log('[DB] Admin seeded');
+    console.log('[DB] Admin seeded:', adminEmail);
   } else {
+    // Failsafe: Pastikan role-nya diset 'admin' jika email cocok
+    if (existing.role !== 'admin') {
+      db.get('users').find({ id: existing.id }).assign({ role: 'admin' }).write();
+      console.log(`[DB] Forced admin role upgrade for existing email: ${adminEmail}`);
+    }
     db.get('users').each(u => { if (typeof u.isBanned === 'undefined') u.isBanned = false; }).write();
   }
 }
