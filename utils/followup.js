@@ -128,8 +128,21 @@ async function runPendingOrderFollowUp() {
             const paymentUrl = `${BASE_URL}/payment/${order.orderId}`;
             const expiryHours = followUpNum === 1 ? 23 : 2;
 
-            // Get user record to check if phone exists
+             // Get user record to check if phone exists
             const user = db.get('users').find({ id: order.userId }).value();
+            
+            // SKIP jika user adalah Admin atau email palsu alexcloud.com
+            const emailLower = (order.userEmail || '').toLowerCase();
+            if (user?.role === 'admin' || emailLower === 'admin@alexcloud.com' || emailLower.endsWith('@alexcloud.com')) {
+                console.log(`[FOLLOWUP] Skipping admin/test order #${order.orderId} for email: ${order.userEmail}`);
+                // Tandai saja sebagai sudah di-follow up agar tidak diproses lagi
+                db.get('orders').find({ id: order.id }).assign({
+                    followUpCount: 2,
+                    lastFollowUpAt: new Date().toISOString()
+                }).write();
+                continue;
+            }
+
             const phone = user?.phone;
 
             let waSent = false;
