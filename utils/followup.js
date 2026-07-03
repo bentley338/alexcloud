@@ -154,11 +154,6 @@ async function runPendingOrderFollowUp() {
                 : `🔴 Pengingat Terakhir: Pesanan #${order.orderId} akan kedaluwarsa!`;
             emailSent = await sendEmail(order.userEmail, subject, html);
 
-            // 3. If no phone, alert owner
-            if (!phone) {
-                await sendOwnerAlert(order);
-            }
-
             // Update follow-up tracking on order
             db.get('orders').find({ id: order.id }).assign({
                 followUpCount: followUpNum,
