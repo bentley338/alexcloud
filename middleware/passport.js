@@ -46,7 +46,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback',
-    passReqToCallback: true // butuh req untuk signupIp, sesi pendingRef, & set cookie referral
+    passReqToCallback: true, // butuh req untuk signupIp, sesi pendingRef, & set cookie referral
+    proxy: true
   }, (req, accessToken, refreshToken, profile, done) => {
     let user = db.get('users').find({ googleId: profile.id }).value();
     if (!user) {
