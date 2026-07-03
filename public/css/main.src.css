@@ -3346,7 +3346,42 @@ input:focus-visible,
   .pricing-grid { grid-template-columns: 1fr; gap: 1.25rem; }
   .payment-grid { grid-template-columns: 1fr; }
 
-  .admin-sidebar { display: none; }
+  .admin-sidebar-toggle {
+    display: flex !important;
+    z-index: 1002;
+  }
+  .admin-sidebar {
+    display: block !important;
+    position: fixed;
+    top: 64px;
+    left: -280px;
+    width: 260px;
+    bottom: 0;
+    z-index: 1001;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+  }
+  .admin-sidebar.open {
+    left: 0;
+  }
+  .admin-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    top: 64px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .admin-sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
   .admin-content { margin-left: 0; padding: 1rem; }
 
   /* Footer mobile */
