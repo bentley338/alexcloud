@@ -133,7 +133,8 @@ async function runPendingOrderFollowUp() {
             
             // SKIP jika user adalah Admin atau email palsu alexcloud.com
             const emailLower = (order.userEmail || '').toLowerCase();
-            if (user?.role === 'admin' || emailLower === 'admin@alexcloud.com' || emailLower.endsWith('@alexcloud.com')) {
+            const adminEmail = (process.env.ADMIN_EMAIL || 'admin@alexcloud.com').toLowerCase().trim();
+            if (user?.role === 'admin' || emailLower === 'admin@alexcloud.com' || emailLower === adminEmail || emailLower.endsWith('@alexcloud.com')) {
                 console.log(`[FOLLOWUP] Skipping admin/test order #${order.orderId} for email: ${order.userEmail}`);
                 // Tandai saja sebagai sudah di-follow up agar tidak diproses lagi
                 db.get('orders').find({ id: order.id }).assign({
@@ -153,19 +154,21 @@ async function runPendingOrderFollowUp() {
                 waSent = await sendWaFollowUpToBuyer(phone, order, followUpNum);
             }
 
-            // 2. Send email to buyer (always, regardless of phone)
-            const html = pendingOrderFollowUpHtml({
-                userName: order.userName,
-                orderId: order.orderId,
-                planName: order.planName,
-                price: order.price,
-                paymentUrl,
-                expiryHours
-            });
-            const subject = followUpNum === 1
-                ? `⚠️ Pesananmu #${order.orderId} belum selesai - AlexCloud`
-                : `🔴 Pengingat Terakhir: Pesanan #${order.orderId} akan kedaluwarsa!`;
-            emailSent = await sendEmail(order.userEmail, subject, html);
+            // 2. Send email to buyer ONLY if WhatsApp was not sent successfully
+            if (!waSent) {
+                const html = pendingOrderFollowUpHtml({
+                    userName: order.userName,
+                    orderId: order.orderId,
+                    planName: order.planName,
+                    price: order.price,
+                    paymentUrl,
+                    expiryHours
+                });
+                const subject = followUpNum === 1
+                    ? `⚠️ Pesananmu #${order.orderId} belum selesai - AlexCloud`
+                    : `🔴 Pengingat Terakhir: Pesanan #${order.orderId} akan kedaluwarsa!`;
+                emailSent = await sendEmail(order.userEmail, subject, html);
+            }
 
             // Update follow-up tracking on order
             db.get('orders').find({ id: order.id }).assign({
