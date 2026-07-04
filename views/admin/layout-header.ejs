@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1">
-  <link rel="stylesheet" href="/css/main.css?v=7.1">
+  <link rel="stylesheet" href="/css/main.css?v=7.2">
   <!-- CSRF token + auto-injeksi ke form & fetch/XHR (lihat middleware/csrf.js) -->
   <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
   <script>
@@ -82,14 +82,14 @@
         <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
       </a>
       <div style="margin-left:auto; display:flex; align-items:center; gap:1rem;">
-        <span style="font-family:var(--font-ui); font-size:0.85rem; color:var(--accent-orange); background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.3); padding:0.3rem 0.8rem; border-radius:50px;">
+        <span class="admin-badge" style="font-family:var(--font-ui); font-size:0.85rem; color:var(--accent-orange); background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.3); padding:0.3rem 0.8rem; border-radius:50px;">
           ⚙ Admin Panel
         </span>
         <div class="nav-user-menu">
           <button class="nav-user-btn" onclick="toggleUserMenu()">
             <div class="nav-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
-            <span><%= user.name.split(' ')[0] %></span>
-            <i class="fas fa-chevron-down"></i>
+            <span class="nav-user-name"><%= user.name.split(' ')[0] %></span>
+            <i class="fas fa-chevron-down nav-user-arrow"></i>
           </button>
           <div class="user-dropdown" id="userDropdown">
             <a href="/dashboard"><i class="fas fa-chart-line"></i> Dashboard User</a>

@@ -3350,6 +3350,12 @@ input:focus-visible,
     display: flex !important;
     z-index: 1002;
   }
+  .admin-badge {
+    display: none !important;
+  }
+  .nav-user-name, .nav-user-arrow {
+    display: none !important;
+  }
   .admin-sidebar {
     display: block !important;
     position: fixed;
