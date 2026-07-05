@@ -237,10 +237,12 @@ router.get('/', (req, res) => {
   const plans = getPlans();
   let balance = 0;
   let lastDailyLogin = null;
+  let loginStreak = 0;
   if (req.user) {
     const w = getWallet(req.user.id);
     balance = w.balance || 0;
     lastDailyLogin = w.lastDailyLogin || null;
+    loginStreak = w.loginStreak || 0;
   }
 
   res.render('index', {
@@ -248,6 +250,7 @@ router.get('/', (req, res) => {
     user: req.user || null,
     balance,
     lastDailyLogin,
+    loginStreak,
     games: popularGames,
     allGames: games,
     trendingGames,
@@ -1865,30 +1868,86 @@ router.post('/api/claim-daily-login', ensureAuthenticated, (req, res) => {
   try {
     const userId = req.user.id;
     const w = getWallet(userId);
-    const today = new Date().toISOString().split('T')[0];
+    
+    // Gunakan UTC agar pergantian hari serentak
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
 
-    if (w.lastDailyLogin === today) {
+    let lastClaimDate = null;
+    if (w.lastDailyLogin) {
+      lastClaimDate = new Date(w.lastDailyLogin);
+      lastClaimDate.setUTCHours(0, 0, 0, 0);
+    }
+
+    if (w.lastDailyLogin === todayStr) {
       return res.json({ success: false, message: 'Sudah diklaim hari ini' });
     }
 
-    // Generate random reward between Rp 1000 and Rp 5000
-    const minReward = 1000;
-    const maxReward = 5000;
-    const reward = Math.floor(Math.random() * (maxReward - minReward + 1)) + minReward;
+    let streak = w.loginStreak || 0;
+    let penaltyApplied = false;
+    let penaltyAmount = 0;
+
+    if (lastClaimDate) {
+      const diffTime = today.getTime() - lastClaimDate.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        // Lanjut streak
+        streak += 1;
+        if (streak > 7) streak = 1;
+      } else if (diffDays > 1) {
+        // Bolong! Penalti dan reset
+        streak = 1;
+        const accumulatedBonus = w.dailyLoginAccumulated || 0;
+        const currentBalance = w.balance || 0;
+        // Hanya potong maksimal 5000, ATAU maksimal sisa bonus yang didapat, ATAU saldo saat ini
+        penaltyAmount = Math.min(5000, accumulatedBonus, currentBalance);
+        
+        if (penaltyAmount > 0) {
+          applyWalletTx(userId, {
+            type: 'admin_debit',
+            amount: penaltyAmount,
+            note: 'Penalti Miss Daily Login',
+            allowNegative: false
+          });
+          penaltyApplied = true;
+        }
+      }
+    } else {
+      streak = 1;
+    }
+
+    // Tentukan hadiah berdasarkan hari
+    const rewards = {
+      1: 1000, 2: 2000, 3: 3000, 4: 4000, 5: 5000, 6: 7000, 7: 10000
+    };
+    const reward = rewards[streak] || 1000;
 
     db.get('wallets')
       .find({ userId })
-      .assign({ lastDailyLogin: today, updatedAt: new Date().toISOString() })
+      .assign({ 
+        lastDailyLogin: todayStr, 
+        loginStreak: streak,
+        dailyLoginAccumulated: (w.dailyLoginAccumulated || 0) - penaltyAmount + reward,
+        updatedAt: new Date().toISOString() 
+      })
       .write();
 
     applyWalletTx(userId, {
       type: 'bonus',
       amount: reward,
-      note: 'Bonus Login Harian',
+      note: `Bonus Login Harian (Hari ${streak})`,
       allowNegative: false
     });
 
-    return res.json({ success: true, amount: reward });
+    return res.json({ 
+      success: true, 
+      amount: reward, 
+      streak,
+      penaltyApplied,
+      penaltyAmount
+    });
   } catch (err) {
     console.error('Error claiming daily login:', err);
     return res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });

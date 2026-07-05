@@ -84,33 +84,86 @@
       </div>
 
       <% 
-         let todayDate = new Date().toISOString().split('T')[0];
+         let today = new Date();
+         today.setUTCHours(0,0,0,0);
+         let todayDate = today.toISOString().split('T')[0];
          let alreadyClaimed = lastDailyLogin === todayDate;
+         
+         let currentStreak = loginStreak || 0;
+         let nextStreak = alreadyClaimed ? currentStreak : (currentStreak + 1 > 7 ? 1 : currentStreak + 1);
+
+         // Cek apakah bolong
+         let lastClaim = null;
+         if (lastDailyLogin) {
+            lastClaim = new Date(lastDailyLogin);
+            lastClaim.setUTCHours(0,0,0,0);
+         }
+         let isMissed = false;
+         if (lastClaim) {
+            let diffDays = Math.round((today.getTime() - lastClaim.getTime()) / (1000*60*60*24));
+            if (diffDays > 1) {
+               isMissed = true;
+               nextStreak = 1;
+            }
+         }
+         if (!lastDailyLogin) nextStreak = 1;
+
+         const rewardMap = { 1: '1k', 2: '2k', 3: '3k', 4: '4k', 5: '5k', 6: '7k', 7: '10k' };
       %>
-      <div style="margin: 1rem auto 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: rgba(255,255,255,0.06); padding: 1.25rem 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 480px; text-align: left;">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.4); flex-shrink: 0;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 12 20 22 4 22 4 12"></polyline>
-              <rect x="2" y="7" width="20" height="5"></rect>
-              <line x1="12" y1="22" x2="12" y2="7"></line>
-              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
-              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
-            </svg>
-          </div>
+      <div id="streakWidget" style="margin: 1rem auto 0; background: rgba(255,255,255,0.06); padding: 1.25rem 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 480px; text-align: left;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
           <div>
             <div style="font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; font-weight: 600;">Reward Harian</div>
-            <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: #fff; line-height: 1.2;">Dapatkan Saldo Acak!</div>
+            <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: #fff; line-height: 1.2;">7-Day Login Streak</div>
           </div>
+          <% if (alreadyClaimed) { %>
+            <button class="btn-secondary" disabled style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; opacity: 0.6; cursor: not-allowed; display: flex; align-items: center; gap: 0.4rem; outline: none; border-color: rgba(255,255,255,0.1);">
+              <i class="fas fa-check"></i> Hari Ini Diklaim
+            </button>
+          <% } else { %>
+            <button id="btnDailyLogin" onclick="claimDailyLogin()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.5rem 1rem; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(16,185,129,0.3); border-radius: 8px; border: none; color: white; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-gift"></i> Klaim Sekarang
+            </button>
+          <% } %>
         </div>
-        <% if (alreadyClaimed) { %>
-          <button class="btn-secondary" disabled style="padding: 0.75rem 1.25rem; font-size: 0.95rem; border-radius: 12px; flex-shrink: 0; opacity: 0.6; cursor: not-allowed; display: flex; align-items: center; gap: 0.5rem; outline: none; border-color: rgba(255,255,255,0.1);">
-            <i class="fas fa-check" style="font-size: 0.85rem;"></i> Diklaim
-          </button>
-        <% } else { %>
-          <button id="btnDailyLogin" onclick="claimDailyLogin()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(16,185,129,0.3); border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; gap: 0.5rem; border: none; color: white; cursor: pointer;">
-            <i class="fas fa-gift" style="font-size: 0.85rem;"></i> Klaim
-          </button>
+        
+        <div style="display: flex; gap: 0.4rem; justify-content: space-between; overflow-x: auto; padding-bottom: 0.5rem; user-select: none;">
+          <% for(let i=1; i<=7; i++) { 
+             let status = 'future';
+             if (i < nextStreak || (i === nextStreak && alreadyClaimed)) status = 'passed';
+             else if (i === nextStreak && !alreadyClaimed) status = 'today';
+             
+             let bg = 'rgba(255,255,255,0.05)';
+             let border = '1px solid rgba(255,255,255,0.05)';
+             let color = 'rgba(255,255,255,0.4)';
+             let icon = '<i class="fas fa-lock"></i>';
+             let glow = 'none';
+
+             if (status === 'passed') {
+                bg = 'rgba(16,185,129,0.15)';
+                border = '1px solid rgba(16,185,129,0.3)';
+                color = '#10b981';
+                icon = '<i class="fas fa-check-circle"></i>';
+             } else if (status === 'today') {
+                bg = 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.8))';
+                border = '1px solid #10b981';
+                color = '#fff';
+                icon = '<i class="fas fa-gift"></i>';
+                glow = '0 0 10px rgba(16,185,129,0.5)';
+             }
+          %>
+          <div style="flex: 1; min-width: 45px; background: <%= bg %>; border: <%= border %>; border-radius: 8px; padding: 0.5rem 0; text-align: center; color: <%= color %>; box-shadow: <%= glow %>; transition: all 0.3s ease;">
+            <div style="font-size: 0.65rem; font-weight: 700; margin-bottom: 0.3rem;">H<%= i %></div>
+            <div style="font-size: 0.9rem; margin-bottom: 0.3rem;"><%- icon %></div>
+            <div style="font-size: 0.75rem; font-weight: 800;"><%= rewardMap[i] %></div>
+          </div>
+          <% } %>
+        </div>
+        <% if (isMissed && !alreadyClaimed) { %>
+          <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #f87171; background: rgba(248,113,113,0.1); padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(248,113,113,0.2); display: flex; align-items: flex-start; gap: 0.5rem; line-height: 1.4;">
+            <i class="fas fa-exclamation-triangle" style="margin-top: 0.15rem;"></i>
+            <div>Anda melewatkan login harian kemarin. Streak hangus & terkena penalti saldo bonus.</div>
+          </div>
         <% } %>
       </div>
       <% } %>
@@ -525,13 +578,10 @@ async function claimDailyLogin() {
         balEl.innerText = 'Rp ' + (currentNum + data.amount).toLocaleString('id-ID');
       }
 
-      // Change button state
-      btn.innerHTML = '<i class="fas fa-check" style="font-size: 0.85rem;"></i> Diklaim';
-      btn.className = 'btn-secondary';
-      btn.style.background = '';
-      btn.style.boxShadow = '';
-      btn.style.color = '';
-      btn.style.border = '1px solid rgba(255,255,255,0.1)';
+      // Reload to update the 7-day streak UI
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } else {
       if (window.showToast) {
         showToast(data.message || 'Gagal klaim', 'error');
