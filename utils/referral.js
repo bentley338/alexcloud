@@ -10,7 +10,7 @@
 //   4) guard identitas — signupIp + cookie penanda (anti bikin akun baru di device sama).
 //   5) cap 1 referral rewardable per IP.
 // ═══════════════════════════════════════════════════════════════════════════
-const { db } = require('../database/db');
+const { db, applyWalletTx } = require('../database/db');
 const { v4: uuidv4 } = require('uuid');
 
 // Karakter tanpa yang membingungkan (0/O/1/I/L) agar kode mudah dibaca/diketik.
@@ -187,64 +187,22 @@ function rewardReferrerOnFirstOrder(order) {
       return null;
     }
 
-    let bonusDays = 0;
-    let bonusOrderId = null;
-
-    if (order.price >= 100000) {
-      bonusDays = 7;
-      const now = new Date();
-      
-      const existingSub = db.get('subscriptions').find({ userId: referrer.id, status: 'active' }).value();
-      let expiresAt;
-      if (existingSub) {
-        expiresAt = new Date(existingSub.expiresAt);
-        expiresAt.setDate(expiresAt.getDate() + 7);
-        db.get('subscriptions').find({ id: existingSub.id }).assign({ expiresAt: expiresAt.toISOString() }).write();
-      } else {
-        expiresAt = new Date(now);
-        expiresAt.setDate(expiresAt.getDate() + 7);
-        db.get('subscriptions').push({
-          id: uuidv4(), userId: referrer.id, orderId: null,
-          planId: 'referral_bonus', planName: 'Bonus Ajak Teman 7 Hari',
-          status: 'active', startedAt: now.toISOString(), expiresAt: expiresAt.toISOString(), createdAt: now.toISOString()
-        }).write();
-        db.get('users').find({ id: referrer.id }).assign({ isActive: true }).write();
-      }
-
-      bonusOrderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
-      const bonusOrder = {
-        id: uuidv4(),
-        orderId: bonusOrderId,
-        userId: referrer.id,
-        userName: referrer.name,
-        userEmail: referrer.email,
-        planId: 'referral_bonus',
-        planName: 'Bonus Ajak Teman 7 Hari',
-        price: 0,
-        originalPrice: 0,
-        discount: 0,
-        promoCode: null,
-        status: 'confirmed',
-        qrisStatus: 'success',
-        payMethodType: 'bonus_referral',
-        gateway: 'system',
-        nominal: 0,
-        createdAt: now.toISOString(),
-        paidAt: now.toISOString(),
-        activatedAt: now.toISOString(),
-        fr3TotalTransfer: 0
-      };
-      db.get('orders').push(bonusOrder).write();
-    }
-
-    const rewardCode = createPersonalPromo({
-      ownerUserId: referrer.id, kind: 'referral', value: cfg.referrerReward,
-      description: `Reward referral: ${rec.referredName || 'teman'} berlangganan`
+    const bonusAmount = Number(cfg.referrerReward) || 10000;
+    
+    // Berikan saldo ke pengajak
+    applyWalletTx(referrer.id, {
+      type: 'bonus',
+      amount: bonusAmount,
+      refType: 'referral',
+      refId: rec.id,
+      note: `Bonus ajak teman: ${rec.referredName || 'Pengguna baru'} berlangganan`
     });
+
     db.get('referrals').find({ id: rec.id }).assign({
-      status: 'rewarded', orderId: order.id, rewardCode, rewardedAt: new Date().toISOString()
+      status: 'rewarded', orderId: order.id, rewardCode: `SALDO-${bonusAmount}`, rewardedAt: new Date().toISOString()
     }).write();
-    return { referrerId: referrer.id, referrerName: referrer.name, rewardCode, bonusDays, bonusOrderId };
+    
+    return { referrerId: referrer.id, referrerName: referrer.name, rewardCode: `SALDO-${bonusAmount}`, bonusAmount };
   } catch (e) {
     console.error('[REFERRAL] reward error:', e.message);
     return null;

@@ -136,7 +136,7 @@ router.post('/simulate-order', ensureAdmin, (req, res) => {
 
   let msg = `Simulasi Order #${orderId} berhasil untuk user ${targetUser.name}.`;
   if (reward) {
-    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (kode ${reward.rewardCode}).`;
+    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (Saldo Rp ${reward.bonusAmount.toLocaleString('id-ID')}).`;
   }
   req.flash('success', msg);
   res.redirect('/admin/orders');
@@ -239,9 +239,7 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
 
   let msg = `Order #${order.orderId} dikonfirmasi. Subscription aktif sampai ${moment(expiresAt).format('DD MMM YYYY')}.`;
   if (reward) {
-    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (kode ${reward.rewardCode})`;
-    if (reward.bonusDays) msg += ` + Bonus langganan ${reward.bonusDays} hari gratis (Invoice #${reward.bonusOrderId})`;
-    msg += '.';
+    msg += ` 🎁 Reward referral untuk ${reward.referrerName} diterbitkan (Saldo Rp ${reward.bonusAmount.toLocaleString('id-ID')}).`;
   }
 
   // Kirim notifikasi ke owner via WhatsApp
@@ -255,8 +253,7 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
       `📅 Expired: ${moment(expiresAt).format('DD MMM YYYY')}`;
     
     if (reward) {
-      notifMsg += `\n\n🎁 *Referral Reward Cair!* Pengajak (${reward.referrerName}) mendapat kode ${reward.rewardCode}`;
-      if (reward.bonusDays) notifMsg += ` + Gratis langganan ${reward.bonusDays} hari (Invoice Rp0 #${reward.bonusOrderId})!`;
+      notifMsg += `\n\n🎁 *Referral Reward Cair!* Pengajak (${reward.referrerName}) mendapat tambahan saldo Rp ${reward.bonusAmount.toLocaleString('id-ID')}.`;
     }
     
     sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF CONFIRM ERROR]', err.message));

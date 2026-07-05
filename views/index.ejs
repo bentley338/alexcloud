@@ -64,6 +64,22 @@
           <i class="fas fa-th-large"></i> Lihat Game
         </a>
       </div>
+      <% if (user) { %>
+      <div style="margin: 2.5rem auto 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: rgba(255,255,255,0.06); padding: 1.25rem 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 480px; text-align: left;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #00d4ff, #007bff); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff; box-shadow: 0 4px 15px rgba(0,212,255,0.4); flex-shrink: 0;">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div>
+            <div style="font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; font-weight: 600;">Saldo Dompet</div>
+            <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1;">Rp <%= balance.toLocaleString('id-ID') %></div>
+          </div>
+        </div>
+        <a href="/wallet" class="btn-primary" style="padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(255,107,53,0.3); border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-plus" style="font-size: 0.85rem;"></i> Top Up
+        </a>
+      </div>
+      <% } %>
       <div class="hero-stats">
         <div class="stat-item glass">
           <span class="stat-num" data-count="<%= allGames.length %>">0</span>

@@ -235,9 +235,16 @@ router.get('/', (req, res) => {
   const trendingGames = games.filter(g => g.rating >= 4.8).slice(0, 6);
   const testimonials = getCleanTestimonials();
   const plans = getPlans();
+  let balance = 0;
+  if (req.user) {
+    const w = getWallet(req.user.id);
+    balance = w.balance || 0;
+  }
+
   res.render('index', {
     title: 'AlexCloud - Premium Cloud Gaming',
     user: req.user || null,
+    balance,
     games: popularGames,
     allGames: games,
     trendingGames,
