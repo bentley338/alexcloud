@@ -29,7 +29,7 @@
           <i class="fas fa-cog"></i> Admin Panel
         </a>
         <% } %>
-        <a href="/wallet" class="btn-secondary" style="font-family:var(--font-ui)"><i class="fas fa-wallet"></i> Saldo &amp; Top-up</a>
+        <a href="/wallet" class="btn-secondary" style="font-family:var(--font-ui)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.3rem;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg> Saldo &amp; Top-up</a>
         <a href="/pricing" class="btn-primary"><i class="fas fa-plus"></i> Order Paket</a>
       </div>
     </div>
@@ -37,7 +37,7 @@
     <!-- Status Cards -->
     <div class="dashboard-grid">
       <a href="/wallet" class="stat-card" style="text-decoration:none; color:inherit; position:relative;">
-        <div class="stat-icon green"><i class="fas fa-wallet"></i></div>
+        <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg></div>
         <div class="stat-info">
           <div class="label">Saldo Dompet</div>
           <div class="value" style="color:var(--accent-green)">Rp <%= (typeof balance !== 'undefined' ? (balance||0) : 0).toLocaleString('id-ID') %></div>
