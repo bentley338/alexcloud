@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache } = require('../database/db');
+const { db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache,
+  getWallet, getBalance, getWalletConfig, applyWalletTx, getUserWalletTx, fulfillTopupOrder } = require('../database/db');
 const { ensureAdmin } = require('../middleware/auth');
 const { isJunkTestimonial, normalizeTestimonial } = require('../utils/helpers');
 const { rewardReferrerOnFirstOrder, getReferralConfig, setReferralConfig } = require('../utils/referral');
@@ -161,6 +162,37 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
   const order = db.get('orders').find({ id: req.params.id }).value();
   if (!order) { req.flash('error', 'Order tidak ditemukan.'); return res.redirect('/admin/orders'); }
   if (order.status !== 'pending') { req.flash('error', 'Order sudah diproses.'); return res.redirect('/admin/orders'); }
+
+  // ─── Order TOP-UP: kreditkan saldo, JANGAN buat subscription ────────────────
+  if ((order.orderType || 'subscription') === 'topup') {
+    const now = new Date();
+    db.get('orders').find({ id: order.id }).assign({
+      status: 'confirmed', paidAt: now.toISOString(), activatedAt: now.toISOString()
+    }).write();
+    const result = fulfillTopupOrder(order.id, { createdBy: 'admin:' + req.user.name });
+
+    let msg = `Top-up #${order.orderId} dikonfirmasi.`;
+    if (result.credited) {
+      msg += ` Saldo masuk Rp ${((result.amount || 0) + (result.bonus || 0)).toLocaleString('id-ID')}` +
+             (result.bonus ? ` (termasuk bonus Rp ${result.bonus.toLocaleString('id-ID')})` : '') +
+             `. Saldo user sekarang Rp ${(result.balanceAfter || 0).toLocaleString('id-ID')}.`;
+    } else {
+      msg += ` (Saldo tidak dikreditkan: ${result.reason}).`;
+    }
+    try {
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      sendWhatsAppNotification(
+        `✅ *TOP-UP DIKONFIRMASI ADMIN*\n\n📋 #${order.orderId}\n👤 ${order.userName} (${order.userEmail})\n` +
+        `💰 Nominal: Rp ${(order.topupAmount || order.price).toLocaleString('id-ID')}` +
+        (result.bonus ? `\n🎁 Bonus: Rp ${result.bonus.toLocaleString('id-ID')}` : '') +
+        `\n🏦 Saldo Sekarang: Rp ${(result.balanceAfter || 0).toLocaleString('id-ID')}`
+      ).catch(err => console.error('[WA NOTIF TOPUP CONFIRM]', err.message));
+    } catch (err) { console.error('[WA NOTIF TOPUP CONFIRM EX]', err.message); }
+
+    req.flash('success', msg);
+    return res.redirect('/admin/orders');
+  }
+
   const plans = getPlans();
   const plan = plans.find(p => p.id === order.planId);
   const now = new Date();
@@ -189,6 +221,18 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
     status: 'active', startedAt: now.toISOString(), expiresAt: expiresAt.toISOString()
   }).write();
   db.get('users').find({ id: order.userId }).assign({ isActive: true }).write();
+
+  // Order "saldo + kurang top-up": potong saldo yang dipakai (sekali saja) saat dikonfirmasi.
+  if (order.walletApplied > 0 && !order.walletDebited) {
+    try {
+      db.get('orders').find({ id: order.id }).assign({ walletDebited: true }).write();
+      applyWalletTx(order.userId, {
+        type: 'purchase', amount: order.walletApplied, refType: 'order', refId: order.orderId,
+        note: `Potong saldo untuk paket ${order.planName} #${order.orderId}`,
+        createdBy: 'admin:' + req.user.name, allowNegative: true
+      });
+    } catch (e) { console.error('[WALLET DEBIT ON ADMIN CONFIRM]', e.message); }
+  }
 
   // Confirm hook referral: order pertama yang di-confirm → cairkan reward pengajak (idempoten).
   const reward = rewardReferrerOnFirstOrder(order);
@@ -1071,6 +1115,137 @@ router.get('/marketing', ensureAdmin, (req, res) => {
     success: req.flash('success'),
     error: req.flash('error')
   });
+});
+
+// =====================
+// WALLET / SALDO — Manajemen lengkap saldo user
+// =====================
+
+// Dashboard saldo: ringkasan liabilitas, daftar dompet user, mutasi terbaru.
+router.get('/wallet', ensureAdmin, (req, res) => {
+  const users = db.get('users').value() || [];
+  const userMap = new Map(users.map(u => [u.id, u]));
+  const walletsRaw = db.get('wallets').value() || [];
+  const allTx = db.get('walletTx').value() || [];
+  const orders = db.get('orders').value() || [];
+
+  const wallets = walletsRaw
+    .map(w => ({ ...w, user: userMap.get(w.userId) }))
+    .filter(w => w.user)                       // sembunyikan dompet yatim (user terhapus)
+    .sort((a, b) => (b.balance || 0) - (a.balance || 0));
+
+  const topupOrders = orders.filter(o => o.orderType === 'topup');
+  const stats = {
+    totalLiability: wallets.reduce((s, w) => s + (w.balance || 0), 0),
+    totalToppedUp: wallets.reduce((s, w) => s + (w.totalToppedUp || 0), 0),
+    activeWallets: wallets.filter(w => (w.balance || 0) > 0).length,
+    totalWallets: wallets.length,
+    topupConfirmed: topupOrders.filter(o => o.status === 'confirmed').length,
+    topupPending: topupOrders.filter(o => o.status === 'pending').length,
+    topupRevenue: topupOrders.filter(o => o.status === 'confirmed').reduce((s, o) => s + (o.topupAmount || o.price || 0), 0),
+    txCount: allTx.length
+  };
+
+  const recentTx = allTx.slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 12)
+    .map(t => ({ ...t, user: userMap.get(t.userId) }));
+
+  res.render('admin/wallet', {
+    title: 'Kelola Saldo - AlexCloud Admin',
+    user: req.user, wallets, stats, recentTx, config: getWalletConfig(), moment,
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
+// Ledger lengkap semua mutasi saldo, dengan filter tipe & pencarian user.
+router.get('/wallet/tx', ensureAdmin, (req, res) => {
+  const users = db.get('users').value() || [];
+  const userMap = new Map(users.map(u => [u.id, u]));
+  const type = (req.query.type || 'all').toString();
+  const q = (req.query.q || '').toString().trim().toLowerCase();
+
+  let list = (db.get('walletTx').value() || [])
+    .slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+    .map(t => ({ ...t, user: userMap.get(t.userId) }));
+
+  if (type !== 'all') list = list.filter(t => t.type === type);
+  if (q) list = list.filter(t => {
+    const u = t.user;
+    return (u && ((u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)))
+      || (t.refId && String(t.refId).toLowerCase().includes(q));
+  });
+
+  const total = list.length;
+  list = list.slice(0, 300); // batasi tampilan agar ringan
+
+  res.render('admin/wallet-tx', {
+    title: 'Mutasi Saldo - AlexCloud Admin',
+    user: req.user, txList: list, total, filterType: type, query: req.query.q || '', moment,
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
+// Setelan dompet: aktif/nonaktif, min/maks, tier bonus.
+router.get('/wallet/settings', ensureAdmin, (req, res) => {
+  res.render('admin/wallet-settings', {
+    title: 'Setelan Saldo - AlexCloud Admin',
+    user: req.user, config: getWalletConfig(),
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
+router.post('/wallet/settings', ensureAdmin, (req, res) => {
+  const { enabled, minTopup, maxTopup,
+    tier1Min, tier1Percent, tier2Min, tier2Percent } = req.body;
+
+  const min = parseInt(minTopup, 10);
+  const max = parseInt(maxTopup, 10);
+  if (isNaN(min) || isNaN(max) || min < 1000 || max <= min) {
+    req.flash('error', 'Nominal min/maks tidak valid (maks harus lebih besar dari min, min ≥ 1000).');
+    return res.redirect('/admin/wallet/settings');
+  }
+
+  // Bangun tier bonus dari input (abaikan baris kosong / tidak valid).
+  const tiers = [];
+  [[tier1Min, tier1Percent], [tier2Min, tier2Percent]].forEach(([m, p]) => {
+    const mm = parseInt(m, 10), pp = parseFloat(p);
+    if (!isNaN(mm) && mm > 0 && !isNaN(pp) && pp > 0) tiers.push({ min: mm, percent: pp });
+  });
+  tiers.sort((a, b) => a.min - b.min);
+
+  db.get('settings').assign({
+    wallet: { enabled: !!enabled, minTopup: min, maxTopup: max, bonusTiers: tiers }
+  }).write();
+
+  req.flash('success', `Setelan saldo disimpan${enabled ? ' & top-up aktif' : ' (top-up dinonaktifkan)'}.`);
+  res.redirect('/admin/wallet/settings');
+});
+
+// Penyesuaian manual saldo user (kredit/debit) — mis. kompensasi, koreksi, refund.
+router.post('/wallet/:userId/adjust', ensureAdmin, (req, res) => {
+  const target = db.get('users').find({ id: req.params.userId }).value();
+  if (!target) { req.flash('error', 'User tidak ditemukan.'); return res.redirect('/admin/wallet'); }
+
+  const direction = req.body.direction === 'debit' ? 'debit' : 'credit';
+  const amount = Math.round(Number(req.body.amount) || 0);
+  const note = (req.body.note || '').toString().trim() || (direction === 'credit' ? 'Penyesuaian saldo (kredit)' : 'Penyesuaian saldo (debit)');
+  if (!Number.isFinite(amount) || amount <= 0) {
+    req.flash('error', 'Nominal penyesuaian tidak valid.');
+    return res.redirect('/admin/wallet');
+  }
+
+  try {
+    const tx = applyWalletTx(target.id, {
+      type: direction === 'credit' ? 'admin_credit' : 'admin_debit',
+      amount, refType: 'admin', refId: null, note,
+      createdBy: 'admin:' + req.user.name
+    });
+    req.flash('success',
+      `Saldo ${target.name} ${direction === 'credit' ? 'ditambah' : 'dikurangi'} Rp ${amount.toLocaleString('id-ID')}. ` +
+      `Saldo sekarang Rp ${tx.balanceAfter.toLocaleString('id-ID')}.`);
+  } catch (e) {
+    req.flash('error', `Gagal menyesuaikan saldo: ${e.message}`);
+  }
+  res.redirect('/admin/wallet');
 });
 
 module.exports = router;

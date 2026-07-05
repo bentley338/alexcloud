@@ -1,0 +1,84 @@
+<% currentPage = 'wallet'; %>
+<%- include('layout-header') %>
+
+<% const tiers = config.bonusTiers || []; const t1 = tiers[0] || {}; const t2 = tiers[1] || {}; %>
+
+<div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem;">
+  <a href="/admin/wallet" class="btn-secondary" style="font-size:0.85rem; padding:0.45rem 0.9rem;"><i class="fas fa-arrow-left"></i></a>
+  <h1 class="admin-page-title" style="margin:0;"><i class="fas fa-sliders"></i> Setelan Saldo &amp; Top-up</h1>
+</div>
+
+<% if (typeof success !== 'undefined' && success && success.length) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<form method="POST" action="/admin/wallet/settings" style="max-width:640px;">
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header"><div class="card-title"><i class="fas fa-toggle-on"></i> Status Fitur</div></div>
+    <div class="card-body">
+      <label style="display:flex; align-items:center; gap:0.75rem; cursor:pointer;">
+        <input type="checkbox" name="enabled" <%= config.enabled ? 'checked' : '' %> style="width:20px; height:20px; accent-color:var(--accent-blue);">
+        <div>
+          <div style="font-family:var(--font-ui); font-weight:600;">Aktifkan Top-up Saldo</div>
+          <div style="font-size:0.82rem; color:var(--text-muted);">Jika dimatikan, user tidak bisa mengisi saldo (saldo yang ada tetap bisa dipakai).</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header"><div class="card-title"><i class="fas fa-coins"></i> Batas Nominal</div></div>
+    <div class="card-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Minimal Top-up (Rp)</label>
+          <input type="number" name="minTopup" value="<%= config.minTopup %>" min="1000" step="1000" required
+            style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.7rem 0.9rem; color:var(--text-primary); font-family:var(--font-display); font-weight:700; outline:none;">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Maksimal Top-up (Rp)</label>
+          <input type="number" name="maxTopup" value="<%= config.maxTopup %>" min="1000" step="1000" required
+            style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.7rem 0.9rem; color:var(--text-primary); font-family:var(--font-display); font-weight:700; outline:none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header"><div class="card-title"><i class="fas fa-gift"></i> Tier Bonus Top-up</div></div>
+    <div class="card-body">
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+        User yang top-up ≥ nominal minimum tier mendapat bonus saldo sesuai persen. Tier tertinggi yang terpenuhi yang dipakai. Kosongkan untuk menonaktifkan tier.
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Tier 1 — Min Nominal (Rp)</label>
+          <input type="number" name="tier1Min" value="<%= t1.min || '' %>" min="0" step="1000" placeholder="100000"
+            style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.65rem 0.9rem; color:var(--text-primary); font-family:var(--font-ui); outline:none;">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Tier 1 — Bonus (%)</label>
+          <input type="number" name="tier1Percent" value="<%= t1.percent || '' %>" min="0" max="100" step="0.5" placeholder="5"
+            style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.65rem 0.9rem; color:var(--text-primary); font-family:var(--font-ui); outline:none;">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Tier 2 — Min Nominal (Rp)</label>
+          <input type="number" name="tier2Min" value="<%= t2.min || '' %>" min="0" step="1000" placeholder="500000"
+            style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.65rem 0.9rem; color:var(--text-primary); font-family:var(--font-ui); outline:none;">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Tier 2 — Bonus (%)</label>
+          <input type="number" name="tier2Percent" value="<%= t2.percent || '' %>" min="0" max="100" step="0.5" placeholder="10"
+            style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.65rem 0.9rem; color:var(--text-primary); font-family:var(--font-ui); outline:none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="btn-primary" style="padding:0.85rem 2rem;"><i class="fas fa-save"></i> Simpan Setelan</button>
+</form>
+
+<%- include('layout-footer') %>

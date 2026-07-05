@@ -17,6 +17,8 @@ db.defaults({
   testimonials: [],
   plans: [],
   referrals: [],
+  wallets: [],
+  walletTx: [],
   settings: {},
   sessions: [],
   chatMessages: []
@@ -182,6 +184,143 @@ function getGames() {
 function invalidatePlansCache() { _plansCacheTs = 0; }
 function invalidateGamesCache() { _gamesCacheTs = 0; }
 
+// ─── Wallet / Saldo ────────────────────────────────────────────────────────────
+// Konfigurasi default dompet (bisa diedit admin lewat /admin/wallet-settings).
+const WALLET_DEFAULTS = {
+  enabled: true,
+  minTopup: 10000,
+  maxTopup: 2000000,
+  // Tier bonus top-up: nominal >= min mendapat tambahan `percent`% saldo (ambil tier tertinggi yang terpenuhi).
+  bonusTiers: [
+    { min: 100000, percent: 5 },
+    { min: 500000, percent: 10 }
+  ]
+};
+
+function getWalletConfig() {
+  const settings = db.get('settings').value() || {};
+  return { ...WALLET_DEFAULTS, ...(settings.wallet || {}) };
+}
+
+function seedWallet() {
+  const settings = db.get('settings').value() || {};
+  if (!settings.wallet) {
+    db.get('settings').assign({ wallet: WALLET_DEFAULTS }).write();
+    console.log('[DB] Wallet config seeded');
+  }
+}
+
+// Ambil (atau buat) dompet milik user. Selalu mengembalikan objek dengan balance numerik.
+function getWallet(userId) {
+  if (!userId) return null;
+  let w = db.get('wallets').find({ userId }).value();
+  if (!w) {
+    w = {
+      id: uuidv4(),
+      userId,
+      balance: 0,
+      totalToppedUp: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    db.get('wallets').push(w).write();
+  }
+  return w;
+}
+
+function getBalance(userId) {
+  const w = getWallet(userId);
+  return w ? (w.balance || 0) : 0;
+}
+
+// Hitung bonus top-up berdasar tier tertinggi yang terpenuhi.
+function calcTopupBonus(amount) {
+  const cfg = getWalletConfig();
+  const tiers = (cfg.bonusTiers || []).filter(t => t && amount >= t.min).sort((a, b) => b.min - a.min);
+  if (!tiers.length) return 0;
+  return Math.floor(amount * (tiers[0].percent || 0) / 100);
+}
+
+// ─── Satu-satunya jalur perubahan saldo (menjaga ledger selalu konsisten) ───────
+// type: 'topup' | 'purchase' | 'bonus' | 'admin_credit' | 'admin_debit' | 'refund'
+// amount: selalu POSITIF. Arah debit/kredit ditentukan oleh `type`.
+// Menolak jika saldo jadi negatif kecuali opts.allowNegative.
+function applyWalletTx(userId, { type, amount, refType = null, refId = null, note = null, createdBy = null, allowNegative = false }) {
+  if (!userId) throw new Error('userId wajib untuk transaksi saldo');
+  const amt = Math.round(Number(amount) || 0);
+  if (!Number.isFinite(amt) || amt <= 0) throw new Error('Nominal transaksi saldo tidak valid');
+
+  const DEBIT_TYPES = ['purchase', 'admin_debit'];
+  const isDebit = DEBIT_TYPES.includes(type);
+
+  // Re-fetch tepat sebelum menulis untuk mengurangi risiko balapan (single-process/event-loop).
+  const w = getWallet(userId);
+  const before = w.balance || 0;
+  const after = isDebit ? before - amt : before + amt;
+  if (after < 0 && !allowNegative) {
+    throw new Error('Saldo tidak mencukupi');
+  }
+
+  const nowIso = new Date().toISOString();
+  db.get('wallets').find({ id: w.id }).assign({
+    balance: after,
+    totalToppedUp: (w.totalToppedUp || 0) + (['topup', 'bonus'].includes(type) ? amt : 0),
+    updatedAt: nowIso
+  }).write();
+
+  const tx = {
+    id: uuidv4(),
+    userId,
+    type,
+    direction: isDebit ? 'debit' : 'credit',
+    amount: amt,
+    balanceBefore: before,
+    balanceAfter: after,
+    refType,
+    refId,
+    note,
+    createdBy,
+    createdAt: nowIso
+  };
+  db.get('walletTx').push(tx).write();
+  return tx;
+}
+
+function getUserWalletTx(userId) {
+  return db.get('walletTx').filter({ userId }).sortBy('createdAt').reverse().value() || [];
+}
+
+// Kreditkan saldo dari sebuah order top-up yang sudah lunas. IDEMPOTEN: hanya
+// mengkredit sekali (guard flag order.walletCredited). Dipakai oleh hook status
+// pembayaran (auto) maupun konfirmasi manual admin. Mengembalikan ringkasan
+// { credited, amount, bonus, balanceAfter } atau { credited:false } bila sudah pernah.
+function fulfillTopupOrder(orderInternalId, { createdBy = null } = {}) {
+  const order = db.get('orders').find({ id: orderInternalId }).value();
+  if (!order || order.orderType !== 'topup') return { credited: false, reason: 'bukan order topup' };
+  if (order.walletCredited) return { credited: false, reason: 'sudah dikreditkan' };
+
+  const amount = Math.round(Number(order.topupAmount || order.price) || 0);
+  const bonus = Math.round(Number(order.topupBonus || 0) || 0);
+  if (amount <= 0) return { credited: false, reason: 'nominal tidak valid' };
+
+  // Tandai lebih dulu agar tidak dobel walau ada polling paralel.
+  db.get('orders').find({ id: order.id }).assign({ walletCredited: true }).write();
+
+  const tx = applyWalletTx(order.userId, {
+    type: 'topup', amount, refType: 'order', refId: order.orderId,
+    note: `Top-up saldo #${order.orderId}`, createdBy
+  });
+  let balanceAfter = tx.balanceAfter;
+  if (bonus > 0) {
+    const btx = applyWalletTx(order.userId, {
+      type: 'bonus', amount: bonus, refType: 'order', refId: order.orderId,
+      note: `Bonus top-up #${order.orderId}`, createdBy
+    });
+    balanceAfter = btx.balanceAfter;
+  }
+  return { credited: true, amount, bonus, balanceAfter };
+}
+
 // ─── Seed functions ────────────────────────────────────────────────────────────
 function seedAdmin() {
   const adminEmail = (process.env.ADMIN_EMAIL || 'admin@alexcloud.com').toLowerCase().trim();
@@ -340,6 +479,7 @@ function initDB() {
   seedGames();
   seedTestimonials();
   seedReferral();
+  seedWallet();
   updateGameImages();
   cleanOldSessions();
 
@@ -357,5 +497,13 @@ module.exports = {
   getPlans,
   getGames,
   invalidatePlansCache,
-  invalidateGamesCache
+  invalidateGamesCache,
+  // Wallet / saldo
+  getWallet,
+  getBalance,
+  getWalletConfig,
+  calcTopupBonus,
+  applyWalletTx,
+  getUserWalletTx,
+  fulfillTopupOrder
 };

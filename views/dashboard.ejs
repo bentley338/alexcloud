@@ -29,12 +29,21 @@
           <i class="fas fa-cog"></i> Admin Panel
         </a>
         <% } %>
+        <a href="/wallet" class="btn-secondary" style="font-family:var(--font-ui)"><i class="fas fa-wallet"></i> Saldo &amp; Top-up</a>
         <a href="/pricing" class="btn-primary"><i class="fas fa-plus"></i> Order Paket</a>
       </div>
     </div>
 
     <!-- Status Cards -->
     <div class="dashboard-grid">
+      <a href="/wallet" class="stat-card" style="text-decoration:none; color:inherit; position:relative;">
+        <div class="stat-icon green"><i class="fas fa-wallet"></i></div>
+        <div class="stat-info">
+          <div class="label">Saldo Dompet</div>
+          <div class="value" style="color:var(--accent-green)">Rp <%= (typeof balance !== 'undefined' ? (balance||0) : 0).toLocaleString('id-ID') %></div>
+        </div>
+        <i class="fas fa-chevron-right" style="position:absolute; top:1rem; right:1rem; font-size:0.75rem; color:var(--text-muted);"></i>
+      </a>
       <div class="stat-card">
         <div class="stat-icon blue"><i class="fas fa-box"></i></div>
         <div class="stat-info">

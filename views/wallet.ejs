@@ -1,0 +1,283 @@
+<%- include('partials/header') %>
+
+<%
+  // Label & ikon per tipe transaksi ledger.
+  const TX_META = {
+    topup:        { label: 'Top-up Saldo',       icon: 'fa-arrow-down',    cls: 'credit' },
+    bonus:        { label: 'Bonus Top-up',        icon: 'fa-gift',          cls: 'credit' },
+    refund:       { label: 'Refund',              icon: 'fa-rotate-left',   cls: 'credit' },
+    admin_credit: { label: 'Penyesuaian Admin',   icon: 'fa-plus',          cls: 'credit' },
+    purchase:     { label: 'Pembelian Paket',     icon: 'fa-bag-shopping',  cls: 'debit'  },
+    admin_debit:  { label: 'Penyesuaian Admin',   icon: 'fa-minus',         cls: 'debit'  }
+  };
+%>
+
+<div class="wl-page">
+  <div class="wl-container">
+
+    <div class="wl-head">
+      <div>
+        <p class="wl-eyebrow">Dompet Saya</p>
+        <h1 class="wl-title">Saldo &amp; Top-up</h1>
+      </div>
+      <a href="/dashboard" class="btn-secondary" style="font-family:var(--font-ui)"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <% if (typeof success !== 'undefined' && success && success.length) { %>
+      <% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error && error.length) { %>
+      <% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+    <% } %>
+
+    <div class="wl-grid">
+      <!-- ═══ KIRI: Kartu Saldo + Form Top-up ═══ -->
+      <div>
+        <!-- Kartu saldo -->
+        <div class="wl-balance-card">
+          <div class="wl-balance-glow"></div>
+          <div class="wl-balance-label"><i class="fas fa-wallet"></i> Saldo Aktif</div>
+          <div class="wl-balance-amount">Rp <%= (balance || 0).toLocaleString('id-ID') %></div>
+          <div class="wl-balance-foot">
+            <div>
+              <span class="wl-bf-label">Total Pernah Top-up</span>
+              <span class="wl-bf-val">Rp <%= (wallet.totalToppedUp || 0).toLocaleString('id-ID') %></span>
+            </div>
+            <div class="wl-chip"><i class="fas fa-shield-halved"></i> Saldo Aman</div>
+          </div>
+        </div>
+
+        <!-- Form Top-up -->
+        <div class="card wl-topup-card">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-plus-circle"></i> Isi Saldo</div>
+          </div>
+          <div class="card-body">
+            <% if (!config.enabled) { %>
+              <div class="alert alert-error" style="margin:0;"><i class="fas fa-ban"></i> Top-up sedang dinonaktifkan sementara. Coba lagi nanti.</div>
+            <% } else { %>
+            <form action="/wallet/topup" method="POST" id="topupForm">
+              <label class="wl-label">Pilih Nominal</label>
+              <div class="wl-presets">
+                <% presets.forEach(p => { %>
+                <button type="button" class="wl-preset" data-amt="<%= p %>" onclick="selectPreset(<%= p %>, this)">
+                  Rp <%= p.toLocaleString('id-ID') %>
+                  <% const b = config.bonusTiers && config.bonusTiers.filter(t=>p>=t.min).sort((a,b)=>b.min-a.min)[0]; %>
+                  <% if (b) { %><span class="wl-preset-bonus">+<%= b.percent %>%</span><% } %>
+                </button>
+                <% }) %>
+              </div>
+
+              <label class="wl-label" style="margin-top:1.1rem;">Atau Nominal Lain</label>
+              <div class="wl-amount-wrap">
+                <span class="wl-amount-prefix">Rp</span>
+                <input type="number" name="amount" id="amountInput" class="wl-amount-input"
+                  min="<%= config.minTopup %>" max="<%= config.maxTopup %>" step="1000"
+                  placeholder="0" inputmode="numeric" oninput="onAmountInput()">
+              </div>
+              <div class="wl-minmax">
+                Min Rp <%= config.minTopup.toLocaleString('id-ID') %> · Maks Rp <%= config.maxTopup.toLocaleString('id-ID') %>
+              </div>
+
+              <!-- Ringkasan bonus & saldo diterima -->
+              <div class="wl-summary" id="topupSummary" style="display:none;">
+                <div class="wl-sum-row">
+                  <span>Nominal Top-up</span>
+                  <span id="sumAmount">Rp 0</span>
+                </div>
+                <div class="wl-sum-row wl-sum-bonus" id="sumBonusRow" style="display:none;">
+                  <span><i class="fas fa-gift"></i> Bonus</span>
+                  <span id="sumBonus">Rp 0</span>
+                </div>
+                <div class="wl-sum-row wl-sum-total">
+                  <span>Saldo Diterima</span>
+                  <span id="sumTotal">Rp 0</span>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary wl-submit" id="topupSubmit" disabled>
+                <i class="fas fa-bolt"></i> Lanjut Bayar
+              </button>
+            </form>
+            <% } %>
+
+            <!-- Info tier bonus -->
+            <% if (config.bonusTiers && config.bonusTiers.length) { %>
+            <div class="wl-bonus-info">
+              <div class="wl-bonus-title"><i class="fas fa-gift"></i> Bonus Top-up</div>
+              <% config.bonusTiers.slice().sort((a,b)=>a.min-b.min).forEach(t => { %>
+              <div class="wl-bonus-line">
+                <span>Top-up ≥ Rp <%= t.min.toLocaleString('id-ID') %></span>
+                <span class="wl-bonus-pct">+<%= t.percent %>% saldo</span>
+              </div>
+              <% }) %>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ KANAN: Riwayat Mutasi ═══ -->
+      <div class="card wl-history-card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Riwayat Mutasi</div>
+          <span class="wl-count"><%= tx.length %> transaksi</span>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <% if (!tx.length) { %>
+          <div class="wl-empty">
+            <i class="fas fa-receipt"></i>
+            <p>Belum ada transaksi saldo.<br>Yuk isi saldo pertamamu!</p>
+          </div>
+          <% } else { %>
+          <div class="wl-tx-list">
+            <% tx.forEach(t => { const m = TX_META[t.type] || { label: t.type, icon:'fa-circle', cls: t.direction }; %>
+            <div class="wl-tx">
+              <div class="wl-tx-icon <%= m.cls %>"><i class="fas <%= m.icon %>"></i></div>
+              <div class="wl-tx-body">
+                <div class="wl-tx-title"><%= m.label %></div>
+                <div class="wl-tx-sub">
+                  <%= moment(t.createdAt).format('DD MMM YYYY · HH:mm') %>
+                  <% if (t.note) { %> · <%= t.note %><% } %>
+                </div>
+              </div>
+              <div class="wl-tx-amt <%= m.cls %>">
+                <%= m.cls === 'debit' ? '-' : '+' %>Rp <%= (t.amount || 0).toLocaleString('id-ID') %>
+                <div class="wl-tx-bal">Saldo: Rp <%= (t.balanceAfter || 0).toLocaleString('id-ID') %></div>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .wl-page { min-height: 100vh; padding: 6.5rem 1.5rem 4rem; }
+  .wl-container { max-width: 1080px; margin: 0 auto; }
+  .wl-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+  .wl-eyebrow { color: var(--text-muted); font-family: var(--font-ui); font-size: 0.85rem; margin-bottom: 0.2rem; }
+  .wl-title { font-family: var(--font-display); font-size: 2rem; font-weight: 800; }
+  .wl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+
+  /* Kartu saldo */
+  .wl-balance-card {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #0f2233 0%, #12303f 55%, #103444 100%);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-xl);
+    padding: 1.75rem; margin-bottom: 1.5rem;
+    box-shadow: var(--glow-accent);
+  }
+  .wl-balance-glow { position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(56,189,248,0.35), transparent 70%); pointer-events: none; }
+  .wl-balance-label { font-family: var(--font-ui); font-size: 0.85rem; color: var(--accent-hover); display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.6rem; position: relative; }
+  .wl-balance-amount { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 1.25rem; position: relative; }
+  .wl-balance-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; position: relative; }
+  .wl-bf-label { display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .wl-bf-val { display: block; font-family: var(--font-ui); font-weight: 700; color: var(--text-secondary); margin-top: 0.15rem; }
+  .wl-chip { display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); color: var(--accent-green); font-size: 0.72rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 100px; }
+
+  /* Form top-up */
+  .wl-label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 0.55rem; }
+  .wl-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+  .wl-preset {
+    position: relative; padding: 0.75rem 0.4rem; border-radius: 12px; cursor: pointer;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    color: var(--text-primary); font-family: var(--font-ui); font-weight: 700; font-size: 0.85rem;
+    transition: var(--transition);
+  }
+  .wl-preset:hover { border-color: var(--accent-line); transform: translateY(-1px); }
+  .wl-preset.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-hover); }
+  .wl-preset-bonus { position: absolute; top: -8px; right: -6px; background: var(--accent-green); color: #04121a; font-size: 0.62rem; font-weight: 800; padding: 0.1rem 0.35rem; border-radius: 100px; }
+  .wl-amount-wrap { display: flex; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 0 0.9rem; transition: var(--transition); }
+  .wl-amount-wrap:focus-within { border-color: var(--accent); }
+  .wl-amount-prefix { color: var(--text-muted); font-family: var(--font-display); font-weight: 700; }
+  .wl-amount-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; padding: 0.7rem 0.6rem; }
+  .wl-amount-input::-webkit-outer-spin-button, .wl-amount-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .wl-minmax { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+  .wl-summary { margin-top: 1.1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem 1rem; }
+  .wl-sum-row { display: flex; justify-content: space-between; font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); padding: 0.2rem 0; }
+  .wl-sum-bonus { color: var(--accent-green); }
+  .wl-sum-total { border-top: 1px dashed var(--border); margin-top: 0.35rem; padding-top: 0.55rem; font-weight: 700; color: var(--text-primary); }
+  .wl-submit { width: 100%; justify-content: center; margin-top: 1.1rem; padding: 0.95rem; }
+  .wl-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .wl-bonus-info { margin-top: 1.25rem; padding-top: 1.1rem; border-top: 1px solid var(--border); }
+  .wl-bonus-title { font-family: var(--font-ui); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.6rem; }
+  .wl-bonus-title i { color: var(--accent-green); }
+  .wl-bonus-line { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-secondary); padding: 0.28rem 0; }
+  .wl-bonus-pct { color: var(--accent-green); font-weight: 700; }
+
+  /* Riwayat */
+  .wl-count { font-size: 0.78rem; color: var(--text-muted); }
+  .wl-empty { text-align: center; padding: 3.5rem 1.5rem; color: var(--text-muted); }
+  .wl-empty i { font-size: 2.2rem; margin-bottom: 1rem; opacity: 0.6; }
+  .wl-empty p { font-size: 0.9rem; line-height: 1.6; }
+  .wl-tx-list { display: flex; flex-direction: column; }
+  .wl-tx { display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .wl-tx:last-child { border-bottom: none; }
+  .wl-tx-icon { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+  .wl-tx-icon.credit { background: rgba(52,211,153,0.12); color: var(--accent-green); }
+  .wl-tx-icon.debit { background: rgba(255,107,107,0.12); color: #ff6b6b; }
+  .wl-tx-body { flex: 1; min-width: 0; }
+  .wl-tx-title { font-family: var(--font-ui); font-weight: 600; font-size: 0.9rem; }
+  .wl-tx-sub { font-size: 0.75rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wl-tx-amt { text-align: right; font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+  .wl-tx-amt.credit { color: var(--accent-green); }
+  .wl-tx-amt.debit { color: #ff6b6b; }
+  .wl-tx-bal { font-family: var(--font-ui); font-weight: 500; font-size: 0.68rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+  @media (max-width: 860px) {
+    .wl-grid { grid-template-columns: 1fr; }
+    .wl-balance-amount { font-size: 2.1rem; }
+  }
+</style>
+
+<script>
+  var MIN_TOPUP = <%= config.minTopup %>;
+  var MAX_TOPUP = <%= config.maxTopup %>;
+  var BONUS_TIERS = <%- JSON.stringify(config.bonusTiers || []) %>;
+
+  function calcBonus(amt) {
+    var best = BONUS_TIERS.filter(function (t) { return amt >= t.min; }).sort(function (a, b) { return b.min - a.min; })[0];
+    return best ? Math.floor(amt * (best.percent || 0) / 100) : 0;
+  }
+  function rupiah(n) { return 'Rp ' + (n || 0).toLocaleString('id-ID'); }
+
+  function refreshSummary() {
+    var amt = parseInt(document.getElementById('amountInput').value, 10) || 0;
+    var summary = document.getElementById('topupSummary');
+    var submit = document.getElementById('topupSubmit');
+    var valid = amt >= MIN_TOPUP && amt <= MAX_TOPUP;
+    if (amt > 0) {
+      var bonus = calcBonus(amt);
+      document.getElementById('sumAmount').textContent = rupiah(amt);
+      document.getElementById('sumTotal').textContent = rupiah(amt + bonus);
+      var bonusRow = document.getElementById('sumBonusRow');
+      if (bonus > 0) { bonusRow.style.display = 'flex'; document.getElementById('sumBonus').textContent = '+' + rupiah(bonus); }
+      else { bonusRow.style.display = 'none'; }
+      summary.style.display = 'block';
+    } else {
+      summary.style.display = 'none';
+    }
+    submit.disabled = !valid;
+  }
+
+  function selectPreset(amt, el) {
+    document.getElementById('amountInput').value = amt;
+    document.querySelectorAll('.wl-preset').forEach(function (b) { b.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    refreshSummary();
+  }
+  function onAmountInput() {
+    var amt = parseInt(document.getElementById('amountInput').value, 10) || 0;
+    document.querySelectorAll('.wl-preset').forEach(function (b) {
+      b.classList.toggle('active', parseInt(b.dataset.amt, 10) === amt);
+    });
+    refreshSummary();
+  }
+</script>
+
+<%- include('partials/footer') %>

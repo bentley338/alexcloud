@@ -3,7 +3,7 @@ const router = express.Router();
 const https = require('https');
 const path = require('path');
 const fs = require('fs');
-const { db, getPlans, getGames, invalidateGamesCache } = require('../database/db');
+const { db, getPlans, getGames, invalidateGamesCache, getWallet, getBalance, getWalletConfig, calcTopupBonus, applyWalletTx, getUserWalletTx, fulfillTopupOrder } = require('../database/db');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
@@ -502,6 +502,7 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
     plans,
     games,
     referral,
+    balance: getBalance(req.user.id),
     moment,
     rememberMe: req.session.rememberMe || false
   });
@@ -517,6 +518,7 @@ router.get('/order/:planId', ensureAuthenticated, (req, res) => {
     title: `Order ${plan.name} - AlexCloud`,
     user: req.user,
     plan,
+    balance: getBalance(req.user.id),
     qrisImage: process.env.QRIS_IMAGE || 'https://img1.pixhost.to/images/5339/592942381_rizzhosting.jpg',
     waNumber: process.env.WA_NUMBER
   });
@@ -631,6 +633,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     userId: req.user.id,
     userName: req.user.name,
     userEmail: req.user.email,
+    orderType: 'subscription', // 'subscription' | 'topup'
     planId: plan.id,
     planName: plan.name,
     price: actualPrice,
@@ -1117,6 +1120,50 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
         paidAt: new Date().toISOString()
       }).write();
 
+      // ─── Cabang TOP-UP: kreditkan saldo (bukan aktivasi subscription) ─────────
+      if ((currentOrder.orderType || 'subscription') === 'topup') {
+        const result = fulfillTopupOrder(order.id, { createdBy: 'gateway' });
+        db.get('orders').find({ id: order.id }).assign({ activatedAt: new Date().toISOString() }).write();
+
+        const totalCredit = (result.amount || 0) + (result.bonus || 0);
+        const topupMsg = `💰 *TOP-UP SALDO SUKSES*\n\n` +
+          `📋 Order ID: *#${order.orderId}*\n` +
+          `👤 User: ${order.userName} (${order.userEmail})\n` +
+          `💵 Nominal: Rp ${(result.amount || order.price).toLocaleString('id-ID')}` +
+          (result.bonus ? `\n🎁 Bonus: Rp ${result.bonus.toLocaleString('id-ID')}` : '') +
+          `\n💳 Saldo Masuk: Rp ${totalCredit.toLocaleString('id-ID')}` +
+          `\n🏦 Saldo Sekarang: Rp ${(result.balanceAfter || 0).toLocaleString('id-ID')}`;
+        try {
+          const { sendWhatsAppNotification } = require('../utils/whatsapp');
+          sendWhatsAppNotification(topupMsg).catch(err => console.error('[WA NOTIF TOPUP]', err.message));
+        } catch (e) { console.error('[WA NOTIF TOPUP EX]', e.message); }
+        try {
+          const { sendTelegramNotification } = require('../utils/telegram');
+          sendTelegramNotification(topupMsg).catch(err => console.error('[TG NOTIF TOPUP]', err.message));
+        } catch (e) { console.error('[TG NOTIF TOPUP EX]', e.message); }
+
+        return res.json({
+          fr3Status: fr3St,
+          status: 'confirmed',
+          orderType: 'topup',
+          redirectUrl: '/wallet',
+          trxId: order.fr3TrxId,
+          amount: order.price
+        });
+      }
+
+      // Mode "saldo + kurang top-up": potong saldo yang dipakai di paket ini (sekali saja).
+      if (currentOrder.walletApplied > 0 && !currentOrder.walletDebited) {
+        try {
+          db.get('orders').find({ id: order.id }).assign({ walletDebited: true }).write();
+          applyWalletTx(currentOrder.userId, {
+            type: 'purchase', amount: currentOrder.walletApplied, refType: 'order', refId: currentOrder.orderId,
+            note: `Potong saldo untuk paket ${currentOrder.planName} #${currentOrder.orderId}`, createdBy: 'gateway',
+            allowNegative: true
+          });
+        } catch (e) { console.error('[WALLET DEBIT ON PAID]', e.message); }
+      }
+
       // Burn promo code
       if (currentOrder.promoCode) {
         const promo = db.get('promoCodes').find({ code: currentOrder.promoCode.toUpperCase() }).value();
@@ -1244,6 +1291,203 @@ router.post('/api/payment/cancel/:orderId', ensureAuthenticated, async (req, res
   return res.json({ success: true, message: 'Pesanan berhasil dibatalkan' });
 });
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  WALLET / SALDO
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Halaman dompet: saldo, top-up (preset + custom), info bonus, riwayat mutasi.
+router.get('/wallet', ensureAuthenticated, (req, res) => {
+  const cfg = getWalletConfig();
+  const wallet = getWallet(req.user.id);
+  const tx = getUserWalletTx(req.user.id);
+  // Nominal preset yang lazim dipakai untuk top-up.
+  const presets = [10000, 25000, 50000, 100000, 200000, 500000].filter(n => n >= cfg.minTopup && n <= cfg.maxTopup);
+  res.render('wallet', {
+    title: 'Saldo & Top-up - AlexCloud',
+    user: req.user,
+    wallet,
+    balance: wallet.balance || 0,
+    tx,
+    config: cfg,
+    presets,
+    moment,
+    success: req.flash('success'),
+    error: req.flash('error')
+  });
+});
+
+// Buat order top-up → arahkan ke halaman pembayaran (reuse selector metode + gateway).
+router.post('/wallet/topup', ensureAuthenticated, (req, res) => {
+  const cfg = getWalletConfig();
+  if (!cfg.enabled) {
+    req.flash('error', 'Fitur top-up sedang dinonaktifkan.');
+    return res.redirect('/wallet');
+  }
+  const amount = Math.round(Number(req.body.amount) || 0);
+  if (!Number.isFinite(amount) || amount < cfg.minTopup) {
+    req.flash('error', `Nominal minimal top-up Rp ${cfg.minTopup.toLocaleString('id-ID')}.`);
+    return res.redirect('/wallet');
+  }
+  if (amount > cfg.maxTopup) {
+    req.flash('error', `Nominal maksimal top-up Rp ${cfg.maxTopup.toLocaleString('id-ID')}.`);
+    return res.redirect('/wallet');
+  }
+
+  const bonus = calcTopupBonus(amount);
+  const orderId = 'TP' + Date.now().toString().slice(-8).toUpperCase();
+  const order = {
+    id: uuidv4(),
+    orderId,
+    userId: req.user.id,
+    userName: req.user.name,
+    userEmail: req.user.email,
+    orderType: 'topup',
+    planId: 'topup',
+    planName: `Top-up Saldo Rp ${amount.toLocaleString('id-ID')}`,
+    price: amount,
+    originalPrice: amount,
+    discount: 0,
+    promoCode: null,
+    topupAmount: amount,
+    topupBonus: bonus,
+    walletCredited: false,
+    status: 'pending',
+    qrisStatus: 'awaiting_method',
+    payMethodType: null,
+    gateway: null,
+    nominal: amount,
+    createdAt: new Date().toISOString(),
+    paidAt: null,
+    activatedAt: null,
+    fr3TrxId: null,
+    fr3QrString: null,
+    fr3TotalTransfer: amount,
+    fr3UniqueCode: 0,
+    fr3Expiry: null,
+    fr3Error: null,
+    mpPaymentLink: null,
+    mpVaNumber: null, mpVaName: null, mpBankCode: null,
+    mpPaymentCode: null, mpRetailOutlet: null,
+    mpEwalletProvider: null,
+    paymentMethod: null
+  };
+  db.get('orders').push(order).write();
+  res.redirect('/payment/' + order.orderId);
+});
+
+// Bayar paket memakai saldo. Jika saldo cukup → langsung aktif. Jika kurang →
+// buat order paket dengan sebagian dibayar saldo, sisanya via gateway.
+router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
+  const { planId, promoCode, promoId } = req.body;
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === planId);
+  if (!plan) { req.flash('error', 'Paket tidak ditemukan.'); return res.redirect('/pricing'); }
+
+  // Terapkan promo (jika valid) — logika sama dengan POST /order.
+  let actualPrice = plan.price;
+  let appliedPromo = null;
+  let discount = 0;
+  if (promoCode && promoId) {
+    const promo = db.get('promoCodes').find({ id: promoId, code: String(promoCode).toUpperCase(), isActive: true }).value();
+    if (promo && !(promo.ownerUserId && promo.ownerUserId !== req.user.id) && !(promo.expiresAt && new Date(promo.expiresAt) < new Date()) && !(promo.maxUses && promo.usedCount >= promo.maxUses) && !(promo.minPurchase && plan.price < promo.minPurchase) && !userAlreadyUsedPromo(req.user.id, promo.code)) {
+      discount = promo.discountType === 'percent'
+        ? Math.round(plan.price * promo.discountValue / 100)
+        : Math.min(promo.discountValue, plan.price);
+      actualPrice = Math.max(0, plan.price - discount);
+      appliedPromo = promo;
+    }
+  }
+
+  const balance = getBalance(req.user.id);
+  const orderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
+
+  // ─── Saldo cukup: aktivasi instan ───────────────────────────────────────────
+  if (balance >= actualPrice) {
+    const now = new Date().toISOString();
+    const order = {
+      id: uuidv4(), orderId,
+      userId: req.user.id, userName: req.user.name, userEmail: req.user.email,
+      orderType: 'subscription',
+      planId: plan.id, planName: plan.name,
+      price: actualPrice, originalPrice: plan.price, discount,
+      promoCode: appliedPromo ? appliedPromo.code : null,
+      status: 'confirmed', qrisStatus: 'success',
+      payMethodType: 'wallet', gateway: 'wallet', nominal: actualPrice,
+      walletApplied: actualPrice, walletDebited: true,
+      createdAt: now, paidAt: now, activatedAt: now,
+      fr3TotalTransfer: actualPrice, fr3UniqueCode: 0,
+      paymentMethod: 'wallet'
+    };
+    db.get('orders').push(order).write();
+
+    // Potong saldo.
+    applyWalletTx(req.user.id, {
+      type: 'purchase', amount: actualPrice, refType: 'order', refId: orderId,
+      note: `Beli paket ${plan.name} #${orderId}`, createdBy: 'user'
+    });
+
+    // Burn promo.
+    if (appliedPromo) {
+      db.get('promoCodes').find({ id: appliedPromo.id }).assign({ usedCount: (appliedPromo.usedCount || 0) + 1 }).write();
+    }
+
+    // Aktivasi subscription (satu aktif per user).
+    const expiresAt = new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString();
+    db.get('subscriptions').remove({ userId: req.user.id, status: 'active' }).write();
+    db.get('subscriptions').push({
+      id: uuidv4(), userId: req.user.id, orderId, planId: plan.id, planName: plan.name,
+      status: 'active', createdAt: now, expiresAt
+    }).write();
+
+    // Referral hook + notifikasi.
+    try {
+      const { rewardReferrerOnFirstOrder } = require('../utils/referral');
+      const reward = rewardReferrerOnFirstOrder(order);
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      const { sendTelegramNotification } = require('../utils/telegram');
+      let msg = `🎉 *PEMBELIAN PAKET via SALDO*\n\n📋 Order: *#${orderId}*\n👤 ${order.userName} (${order.userEmail})\n📦 Paket: *${plan.name}*\n💳 Potong Saldo: Rp ${actualPrice.toLocaleString('id-ID')}\n🏦 Sisa Saldo: Rp ${getBalance(req.user.id).toLocaleString('id-ID')}\n⚙️ Status: Aktif Otomatis`;
+      if (reward) msg += `\n\n🎁 Referral reward cair untuk ${reward.referrerName} (${reward.rewardCode})`;
+      sendWhatsAppNotification(msg).catch(() => {});
+      sendTelegramNotification(msg).catch(() => {});
+    } catch (e) { console.error('[WALLET PAY NOTIF]', e.message); }
+
+    req.flash('success', `Paket ${plan.name} berhasil dibeli dengan saldo! Akun langsung aktif.`);
+    return res.redirect('/dashboard');
+  }
+
+  // ─── Saldo kurang: sebagian saldo + sisa via gateway ────────────────────────
+  let walletApplied = balance;
+  let remainder = actualPrice - walletApplied;
+  const GATEWAY_MIN = 1000; // minimum QRIS MustikaPay
+  if (remainder > 0 && remainder < GATEWAY_MIN) {
+    // Sisakan tepat GATEWAY_MIN agar diterima gateway (saldo terpakai sedikit lebih kecil).
+    walletApplied = Math.max(0, actualPrice - GATEWAY_MIN);
+    remainder = actualPrice - walletApplied;
+  }
+
+  const order = {
+    id: uuidv4(), orderId,
+    userId: req.user.id, userName: req.user.name, userEmail: req.user.email,
+    orderType: 'subscription',
+    planId: plan.id, planName: plan.name,
+    price: remainder,           // yang ditagih gateway
+    originalPrice: plan.price, discount,
+    promoCode: appliedPromo ? appliedPromo.code : null,
+    walletApplied,              // dipotong saat pembayaran gateway sukses
+    walletDebited: false,
+    status: 'pending', qrisStatus: 'awaiting_method',
+    payMethodType: null, gateway: null, nominal: remainder,
+    createdAt: new Date().toISOString(), paidAt: null, activatedAt: null,
+    fr3TrxId: null, fr3QrString: null, fr3TotalTransfer: remainder, fr3UniqueCode: 0,
+    fr3Expiry: null, fr3Error: null,
+    mpPaymentLink: null, mpVaNumber: null, mpVaName: null, mpBankCode: null,
+    mpPaymentCode: null, mpRetailOutlet: null, mpEwalletProvider: null, paymentMethod: null
+  };
+  db.get('orders').push(order).write();
+  req.flash('success', `Saldo Rp ${walletApplied.toLocaleString('id-ID')} dipakai. Sisa Rp ${remainder.toLocaleString('id-ID')} bayar via pembayaran di bawah.`);
+  res.redirect('/payment/' + order.orderId);
+});
 
 // Profile
 router.get('/profile', ensureAuthenticated, (req, res) => {

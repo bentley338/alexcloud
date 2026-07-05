@@ -1,0 +1,84 @@
+<% currentPage = 'wallet'; %>
+<%- include('layout-header') %>
+
+<%
+  const TX_META = {
+    topup:        { label: 'Top-up',       cls: 'credit' },
+    bonus:        { label: 'Bonus',        cls: 'credit' },
+    refund:       { label: 'Refund',       cls: 'credit' },
+    admin_credit: { label: 'Kredit Admin', cls: 'credit' },
+    purchase:     { label: 'Pembelian',    cls: 'debit'  },
+    admin_debit:  { label: 'Debit Admin',  cls: 'debit'  }
+  };
+  const TYPES = [
+    ['all', 'Semua'], ['topup', 'Top-up'], ['bonus', 'Bonus'],
+    ['purchase', 'Pembelian'], ['admin_credit', 'Kredit Admin'],
+    ['admin_debit', 'Debit Admin'], ['refund', 'Refund']
+  ];
+%>
+
+<div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem;">
+  <a href="/admin/wallet" class="btn-secondary" style="font-size:0.85rem; padding:0.45rem 0.9rem;"><i class="fas fa-arrow-left"></i></a>
+  <h1 class="admin-page-title" style="margin:0;"><i class="fas fa-list"></i> Mutasi Saldo</h1>
+</div>
+
+<% if (typeof success !== 'undefined' && success && success.length) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+
+<!-- Filter -->
+<form method="GET" action="/admin/wallet/tx" style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; margin-bottom:1.25rem;">
+  <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+    <% TYPES.forEach(([val, label]) => { %>
+    <a href="/admin/wallet/tx?type=<%= val %><%= query ? '&q=' + encodeURIComponent(query) : '' %>"
+      class="btn-action <%= filterType === val ? 'btn-confirm' : '' %>"
+      style="border-radius:50px; <%= filterType === val ? '' : 'background:rgba(255,255,255,0.04); color:var(--text-secondary);' %>"><%= label %></a>
+    <% }) %>
+  </div>
+  <div style="display:flex; gap:0.4rem; margin-left:auto;">
+    <input type="hidden" name="type" value="<%= filterType %>">
+    <input type="text" name="q" value="<%= query %>" placeholder="Cari user / order ID..."
+      style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:8px; padding:0.45rem 0.8rem; color:var(--text-primary); font-family:var(--font-ui); font-size:0.85rem; outline:none; min-width:200px;">
+    <button type="submit" class="btn-primary" style="padding:0.45rem 1rem; font-size:0.85rem;"><i class="fas fa-search"></i></button>
+  </div>
+</form>
+
+<div style="color:var(--text-muted); font-size:0.82rem; margin-bottom:0.75rem;">
+  Menampilkan <%= txList.length %> dari <%= total %> mutasi<% if (total > txList.length) { %> (dibatasi 300 terbaru)<% } %>.
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Waktu</th><th>User</th><th>Tipe</th><th>Nominal</th>
+          <th>Saldo Akhir</th><th>Referensi</th><th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!txList.length) { %>
+        <tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-muted);">Tidak ada mutasi yang cocok.</td></tr>
+        <% } %>
+        <% txList.forEach(t => { const m = TX_META[t.type] || { label: t.type, cls: t.direction }; const debit = m.cls === 'debit'; %>
+        <tr>
+          <td style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap;"><%= moment(t.createdAt).format('DD/MM/YY HH:mm') %></td>
+          <td>
+            <div style="font-family:var(--font-ui); font-size:0.88rem; font-weight:600;"><%= t.user ? t.user.name : '(user terhapus)' %></div>
+            <div style="font-size:0.75rem; color:var(--text-muted)"><%= t.user ? t.user.email : t.userId %></div>
+          </td>
+          <td>
+            <span class="status-badge" style="background:<%= debit ? 'rgba(255,107,107,0.1)' : 'rgba(52,211,153,0.1)' %>; color:<%= debit ? '#ff6b6b' : 'var(--accent-green)' %>; border:1px solid <%= debit ? 'rgba(255,107,107,0.3)' : 'rgba(52,211,153,0.3)' %>;"><%= m.label %></span>
+          </td>
+          <td style="font-family:var(--font-display); font-weight:700; color:<%= debit ? '#ff6b6b' : 'var(--accent-green)' %>; white-space:nowrap;"><%= debit ? '-' : '+' %>Rp <%= (t.amount||0).toLocaleString('id-ID') %></td>
+          <td style="font-size:0.85rem; color:var(--text-secondary); white-space:nowrap;">Rp <%= (t.balanceAfter||0).toLocaleString('id-ID') %></td>
+          <td style="font-size:0.78rem; color:var(--accent-blue); font-family:var(--font-display);"><%= t.refId || '—' %></td>
+          <td style="font-size:0.8rem; color:var(--text-muted); max-width:220px;"><%= t.note || '—' %><% if (t.createdBy) { %><div style="font-size:0.7rem; opacity:0.7;">oleh <%= t.createdBy %></div><% } %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('layout-footer') %>

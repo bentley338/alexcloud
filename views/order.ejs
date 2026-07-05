@@ -61,6 +61,30 @@
       Pilih metode pembayaran di langkah berikutnya: <strong>QRIS</strong>, <strong>Virtual Account</strong> (BCA, BNI, BRI, Mandiri, dll), <strong>E-Wallet</strong> (DANA, OVO, ShopeePay, LinkAja), atau <strong>Retail</strong> (Alfamart/Indomaret). Semua diproses otomatis.
     </div>
 
+    <% var walletBal = (typeof balance !== 'undefined' && balance) ? balance : 0; %>
+    <!-- SALDO / DOMPET -->
+    <% if (walletBal > 0) { %>
+    <div class="wl-pay-card" id="walletPayCard">
+      <div class="wl-pay-head">
+        <div class="wl-pay-icon"><i class="fas fa-wallet"></i></div>
+        <div style="flex:1; min-width:0;">
+          <div class="wl-pay-title">Bayar Pakai Saldo</div>
+          <div class="wl-pay-bal">Saldo kamu: <strong>Rp <%= walletBal.toLocaleString('id-ID') %></strong></div>
+        </div>
+      </div>
+      <div class="wl-pay-note" id="walletPayNote"></div>
+      <form action="/wallet/pay-plan" method="POST" id="walletForm">
+        <input type="hidden" name="planId" value="<%= plan.id %>">
+        <input type="hidden" name="promoCode" id="wPromoCode" value="">
+        <input type="hidden" name="promoId" id="wPromoId" value="">
+        <button type="submit" class="btn-primary" id="walletPayBtn" style="width:100%; justify-content:center; padding:0.9rem; font-size:1rem; background:var(--accent-green);">
+          <i class="fas fa-bolt"></i> Bayar dengan Saldo
+        </button>
+      </form>
+      <div style="text-align:center; margin:1rem 0 0.5rem; color:var(--text-muted); font-size:0.82rem; font-family:var(--font-ui);">— atau —</div>
+    </div>
+    <% } %>
+
     <form action="/order" method="POST" id="orderForm">
       <input type="hidden" name="planId" value="<%= plan.id %>">
       <input type="hidden" name="promoCode" id="hiddenPromoCode" value="">
@@ -68,11 +92,27 @@
       <input type="hidden" name="finalPrice" id="hiddenFinalPrice" value="<%= plan.price %>">
       <input type="hidden" name="paymentMethod" value="auto">
       <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:1rem; font-size:1.05rem;">
-        <i class="fas fa-shopping-cart"></i> Buat Order & Lanjut Bayar
+        <i class="fas fa-shopping-cart"></i> Buat Order &amp; Lanjut Bayar
       </button>
     </form>
+
+    <% if (walletBal <= 0) { %>
+    <a href="/wallet" style="display:block; text-align:center; margin-top:1rem; color:var(--accent-blue); text-decoration:none; font-family:var(--font-ui); font-size:0.88rem;">
+      <i class="fas fa-wallet"></i> Isi saldo untuk pembayaran instan tanpa QRIS
+    </a>
+    <% } %>
   </div>
 </div>
+
+<style>
+  .wl-pay-card { background: linear-gradient(160deg, rgba(52,211,153,0.08), transparent 70%); border: 1px solid rgba(52,211,153,0.3); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
+  .wl-pay-head { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.85rem; }
+  .wl-pay-icon { flex-shrink: 0; width: 42px; height: 42px; border-radius: 11px; background: rgba(52,211,153,0.15); color: var(--accent-green); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .wl-pay-title { font-family: var(--font-ui); font-weight: 700; }
+  .wl-pay-bal { font-size: 0.85rem; color: var(--text-secondary); }
+  .wl-pay-bal strong { color: var(--accent-green); }
+  .wl-pay-note { font-size: 0.82rem; color: var(--text-muted); font-family: var(--font-ui); margin-bottom: 0.85rem; line-height: 1.5; }
+</style>
 
 <!-- Fullscreen Glassmorphism Loading Overlay -->
 <div id="paymentLoadingOverlay" class="loading-overlay" style="display: none;">
@@ -198,8 +238,26 @@
 <script>
 const planPrice = <%= plan.price %>;
 const planId = '<%= plan.id %>';
+const userBalance = <%= walletBal %>;
 let appliedPromoId = '';
 let appliedPromoCode = '';
+
+// Perbarui catatan & tombol "Bayar dengan Saldo" sesuai harga akhir vs saldo.
+function updateWalletNote(finalPrice) {
+  var card = document.getElementById('walletPayCard');
+  if (!card) return;
+  var note = document.getElementById('walletPayNote');
+  var btn = document.getElementById('walletPayBtn');
+  if (userBalance >= finalPrice) {
+    note.innerHTML = '<i class="fas fa-circle-check" style="color:var(--accent-green)"></i> Saldo mencukupi — akun <strong>langsung aktif</strong> tanpa perlu bayar lagi.';
+    btn.innerHTML = '<i class="fas fa-bolt"></i> Bayar dengan Saldo (Aktif Instan)';
+  } else {
+    var sisa = finalPrice - userBalance;
+    note.innerHTML = 'Saldo <strong>Rp ' + userBalance.toLocaleString('id-ID') + '</strong> akan dipakai, sisa <strong>Rp ' + sisa.toLocaleString('id-ID') + '</strong> dibayar via QRIS/VA di langkah berikutnya.';
+    btn.innerHTML = '<i class="fas fa-wallet"></i> Pakai Saldo + Bayar Sisa';
+  }
+}
+document.addEventListener('DOMContentLoaded', function () { updateWalletNote(planPrice); });
 
 async function applyPromo() {
   const code = document.getElementById('promoInput').value.trim();
@@ -224,6 +282,11 @@ async function applyPromo() {
       document.getElementById('hiddenPromoCode').value = code;
       document.getElementById('hiddenPromoId').value = data.promoId;
       document.getElementById('hiddenFinalPrice').value = data.finalPrice;
+      // Sinkronkan promo ke form pembayaran saldo juga.
+      var wc = document.getElementById('wPromoCode'), wi = document.getElementById('wPromoId');
+      if (wc) wc.value = code;
+      if (wi) wi.value = data.promoId;
+      updateWalletNote(data.finalPrice);
       appliedPromoId = data.promoId;
       appliedPromoCode = code;
     } else {
@@ -241,6 +304,10 @@ function resetPromo() {
   document.getElementById('hiddenPromoCode').value = '';
   document.getElementById('hiddenPromoId').value = '';
   document.getElementById('hiddenFinalPrice').value = planPrice;
+  var wc = document.getElementById('wPromoCode'), wi = document.getElementById('wPromoId');
+  if (wc) wc.value = '';
+  if (wi) wi.value = '';
+  updateWalletNote(planPrice);
   appliedPromoId = '';
   appliedPromoCode = '';
 }
@@ -251,8 +318,10 @@ document.getElementById('promoInput').addEventListener('keypress', (e) => {
 
 // Payment method logic removed (QRIS auto is now default & mandatory)
 
-// Form submit loading logic
-document.getElementById('orderForm').addEventListener('submit', function(e) {
+// Form submit loading logic (dipakai form QRIS maupun form saldo)
+function attachLoading(form) {
+  if (!form) return;
+  form.addEventListener('submit', function(e) {
   const overlay = document.getElementById('paymentLoadingOverlay');
   overlay.style.display = 'flex';
   
@@ -279,7 +348,10 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     submitBtn.style.opacity = '0.6';
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
   }
-});
+  });
+}
+attachLoading(document.getElementById('orderForm'));
+attachLoading(document.getElementById('walletForm'));
 </script>
 
 <%- include('partials/footer') %>

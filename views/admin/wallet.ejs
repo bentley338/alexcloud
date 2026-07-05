@@ -1,0 +1,201 @@
+<% currentPage = 'wallet'; %>
+<%- include('layout-header') %>
+
+<%
+  const TX_LABEL = {
+    topup: 'Top-up', bonus: 'Bonus', refund: 'Refund',
+    admin_credit: 'Kredit Admin', purchase: 'Pembelian', admin_debit: 'Debit Admin'
+  };
+%>
+
+<div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+  <h1 class="admin-page-title" style="margin:0;"><i class="fas fa-wallet"></i> Kelola Saldo</h1>
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+    <a href="/admin/wallet/tx" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-list"></i> Semua Mutasi</a>
+    <a href="/admin/wallet/settings" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-sliders"></i> Setelan</a>
+  </div>
+</div>
+
+<% if (typeof success !== 'undefined' && success && success.length) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin:1rem 0;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin:1rem 0;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<% if (!config.enabled) { %>
+<div style="background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.3); border-radius:var(--radius); padding:0.85rem 1.25rem; margin:1rem 0; display:flex; align-items:center; gap:0.75rem; font-family:var(--font-ui);">
+  <i class="fas fa-ban" style="color:#ff6b6b;"></i>
+  <span>Fitur top-up sedang <strong style="color:#ff6b6b;">dinonaktifkan</strong>. User tidak bisa mengisi saldo.</span>
+  <a href="/admin/wallet/settings" style="margin-left:auto; color:var(--accent-blue); text-decoration:none; font-weight:600;">Aktifkan →</a>
+</div>
+<% } %>
+
+<!-- Statistik -->
+<div class="admin-stats-grid" style="margin-top:1rem;">
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-green); font-size:1.4rem;">Rp <%= stats.totalLiability.toLocaleString('id-ID') %></div>
+    <div class="admin-stat-label"><i class="fas fa-scale-balanced"></i> Total Saldo Beredar</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-blue); font-size:1.4rem;">Rp <%= stats.topupRevenue.toLocaleString('id-ID') %></div>
+    <div class="admin-stat-label"><i class="fas fa-money-bill-trend-up"></i> Pendapatan Top-up</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-blue)"><%= stats.activeWallets %>/<%= stats.totalWallets %></div>
+    <div class="admin-stat-label"><i class="fas fa-users"></i> Dompet Bersaldo</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:#fbbf24"><%= stats.topupPending %></div>
+    <div class="admin-stat-label"><i class="fas fa-clock"></i> Top-up Pending</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--accent-green)"><%= stats.topupConfirmed %></div>
+    <div class="admin-stat-label"><i class="fas fa-check"></i> Top-up Sukses</div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="admin-stat-value" style="color:var(--text-secondary)"><%= stats.txCount %></div>
+    <div class="admin-stat-label"><i class="fas fa-exchange-alt"></i> Total Mutasi</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1.6fr 1fr; gap:1.5rem; margin-top:0.5rem;" class="wl-admin-grid">
+  <!-- Daftar dompet user -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-users"></i> Saldo Per User</div>
+      <input type="text" id="walletSearch" placeholder="Cari nama / email..." onkeyup="filterWallets()"
+        style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:8px; padding:0.4rem 0.7rem; color:var(--text-primary); font-family:var(--font-ui); font-size:0.85rem; outline:none;">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>User</th><th>Saldo</th><th>Total Top-up</th><th>Update</th><th>Aksi</th></tr>
+        </thead>
+        <tbody id="walletTable">
+          <% if (!wallets.length) { %>
+          <tr><td colspan="5" style="text-align:center; padding:2.5rem; color:var(--text-muted);">Belum ada dompet user.</td></tr>
+          <% } %>
+          <% wallets.forEach(w => { %>
+          <tr class="wallet-row" data-search="<%= ((w.user.name||'') + ' ' + (w.user.email||'')).toLowerCase() %>">
+            <td>
+              <div style="font-family:var(--font-ui); font-weight:600;"><%= w.user.name %></div>
+              <div style="font-size:0.78rem; color:var(--text-muted)"><%= w.user.email %></div>
+            </td>
+            <td style="font-family:var(--font-display); font-weight:700; color:<%= (w.balance||0) > 0 ? 'var(--accent-green)' : 'var(--text-muted)' %>;">Rp <%= (w.balance||0).toLocaleString('id-ID') %></td>
+            <td style="color:var(--text-secondary); font-size:0.88rem;">Rp <%= (w.totalToppedUp||0).toLocaleString('id-ID') %></td>
+            <td style="font-size:0.8rem; color:var(--text-muted)"><%= w.updatedAt ? moment(w.updatedAt).format('DD/MM/YY HH:mm') : '—' %></td>
+            <td>
+              <button type="button" class="btn-action btn-confirm wl-adjust-btn"
+                data-uid="<%= w.userId %>" data-name="<%= w.user.name || '' %>" data-bal="<%= w.balance || 0 %>"
+                title="Sesuaikan saldo"><i class="fas fa-sliders"></i> Atur</button>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mutasi terbaru -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Mutasi Terbaru</div>
+      <a href="/admin/wallet/tx" class="btn-action btn-confirm">Semua</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <% if (!recentTx.length) { %>
+      <div style="text-align:center; padding:2.5rem; color:var(--text-muted);">Belum ada mutasi.</div>
+      <% } %>
+      <% recentTx.forEach(t => { const debit = t.direction === 'debit'; %>
+      <div style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1.25rem; border-bottom:1px solid var(--border);">
+        <div style="flex-shrink:0; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:<%= debit ? 'rgba(255,107,107,0.12)' : 'rgba(52,211,153,0.12)' %>; color:<%= debit ? '#ff6b6b' : 'var(--accent-green)' %>;">
+          <i class="fas <%= debit ? 'fa-arrow-up' : 'fa-arrow-down' %>" style="font-size:0.8rem;"></i>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-family:var(--font-ui); font-weight:600; font-size:0.85rem;"><%= TX_LABEL[t.type] || t.type %></div>
+          <div style="font-size:0.72rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><%= t.user ? t.user.name : '(user terhapus)' %> · <%= moment(t.createdAt).format('DD/MM HH:mm') %></div>
+        </div>
+        <div style="text-align:right; font-family:var(--font-display); font-weight:700; font-size:0.85rem; color:<%= debit ? '#ff6b6b' : 'var(--accent-green)' %>; white-space:nowrap;">
+          <%= debit ? '-' : '+' %>Rp <%= (t.amount||0).toLocaleString('id-ID') %>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<!-- Modal penyesuaian saldo -->
+<div id="adjustModal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(3,7,18,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:var(--bg-card); border:1px solid var(--border-hover); border-radius:var(--radius-lg); padding:1.75rem; max-width:420px; width:100%;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+      <h3 style="font-family:var(--font-display); font-size:1.2rem;"><i class="fas fa-sliders"></i> Sesuaikan Saldo</h3>
+      <button onclick="closeAdjust()" style="background:none; border:none; color:var(--text-muted); font-size:1.3rem; cursor:pointer;">&times;</button>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem;">
+      User: <strong id="adjUserName" style="color:var(--text-primary);"></strong><br>
+      Saldo saat ini: <strong id="adjBalance" style="color:var(--accent-green);"></strong>
+    </p>
+    <form id="adjustForm" method="POST">
+      <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+        <label style="flex:1; cursor:pointer;">
+          <input type="radio" name="direction" value="credit" checked style="display:none;" onchange="markDir(this)">
+          <div class="adj-dir active" data-dir="credit" style="text-align:center; padding:0.6rem; border-radius:10px; border:1px solid var(--accent-line); background:var(--accent-soft); color:var(--accent-green); font-weight:700; font-size:0.85rem;"><i class="fas fa-plus"></i> Tambah</div>
+        </label>
+        <label style="flex:1; cursor:pointer;">
+          <input type="radio" name="direction" value="debit" style="display:none;" onchange="markDir(this)">
+          <div class="adj-dir" data-dir="debit" style="text-align:center; padding:0.6rem; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-secondary); font-weight:700; font-size:0.85rem;"><i class="fas fa-minus"></i> Kurangi</div>
+        </label>
+      </div>
+      <label class="admin-label" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Nominal (Rp)</label>
+      <input type="number" name="amount" min="1" step="1000" required placeholder="0"
+        style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.7rem 0.9rem; color:var(--text-primary); font-family:var(--font-display); font-weight:700; font-size:1.1rem; outline:none; margin-bottom:1rem;">
+      <label class="admin-label" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Catatan (opsional)</label>
+      <input type="text" name="note" maxlength="120" placeholder="Alasan penyesuaian..."
+        style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.6rem 0.9rem; color:var(--text-primary); font-family:var(--font-ui); font-size:0.9rem; outline:none; margin-bottom:1.25rem;">
+      <div style="display:flex; gap:0.6rem;">
+        <button type="button" onclick="closeAdjust()" class="btn-secondary" style="flex:1; justify-content:center;">Batal</button>
+        <button type="submit" class="btn-primary" style="flex:1; justify-content:center;"><i class="fas fa-check"></i> Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  @media (max-width: 900px) { .wl-admin-grid { grid-template-columns: 1fr !important; } }
+</style>
+
+<script>
+  function filterWallets() {
+    var q = document.getElementById('walletSearch').value.toLowerCase();
+    document.querySelectorAll('.wallet-row').forEach(function (r) {
+      r.style.display = r.dataset.search.indexOf(q) !== -1 ? '' : 'none';
+    });
+  }
+  function openAdjust(userId, name, balance) {
+    document.getElementById('adjustForm').action = '/admin/wallet/' + userId + '/adjust';
+    document.getElementById('adjUserName').textContent = name;
+    document.getElementById('adjBalance').textContent = 'Rp ' + (balance || 0).toLocaleString('id-ID');
+    document.getElementById('adjustModal').style.display = 'flex';
+  }
+  document.querySelectorAll('.wl-adjust-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      openAdjust(b.dataset.uid, b.dataset.name, parseInt(b.dataset.bal, 10) || 0);
+    });
+  });
+  function closeAdjust() { document.getElementById('adjustModal').style.display = 'none'; }
+  function markDir(input) {
+    document.querySelectorAll('.adj-dir').forEach(function (d) {
+      var on = d.dataset.dir === input.value;
+      d.classList.toggle('active', on);
+      d.style.borderColor = on ? 'var(--accent-line)' : 'var(--border)';
+      d.style.background = on ? 'var(--accent-soft)' : 'rgba(255,255,255,0.03)';
+      d.style.color = on ? (input.value === 'debit' ? '#ff6b6b' : 'var(--accent-green)') : 'var(--text-secondary)';
+    });
+  }
+  document.getElementById('adjustModal').addEventListener('click', function (e) {
+    if (e.target === this) closeAdjust();
+  });
+</script>
+
+<%- include('layout-footer') %>
