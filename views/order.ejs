@@ -66,7 +66,7 @@
     <% if (walletBal > 0) { %>
     <div class="wl-pay-card" id="walletPayCard">
       <div class="wl-pay-head">
-        <div class="wl-pay-icon"><i class="fas fa-wallet"></i></div>
+        <div class="wl-pay-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg></div>
         <div style="flex:1; min-width:0;">
           <div class="wl-pay-title">Bayar Pakai Saldo</div>
           <div class="wl-pay-bal">Saldo kamu: <strong>Rp <%= walletBal.toLocaleString('id-ID') %></strong></div>
@@ -98,7 +98,7 @@
 
     <% if (walletBal <= 0) { %>
     <a href="/wallet" style="display:block; text-align:center; margin-top:1rem; color:var(--accent-blue); text-decoration:none; font-family:var(--font-ui); font-size:0.88rem;">
-      <i class="fas fa-wallet"></i> Isi saldo untuk pembayaran instan tanpa QRIS
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 0.2rem;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg> Isi saldo untuk pembayaran instan tanpa QRIS
     </a>
     <% } %>
   </div>
@@ -254,7 +254,7 @@ function updateWalletNote(finalPrice) {
   } else {
     var sisa = finalPrice - userBalance;
     note.innerHTML = 'Saldo <strong>Rp ' + userBalance.toLocaleString('id-ID') + '</strong> akan dipakai, sisa <strong>Rp ' + sisa.toLocaleString('id-ID') + '</strong> dibayar via QRIS/VA di langkah berikutnya.';
-    btn.innerHTML = '<i class="fas fa-wallet"></i> Pakai Saldo + Bayar Sisa';
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 0.2rem;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg> Pakai Saldo + Bayar Sisa';
   }
 }
 document.addEventListener('DOMContentLoaded', function () { updateWalletNote(planPrice); });
