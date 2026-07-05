@@ -236,15 +236,18 @@ router.get('/', (req, res) => {
   const testimonials = getCleanTestimonials();
   const plans = getPlans();
   let balance = 0;
+  let lastDailyLogin = null;
   if (req.user) {
     const w = getWallet(req.user.id);
     balance = w.balance || 0;
+    lastDailyLogin = w.lastDailyLogin || null;
   }
 
   res.render('index', {
     title: 'AlexCloud - Premium Cloud Gaming',
     user: req.user || null,
     balance,
+    lastDailyLogin,
     games: popularGames,
     allGames: games,
     trendingGames,
@@ -1855,6 +1858,41 @@ router.get('/sitemap.xml', (req, res) => {
 router.get('/robots.txt', (req, res) => {
   res.header('Content-Type', 'text/plain');
   res.sendFile(path.join(__dirname, '../public/robots.txt'));
+});
+
+// --- API Daily Login Reward ---
+router.post('/api/claim-daily-login', ensureAuthenticated, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const w = getWallet(userId);
+    const today = new Date().toISOString().split('T')[0];
+
+    if (w.lastDailyLogin === today) {
+      return res.json({ success: false, message: 'Sudah diklaim hari ini' });
+    }
+
+    // Generate random reward between Rp 1000 and Rp 5000
+    const minReward = 1000;
+    const maxReward = 5000;
+    const reward = Math.floor(Math.random() * (maxReward - minReward + 1)) + minReward;
+
+    db.get('wallets')
+      .find({ userId })
+      .assign({ lastDailyLogin: today, updatedAt: new Date().toISOString() })
+      .write();
+
+    applyWalletTx(userId, {
+      type: 'bonus',
+      amount: reward,
+      note: 'Bonus Login Harian',
+      allowNegative: false
+    });
+
+    return res.json({ success: true, amount: reward });
+  } catch (err) {
+    console.error('Error claiming daily login:', err);
+    return res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });
+  }
 });
 
 module.exports = { router, getPlans };

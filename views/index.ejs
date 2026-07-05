@@ -75,12 +75,43 @@
           </div>
           <div>
             <div style="font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; font-weight: 600;">Saldo Dompet</div>
-            <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1;">Rp <%= balance.toLocaleString('id-ID') %></div>
+            <div id="heroWalletBalance" style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1;">Rp <%= balance.toLocaleString('id-ID') %></div>
           </div>
         </div>
         <a href="/wallet" class="btn-primary" style="padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(255,107,53,0.3); border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; gap: 0.5rem;">
           <i class="fas fa-plus" style="font-size: 0.85rem;"></i> Top Up
         </a>
+      </div>
+
+      <% 
+         let todayDate = new Date().toISOString().split('T')[0];
+         let alreadyClaimed = lastDailyLogin === todayDate;
+      %>
+      <div style="margin: 1rem auto 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: rgba(255,255,255,0.06); padding: 1.25rem 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 480px; text-align: left;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.4); flex-shrink: 0;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 12 20 22 4 22 4 12"></polyline>
+              <rect x="2" y="7" width="20" height="5"></rect>
+              <line x1="12" y1="22" x2="12" y2="7"></line>
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+            </svg>
+          </div>
+          <div>
+            <div style="font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; font-weight: 600;">Reward Harian</div>
+            <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: #fff; line-height: 1.2;">Dapatkan Saldo Acak!</div>
+          </div>
+        </div>
+        <% if (alreadyClaimed) { %>
+          <button class="btn-secondary" disabled style="padding: 0.75rem 1.25rem; font-size: 0.95rem; border-radius: 12px; flex-shrink: 0; opacity: 0.6; cursor: not-allowed; display: flex; align-items: center; gap: 0.5rem; outline: none; border-color: rgba(255,255,255,0.1);">
+            <i class="fas fa-check" style="font-size: 0.85rem;"></i> Diklaim
+          </button>
+        <% } else { %>
+          <button id="btnDailyLogin" onclick="claimDailyLogin()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(16,185,129,0.3); border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; gap: 0.5rem; border: none; color: white; cursor: pointer;">
+            <i class="fas fa-gift" style="font-size: 0.85rem;"></i> Klaim
+          </button>
+        <% } %>
       </div>
       <% } %>
       <div class="hero-stats">
@@ -462,5 +493,68 @@
     </div>
   </div>
 </section>
+
+<script>
+async function claimDailyLogin() {
+  const btn = document.getElementById('btnDailyLogin');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 0.85rem;"></i> Proses...';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  btn.style.cursor = 'not-allowed';
+
+  try {
+    const res = await fetch('/api/claim-daily-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      if (window.showToast) {
+        showToast('Yeay! Berhasil klaim reward harian Rp ' + data.amount.toLocaleString('id-ID'), 'success');
+      } else {
+        alert('Yeay! Berhasil klaim reward harian Rp ' + data.amount.toLocaleString('id-ID'));
+      }
+      
+      // Update balance UI
+      const balEl = document.getElementById('heroWalletBalance');
+      if (balEl) {
+        const currentStr = balEl.innerText.replace(/[^0-9]/g, '');
+        const currentNum = parseInt(currentStr) || 0;
+        balEl.innerText = 'Rp ' + (currentNum + data.amount).toLocaleString('id-ID');
+      }
+
+      // Change button state
+      btn.innerHTML = '<i class="fas fa-check" style="font-size: 0.85rem;"></i> Diklaim';
+      btn.className = 'btn-secondary';
+      btn.style.background = '';
+      btn.style.boxShadow = '';
+      btn.style.color = '';
+      btn.style.border = '1px solid rgba(255,255,255,0.1)';
+    } else {
+      if (window.showToast) {
+        showToast(data.message || 'Gagal klaim', 'error');
+      } else {
+        alert(data.message || 'Gagal klaim');
+      }
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    }
+  } catch (err) {
+    if (window.showToast) {
+      showToast('Terjadi kesalahan jaringan', 'error');
+    } else {
+      alert('Terjadi kesalahan jaringan');
+    }
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  }
+}
+</script>
 
 <%- include('partials/footer') %>
