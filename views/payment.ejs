@@ -262,7 +262,18 @@
         <div style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.75rem;">
           Terima kasih! Pembayaran Anda telah kami terima dan pesanan sudah aktif otomatis.
         </div>
-        <a href="/dashboard" class="btn-primary" style="margin: 0 auto; max-width: 320px; display: flex; justify-content: center;">
+        <div style="font-family: var(--font-ui); font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Silakan konfirmasi ke admin untuk meminta detail akun atau informasi tambahan lainnya.
+        </div>
+        <%
+          let waSuccessMsg = 'Halo Admin AlexCloud! 🎉\n\n';
+          waSuccessMsg += 'Saya ingin konfirmasi bahwa pesanan saya sudah berstatus LUNAS:\n';
+          waSuccessMsg += '📋 ID Pesanan: *#' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + order.planName + '*\n\nTerima kasih, mohon detail akunnya segera dikirimkan!';
+        %>
+        <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent(waSuccessMsg) %>" target="_blank" class="wa-confirm-btn" style="margin: 0 auto 0.75rem auto; max-width: 320px; display: flex;">
+          <i class="fab fa-whatsapp"></i> Konfirmasi ke Admin
+        </a>
+        <a href="/dashboard" class="btn-primary" style="margin: 0 auto; max-width: 320px; display: flex; justify-content: center; background: rgba(255,255,255,0.1); border-color: transparent;">
           Kembali ke Dashboard
         </a>
       </div>
