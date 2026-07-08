@@ -235,6 +235,39 @@
       </div>
     </div>
 
+    <% } else if (payState === 'success') { %>
+    <!-- ======= PAYMENT SUCCESS INVOICE ======= -->
+    <div class="pay-card qris-card">
+      <div class="pay-status-bar" style="background: rgba(0, 255, 136, 0.1); border-bottom: 1px solid rgba(0, 255, 136, 0.2);">
+        <div class="pay-status-dot success"></div>
+        <span style="color: var(--accent-green);">Pembayaran Lunas</span>
+      </div>
+
+      <div class="pay-summary" style="margin-top: 1rem;">
+        <div class="pay-sum-row">
+          <span>ID Pesanan</span>
+          <span><strong><%= order.orderId %></strong></span>
+        </div>
+        <div class="pay-sum-row">
+          <span>Paket</span>
+          <span><strong><%= order.planName %></strong></span>
+        </div>
+        <div class="pay-sum-row total-row">
+          <span>Status</span>
+          <span style="color: var(--accent-green); font-weight: bold;">Terkonfirmasi</span>
+        </div>
+      </div>
+
+      <div class="pay-stuck-helper" style="margin: 1.5rem 0; text-align: center; border-top: 1px dashed var(--border); padding-top: 1.5rem;">
+        <div style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.75rem;">
+          Terima kasih! Pembayaran Anda telah kami terima dan pesanan sudah aktif otomatis.
+        </div>
+        <a href="/dashboard" class="btn-primary" style="margin: 0 auto; max-width: 320px; display: flex; justify-content: center;">
+          Kembali ke Dashboard
+        </a>
+      </div>
+    </div>
+
     <% } else if (payState === 'instrument') { %>
     <!-- ======= INSTRUMEN PEMBAYARAN ======= -->
     <div class="pay-card qris-card">

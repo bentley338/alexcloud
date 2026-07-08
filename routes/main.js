@@ -956,12 +956,14 @@ router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
   const priceDisplay = 'Rp ' + order.price.toLocaleString('id-ID');
   const totalDisplay = 'Rp ' + (order.fr3TotalTransfer || order.price).toLocaleString('id-ID');
 
-  // Tiga state halaman:
+  // Empat state halaman:
+  //  - 'success'    : order sudah lunas / sukses
   //  - 'instrument' : instrumen bayar sudah dibuat (render QR/VA/e-wallet/retail + polling)
   //  - 'manual'     : semua gateway gagal → fallback transfer manual via WA
   //  - 'select'     : belum memilih metode → tampilkan selector
   let payState = 'select';
-  if (order.payMethodType === 'bonus_referral') payState = 'bonus';
+  if (order.status === 'confirmed' || order.status === 'completed' || order.status === 'active') payState = 'success';
+  else if (order.payMethodType === 'bonus_referral') payState = 'bonus';
   else if (order.qrisStatus === 'ready' && order.payMethodType) payState = 'instrument';
   else if (order.qrisStatus === 'failed') payState = 'manual';
 
