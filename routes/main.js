@@ -674,7 +674,8 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     mpVaNumber: null, mpVaName: null, mpBankCode: null,
     mpPaymentCode: null, mpRetailOutlet: null,
     mpEwalletProvider: null,
-    paymentMethod: null
+    paymentMethod: null,
+    tracking: req.session.tracking || null
   };
 
   db.get('orders').push(order).write();
@@ -1018,12 +1019,17 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
         method === 'emoney' ? ` (${product_code})` :
         method === 'retail' ? ` (${retail_outlet})` : ''
       );
+      let trackingInfo = '';
+      if (order.tracking && Object.keys(order.tracking).length > 0) {
+        trackingInfo = `📍 *Tracking:* ${Object.entries(order.tracking).map(([k,v]) => `${k}=${v}`).join(', ')}\n`;
+      }
       const notifMsg = `🔔 *NOTIFIKASI PEMBAYARAN BARU DI GENERATE* 🔔\n\n` +
         `👤 *Pengguna:* ${order.userName} (${order.userEmail})\n` +
         `📦 *Paket:* ${order.planName}\n` +
         `💰 *Total Nominal:* Rp ${order.price.toLocaleString('id-ID')}\n` +
         `💳 *Metode:* ${cleanMethod}\n` +
-        `📝 *ID Order:* ${order.orderId}\n\n` +
+        `📝 *ID Order:* ${order.orderId}\n` +
+        `${trackingInfo}\n` +
         `Silakan pantau status pembayaran di dashboard admin.`;
       
       sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF GENERATE ERROR]', err.message));
@@ -1385,7 +1391,8 @@ router.post('/wallet/topup', ensureAuthenticated, (req, res) => {
     mpVaNumber: null, mpVaName: null, mpBankCode: null,
     mpPaymentCode: null, mpRetailOutlet: null,
     mpEwalletProvider: null,
-    paymentMethod: null
+    paymentMethod: null,
+    tracking: req.session.tracking || null
   };
   db.get('orders').push(order).write();
   res.redirect('/payment/' + order.orderId);
@@ -1432,7 +1439,8 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
       walletApplied: actualPrice, walletDebited: true,
       createdAt: now, paidAt: now, activatedAt: now,
       fr3TotalTransfer: actualPrice, fr3UniqueCode: 0,
-      paymentMethod: 'wallet'
+      paymentMethod: 'wallet',
+      tracking: req.session.tracking || null
     };
     db.get('orders').push(order).write();
 
@@ -1462,6 +1470,9 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
       const { sendWhatsAppNotification } = require('../utils/whatsapp');
       const { sendTelegramNotification } = require('../utils/telegram');
       let msg = `🎉 *PEMBELIAN PAKET via SALDO*\n\n📋 Order: *#${orderId}*\n👤 ${order.userName} (${order.userEmail})\n📦 Paket: *${plan.name}*\n💳 Potong Saldo: Rp ${actualPrice.toLocaleString('id-ID')}\n🏦 Sisa Saldo: Rp ${getBalance(req.user.id).toLocaleString('id-ID')}\n⚙️ Status: Aktif Otomatis`;
+      if (order.tracking && Object.keys(order.tracking).length > 0) {
+        msg += `\n📍 *Tracking:* ${Object.entries(order.tracking).map(([k,v]) => `${k}=${v}`).join(', ')}`;
+      }
       if (reward) msg += `\n\n🎁 Referral reward cair untuk ${reward.referrerName} (${reward.rewardCode})`;
       sendWhatsAppNotification(msg).catch(() => {});
       sendTelegramNotification(msg).catch(() => {});
@@ -1497,7 +1508,8 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
     fr3TrxId: null, fr3QrString: null, fr3TotalTransfer: remainder, fr3UniqueCode: 0,
     fr3Expiry: null, fr3Error: null,
     mpPaymentLink: null, mpVaNumber: null, mpVaName: null, mpBankCode: null,
-    mpPaymentCode: null, mpRetailOutlet: null, mpEwalletProvider: null, paymentMethod: null
+    mpPaymentCode: null, mpRetailOutlet: null, mpEwalletProvider: null, paymentMethod: null,
+    tracking: req.session.tracking || null
   };
   db.get('orders').push(order).write();
   req.flash('success', `Saldo Rp ${walletApplied.toLocaleString('id-ID')} dipakai. Sisa Rp ${remainder.toLocaleString('id-ID')} bayar via pembayaran di bawah.`);

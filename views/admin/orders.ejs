@@ -44,6 +44,12 @@
           <td>
             <div style="font-family:var(--font-ui); font-weight:600;"><%= order.userName %></div>
             <div style="font-size:0.78rem; color:var(--text-muted)"><%= order.userEmail %></div>
+            <% if (order.tracking && Object.keys(order.tracking).length > 0) { %>
+              <div style="font-size:0.72rem; color:#a78bfa; margin-top:0.25rem; word-break:break-all;">
+                <i class="fas fa-search-location"></i>
+                <%= Object.entries(order.tracking).map(([k,v]) => `${k}=${v}`).join(', ') %>
+              </div>
+            <% } %>
           </td>
           <td style="font-family:var(--font-ui);"><%= order.planName %></td>
           <td style="color:var(--accent-green); font-family:var(--font-ui); font-weight:700;">Rp <%= order.price.toLocaleString('id-ID') %></td>

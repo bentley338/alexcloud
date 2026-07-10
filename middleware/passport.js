@@ -68,7 +68,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           signupIp: req.ip,
           referralCode: null,
           referredBy: null,
-          isActive: true
+          isActive: true,
+          tracking: (req.session && req.session.tracking) || null
         };
         db.get('users').push(newUser).write();
         // Referral: kode sendiri + proses kode pengajak (anti-abuse). Cookie via req.res.
@@ -79,9 +80,15 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         // Send WhatsApp Notification to Owner
         try {
           const { sendWhatsAppNotification } = require('../utils/whatsapp');
+          const trackingData = req.session && req.session.tracking;
+          let trackingInfo = '';
+          if (trackingData && Object.keys(trackingData).length > 0) {
+            trackingInfo = `📍 *Tracking:* ${Object.entries(trackingData).map(([k,v]) => `${k}=${v}`).join(', ')}\n`;
+          }
           const notifMsg = `🔔 *NOTIFIKASI PENDAFTARAN BARU (GOOGLE)* 🔔\n\n` +
             `👤 *Nama:* ${newUser.name}\n` +
             `📧 *Email:* ${newUser.email}\n` +
+            `${trackingInfo}` +
             `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
             `Pengguna baru telah berhasil mendaftar menggunakan Google OAuth di website AlexCloud.`;
           sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ERROR]', err.message));

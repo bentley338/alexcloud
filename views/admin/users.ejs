@@ -43,7 +43,15 @@
               <span style="font-family:var(--font-ui); font-weight:600;"><%= u.name %></span>
             </div>
           </td>
-          <td style="font-size:0.85rem; color:var(--text-muted);"><%= u.email %></td>
+          <td style="font-size:0.85rem; color:var(--text-muted);">
+            <%= u.email %>
+            <% if (u.tracking && Object.keys(u.tracking).length > 0) { %>
+              <div style="font-size:0.72rem; color:#a78bfa; margin-top:0.25rem; word-break:break-all;">
+                <i class="fas fa-search-location"></i>
+                <%= Object.entries(u.tracking).map(([k,v]) => `${k}=${v}`).join(', ') %>
+              </div>
+            <% } %>
+          </td>
           <td>
             <span class="status-badge <%= u.role === 'admin' ? 'status-confirmed' : 'status-active' %>">
               <%= u.role === 'admin' ? '⚙ Admin' : '👤 Member' %>

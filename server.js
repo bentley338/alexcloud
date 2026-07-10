@@ -174,8 +174,49 @@ app.use(passport.session());
 const { csrfProtection } = require('./middleware/csrf');
 app.use(csrfProtection);
 
-// Global locals
+// Global locals and tracking
 app.use((req, res, next) => {
+  // 1. Recover tracking data from cookie if session is fresh
+  if (!req.session.tracking && req.headers.cookie) {
+    const rawCookies = req.headers.cookie.split(';');
+    const trackingCookie = rawCookies.find(c => c.trim().startsWith('ac_tracking='));
+    if (trackingCookie) {
+      try {
+        const val = decodeURIComponent(trackingCookie.split('=')[1]);
+        req.session.tracking = JSON.parse(val);
+      } catch (e) {
+        // ignore malformed cookie
+      }
+    }
+  }
+
+  // 2. Capture new tracking parameters
+  const trackingKeys = [
+    'ref', 'ref_', 'ref_id', 'utm_source', 'utm_medium', 'utm_campaign', 
+    'utm_term', 'utm_content', 'source', 'src', 'from', 'origin', 'via', 
+    'gclid', 'fbclid', 'ttclid', 'click_id', 'aff'
+  ];
+  
+  let hasNewTracking = false;
+  const currentTracking = req.session.tracking || {};
+  
+  for (const key of trackingKeys) {
+    if (req.query[key]) {
+      currentTracking[key] = String(req.query[key]).trim();
+      hasNewTracking = true;
+    }
+  }
+  
+  if (hasNewTracking) {
+    req.session.tracking = currentTracking;
+    res.cookie('ac_tracking', JSON.stringify(currentTracking), {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 hari
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: IS_PROD || (process.env.BASE_URL || '').startsWith('https://')
+    });
+  }
+
   res.locals.user = req.user || null;
   res.locals.process = process;
 

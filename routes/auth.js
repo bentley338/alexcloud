@@ -107,7 +107,8 @@ router.post('/register', ensureGuest, registerLimiter, (req, res) => {
     referralCode: null,
     referredBy: null,
     isActive: true,
-    isBanned: false
+    isBanned: false,
+    tracking: req.session.tracking || null
   };
   db.get('users').push(newUser).write();
 
@@ -119,9 +120,15 @@ router.post('/register', ensureGuest, registerLimiter, (req, res) => {
   // Send WhatsApp Notification to Owner
   try {
     const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    const trackingData = req.session.tracking;
+    let trackingInfo = '';
+    if (trackingData && Object.keys(trackingData).length > 0) {
+      trackingInfo = `📍 *Tracking:* ${Object.entries(trackingData).map(([k,v]) => `${k}=${v}`).join(', ')}\n`;
+    }
     const notifMsg = `🔔 *NOTIFIKASI PENDAFTARAN BARU* 🔔\n\n` +
       `👤 *Nama:* ${name.trim()}\n` +
       `📧 *Email:* ${email.toLowerCase()}\n` +
+      `${trackingInfo}` +
       `📅 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n` +
       `Pengguna baru telah berhasil mendaftar di website AlexCloud.`;
     sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ERROR]', err.message));
