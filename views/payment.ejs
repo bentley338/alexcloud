@@ -1499,7 +1499,7 @@ function startTimer() {
 function startPolling() { pollInterval = setInterval(checkStatus, 5000); }
 
 async function checkStatus() {
-  if (cancelled) return;
+  if (cancelled) return false;
   try {
     const r = await fetch(`/api/payment/status/${ORDER_ID}`);
     const data = await r.json();
@@ -1508,11 +1508,15 @@ async function checkStatus() {
       clearInterval(pollInterval);
       clearInterval(timerInterval);
       showSuccess();
+      return true;
     } else if (st === 'EXPIRED' || data.status === 'expired') {
       markExpired();
+      return 'expired';
     }
+    return false;
   } catch(e) {
     console.warn('Status check failed:', e);
+    return 'error';
   }
 }
 
@@ -1521,7 +1525,19 @@ async function manualCheckStatus(btn) {
   const originalText = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
-  await checkStatus();
+  
+  const result = await checkStatus();
+  
+  if (result === true) {
+    // Sukses, halaman otomatis terupdate
+  } else if (result === 'expired') {
+    alert('Sesi pembayaran ini telah kedaluwarsa.');
+  } else if (result === 'error') {
+    alert('Gagal mengecek status pembayaran. Silakan coba beberapa saat lagi.');
+  } else {
+    alert('Pembayaran belum terdeteksi. Silakan transfer terlebih dahulu sesuai nominal tagihan.');
+  }
+  
   setTimeout(() => {
     btn.disabled = false;
     btn.innerHTML = originalText;
