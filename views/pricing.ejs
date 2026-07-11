@@ -38,11 +38,11 @@
             <% } %>
           </ul>
           <% if (typeof user !== 'undefined' && user) { %>
-            <a href="/order/<%= plan.id %>" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+            <a href="/order/<%= plan.id %>?ref_=pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
               <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
             </a>
           <% } else { %>
-            <a href="/login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+            <a href="/login?ref_=pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
               Login untuk Order
             </a>
           <% } %>

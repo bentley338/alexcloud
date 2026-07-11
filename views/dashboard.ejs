@@ -25,18 +25,18 @@
       </div>
       <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
         <% if (user.role === 'admin') { %>
-        <a href="/admin" class="btn-secondary" style="font-family:var(--font-ui)">
+        <a href="/admin?ref_=dash_admin" class="btn-secondary" style="font-family:var(--font-ui)">
           <i class="fas fa-cog"></i> Admin Panel
         </a>
         <% } %>
-        <a href="/wallet" class="btn-secondary" style="font-family:var(--font-ui)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.3rem;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg> Saldo &amp; Top-up</a>
-        <a href="/pricing" class="btn-primary"><i class="fas fa-plus"></i> Order Paket</a>
+        <a href="/wallet?ref_=dash_wallet_topup" class="btn-secondary" style="font-family:var(--font-ui)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.3rem;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg> Saldo &amp; Top-up</a>
+        <a href="/pricing?ref_=dash_pricing" class="btn-primary"><i class="fas fa-plus"></i> Order Paket</a>
       </div>
     </div>
 
     <!-- Status Cards -->
     <div class="dashboard-grid">
-      <a href="/wallet" class="stat-card" style="text-decoration:none; color:inherit; position:relative;">
+      <a href="/wallet?ref_=dash_wallet_card" class="stat-card" style="text-decoration:none; color:inherit; position:relative;">
         <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg></div>
         <div class="stat-info">
           <div class="label">Saldo Dompet</div>
@@ -82,13 +82,13 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i class="fas fa-history"></i> Riwayat Order</div>
-          <a href="/pricing" class="btn-action btn-confirm"><i class="fas fa-plus"></i> Order Baru</a>
+          <a href="/pricing?ref_=dash_history_order_new" class="btn-action btn-confirm"><i class="fas fa-plus"></i> Order Baru</a>
         </div>
         <div class="card-body" style="padding:0;">
           <% if (orders.length === 0) { %>
           <div style="text-align:center; padding:3rem; color:var(--text-muted);">
             <i class="fas fa-inbox" style="font-size:2rem; margin-bottom:1rem;"></i>
-            <p>Belum ada order. <a href="/pricing" style="color:var(--accent-blue)">Order sekarang!</a></p>
+            <p>Belum ada order. <a href="/pricing?ref_=dash_history_order_empty" style="color:var(--accent-blue)">Order sekarang!</a></p>
           </div>
           <% } else { %>
           <div class="table-wrap">
@@ -141,7 +141,7 @@
           <div class="card-body" style="text-align:center; padding:2rem;">
             <i class="fas fa-lock" style="font-size:2.5rem; color:var(--text-muted); margin-bottom:1rem;"></i>
             <p style="color:var(--text-muted); margin-bottom:1.25rem;">Kamu belum memiliki subscription aktif</p>
-            <a href="/pricing" class="btn-primary"><i class="fas fa-gamepad"></i> Subscribe Sekarang</a>
+            <a href="/pricing?ref_=dash_no_sub_subscribe" class="btn-primary"><i class="fas fa-gamepad"></i> Subscribe Sekarang</a>
           </div>
         </div>
         <% } %>

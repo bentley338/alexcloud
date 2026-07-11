@@ -2,7 +2,7 @@
     <div class="footer-top-line" aria-hidden="true"></div>
     <div class="footer-container">
       <div class="footer-brand">
-        <a href="/" class="nav-logo">
+        <a href="/?ref_=ftr_logo" class="nav-logo">
           <img src="/images/logo-icon.png" class="logo-icon-img" alt="AlexCloud Logo" width="28" height="28" style="object-fit: contain; flex-shrink:0;">
           <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
         </a>
@@ -24,40 +24,40 @@
       </div>
       <div class="footer-links">
         <h4>Navigasi</h4>
-        <a href="/">Beranda</a>
-        <a href="/games">Game Library</a>
-        <a href="/pricing">Harga</a>
-        <a href="/testimonials">Testimoni</a>
-        <a href="/community">Komunitas</a>
-        <a href="/dashboard">Dashboard</a>
+        <a href="/?ref_=ftr_home">Beranda</a>
+        <a href="/games?ref_=ftr_games">Game Library</a>
+        <a href="/pricing?ref_=ftr_pricing">Harga</a>
+        <a href="/testimonials?ref_=ftr_testimonials">Testimoni</a>
+        <a href="/community?ref_=ftr_community">Komunitas</a>
+        <a href="/dashboard?ref_=ftr_dashboard">Dashboard</a>
       </div>
       <div class="footer-links">
         <h4>Support</h4>
-        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank">WhatsApp Admin</a>
-        <a href="/faq">FAQ Lengkap</a>
-        <a href="/network-test"><i class="fas fa-wifi" style="font-size:0.75rem;"></i> Speed Test</a>
-        <a href="/pricing">Cek Harga</a>
-        <a href="/register">Daftar Sekarang</a>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>?text=Halo%20Admin%20AlexCloud" target="_blank">WhatsApp Admin</a>
+        <a href="/faq?ref_=ftr_faq">FAQ Lengkap</a>
+        <a href="/network-test?ref_=ftr_speedtest"><i class="fas fa-wifi" style="font-size:0.75rem;"></i> Speed Test</a>
+        <a href="/pricing?ref_=ftr_pricing_check">Cek Harga</a>
+        <a href="/register?ref_=ftr_register">Daftar Sekarang</a>
       </div>
       <div class="footer-links">
         <h4>Perusahaan</h4>
-        <a href="/about">Tentang Kami</a>
-        <a href="/terms">Syarat &amp; Ketentuan</a>
-        <a href="/privacy">Kebijakan Privasi</a>
-        <a href="/refund">Kebijakan Refund</a>
-        <a href="/faq">FAQ</a>
+        <a href="/about?ref_=ftr_about">Tentang Kami</a>
+        <a href="/terms?ref_=ftr_terms">Syarat &amp; Ketentuan</a>
+        <a href="/privacy?ref_=ftr_privacy">Kebijakan Privasi</a>
+        <a href="/refund?ref_=ftr_refund">Kebijakan Refund</a>
+        <a href="/faq?ref_=ftr_faq_comp">FAQ</a>
       </div>
     </div>
     <div class="footer-bottom">
       <p>© <%= new Date().getFullYear() %> AlexCloud. Seluruh hak cipta dilindungi. Cloud gaming untuk Indonesia.</p>
       <nav class="footer-legal-links" aria-label="Tautan legal">
-        <a href="/terms">Syarat &amp; Ketentuan</a>
+        <a href="/terms?ref_=ftr_legal_terms">Syarat &amp; Ketentuan</a>
         <span aria-hidden="true">•</span>
-        <a href="/privacy">Privasi</a>
+        <a href="/privacy?ref_=ftr_legal_privacy">Privasi</a>
         <span aria-hidden="true">•</span>
-        <a href="/refund">Refund</a>
+        <a href="/refund?ref_=ftr_legal_refund">Refund</a>
         <span aria-hidden="true">•</span>
-        <a href="/about">Tentang Kami</a>
+        <a href="/about?ref_=ftr_legal_about">Tentang Kami</a>
       </nav>
     </div>
   </footer>

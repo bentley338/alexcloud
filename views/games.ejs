@@ -79,14 +79,14 @@
     <div style="text-align:center; padding:5rem; color:var(--text-muted);">
       <i class="fas fa-gamepad" style="font-size:3rem; margin-bottom:1rem;"></i>
       <p>Tidak ada game di kategori ini.</p>
-      <a href="/games" class="btn-primary" style="margin-top:1rem; display:inline-flex;">Lihat Semua Game</a>
+      <a href="/games?ref_=games_empty_reset" class="btn-primary" style="margin-top:1rem; display:inline-flex;">Lihat Semua Game</a>
     </div>
     <% } %>
 
     <div style="text-align:center; margin-top:4rem; padding:3rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg);">
       <h2 style="font-family:var(--font-display); margin-bottom:0.75rem; font-size:1.5rem;">Siap Main?</h2>
       <p style="color:var(--text-muted); margin-bottom:1.5rem;">Subscribe sekarang dan mainkan semua game ini!</p>
-      <a href="<%= typeof user !== 'undefined' && user ? '/pricing' : '/register' %>" class="btn-primary">
+      <a href="<%= typeof user !== 'undefined' && user ? '/pricing?ref_=games_footer_pricing' : '/register?ref_=games_footer_register' %>" class="btn-primary">
         <i class="fas fa-gamepad"></i> <%= typeof user !== 'undefined' && user ? 'Pilih Paket' : 'Daftar Sekarang' %>
       </a>
     </div>

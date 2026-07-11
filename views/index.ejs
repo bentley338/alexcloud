@@ -57,10 +57,10 @@
         Mulai dari Rp 40.000/minggu!
       </p>
       <div class="hero-actions">
-        <a href="/pricing" class="btn-primary">
+        <a href="/pricing?ref_=home_hero_pricing" class="btn-primary">
           <i class="fas fa-gamepad"></i> Mulai Sekarang
         </a>
-        <a href="/games" class="btn-secondary">
+        <a href="/games?ref_=home_hero_games" class="btn-secondary">
           <i class="fas fa-th-large"></i> Lihat Game
         </a>
       </div>
@@ -78,7 +78,7 @@
             <div id="heroWalletBalance" style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1;">Rp <%= balance.toLocaleString('id-ID') %></div>
           </div>
         </div>
-        <a href="/wallet" class="btn-primary" style="padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(255,107,53,0.3); border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <a href="/wallet?ref_=home_wallet_topup" class="btn-primary" style="padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(255,107,53,0.3); border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; gap: 0.5rem;">
           <i class="fas fa-plus" style="font-size: 0.85rem;"></i> Top Up
         </a>
       </div>
@@ -360,7 +360,7 @@
       <% }) %>
     </div>
     <div class="games-cta">
-      <a href="/games" class="btn-primary"><i class="fas fa-th-large"></i> Lihat Semua Game</a>
+      <a href="/games?ref_=home_explore_games" class="btn-primary"><i class="fas fa-th-large"></i> Lihat Semua Game</a>
     </div>
 </section>
 
@@ -414,7 +414,7 @@
       <div class="trust-card animate-on-scroll" data-delay="80">
         <div class="trust-icon"><i class="fas fa-sync-alt"></i></div>
         <h3 class="trust-title">Garansi Refund</h3>
-        <p class="trust-desc">Kalau kendala murni dari sisi kami, dana kamu kami kembalikan. <a href="/refund">Lihat kebijakan</a>.</p>
+        <p class="trust-desc">Kalau kendala murni dari sisi kami, dana kamu kami kembalikan. <a href="/refund?ref_=home_refund_policy">Lihat kebijakan</a>.</p>
       </div>
       <div class="trust-card animate-on-scroll" data-delay="160">
         <div class="trust-icon"><i class="fas fa-bolt"></i></div>
@@ -428,10 +428,10 @@
       </div>
     </div>
     <div class="trust-links">
-      <a href="/about"><i class="fas fa-circle-info"></i> Tentang Kami</a>
-      <a href="/terms"><i class="fas fa-file-contract"></i> Syarat &amp; Ketentuan</a>
-      <a href="/privacy"><i class="fas fa-user-shield"></i> Kebijakan Privasi</a>
-      <a href="/refund"><i class="fas fa-rotate-left"></i> Kebijakan Refund</a>
+      <a href="/about?ref_=home_links_about"><i class="fas fa-circle-info"></i> Tentang Kami</a>
+      <a href="/terms?ref_=home_links_terms"><i class="fas fa-file-contract"></i> Syarat &amp; Ketentuan</a>
+      <a href="/privacy?ref_=home_links_privacy"><i class="fas fa-user-shield"></i> Kebijakan Privasi</a>
+      <a href="/refund?ref_=home_links_refund"><i class="fas fa-rotate-left"></i> Kebijakan Refund</a>
     </div>
   </div>
 </section>
@@ -462,11 +462,11 @@
           <% if (plan.duration >= 90) { %><li><i class="fas fa-star" style="color:#fbbf24"></i> Akses Game Baru Early</li><% } %>
         </ul>
         <% if (typeof user !== 'undefined' && user) { %>
-          <a href="/order/<%= plan.id %>" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+          <a href="/order/<%= plan.id %>?ref_=home_pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
             Pilih Paket Ini
           </a>
         <% } else { %>
-          <a href="/login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+          <a href="/login?ref_=home_pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
             Login untuk Order
           </a>
         <% } %>
@@ -522,7 +522,7 @@
     </div>
     <% } %>
     <div class="testi-cta">
-      <a href="/testimonials" class="btn-secondary"><i class="fas fa-star"></i> Lihat Semua Testimoni</a>
+      <a href="/testimonials?ref_=home_all_testi" class="btn-secondary"><i class="fas fa-star"></i> Lihat Semua Testimoni</a>
     </div>
   </div>
 </section>
@@ -537,8 +537,8 @@
         <h2 class="section-title">Siap Masuk ke Dunia <span class="accent">Cloud Gaming?</span></h2>
         <p class="section-desc" style="margin-bottom: 2.5rem;">Daftar gratis sekarang dan nikmati pengalaman gaming premium tanpa batas!</p>
         <div class="cta-actions">
-          <a href="/register" class="btn-primary"><i class="fas fa-user-plus"></i> Daftar Gratis</a>
-          <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>" target="_blank" class="btn-secondary">
+          <a href="/register?ref_=home_footer_cta" class="btn-primary"><i class="fas fa-user-plus"></i> Daftar Gratis</a>
+          <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '82328437656' %>?text=Halo%20Admin%20AlexCloud" target="_blank" class="btn-secondary">
             <i class="fab fa-whatsapp"></i> Hubungi Admin
           </a>
         </div>
