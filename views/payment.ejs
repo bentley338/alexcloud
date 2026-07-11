@@ -424,14 +424,14 @@
         </div>
       </div>
 
-      <!-- Manual confirmation helper if stuck -->
+      <!-- Manual status check helper -->
       <div class="pay-stuck-helper" style="margin: 1.5rem 0; text-align: center; border-top: 1px dashed var(--border); padding-top: 1.5rem;">
         <div style="font-family: var(--font-ui); font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-          Sudah bayar tapi status belum terkonfirmasi otomatis?
+          Sudah bayar? Klik tombol di bawah jika status belum terupdate:
         </div>
-        <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent('Halo Admin AlexCloud! 👋\n\nSaya sudah membayar namun statusnya masih stuck.\n\n📋 Order ID: *' + order.orderId + '*\n👤 Nama: ' + user.name + '\n📧 Email: ' + user.email + '\n📦 Paket: *' + plan.name + '*\n💰 Total: Rp ' + order.fr3TotalTransfer.toLocaleString('id-ID') + '\n\nMohon bantuannya untuk mengaktifkan akun saya. Terima kasih!') %>" target="_blank" class="wa-confirm-btn" style="margin: 0 auto; max-width: 320px; display: flex;">
-          <i class="fab fa-whatsapp"></i> Konfirmasi Manual via WA
-        </a>
+        <button onclick="manualCheckStatus(this)" class="btn-primary" style="margin: 0 auto; max-width: 320px; display: flex; justify-content: center; width: 100%; gap: 0.5rem; border: none; cursor: pointer; align-items: center;">
+          <i class="fas fa-sync-alt"></i> Cek Status Pembayaran
+        </button>
       </div>
 
       <!-- Ganti metode -->
@@ -1514,6 +1514,18 @@ async function checkStatus() {
   } catch(e) {
     console.warn('Status check failed:', e);
   }
+}
+
+async function manualCheckStatus(btn) {
+  if (!btn || btn.disabled) return;
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
+  await checkStatus();
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }, 1000);
 }
 
 function showSuccess() {
