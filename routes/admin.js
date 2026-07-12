@@ -478,6 +478,15 @@ router.post('/users/:id/toggle', ensureAdmin, (req, res) => {
   res.redirect('/admin/users');
 });
 
+router.post('/users/:id/toggle-royal', ensureAdmin, (req, res) => {
+  const target = db.get('users').find({ id: req.params.id }).value();
+  if (!target) { req.flash('error', 'User tidak ditemukan.'); return res.redirect('/admin/users'); }
+  const newRoyal = !target.isRoyal;
+  db.get('users').find({ id: target.id }).assign({ isRoyal: newRoyal }).write();
+  req.flash('success', `Status Royal Club untuk ${target.name} berhasil ${newRoyal ? 'diberikan' : 'dicabut'}.`);
+  res.redirect('/admin/users');
+});
+
 router.post('/users/:id/ban', ensureAdmin, (req, res) => {
   const target = db.get('users').find({ id: req.params.id }).value();
   if (!target) { req.flash('error', 'User tidak ditemukan.'); return res.redirect('/admin/users'); }

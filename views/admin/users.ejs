@@ -40,7 +40,12 @@
                 <%= u.name.charAt(0).toUpperCase() %>
               </div>
               <% } %>
-              <span style="font-family:var(--font-ui); font-weight:600;"><%= u.name %></span>
+              <span style="font-family:var(--font-ui); font-weight:600;">
+                <%= u.name %>
+                <% if (u.isRoyal) { %>
+                  <span title="Royal Club Member" style="color:#fbbf24; margin-left:0.25rem;">👑</span>
+                <% } %>
+              </span>
             </div>
           </td>
           <td style="font-size:0.85rem; color:var(--text-muted);">
@@ -106,6 +111,14 @@
                 </button>
               </form>
               <% } %>
+
+              <!-- Toggle Royal Club -->
+              <form action="/admin/users/<%= u.id %>/toggle-royal" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action" style="width:100%; background:rgba(251, 191, 36, 0.1); color:#fbbf24; border:1px solid rgba(251, 191, 36, 0.25);"
+                  onclick="return confirm('<%= u.isRoyal ? 'Cabut' : 'Berikan' %> status Royal Club untuk <%= u.name %>?')">
+                  <%= u.isRoyal ? '👑 Cabut Royal Club' : '👑 Set Royal Club' %>
+                </button>
+              </form>
 
               <!-- Toggle Active -->
               <form action="/admin/users/<%= u.id %>/toggle" method="POST" style="display:inline;">
