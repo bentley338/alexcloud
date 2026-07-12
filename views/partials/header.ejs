@@ -250,7 +250,12 @@
               <% } else { %>
                 <div class="nav-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
               <% } %>
-              <span><%= user.name.split(' ')[0] %></span>
+              <span style="display:inline-flex; align-items:center; gap:0.25rem;">
+                <%= user.name.split(' ')[0] %>
+                <% if (user.isRoyal) { %>
+                  <i class="fas fa-crown" style="color:#fbbf24; font-size:0.85rem;" title="Royal Club Member"></i>
+                <% } %>
+              </span>
               <i class="fas fa-chevron-down"></i>
             </button>
             <div class="user-dropdown" id="userDropdown">

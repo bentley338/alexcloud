@@ -5,7 +5,13 @@
     <div class="dashboard-header">
       <div>
         <p style="color:var(--text-muted); font-family:var(--font-ui); margin-bottom:0.25rem;">Dashboard</p>
-        <h1 class="dashboard-greeting">Halo, <span class="name"><%= user.name.split(' ')[0] %></span> 👋</h1>
+        <h1 class="dashboard-greeting" style="display:flex; align-items:center; gap:0.4rem;">
+          Halo, <span class="name"><%= user.name.split(' ')[0] %></span>
+          <% if (user.isRoyal) { %>
+            <i class="fas fa-crown" style="color:#fbbf24; font-size:1.4rem;" title="Royal Club Member"></i>
+          <% } %>
+          👋
+        </h1>
         <!-- Session info badge -->
         <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.35rem; flex-wrap:wrap;">
           <% if (user.isRoyal) { %>

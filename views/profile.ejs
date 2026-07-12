@@ -29,7 +29,12 @@
           <%= user.name.charAt(0).toUpperCase() %>
         </div>
         <% } %>
-        <h3 style="font-family:var(--font-ui); font-size:1.1rem; margin-bottom:0.25rem;"><%= user.name %></h3>
+        <h3 style="font-family:var(--font-ui); font-size:1.1rem; margin-bottom:0.25rem; display:flex; align-items:center; justify-content:center; gap:0.35rem;">
+          <%= user.name %>
+          <% if (user.isRoyal) { %>
+            <i class="fas fa-crown" style="color:#fbbf24;" title="Royal Club Member"></i>
+          <% } %>
+        </h3>
         <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;"><%= user.email %></p>
         <span class="status-badge <%= user.role === 'admin' ? 'status-confirmed' : 'status-active' %>">
           <%= user.role === 'admin' ? '⚙ Admin' : '👤 Member' %>
