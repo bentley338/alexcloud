@@ -1,0 +1,127 @@
+<% currentPage = 'royal'; %>
+<%- include('layout-header') %>
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+  <h1 class="admin-page-title" style="margin-bottom:0;"><i class="fas fa-crown" style="color:#fbbf24;"></i> Kelola Royal Club</h1>
+  <div style="font-family:var(--font-ui); font-size:0.9rem; color:var(--text-muted);">
+    Menu khusus pengelolaan keanggotaan VIP Royal Club.
+  </div>
+</div>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<!-- Stats Dashboard -->
+<div class="admin-stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-bottom:2rem;">
+  <div class="stat-card" style="border-left:4px solid #fbbf24; background:linear-gradient(135deg, rgba(251,191,36,0.05) 0%, var(--bg-card) 100%);">
+    <div class="stat-icon" style="color:#fbbf24;"><i class="fas fa-crown"></i></div>
+    <div class="stat-label">Total Anggota Royal</div>
+    <div class="stat-value" style="color:#fbbf24;"><%= royalUsers.length %></div>
+    <div class="stat-desc">Pengguna aktif dengan status Royal</div>
+  </div>
+  <div class="stat-card" style="border-left:4px solid var(--accent-green);">
+    <div class="stat-icon" style="color:var(--accent-green);"><i class="fas fa-wallet"></i></div>
+    <div class="stat-label">Estimasi Pendapatan</div>
+    <div class="stat-value" style="color:var(--accent-green);">Rp <%= totalRevenue.toLocaleString('id-ID') %></div>
+    <div class="stat-desc">Dari pembelian Royal Club Upgrade</div>
+  </div>
+  <div class="stat-card" style="border-left:4px solid var(--accent-blue);">
+    <div class="stat-icon" style="color:var(--accent-blue);"><i class="fas fa-id-card"></i></div>
+    <div class="stat-label">Subskripsi Aktif</div>
+    <div class="stat-value" style="color:var(--accent-blue);"><%= activeSubsCount %></div>
+    <div class="stat-desc">Tiket Royal lifetime aktif saat ini</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr; gap:2rem; margin-bottom:2rem;">
+  
+  <!-- Add Member Form -->
+  <div class="card" style="border: 1px solid rgba(251,191,36,0.25);">
+    <div class="card-header" style="border-bottom:1px solid rgba(251,191,36,0.15); background:rgba(251,191,36,0.02);">
+      <div class="card-title" style="color:#fbbf24;"><i class="fas fa-user-plus"></i> Tambah Anggota Royal Club Manual</div>
+    </div>
+    <div style="padding:1.5rem;">
+      <form action="/admin/royal/add" method="POST" style="display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end;">
+        <div style="flex:1; min-width:260px;">
+          <label style="display:block; font-family:var(--font-ui); font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.5rem;">Pilih User Non-Royal</label>
+          <select name="userId" required style="width:100%; padding:0.75rem; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius-sm); color:#fff; font-family:var(--font-ui); outline:none;">
+            <option value="" disabled selected>-- Pilih Pengguna --</option>
+            <% nonRoyalUsers.forEach(u => { %>
+              <option value="<%= u.id %>"><%= u.name %> (<%= u.email %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" style="background:linear-gradient(90deg, #fbbf24, #d97706); color:#111; font-weight:800; border:none; padding:0.75rem 1.5rem; height:45px;">
+          <i class="fas fa-plus"></i> Tambahkan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Members List Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-list"></i> Daftar Anggota Royal Club</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pengguna</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (royalUsers.length === 0) { %>
+            <tr>
+              <td colspan="4" style="text-align:center; padding:2rem; color:var(--text-muted); font-family:var(--font-ui);">
+                Belum ada anggota Royal Club.
+              </td>
+            </tr>
+          <% } else { %>
+            <% royalUsers.forEach(u => { %>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <% if (u.avatar) { %>
+                    <img src="<%= u.avatar %>" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                    <% } else { %>
+                    <div style="width:32px; height:32px; border-radius:50%; background:var(--gradient-main); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; color:#000; flex-shrink:0">
+                      <%= u.name.charAt(0).toUpperCase() %>
+                    </div>
+                    <% } %>
+                    <div>
+                      <span style="font-family:var(--font-ui); font-weight:600; color:#fbbf24;"><%= u.name %> <i class="fas fa-crown"></i></span>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-family:var(--font-ui); font-size:0.9rem; color:var(--text-muted);"><%= u.email %></td>
+                <td>
+                  <span class="status-badge status-confirmed" style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.25); color:#fbbf24;">
+                    👑 Royal Active
+                  </span>
+                </td>
+                <td>
+                  <form action="/admin/royal/<%= u.id %>/revoke" method="POST" style="display:inline;" onsubmit="return confirm('Cabut status Royal Club dari <%= u.name %>?')">
+                    <button type="submit" class="btn-action btn-reject" style="padding:0.4rem 0.8rem; font-size:0.85rem;">
+                      <i class="fas fa-times-circle"></i> Cabut Akses
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%- include('layout-footer') %>

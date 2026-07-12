@@ -483,8 +483,83 @@ router.post('/users/:id/toggle-royal', ensureAdmin, (req, res) => {
   if (!target) { req.flash('error', 'User tidak ditemukan.'); return res.redirect('/admin/users'); }
   const newRoyal = !target.isRoyal;
   db.get('users').find({ id: target.id }).assign({ isRoyal: newRoyal }).write();
+  
+  if (newRoyal) {
+    activateUserSubscription(target.id, 'royal_access', 'ADMIN_GRANT_' + Date.now());
+  } else {
+    db.get('subscriptions')
+      .filter({ userId: target.id, planId: 'royal_access', status: 'active' })
+      .forEach(sub => {
+        db.get('subscriptions').find({ id: sub.id }).assign({ status: 'expired', expiredAt: new Date().toISOString() }).write();
+      })
+      .value();
+  }
+  
   req.flash('success', `Status Royal Club untuk ${target.name} berhasil ${newRoyal ? 'diberikan' : 'dicabut'}.`);
   res.redirect('/admin/users');
+});
+
+// Royal Club Management Dashboard
+router.get('/royal', ensureAdmin, (req, res) => {
+  const users = db.get('users').value() || [];
+  const royalUsers = users.filter(u => u.isRoyal);
+  const nonRoyalUsers = users.filter(u => !u.isRoyal && u.role !== 'admin');
+  
+  // Calculate total revenue from confirmed royal_access orders
+  const royalOrders = db.get('orders').filter({ planId: 'royal_access', status: 'confirmed' }).value() || [];
+  const totalRevenue = royalOrders.reduce((sum, o) => sum + (o.price || 0), 0);
+  
+  // Get active subscriptions count for royal_access
+  const royalSubs = db.get('subscriptions').filter({ planId: 'royal_access', status: 'active' }).value() || [];
+
+  res.render('admin/royal', {
+    title: 'Royal Club Management - AlexCloud Admin',
+    user: req.user,
+    royalUsers,
+    nonRoyalUsers,
+    totalRevenue,
+    activeSubsCount: royalSubs.length,
+    moment,
+    success: req.flash('success'),
+    error: req.flash('error')
+  });
+});
+
+router.post('/royal/add', ensureAdmin, (req, res) => {
+  const { userId } = req.body;
+  const targetUser = db.get('users').find({ id: userId }).value();
+  if (!targetUser) {
+    req.flash('error', 'User tidak ditemukan.');
+    return res.redirect('/admin/royal');
+  }
+
+  // Activate Royal status
+  activateUserSubscription(targetUser.id, 'royal_access', 'ADMIN_GRANT_' + Date.now());
+  
+  req.flash('success', `Berhasil menambahkan ${targetUser.name} ke Royal Club!`);
+  res.redirect('/admin/royal');
+});
+
+router.post('/royal/:id/revoke', ensureAdmin, (req, res) => {
+  const targetUser = db.get('users').find({ id: req.params.id }).value();
+  if (!targetUser) {
+    req.flash('error', 'User tidak ditemukan.');
+    return res.redirect('/admin/royal');
+  }
+
+  // Remove Royal flag
+  db.get('users').find({ id: targetUser.id }).assign({ isRoyal: false }).write();
+  
+  // Expire active royal_access subscription
+  db.get('subscriptions')
+    .filter({ userId: targetUser.id, planId: 'royal_access', status: 'active' })
+    .forEach(sub => {
+      db.get('subscriptions').find({ id: sub.id }).assign({ status: 'expired', expiredAt: new Date().toISOString() }).write();
+    })
+    .value();
+
+  req.flash('success', `Berhasil mencabut status Royal Club dari ${targetUser.name}.`);
+  res.redirect('/admin/royal');
 });
 
 router.post('/users/:id/ban', ensureAdmin, (req, res) => {
