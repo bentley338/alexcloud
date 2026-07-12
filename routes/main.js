@@ -3,7 +3,7 @@ const router = express.Router();
 const https = require('https');
 const path = require('path');
 const fs = require('fs');
-const { db, getPlans, getGames, invalidateGamesCache, getWallet, getBalance, getWalletConfig, calcTopupBonus, applyWalletTx, getUserWalletTx, fulfillTopupOrder } = require('../database/db');
+const { db, getPlans, getGames, invalidateGamesCache, getWallet, getBalance, getWalletConfig, calcTopupBonus, applyWalletTx, getUserWalletTx, fulfillTopupOrder, activateUserSubscription } = require('../database/db');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
@@ -468,10 +468,11 @@ router.post('/api/referral/redeem', ensureAuthenticated, express.json(), (req, r
 // Dashboard
 router.get('/dashboard', ensureAuthenticated, (req, res) => {
   const orders = db.get('orders').filter({ userId: req.user.id }).sortBy('createdAt').reverse().value();
-  const activeSub = db.get('subscriptions').find({
-    userId: req.user.id,
-    status: 'active'
-  }).value();
+  const activeSub = db.get('subscriptions').value().find(sub => 
+    sub.userId === req.user.id && 
+    sub.status === 'active' && 
+    sub.planId !== 'royal_access'
+  );
 
   let subInfo = null;
   if (activeSub) {
@@ -526,6 +527,10 @@ router.get('/order/:planId', ensureAuthenticated, (req, res) => {
   const plans = getPlans();
   const plan = plans.find(p => p.id === req.params.planId);
   if (!plan) return res.redirect('/pricing');
+  if (plan.royalOnly && !req.user.isRoyal) {
+    req.flash('error', 'Opsi harian hanya untuk member Royal Club. Silakan beli Royal Club Access terlebih dahulu!');
+    return res.redirect('/pricing');
+  }
   const promoCodes = db.get('promoCodes').filter({ isActive: true }).value();
   res.render('order', {
     title: `Order ${plan.name} - AlexCloud`,
@@ -615,6 +620,10 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
   const plans = getPlans();
   const plan = plans.find(p => p.id === planId);
   if (!plan) return res.redirect('/pricing');
+  if (plan.royalOnly && !req.user.isRoyal) {
+    req.flash('error', 'Opsi harian hanya untuk member Royal Club. Silakan beli Royal Club Access terlebih dahulu!');
+    return res.redirect('/pricing');
+  }
 
   let actualPrice = plan.price;
   let appliedPromo = null;
@@ -1197,18 +1206,7 @@ router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res)
       const plans = getPlans();
       const plan = plans.find(p => p.id === currentOrder.planId);
       if (plan) {
-        const expiresAt = new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString();
-        db.get('subscriptions').remove({ userId: req.user.id, status: 'active' }).write();
-        db.get('subscriptions').push({
-          id: uuidv4(),
-          userId: req.user.id,
-          orderId: order.orderId,
-          planId: plan.id,
-          planName: plan.name,
-          status: 'active',
-          createdAt: new Date().toISOString(),
-          expiresAt
-        }).write();
+        activateUserSubscription(currentOrder.userId, plan.id, order.orderId);
         db.get('orders').find({ id: order.id }).assign({ activatedAt: new Date().toISOString() }).write();
       }
 
@@ -1405,6 +1403,10 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
   const plans = getPlans();
   const plan = plans.find(p => p.id === planId);
   if (!plan) { req.flash('error', 'Paket tidak ditemukan.'); return res.redirect('/pricing'); }
+  if (plan.royalOnly && !req.user.isRoyal) {
+    req.flash('error', 'Opsi harian hanya untuk member Royal Club. Silakan beli Royal Club Access terlebih dahulu!');
+    return res.redirect('/pricing');
+  }
 
   // Terapkan promo (jika valid) — logika sama dengan POST /order.
   let actualPrice = plan.price;
@@ -1455,13 +1457,8 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
       db.get('promoCodes').find({ id: appliedPromo.id }).assign({ usedCount: (appliedPromo.usedCount || 0) + 1 }).write();
     }
 
-    // Aktivasi subscription (satu aktif per user).
-    const expiresAt = new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString();
-    db.get('subscriptions').remove({ userId: req.user.id, status: 'active' }).write();
-    db.get('subscriptions').push({
-      id: uuidv4(), userId: req.user.id, orderId, planId: plan.id, planName: plan.name,
-      status: 'active', createdAt: now, expiresAt
-    }).write();
+    // Aktivasi subscription
+    activateUserSubscription(req.user.id, plan.id, orderId);
 
     // Referral hook + notifikasi.
     try {
@@ -1936,7 +1933,10 @@ router.post('/api/claim-daily-login', ensureAuthenticated, (req, res) => {
     const rewards = {
       1: 1000, 2: 2000, 3: 3000, 4: 4000, 5: 5000, 6: 7000, 7: 10000
     };
-    const reward = rewards[streak] || 1000;
+    let reward = rewards[streak] || 1000;
+    if (req.user && req.user.isRoyal) {
+      reward += 500; // Extra bonus for Royal Members
+    }
 
     db.get('wallets')
       .find({ userId })

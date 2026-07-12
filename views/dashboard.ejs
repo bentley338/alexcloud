@@ -8,6 +8,11 @@
         <h1 class="dashboard-greeting">Halo, <span class="name"><%= user.name.split(' ')[0] %></span> 👋</h1>
         <!-- Session info badge -->
         <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.35rem; flex-wrap:wrap;">
+          <% if (user.isRoyal) { %>
+          <span style="display:inline-flex; align-items:center; gap:0.35rem; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-family:var(--font-ui); font-size:0.75rem; font-weight:700; padding:0.2rem 0.65rem; border-radius:100px; box-shadow: 0 0 10px rgba(251,191,36,0.15);">
+            <i class="fas fa-crown"></i> Royal Club Member
+          </span>
+          <% } %>
           <span style="display:inline-flex; align-items:center; gap:0.35rem; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); color:var(--accent-green); font-family:var(--font-ui); font-size:0.75rem; font-weight:600; padding:0.2rem 0.6rem; border-radius:100px;">
             <i class="fas fa-shield-halved"></i>
             <% if (user.googleId) { %>

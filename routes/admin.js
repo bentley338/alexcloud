@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { db, getPlans, getGames, invalidatePlansCache, invalidateGamesCache,
-  getWallet, getBalance, getWalletConfig, applyWalletTx, getUserWalletTx, fulfillTopupOrder } = require('../database/db');
+  getWallet, getBalance, getWalletConfig, applyWalletTx, getUserWalletTx, fulfillTopupOrder, activateUserSubscription } = require('../database/db');
 const { ensureAdmin } = require('../middleware/auth');
 const { isJunkTestimonial, normalizeTestimonial } = require('../utils/helpers');
 const { rewardReferrerOnFirstOrder, getReferralConfig, setReferralConfig } = require('../utils/referral');
@@ -209,18 +209,7 @@ router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
       db.get('promoCodes').find({ id: promo.id }).assign({ usedCount: (promo.usedCount || 0) + 1 }).write();
     }
   }
-  const existingSub = db.get('subscriptions').find({ userId: order.userId, status: 'active' }).value();
-  if (existingSub) {
-    db.get('subscriptions').find({ id: existingSub.id }).assign({
-      status: 'expired', expiredAt: now.toISOString()
-    }).write();
-  }
-  db.get('subscriptions').push({
-    id: uuidv4(), userId: order.userId, orderId: order.id,
-    planId: order.planId, planName: plan ? plan.name : order.planName,
-    status: 'active', startedAt: now.toISOString(), expiresAt: expiresAt.toISOString()
-  }).write();
-  db.get('users').find({ id: order.userId }).assign({ isActive: true }).write();
+  activateUserSubscription(order.userId, order.planId, order.orderId);
 
   // Order "saldo + kurang top-up": potong saldo yang dipakai (sekali saja) saat dikonfirmasi.
   if (order.walletApplied > 0 && !order.walletDebited) {

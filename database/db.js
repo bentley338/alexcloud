@@ -359,6 +359,35 @@ function seedPlans() {
     ).write();
     console.log('[DB] Plans seeded');
   }
+
+  // Seed Royal plans if not present
+  if (!db.get('plans').find({ id: 'royal_access' }).value()) {
+    db.get('plans').push({
+      id: 'royal_access',
+      name: 'Royal Club Access',
+      duration: 9999, // lifetime
+      price: 25000,
+      priceDisplay: 'Rp 25.000',
+      isRoyalUpgrade: true,
+      popular: false,
+      desc: 'Membuka akses sewa harian (Rp 7.000/hari), prioritas antrean bypass, region server khusus, dan badge emas profil!'
+    }).write();
+    console.log('[DB] Royal Access plan seeded');
+  }
+
+  if (!db.get('plans').find({ id: '1day_royal' }).value()) {
+    db.get('plans').push({
+      id: '1day_royal',
+      name: '1 Hari (Royal)',
+      duration: 1,
+      price: 7000,
+      priceDisplay: 'Rp 7.000',
+      royalOnly: true,
+      popular: false,
+      desc: 'Akses penuh 1 hari khusus member Royal Club. Sangat murah dan fleksibel!'
+    }).write();
+    console.log('[DB] Daily Royal plan seeded');
+  }
 }
 
 const gameImageMapping = {
@@ -489,6 +518,52 @@ function initDB() {
   }, 6 * 60 * 60 * 1000).unref();
 }
 
+function activateUserSubscription(userId, planId, orderId) {
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === planId);
+  if (!plan) return false;
+
+  const now = new Date().toISOString();
+  if (plan.id === 'royal_access') {
+    // 1. Mark user as Royal
+    db.get('users').find({ id: userId }).assign({ isRoyal: true, isActive: true }).write();
+
+    // 2. Add Royal subscription (expires in 2099-12-31 / lifetime)
+    db.get('subscriptions').push({
+      id: uuidv4(),
+      userId,
+      orderId,
+      planId: plan.id,
+      planName: plan.name,
+      status: 'active',
+      createdAt: now,
+      expiresAt: '2099-12-31T23:59:59.000Z'
+    }).write();
+  } else {
+    // Normal package
+    const expiresAt = new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString();
+    
+    // Clear any previous active normal subscription (keep royal_access active)
+    db.get('subscriptions').remove(sub => sub.userId === userId && sub.status === 'active' && sub.planId !== 'royal_access').write();
+
+    // Add new subscription
+    db.get('subscriptions').push({
+      id: uuidv4(),
+      userId,
+      orderId,
+      planId: plan.id,
+      planName: plan.name,
+      status: 'active',
+      createdAt: now,
+      expiresAt
+    }).write();
+    
+    // Set user as active
+    db.get('users').find({ id: userId }).assign({ isActive: true }).write();
+  }
+  return true;
+}
+
 module.exports = {
   db,
   initDB,
@@ -505,5 +580,6 @@ module.exports = {
   calcTopupBonus,
   applyWalletTx,
   getUserWalletTx,
-  fulfillTopupOrder
+  fulfillTopupOrder,
+  activateUserSubscription
 };
