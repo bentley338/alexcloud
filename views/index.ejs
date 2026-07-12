@@ -506,7 +506,48 @@
                </a>
              <% } %>
            </div>
-         <% } else { %>
+         <% } else if (plan.id === 'royal_access') { %>
+            <!-- VIP Royal Access Pass Card -->
+            <div class="plan-card royal-card animate-on-scroll" data-delay="<%= i * 90 %>" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%); border: 2px solid #fbbf24; box-shadow: 0 0 25px rgba(251, 191, 36, 0.15); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+              <div>
+                <div class="popular-badge" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.05em; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3);">👑 VIP CLUB UPGRADE</div>
+                <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%); pointer-events: none;"></div>
+                
+                <div class="plan-name" style="color: #fbbf24; font-weight: 800; font-size: 1.5rem;"><%= plan.name %></div>
+                <div class="plan-price" style="color: #fff; font-size: 2.2rem; text-shadow: 0 0 15px rgba(251,191,36,0.2);"><%= plan.priceDisplay %></div>
+                <div class="plan-period" style="color: #fbbf24; font-weight: 600;">Lifetime / Sekali Bayar</div>
+                
+                <ul class="plan-features" style="text-align: left; margin-bottom: 1.5rem;">
+                  <li><i class="fas fa-unlock" style="color:#fbbf24;"></i> <strong>Buka Sewa Harian (Rp 7.000)</strong></li>
+                  <li><i class="fas fa-server" style="color:#fbbf24;"></i> Server Premium Latensi Terendah</li>
+                  <li><i class="fas fa-crown" style="color:#fbbf24;"></i> Badge Mahkota Emas Profil 👑</li>
+                  <li><i class="fas fa-coins" style="color:#fbbf24;"></i> Bonus Klaim Harian Saldo +Rp 500</li>
+                  <li><i class="fas fa-star" style="color:#fbbf24;"></i> Akses Game Early Release &amp; Beta</li>
+                  <li><i class="fas fa-hdd" style="color:#fbbf24;"></i> Cloud Save Storage Lebih Besar</li>
+                  <li><i class="fas fa-video" style="color:#fbbf24;"></i> Bitrate Streaming Maksimal 100 Mbps</li>
+                  <li><i class="fas fa-gamepad" style="color:#fbbf24;"></i> Prioritas Request Game Baru</li>
+                  <li><i class="fas fa-user-shield" style="color:#fbbf24;"></i> CS VIP Fast-response 24/7</li>
+                  <li><i class="fas fa-percentage" style="color:#fbbf24;"></i> Cashback Top-up Saldo +5%</li>
+                  <li><i class="fas fa-sliders-h" style="color:#fbbf24;"></i> Layout Kontroler Virtual Kustom</li>
+                </ul>
+              </div>
+              <% if (typeof user !== 'undefined' && user) { %>
+                <% if (user.isRoyal) { %>
+                  <div class="plan-btn" style="background: linear-gradient(90deg, #10b981, #059669); color: white; cursor: default; border: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.85rem 1.5rem; border-radius: var(--radius-md); text-align: center;">
+                    <i class="fas fa-check-circle"></i> Sudah Aktif
+                  </div>
+                <% } else { %>
+                  <a href="/order/<%= plan.id %>?ref_=pricing_buy_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800; box-shadow: 0 4px 15px rgba(251,191,36,0.3); text-align: center;">
+                    <i class="fas fa-crown"></i> Beli Royal Access
+                  </a>
+                <% } %>
+              <% } else { %>
+                <a href="/login?ref_=pricing_login_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800; text-align: center;">
+                  Login untuk Order
+                </a>
+              <% } %>
+            </div>
+          <% } else { %>
            <!-- Normal Plan -->
            <div class="plan-card <%= plan.popular ? 'popular' : '' %> animate-on-scroll" data-delay="<%= i * 90 %>">
              <% if (plan.popular) { %><div class="popular-badge">PALING POPULER</div><% } %>
