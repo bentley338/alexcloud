@@ -1,37 +1,30 @@
 const path = require('path');
 const dotenv = require('dotenv');
 
-// Load env
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-const { db, initDB, activateUserSubscription } = require('../database/db');
+const { db, initDB, restoreFromMongoDB, activateUserSubscription } = require('../database/db');
 
 async function run() {
-  console.log('Initializing DB...');
-  await initDB();
+  console.log('Restoring from Postgres...');
+  await restoreFromMongoDB();
+  initDB();
 
-  // Find user with name Bentley or role admin
-  let user = db.get('users').find({ role: 'admin' }).value();
-  if (!user) {
-    user = db.get('users').find(u => u.name.toLowerCase().includes('bentley')).value();
-  }
-
-  if (!user) {
-    console.error('User Bentley or Admin not found!');
-    process.exit(1);
-  }
-
-  console.log(`Found User: ${user.name} (${user.email}), ID: ${user.id}`);
+  const targetEmails = ['graha9181@gmail.com', 'bentleysamp462@gmail.com'];
   
-  // Set isRoyal: true
-  db.get('users').find({ id: user.id }).assign({ isRoyal: true }).write();
-  console.log('Set isRoyal: true');
+  for (const email of targetEmails) {
+    const user = db.get('users').find({ email }).value();
+    if (user) {
+      console.log(`Found User: ${user.name} (${user.email}), ID: ${user.id}`);
+      db.get('users').find({ id: user.id }).assign({ isRoyal: true }).write();
+      console.log(`Set isRoyal: true for ${user.email}`);
+      activateUserSubscription(user.id, 'royal_access', 'ADMIN_GRANT_' + Date.now());
+      console.log(`Activated royal_access subscription for ${user.email}`);
+    } else {
+      console.warn(`User with email ${email} not found.`);
+    }
+  }
 
-  // Activate subscription
-  activateUserSubscription(user.id, 'royal_access', 'ADMIN_GRANT_' + Date.now());
-  console.log('Activated royal_access subscription');
-
-  // Wait for PostgreSQL backup sync (debounce is 2000ms)
   console.log('Waiting for PostgreSQL backup sync...');
   await new Promise(resolve => setTimeout(resolve, 3500));
 
