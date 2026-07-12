@@ -46,8 +46,8 @@
                 </a>
               <% } %>
             </div>
-          <% } else if (plan.id === '1day_royal') { %>
-            <!-- Daily Royal Plan Card -->
+          <% } else if (plan.id === 'custom_royal') { %>
+            <!-- Daily Royal Plan Card with Day Slider -->
             <div class="plan-card" style="<%= (typeof user !== 'undefined' && user && user.isRoyal) ? 'border: 1px solid var(--accent-blue);' : 'opacity: 0.85; position: relative;' %>">
               <% if (typeof user === 'undefined' || !user || !user.isRoyal) { %>
                 <div style="position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px; z-index: 2;">
@@ -59,11 +59,28 @@
                 </div>
               <% } %>
               
-              <div class="plan-name"><%= plan.name %></div>
-              <div class="plan-price"><%= plan.priceDisplay %></div>
-              <div class="plan-period">akses selama <%= plan.duration %> hari</div>
+              <div class="plan-name" id="customDaysName">Sewa Harian (1 Hari)</div>
+              <div class="plan-price" id="customDaysPrice">Rp 7.000</div>
+              <div class="plan-period" id="customDaysPeriod">akses selama 1 hari</div>
+
+              <!-- SLIDER SECTION -->
+              <div style="margin: 1.5rem 0 1rem; text-align: left;">
+                <label for="daysSlider" style="display: block; font-family: var(--font-ui); font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                  <span>Durasi Sewa:</span>
+                  <strong style="color: var(--accent-blue);" id="sliderValueText">1 Hari</strong>
+                </label>
+                <input type="range" id="daysSlider" min="1" max="6" value="1" style="width: 100%; accent-color: var(--accent-blue); background: rgba(255,255,255,0.1); border-radius: var(--radius-sm); outline: none; cursor: pointer;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; font-family: var(--font-ui);">
+                  <span>1 Hari</span>
+                  <span>2H</span>
+                  <span>3H</span>
+                  <span>4H</span>
+                  <span>5H</span>
+                  <span>6 Hari</span>
+                </div>
+              </div>
               
-              <ul class="plan-features">
+              <ul class="plan-features" style="margin-top: 0.5rem;">
                 <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
                 <li><i class="fas fa-check"></i> Streaming 4K / 60fps</li>
                 <li><i class="fas fa-check"></i> Cloud Save Progress</li>
@@ -72,7 +89,7 @@
               </ul>
               <% if (typeof user !== 'undefined' && user) { %>
                 <% if (user.isRoyal) { %>
-                  <a href="/order/<%= plan.id %>?ref_=pricing_buy_daily" class="plan-btn filled">
+                  <a href="/order/<%= plan.id %>?days=1" id="customDaysBtn" class="plan-btn filled">
                     <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
                   </a>
                 <% } else { %>
@@ -163,3 +180,33 @@
 </div>
 
 <%- include('partials/footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.getElementById('daysSlider');
+    if (slider) {
+      const nameEl = document.getElementById('customDaysName');
+      const priceEl = document.getElementById('customDaysPrice');
+      const periodEl = document.getElementById('customDaysPeriod');
+      const valTextEl = document.getElementById('sliderValueText');
+      const btnEl = document.getElementById('customDaysBtn');
+
+      function updateCustomDays() {
+        const days = parseInt(slider.value);
+        const price = days * 7000;
+        
+        nameEl.innerText = `Sewa Harian (${days} Hari)`;
+        priceEl.innerText = `Rp ${price.toLocaleString('id-ID')}`;
+        periodEl.innerText = `akses selama ${days} hari`;
+        valTextEl.innerText = `${days} Hari`;
+        
+        if (btnEl) {
+          btnEl.href = `/order/custom_royal?days=${days}`;
+        }
+      }
+
+      slider.addEventListener('input', updateCustomDays);
+      updateCustomDays(); // run once initially
+    }
+  });
+</script>

@@ -75,6 +75,7 @@
       <div class="wl-pay-note" id="walletPayNote"></div>
       <form action="/wallet/pay-plan" method="POST" id="walletForm">
         <input type="hidden" name="planId" value="<%= plan.id %>">
+        <input type="hidden" name="customDays" value="<%= plan.id === 'custom_royal' ? plan.duration : '' %>">
         <input type="hidden" name="promoCode" id="wPromoCode" value="">
         <input type="hidden" name="promoId" id="wPromoId" value="">
         <button type="submit" class="btn-primary" id="walletPayBtn" style="width:100%; justify-content:center; padding:0.9rem; font-size:1rem; background:var(--accent-green);">
@@ -87,6 +88,7 @@
 
     <form action="/order" method="POST" id="orderForm">
       <input type="hidden" name="planId" value="<%= plan.id %>">
+      <input type="hidden" name="customDays" value="<%= plan.id === 'custom_royal' ? plan.duration : '' %>">
       <input type="hidden" name="promoCode" id="hiddenPromoCode" value="">
       <input type="hidden" name="promoId" id="hiddenPromoId" value="">
       <input type="hidden" name="finalPrice" id="hiddenFinalPrice" value="<%= plan.price %>">

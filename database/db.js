@@ -375,18 +375,22 @@ function seedPlans() {
     console.log('[DB] Royal Access plan seeded');
   }
 
-  if (!db.get('plans').find({ id: '1day_royal' }).value()) {
+  // Remove old 1day_royal if exists
+  db.get('plans').remove({ id: '1day_royal' }).write();
+
+  if (!db.get('plans').find({ id: 'custom_royal' }).value()) {
     db.get('plans').push({
-      id: '1day_royal',
-      name: '1 Hari (Royal)',
-      duration: 1,
-      price: 7000,
-      priceDisplay: 'Rp 7.000',
+      id: 'custom_royal',
+      name: 'Sewa Harian (Royal)',
+      duration: 1, // default base
+      price: 7000, // per day
+      priceDisplay: 'Rp 7.000 / hari',
       royalOnly: true,
+      isCustomDays: true,
       popular: false,
-      desc: 'Akses penuh 1 hari khusus member Royal Club. Sangat murah dan fleksibel!'
+      desc: 'Pilih jumlah hari sewa sesukamu. Sangat murah dan fleksibel!'
     }).write();
-    console.log('[DB] Daily Royal plan seeded');
+    console.log('[DB] Custom Royal plan seeded');
   }
 }
 
@@ -518,7 +522,7 @@ function initDB() {
   }, 6 * 60 * 60 * 1000).unref();
 }
 
-function activateUserSubscription(userId, planId, orderId) {
+function activateUserSubscription(userId, planId, orderId, durationOverride) {
   const plans = getPlans();
   const plan = plans.find(p => p.id === planId);
   if (!plan) return false;
@@ -540,8 +544,9 @@ function activateUserSubscription(userId, planId, orderId) {
       expiresAt: '2099-12-31T23:59:59.000Z'
     }).write();
   } else {
-    // Normal package
-    const expiresAt = new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString();
+    // Normal package or Custom Royal
+    const duration = durationOverride || plan.duration;
+    const expiresAt = new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString();
     
     // Clear any previous active normal subscription (keep royal_access active)
     db.get('subscriptions').remove(sub => sub.userId === userId && sub.status === 'active' && sub.planId !== 'royal_access').write();
@@ -552,7 +557,7 @@ function activateUserSubscription(userId, planId, orderId) {
       userId,
       orderId,
       planId: plan.id,
-      planName: plan.name,
+      planName: plan.id === 'custom_royal' ? `Sewa Harian (${duration} Hari)` : plan.name,
       status: 'active',
       createdAt: now,
       expiresAt

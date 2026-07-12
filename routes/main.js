@@ -525,11 +525,22 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
 // Order page
 router.get('/order/:planId', ensureAuthenticated, (req, res) => {
   const plans = getPlans();
-  const plan = plans.find(p => p.id === req.params.planId);
+  let plan = plans.find(p => p.id === req.params.planId);
   if (!plan) return res.redirect('/pricing');
   if (plan.royalOnly && !req.user.isRoyal) {
     req.flash('error', 'Opsi harian hanya untuk member Royal Club. Silakan beli Royal Club Access terlebih dahulu!');
     return res.redirect('/pricing');
+  }
+
+  if (plan.id === 'custom_royal') {
+    const days = Math.min(6, Math.max(1, parseInt(req.query.days) || 1));
+    plan = {
+      ...plan,
+      name: `Sewa Harian (${days} Hari)`,
+      duration: days,
+      price: days * 7000,
+      priceDisplay: 'Rp ' + (days * 7000).toLocaleString('id-ID')
+    };
   }
   const promoCodes = db.get('promoCodes').filter({ isActive: true }).value();
   res.render('order', {
@@ -616,13 +627,26 @@ router.post('/api/promo/validate', ensureAuthenticated, (req, res) => {
 
 // Create order POST — FR3 NEWERA Payment Gateway
 router.post('/order', ensureAuthenticated, async (req, res) => {
-  const { planId, promoCode, promoId, paymentMethod } = req.body;
+  const { planId, promoCode, promoId, paymentMethod, customDays } = req.body;
   const plans = getPlans();
-  const plan = plans.find(p => p.id === planId);
+  let plan = plans.find(p => p.id === planId);
   if (!plan) return res.redirect('/pricing');
   if (plan.royalOnly && !req.user.isRoyal) {
     req.flash('error', 'Opsi harian hanya untuk member Royal Club. Silakan beli Royal Club Access terlebih dahulu!');
     return res.redirect('/pricing');
+  }
+
+  let selectedDuration = plan.duration;
+  let selectedPlanName = plan.name;
+  if (plan.id === 'custom_royal') {
+    const days = Math.min(6, Math.max(1, parseInt(customDays) || 1));
+    selectedDuration = days;
+    selectedPlanName = `Sewa Harian (${days} Hari)`;
+    plan = {
+      ...plan,
+      duration: days,
+      price: days * 7000
+    };
   }
 
   let actualPrice = plan.price;
@@ -657,7 +681,8 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     userEmail: req.user.email,
     orderType: 'subscription', // 'subscription' | 'topup'
     planId: plan.id,
-    planName: plan.name,
+    planName: selectedPlanName,
+    duration: selectedDuration,
     price: actualPrice,
     originalPrice: plan.price,
     discount,
@@ -1399,13 +1424,26 @@ router.post('/wallet/topup', ensureAuthenticated, (req, res) => {
 // Bayar paket memakai saldo. Jika saldo cukup → langsung aktif. Jika kurang →
 // buat order paket dengan sebagian dibayar saldo, sisanya via gateway.
 router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
-  const { planId, promoCode, promoId } = req.body;
+  const { planId, promoCode, promoId, customDays } = req.body;
   const plans = getPlans();
-  const plan = plans.find(p => p.id === planId);
+  let plan = plans.find(p => p.id === planId);
   if (!plan) { req.flash('error', 'Paket tidak ditemukan.'); return res.redirect('/pricing'); }
   if (plan.royalOnly && !req.user.isRoyal) {
     req.flash('error', 'Opsi harian hanya untuk member Royal Club. Silakan beli Royal Club Access terlebih dahulu!');
     return res.redirect('/pricing');
+  }
+
+  let selectedDuration = plan.duration;
+  let selectedPlanName = plan.name;
+  if (plan.id === 'custom_royal') {
+    const days = Math.min(6, Math.max(1, parseInt(customDays) || 1));
+    selectedDuration = days;
+    selectedPlanName = `Sewa Harian (${days} Hari)`;
+    plan = {
+      ...plan,
+      duration: days,
+      price: days * 7000
+    };
   }
 
   // Terapkan promo (jika valid) — logika sama dengan POST /order.
@@ -1433,7 +1471,8 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
       id: uuidv4(), orderId,
       userId: req.user.id, userName: req.user.name, userEmail: req.user.email,
       orderType: 'subscription',
-      planId: plan.id, planName: plan.name,
+      planId: plan.id, planName: selectedPlanName,
+      duration: selectedDuration,
       price: actualPrice, originalPrice: plan.price, discount,
       promoCode: appliedPromo ? appliedPromo.code : null,
       status: 'confirmed', qrisStatus: 'success',
@@ -1458,7 +1497,7 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
     }
 
     // Aktivasi subscription
-    activateUserSubscription(req.user.id, plan.id, orderId);
+    activateUserSubscription(req.user.id, plan.id, orderId, selectedDuration);
 
     // Referral hook + notifikasi.
     try {
@@ -1493,7 +1532,8 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
     id: uuidv4(), orderId,
     userId: req.user.id, userName: req.user.name, userEmail: req.user.email,
     orderType: 'subscription',
-    planId: plan.id, planName: plan.name,
+    planId: plan.id, planName: selectedPlanName,
+    duration: selectedDuration,
     price: remainder,           // yang ditagih gateway
     originalPrice: plan.price, discount,
     promoCode: appliedPromo ? appliedPromo.code : null,
