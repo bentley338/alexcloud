@@ -4,11 +4,13 @@ const fs = require('fs');
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-const { db, initDB } = require('../database/db');
+const { db, initDB, restoreFromMongoDB } = require('../database/db');
 
 async function run() {
-  console.log('Connecting to production DB...');
-  await initDB();
+  console.log('Restoring from Postgres...');
+  await restoreFromMongoDB();
+  initDB();
+  
   const users = db.get('users').value() || [];
   console.log(`Total users in production Postgres: ${users.length}`);
   users.forEach(u => {
