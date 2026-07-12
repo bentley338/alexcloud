@@ -522,6 +522,93 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
   });
 });
 
+// API: Claim Royal Daily Coins
+router.post('/api/royal/claim-daily', ensureAuthenticated, (req, res) => {
+  const user = db.get('users').find({ id: req.user.id }).value();
+  if (!user || !user.isRoyal) {
+    return res.json({ success: false, message: 'Anda bukan anggota Royal Club.' });
+  }
+
+  // Check last claim
+  const now = new Date();
+  if (user.lastRoyalClaim) {
+    const lastClaim = new Date(user.lastRoyalClaim);
+    const diffTime = Math.abs(now - lastClaim);
+    const diffHours = diffTime / (1000 * 60 * 60);
+    if (diffHours < 24) {
+      const hoursLeft = Math.ceil(24 - diffHours);
+      return res.json({ success: false, message: `Anda sudah mengklaim hari ini. Silakan coba lagi dalam ${hoursLeft} jam.` });
+    }
+  }
+
+  // Update user last claim time
+  db.get('users')
+    .find({ id: user.id })
+    .assign({ 
+      lastRoyalClaim: now.toISOString()
+    })
+    .write();
+
+  // Add 500 to wallet balance via applyWalletTx
+  applyWalletTx(req.user.id, {
+    type: 'credit',
+    amount: 500,
+    refType: 'royal_daily_claim',
+    refId: 'CLAIM_' + Date.now(),
+    note: 'Klaim Harian Royal Club'
+  });
+
+  return res.json({ success: true, message: 'Berhasil mengklaim Rp 500!' });
+});
+
+// API: Save Royal Settings
+router.post('/api/royal/settings', ensureAuthenticated, (req, res) => {
+  const user = db.get('users').find({ id: req.user.id }).value();
+  if (!user || !user.isRoyal) {
+    return res.json({ success: false, message: 'Anda bukan anggota Royal Club.' });
+  }
+
+  const { key, value } = req.body;
+  if (key === 'bitrate') {
+    const bitrate = Math.min(100, Math.max(10, parseInt(value) || 50));
+    db.get('users').find({ id: user.id }).assign({ royalBitrate: bitrate }).write();
+  } else if (key === 'controller') {
+    const preset = value || 'default';
+    db.get('users').find({ id: user.id }).assign({ royalController: preset }).write();
+  } else {
+    return res.json({ success: false, message: 'Pengaturan tidak dikenal.' });
+  }
+
+  return res.json({ success: true });
+});
+
+// API: Submit Game Request
+router.post('/api/royal/game-request', ensureAuthenticated, (req, res) => {
+  const user = db.get('users').find({ id: req.user.id }).value();
+  if (!user || !user.isRoyal) {
+    return res.json({ success: false, message: 'Anda bukan anggota Royal Club.' });
+  }
+
+  const { title } = req.body;
+  if (!title || !title.trim()) {
+    return res.json({ success: false, message: 'Nama game tidak boleh kosong.' });
+  }
+
+  const cleanTitle = title.trim();
+  const request = {
+    id: 'REQ_' + Date.now(),
+    userId: user.id,
+    userName: user.name,
+    userEmail: user.email,
+    title: cleanTitle,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  db.get('gameRequests').push(request).write();
+  return res.json({ success: true });
+});
+
 // Order page
 router.get('/order/:planId', ensureAuthenticated, (req, res) => {
   const plans = getPlans();

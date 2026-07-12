@@ -512,6 +512,9 @@ router.get('/royal', ensureAdmin, (req, res) => {
   // Get active subscriptions count for royal_access
   const royalSubs = db.get('subscriptions').filter({ planId: 'royal_access', status: 'active' }).value() || [];
 
+  // Get game requests
+  const gameRequests = db.get('gameRequests').value() || [];
+
   res.render('admin/royal', {
     title: 'Royal Club Management - AlexCloud Admin',
     user: req.user,
@@ -519,10 +522,24 @@ router.get('/royal', ensureAdmin, (req, res) => {
     nonRoyalUsers,
     totalRevenue,
     activeSubsCount: royalSubs.length,
+    gameRequests,
     moment,
     success: req.flash('success'),
     error: req.flash('error')
   });
+});
+
+router.post('/royal/game-request/:id/status', ensureAdmin, (req, res) => {
+  const { status } = req.body;
+  const targetReq = db.get('gameRequests').find({ id: req.params.id }).value();
+  if (!targetReq) {
+    req.flash('error', 'Request tidak ditemukan.');
+    return res.redirect('/admin/royal');
+  }
+
+  db.get('gameRequests').find({ id: targetReq.id }).assign({ status }).write();
+  req.flash('success', `Status request game "${targetReq.title}" berhasil diubah menjadi ${status}.`);
+  res.redirect('/admin/royal');
 });
 
 router.post('/royal/add', ensureAdmin, (req, res) => {

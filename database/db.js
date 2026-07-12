@@ -21,7 +21,8 @@ db.defaults({
   walletTx: [],
   settings: {},
   sessions: [],
-  chatMessages: []
+  chatMessages: [],
+  gameRequests: []
 }).write();
 
 // ─── Custom Lowdb Session Store (automatically backed up to Postgres) ──────────

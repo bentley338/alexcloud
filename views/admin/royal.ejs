@@ -122,6 +122,73 @@
     </div>
   </div>
 
+  <!-- Game Requests List -->
+  <div class="card" style="margin-top:2rem;">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-gamepad"></i> Request Game (Prioritas VIP)</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pengirim</th>
+            <th>Judul Game</th>
+            <th>Tanggal Request</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (gameRequests.length === 0) { %>
+            <tr>
+              <td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted); font-family:var(--font-ui);">
+                Belum ada request game dari member Royal.
+              </td>
+            </tr>
+          <% } else { %>
+            <% gameRequests.forEach(req => { %>
+              <tr>
+                <td>
+                  <span style="font-family:var(--font-ui); font-weight:600;"><%= req.userName %></span><br>
+                  <span style="font-size:0.8rem; color:var(--text-muted);"><%= req.userEmail %></span>
+                </td>
+                <td style="font-family:var(--font-ui); font-weight:700; color:#fbbf24;"><%= req.title %></td>
+                <td style="font-family:var(--font-ui); font-size:0.85rem;"><%= moment(req.createdAt).format('DD/MM/YYYY, HH:mm') %></td>
+                <td>
+                  <% if (req.status === 'pending') { %>
+                    <span class="status-badge status-pending">Pending</span>
+                  <% } else if (req.status === 'completed') { %>
+                    <span class="status-badge status-confirmed">Selesai</span>
+                  <% } else if (req.status === 'rejected') { %>
+                    <span class="status-badge status-rejected">Ditolak</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (req.status === 'pending') { %>
+                    <form action="/admin/royal/game-request/<%= req.id %>/status" method="POST" style="display:inline; margin-right:0.25rem;">
+                      <input type="hidden" name="status" value="completed">
+                      <button type="submit" class="btn-action btn-confirm" style="padding:0.35rem 0.7rem; font-size:0.8rem;">
+                        <i class="fas fa-check"></i> Terima
+                      </button>
+                    </form>
+                    <form action="/admin/royal/game-request/<%= req.id %>/status" method="POST" style="display:inline;">
+                      <input type="hidden" name="status" value="rejected">
+                      <button type="submit" class="btn-action btn-reject" style="padding:0.35rem 0.7rem; font-size:0.8rem;">
+                        <i class="fas fa-times"></i> Tolak
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <span style="font-size:0.85rem; color:var(--text-muted);">Selesai diproses</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <%- include('layout-footer') %>

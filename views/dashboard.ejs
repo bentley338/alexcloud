@@ -83,8 +83,200 @@
 
     <!-- Content -->
     <div class="content-grid">
-      <!-- Orders Table -->
-      <div class="card">
+      <!-- Left Column -->
+      <div>
+        <% if (user.isRoyal) { %>
+        <!-- 👑 ROYAL CLUB MEMBER LOUNGE 👑 -->
+        <div class="card" style="border: 2px solid #fbbf24; background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(17,17,17,0.95) 50%, rgba(251,191,36,0.02) 100%); margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(251,191,36,0.1);">
+          <div class="card-header" style="border-bottom: 1px solid rgba(251,191,36,0.15); display: flex; justify-content: space-between; align-items: center; background: rgba(251,191,36,0.03);">
+            <div class="card-title" style="color: #fbbf24; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fas fa-crown"></i> Royal Club Lounge
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; background: #fbbf24; color: #111; padding: 0.2rem 0.6rem; border-radius: 100px; font-family: var(--font-ui);">
+              VIP PERK ACTIVE
+            </span>
+          </div>
+          <div class="card-body" style="padding: 1.5rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+              
+              <!-- CLAIM DAILY COINS -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(251,191,36,0.15); padding: 1.25rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fbbf24; display: flex; align-items: center; gap: 0.4rem;">
+                    <i class="fas fa-coins"></i> Klaim Bonus Harian
+                  </h4>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 1rem;">
+                    Ambil bonus saldo gratis **Rp 500** setiap 24 jam khusus untuk member Royal Club.
+                  </p>
+                </div>
+                <div id="dailyClaimArea">
+                  <% 
+                    let canClaim = true;
+                    if (user.lastRoyalClaim) {
+                      const lastClaim = new Date(user.lastRoyalClaim);
+                      const diffTime = Math.abs(new Date() - lastClaim);
+                      const diffHours = diffTime / (1000 * 60 * 60);
+                      if (diffHours < 24) {
+                        canClaim = false;
+                      }
+                    }
+                  %>
+                  <% if (canClaim) { %>
+                    <button onclick="claimRoyalDaily()" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; font-weight: 800; border: none; width: 100%; text-align: center; justify-content: center; cursor: pointer; height: 42px; border-radius: 8px;">
+                      <i class="fas fa-gift"></i> Klaim Rp 500 Sekarang
+                    </button>
+                  <% } else { %>
+                    <button class="plan-btn" disabled style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); width: 100%; text-align: center; justify-content: center; height: 42px; border-radius: 8px; cursor: not-allowed;">
+                      <i class="fas fa-clock"></i> Sudah Diklaim (Kembali Besok)
+                    </button>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- STREAMING QUALITY CONTROLS -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px;">
+                <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fff; display: flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-sliders-h"></i> Pengaturan Bitrate VIP
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem;">
+                  Sesuaikan batas bitrate maksimal streaming cloud gaming (hingga 100 Mbps).
+                </p>
+                <div style="margin-top: 0.5rem;">
+                  <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem; font-family:var(--font-ui);">
+                    <span>Bitrate Target:</span>
+                    <strong style="color:var(--accent-blue);" id="bitrateVal"><%= user.royalBitrate || 50 %> Mbps</strong>
+                  </div>
+                  <input type="range" min="10" max="100" step="5" value="<%= user.royalBitrate || 50 %>" id="bitrateSlider" oninput="updateBitrateDisplay(this.value)" onchange="saveRoyalSettings('bitrate', this.value)" style="width:100%; accent-color:var(--accent-blue); background:rgba(255,255,255,0.1); outline:none; cursor:pointer;">
+                </div>
+              </div>
+
+              <!-- CUSTOM VIRTUAL CONTROLLER -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px;">
+                <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fff; display: flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-gamepad"></i> Layout Kontroler Virtual
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem;">
+                  Pilih jenis preset layout kontroler virtual kustom di layar HP.
+                </p>
+                <select id="controllerPreset" onchange="saveRoyalSettings('controller', this.value)" style="width: 100%; padding: 0.6rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-family: var(--font-ui); outline: none; font-size: 0.85rem; margin-top: 0.25rem;">
+                  <option value="default" <%= (user.royalController === 'default' || !user.royalController) ? 'selected' : '' %>>Xbox Console (Standar)</option>
+                  <option value="playstation" <%= user.royalController === 'playstation' ? 'selected' : '' %>>PlayStation Layout</option>
+                  <option value="retro" <%= user.royalController === 'retro' ? 'selected' : '' %>>Classic Retro (NES/SNES)</option>
+                  <option value="rpg" <%= user.royalController === 'rpg' ? 'selected' : '' %>>RPG Kustom Buttons</option>
+                </select>
+              </div>
+
+              <!-- REQUEST GAME CUSTOM FORM -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; grid-column: 1 / -1;">
+                <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fff; display: flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-plus-circle"></i> Ajukan Request Game Baru (VIP Priority)
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem;">
+                  Ingin game tertentu ditambahkan ke cloud gaming? Kirim request Anda, kami prioritaskan langsung!
+                </p>
+                <form id="gameRequestForm" onsubmit="submitGameRequest(event)" style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                  <input type="text" id="reqGameTitle" required placeholder="Contoh: GTA V, FIFA 24, Cyberpunk 2077..." style="flex: 1; padding: 0.6rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-family: var(--font-ui); outline: none; font-size: 0.85rem;">
+                  <button type="submit" class="btn-primary" style="padding: 0 1.25rem; font-size: 0.85rem; height: 38px; border-radius: var(--radius-sm);">
+                    Kirim Request
+                  </button>
+                </form>
+                <div id="gameRequestAlert" style="margin-top:0.5rem; font-size:0.8rem; display:none;"></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        
+        <!-- ROYAL LOUNGE SCRIPTS -->
+        <script>
+          function claimRoyalDaily() {
+            const btn = document.querySelector('#dailyClaimArea button');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            
+            fetch('/api/royal/claim-daily', { method: 'POST' })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  alert('Selamat! Saldo Rp 500 berhasil ditambahkan ke dompet Anda!');
+                  location.reload();
+                } else {
+                  alert(data.message || 'Gagal melakukan klaim.');
+                  btn.disabled = false;
+                  btn.innerHTML = '<i class="fas fa-gift"></i> Klaim Rp 500 Sekarang';
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan jaringan.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-gift"></i> Klaim Rp 500 Sekarang';
+              });
+          }
+          
+          function updateBitrateDisplay(val) {
+            document.getElementById('bitrateVal').innerText = val + ' Mbps';
+          }
+          
+          function saveRoyalSettings(key, value) {
+            fetch('/api/royal/settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key, value })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (!data.success) {
+                alert(data.message || 'Gagal menyimpan pengaturan.');
+              }
+            })
+            .catch(err => console.error(err));
+          }
+          
+          function submitGameRequest(e) {
+            e.preventDefault();
+            const titleInput = document.getElementById('reqGameTitle');
+            const gameTitle = titleInput.value.trim();
+            if (!gameTitle) return;
+            
+            const alertDiv = document.getElementById('gameRequestAlert');
+            const submitBtn = document.querySelector('#gameRequestForm button');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch('/api/royal/game-request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title: gameTitle })
+            })
+            .then(res => res.json())
+            .then(data => {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'Kirim Request';
+              if (data.success) {
+                alertDiv.style.display = 'block';
+                alertDiv.style.color = 'var(--accent-green)';
+                alertDiv.innerHTML = '<i class="fas fa-check-circle"></i> Request game "' + gameTitle + '" berhasil diajukan!';
+                titleInput.value = '';
+                setTimeout(() => { alertDiv.style.display = 'none'; }, 4000);
+              } else {
+                alertDiv.style.display = 'block';
+                alertDiv.style.color = '#ef4444';
+                alertDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (data.message || 'Gagal mengirim request.');
+              }
+            })
+            .catch(err => {
+              console.error(err);
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'Kirim Request';
+            });
+          }
+        </script>
+        <% } %>
+
+        <!-- Orders Table -->
+        <div class="card">
         <div class="card-header">
           <div class="card-title"><i class="fas fa-history"></i> Riwayat Order</div>
           <a href="/pricing?ref_=dash_history_order_new" class="btn-action btn-confirm"><i class="fas fa-plus"></i> Order Baru</a>
