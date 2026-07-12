@@ -1932,13 +1932,13 @@ JANGAN pernah gunakan format tulisan markdown seperti tanda bintang (* atau **) 
 
 // Secure endpoint to add testimonial from Bot
 router.post('/api/testimonials', async (req, res) => {
-  const apiKey = req.headers['x-api-key'] || req.query.apikey;
-  // Kunci khusus testimonial; fallback ke FR3_API_KEY demi kompatibilitas bot lama.
-  // Bandingkan timing-safe agar tidak bocor lewat timing attack.
-  const expectedApiKey = process.env.TESTIMONIAL_API_KEY || process.env.FR3_API_KEY;
+  // Gunakan secret di body request — tidak perlu sync env var ke botwa.
+  // BOT_SHARED_SECRET di .env alexcloud, fallback ke hardcoded default yang sama di botwa.
+  const { secret } = req.body;
+  const BOT_SECRET = process.env.BOT_SHARED_SECRET || 'alexcloud-botwa-secret-2026';
 
-  if (!safeEqual(apiKey, expectedApiKey)) {
-    return res.status(401).json({ success: false, error: 'Unauthorized: Invalid API key' });
+  if (!secret || !safeEqual(secret, BOT_SECRET)) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
   const { name, role, text, rating, image, avatar } = req.body;
