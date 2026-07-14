@@ -161,6 +161,8 @@ router.get('/orders', ensureAdmin, (req, res) => {
 // ─── Reviews Management ───────────────────────────────────────────────────────
 router.get('/reviews', ensureAdmin, (req, res) => {
   const orders = db.get('orders').filter({ status: 'confirmed' }).orderBy('paidAt', 'desc').value() || [];
+  const plans = db.get('plans').value() || [];
+  const games = db.get('games').value() || [];
 
   const stats = {
     total: orders.length,
@@ -173,6 +175,7 @@ router.get('/reviews', ensureAdmin, (req, res) => {
   res.render('admin/reviews', {
     title: 'Izinkan Ulasan - AlexCloud Admin',
     user: req.user, orders, stats, moment,
+    plans, games,
     success: req.flash('success'), error: req.flash('error')
   });
 });

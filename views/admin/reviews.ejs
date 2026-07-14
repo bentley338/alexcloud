@@ -28,10 +28,28 @@
       <input type="text" name="buyerName" placeholder="Contoh: Raditya" required
         style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); outline: none; font-family: var(--font-ui); box-sizing: border-box;">
     </div>
-    <div style="flex: 1; min-width: 200px;">
+    <div style="flex: 1; min-width: 250px;">
       <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-family: var(--font-ui);">Paket / Game Yang Dibeli:</label>
-      <input type="text" name="planName" placeholder="Contoh: AlexCloud Ultimate (1 Bulan)" required
-        style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); outline: none; font-family: var(--font-ui); box-sizing: border-box;">
+      <select name="planName" required
+        style="width: 100%; padding: 0.6rem 0.8rem; background: #181818; border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); outline: none; font-family: var(--font-ui); box-sizing: border-box; cursor: pointer; height: 38px;">
+        <option value="" disabled selected>-- Pilih Paket / Game --</option>
+        
+        <% if (typeof plans !== 'undefined' && plans.length > 0) { %>
+          <optgroup label="📦 PAKET LANGGANAN">
+            <% plans.forEach(p => { %>
+              <option value="<%= p.name %>"><%= p.name %> (Rp <%= p.price.toLocaleString('id-ID') %>)</option>
+            <% }) %>
+          </optgroup>
+        <% } %>
+        
+        <% if (typeof games !== 'undefined' && games.length > 0) { %>
+          <optgroup label="🎮 DAFTAR GAME">
+            <% games.forEach(g => { %>
+              <option value="<%= g.name %>"><%= g.name %></option>
+            <% }) %>
+          </optgroup>
+        <% } %>
+      </select>
     </div>
     <div>
       <button type="submit" class="btn-action btn-confirm" style="height: 38px; border-radius: var(--radius-md); font-weight: 700; background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; font-family: var(--font-ui); padding: 0 1.5rem; display: inline-flex; align-items: center; gap: 0.4rem; border: none; cursor: pointer;">
