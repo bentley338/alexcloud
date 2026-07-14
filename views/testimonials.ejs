@@ -324,6 +324,23 @@ function applyFilters() {
   });
   document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
 }
+
+// Auto filter based on URL query parameter
+window.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const filter = urlParams.get('filter');
+  if (filter) {
+    const btn = document.querySelector(`.filter-btn[onclick*="'${filter}'"]`);
+    if (btn) {
+      btn.click();
+      // Scroll to filter controls
+      const controls = document.querySelector('.testi-controls');
+      if (controls) {
+        controls.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+});
 </script>
 
 <%- include('partials/footer') %>
