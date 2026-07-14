@@ -1,0 +1,154 @@
+<% currentPage = 'reviews'; %>
+<%- include('layout-header') %>
+
+<h1 class="admin-page-title"><i class="fas fa-pen-to-square"></i> Izinkan Ulasan Pelanggan</h1>
+<p style="color:var(--text-muted); margin-bottom:1.5rem; font-family:var(--font-ui); font-size:0.9rem;">
+  Setelah order dikonfirmasi, klik <strong style="color:#fbbf24;">Izinkan Review</strong> agar pelanggan bisa menulis testimoni di website.
+</p>
+
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+<% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+<% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<!-- Stats Row -->
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.5rem;">
+  <div class="card" style="padding:1.25rem; text-align:center;">
+    <div style="font-size:1.75rem; font-weight:800; color:var(--accent-green); font-family:var(--font-display);"><%= stats.total %></div>
+    <div style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-ui); margin-top:0.25rem;">Total Order Confirmed</div>
+  </div>
+  <div class="card" style="padding:1.25rem; text-align:center;">
+    <div style="font-size:1.75rem; font-weight:800; color:#fbbf24; font-family:var(--font-display);"><%= stats.allowed %></div>
+    <div style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-ui); margin-top:0.25rem;">Diizinkan Review</div>
+  </div>
+  <div class="card" style="padding:1.25rem; text-align:center;">
+    <div style="font-size:1.75rem; font-weight:800; color:#a78bfa; font-family:var(--font-display);"><%= stats.pending %></div>
+    <div style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-ui); margin-top:0.25rem;">Menunggu Ulasan</div>
+  </div>
+  <div class="card" style="padding:1.25rem; text-align:center;">
+    <div style="font-size:1.75rem; font-weight:800; color:#34d399; font-family:var(--font-display);"><%= stats.reviewed %></div>
+    <div style="color:var(--text-muted); font-size:0.8rem; font-family:var(--font-ui); margin-top:0.25rem;">Sudah Diulas</div>
+  </div>
+</div>
+
+<!-- Filter Tabs -->
+<div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+  <button onclick="filterRows('all')" id="tab-all" class="btn-action btn-confirm" style="border-radius:50px;">Semua (<%= orders.length %>)</button>
+  <button onclick="filterRows('not-allowed')" id="tab-not-allowed" class="btn-action" style="border-radius:50px;">Belum Diizinkan (<%= stats.notAllowed %>)</button>
+  <button onclick="filterRows('pending')" id="tab-pending" class="btn-action" style="border-radius:50px; background:rgba(167,139,250,0.1); color:#a78bfa;">Menunggu Ulasan (<%= stats.pending %>)</button>
+  <button onclick="filterRows('reviewed')" id="tab-reviewed" class="btn-action" style="border-radius:50px; background:rgba(251,191,36,0.1); color:#fbbf24;">Sudah Diulas (<%= stats.reviewed %>)</button>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Pelanggan</th>
+          <th>Paket</th>
+          <th>Tgl Konfirmasi</th>
+          <th>Status Review</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="reviewsTable">
+        <% if (orders.length === 0) { %>
+        <tr><td colspan="6" style="text-align:center; padding:3rem; color:var(--text-muted);">Belum ada order yang dikonfirmasi.</td></tr>
+        <% } %>
+        <% orders.forEach(order => {
+          let reviewStatus = 'not-allowed';
+          if (order.reviewedAt) reviewStatus = 'reviewed';
+          else if (order.reviewAllowed) reviewStatus = 'pending';
+        %>
+        <tr class="review-row" data-status="<%= reviewStatus %>">
+          <td>
+            <span style="font-family:var(--font-display); font-size:0.8rem; color:var(--accent-blue)"><%= order.orderId %></span>
+          </td>
+          <td>
+            <div style="font-family:var(--font-ui); font-weight:600;"><%= order.userName %></div>
+            <div style="font-size:0.78rem; color:var(--text-muted)"><%= order.userEmail %></div>
+          </td>
+          <td style="font-family:var(--font-ui);"><%= order.planName %></td>
+          <td style="font-size:0.85rem; color:var(--text-muted)">
+            <%= moment(order.paidAt || order.createdAt).format('DD/MM/YY HH:mm') %>
+          </td>
+          <td>
+            <% if (order.reviewedAt) { %>
+              <span style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; padding:0.2rem 0.6rem; border-radius:100px; font-size:0.78rem; font-weight:700;">
+                <i class="fas fa-star"></i> Sudah Diulas
+              </span>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.25rem;">
+                <%= moment(order.reviewedAt).format('DD/MM/YY HH:mm') %>
+              </div>
+            <% } else if (order.reviewAllowed) { %>
+              <span style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); color:#a78bfa; padding:0.2rem 0.6rem; border-radius:100px; font-size:0.78rem; font-weight:700;">
+                <i class="fas fa-hourglass-half"></i> Menunggu Ulasan
+              </span>
+              <div style="margin-top:0.4rem;">
+                <button onclick="copyLink('<%= process.env.BASE_URL || 'https://alexcloud.my.id' %>/review/<%= order.reviewToken %>')"
+                  class="btn-action" style="font-size:0.7rem; padding:0.2rem 0.5rem;">
+                  <i class="fas fa-copy"></i> Copy Link
+                </button>
+              </div>
+            <% } else { %>
+              <span style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-muted); padding:0.2rem 0.6rem; border-radius:100px; font-size:0.78rem;">
+                <i class="fas fa-lock"></i> Belum Diizinkan
+              </span>
+            <% } %>
+          </td>
+          <td>
+            <% if (order.reviewedAt) { %>
+              <span style="color:#fbbf24; font-size:0.85rem;"><i class="fas fa-check-double"></i> Selesai</span>
+            <% } else if (order.reviewAllowed) { %>
+              <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                <button onclick="copyLink('<%= process.env.BASE_URL || 'https://alexcloud.my.id' %>/review/<%= order.reviewToken %>')"
+                  class="btn-action btn-confirm" style="font-size:0.78rem;">
+                  <i class="fas fa-link"></i> Copy Link Review
+                </button>
+                <div style="font-size:0.7rem; color:var(--text-muted); word-break:break-all; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  /review/<%= order.reviewToken ? order.reviewToken.substring(0,12) : '' %>...
+                </div>
+              </div>
+            <% } else { %>
+              <form action="/admin/orders/<%= order.id %>/allow-review" method="POST" style="display:inline;">
+                <button type="submit" class="btn-action" style="background:rgba(251,191,36,0.12); color:#fbbf24; border:1px solid rgba(251,191,36,0.3); font-size:0.82rem;">
+                  <i class="fas fa-unlock"></i> Izinkan Review
+                </button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function filterRows(status) {
+  document.querySelectorAll('.review-row').forEach(row => {
+    row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+  });
+  document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('btn-confirm'));
+  const active = document.getElementById('tab-' + status);
+  if (active) active.classList.add('btn-confirm');
+}
+
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const el = event.target.closest('button');
+    const orig = el.innerHTML;
+    el.innerHTML = '<i class="fas fa-check"></i> Disalin!';
+    el.style.background = 'rgba(52,211,153,0.15)';
+    el.style.color = '#34d399';
+    setTimeout(() => { el.innerHTML = orig; el.style.background = ''; el.style.color = ''; }, 2000);
+  }).catch(() => {
+    prompt('Salin link review ini:', url);
+  });
+}
+</script>
+
+<%- include('layout-footer') %>

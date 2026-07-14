@@ -158,6 +158,25 @@ router.get('/orders', ensureAdmin, (req, res) => {
   });
 });
 
+// ─── Reviews Management ───────────────────────────────────────────────────────
+router.get('/reviews', ensureAdmin, (req, res) => {
+  const orders = db.get('orders').filter({ status: 'confirmed' }).orderBy('paidAt', 'desc').value() || [];
+
+  const stats = {
+    total: orders.length,
+    allowed: orders.filter(o => o.reviewAllowed).length,
+    pending: orders.filter(o => o.reviewAllowed && !o.reviewedAt).length,
+    reviewed: orders.filter(o => o.reviewedAt).length,
+    notAllowed: orders.filter(o => !o.reviewAllowed).length
+  };
+
+  res.render('admin/reviews', {
+    title: 'Izinkan Ulasan - AlexCloud Admin',
+    user: req.user, orders, stats, moment,
+    success: req.flash('success'), error: req.flash('error')
+  });
+});
+
 router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
   const order = db.get('orders').find({ id: req.params.id }).value();
   if (!order) { req.flash('error', 'Order tidak ditemukan.'); return res.redirect('/admin/orders'); }
