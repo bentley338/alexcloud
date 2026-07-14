@@ -423,10 +423,20 @@ router.get('/review/:token/sukses', (req, res) => {
 // Testimonials page
 router.get('/testimonials', (req, res) => {
   const testimonials = getCleanTestimonials();
+
+  // Check if logged-in user has pending review invitations
+  let pendingReviews = [];
+  if (req.user) {
+    pendingReviews = db.get('orders')
+      .filter(o => o.userId === req.user.id && o.reviewAllowed && !o.reviewedAt)
+      .value() || [];
+  }
+
   res.render('testimonials', {
-    title: 'Testimoni - AlexCloud',
+    title: 'Testimoni Pelanggan - AlexCloud',
     user: req.user || null,
-    testimonials
+    testimonials,
+    pendingReviews
   });
 });
 

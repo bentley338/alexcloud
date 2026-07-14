@@ -1,51 +1,319 @@
 <%- include('partials/header') %>
 
-<div style="min-height:100vh; padding:7rem 2rem 4rem;">
-  <div style="max-width:1100px; margin:0 auto;">
-    <div class="section-header" style="margin-bottom:3rem;">
-      <div class="section-tag">⭐ Dari Gamer Nyata</div>
-      <h1 class="section-title">Semua <span class="accent">Testimoni</span></h1>
-      <p class="section-desc">Ribuan gamer Indonesia telah merasakan perbedaan AlexCloud</p>
+<style>
+/* ─── Testimonials Page Styles ─────────────────────────────────────── */
+.testi-page { min-height: 100vh; padding: 6rem 1.5rem 5rem; }
+.testi-page-inner { max-width: 1200px; margin: 0 auto; }
+
+/* Hero */
+.testi-hero { text-align: center; margin-bottom: 3.5rem; }
+.testi-hero-tag {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25);
+  color: #fbbf24; border-radius: 100px; padding: 0.35rem 1rem;
+  font-family: var(--font-ui); font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1.25rem;
+}
+.testi-hero h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; margin-bottom: 0.75rem; }
+.testi-hero h1 span { background: linear-gradient(90deg, #fbbf24, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.testi-hero p { color: var(--text-muted); font-size: 1rem; max-width: 520px; margin: 0 auto 2rem; line-height: 1.7; }
+
+/* Stats row */
+.testi-stats {
+  display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+.testi-stat { text-align: center; }
+.testi-stat-num { font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: #fbbf24; line-height: 1; }
+.testi-stat-label { font-family: var(--font-ui); font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+/* CTA Buttons */
+.testi-cta-row { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 3rem; }
+.btn-write-review {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(90deg, #fbbf24, #d97706);
+  color: #111; border: none; border-radius: 0.625rem;
+  font-family: var(--font-ui); font-size: 0.9rem; font-weight: 800;
+  text-decoration: none; cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 4px 20px rgba(251,191,36,0.3);
+}
+.btn-write-review:hover { opacity: 0.9; transform: translateY(-2px); }
+.btn-secondary-outline {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent; color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 0.625rem;
+  font-family: var(--font-ui); font-size: 0.9rem; font-weight: 600;
+  text-decoration: none; transition: border-color 0.2s, color 0.2s;
+}
+.btn-secondary-outline:hover { border-color: #fbbf24; color: #fbbf24; }
+
+/* Filter & Search */
+.testi-controls {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  margin-bottom: 2rem; justify-content: space-between;
+}
+.testi-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.filter-btn {
+  padding: 0.4rem 0.9rem; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-muted); font-family: var(--font-ui); font-size: 0.82rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.filter-btn:hover, .filter-btn.active { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.4); color: #fbbf24; }
+.testi-search {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  border-radius: 0.5rem; padding: 0.4rem 0.75rem;
+}
+.testi-search input {
+  background: transparent; border: none; outline: none;
+  color: var(--text-primary); font-family: var(--font-ui); font-size: 0.85rem;
+  width: 180px;
+}
+.testi-search i { color: var(--text-muted); font-size: 0.8rem; }
+
+/* Grid */
+.testi-masonry {
+  columns: 3; column-gap: 1.25rem;
+}
+@media (max-width: 900px) { .testi-masonry { columns: 2; } }
+@media (max-width: 600px) { .testi-masonry { columns: 1; } }
+
+/* Card */
+.testi-card-v2 {
+  break-inside: avoid; margin-bottom: 1.25rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 1rem; overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.testi-card-v2:hover { transform: translateY(-4px); border-color: rgba(251,191,36,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+.testi-card-v2 .testi-img { width: 100%; max-height: 260px; object-fit: cover; display: block; }
+.testi-card-body { padding: 1.1rem 1.1rem 0.9rem; }
+.testi-stars-v2 { display: flex; gap: 0.2rem; margin-bottom: 0.6rem; }
+.testi-stars-v2 i { font-size: 0.85rem; }
+.testi-text-v2 {
+  color: var(--text-primary); font-size: 0.9rem; line-height: 1.65;
+  margin-bottom: 0.9rem; font-style: italic;
+}
+.testi-author-v2 { display: flex; align-items: center; gap: 0.6rem; }
+.testi-avatar-v2 {
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+  background: linear-gradient(135deg,#fbbf24,#d97706);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 0.9rem; color: #111;
+  flex-shrink: 0;
+}
+.testi-author-v2 img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.testi-name-v2 { font-family: var(--font-ui); font-size: 0.85rem; font-weight: 700; }
+.testi-role-v2 { font-family: var(--font-ui); font-size: 0.72rem; color: var(--text-muted); }
+.testi-source-badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2);
+  color: #fbbf24; border-radius: 100px; padding: 0.15rem 0.5rem;
+  font-size: 0.65rem; font-family: var(--font-ui); font-weight: 700; margin-top: 0.3rem;
+}
+
+/* Empty state */
+.testi-empty { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+.testi-empty i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; display: block; }
+
+/* Review pending banner */
+.review-pending-banner {
+  background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(217,119,6,0.08));
+  border: 1px solid rgba(251,191,36,0.25);
+  border-radius: 0.875rem; padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.review-pending-banner i { font-size: 1.5rem; color: #fbbf24; flex-shrink: 0; }
+.review-pending-banner .banner-title { font-family: var(--font-ui); font-weight: 700; margin-bottom: 0.2rem; }
+.review-pending-banner .banner-desc { font-family: var(--font-ui); font-size: 0.85rem; color: var(--text-muted); }
+</style>
+
+<div class="testi-page">
+  <div class="testi-page-inner">
+
+    <!-- Hero -->
+    <div class="testi-hero">
+      <div class="testi-hero-tag"><i class="fas fa-star"></i> Ulasan Pelanggan Nyata</div>
+      <h1>Apa Kata <span>Mereka?</span></h1>
+      <p>Ribuan gamer Indonesia telah merasakan perbedaan AlexCloud. Berikut ulasan jujur dari pelanggan kami.</p>
+
+      <!-- Stats -->
+      <% const totalRating = testimonials.reduce((s,t) => s + (t.rating||5), 0);
+         const avgRating = testimonials.length > 0 ? (totalRating / testimonials.length).toFixed(1) : '5.0';
+         const fiveStars = testimonials.filter(t => t.rating === 5).length; %>
+      <div class="testi-stats">
+        <div class="testi-stat">
+          <div class="testi-stat-num"><%= testimonials.length %>+</div>
+          <div class="testi-stat-label">Total Ulasan</div>
+        </div>
+        <div class="testi-stat">
+          <div class="testi-stat-num"><%= avgRating %> ⭐</div>
+          <div class="testi-stat-label">Rating Rata-rata</div>
+        </div>
+        <div class="testi-stat">
+          <div class="testi-stat-num"><%= fiveStars %></div>
+          <div class="testi-stat-label">Bintang 5</div>
+        </div>
+      </div>
+
+      <!-- CTA Buttons -->
+      <div class="testi-cta-row">
+        <% if (typeof user !== 'undefined' && user) { %>
+          <%
+            // Check if user has any pending review
+            // We'll render a generic dashboard link; actual check is done server-side
+          %>
+          <a href="/dashboard" class="btn-write-review">
+            <i class="fas fa-star"></i> Tulis Ulasanmu
+          </a>
+        <% } else { %>
+          <a href="/login" class="btn-write-review">
+            <i class="fas fa-star"></i> Login & Tulis Ulasan
+          </a>
+        <% } %>
+        <a href="/pricing" class="btn-secondary-outline">
+          <i class="fas fa-gamepad"></i> Coba AlexCloud
+        </a>
+      </div>
     </div>
 
+    <!-- Pending review banner for logged in users -->
+    <% if (typeof pendingReviews !== 'undefined' && pendingReviews && pendingReviews.length > 0) { %>
+    <div class="review-pending-banner">
+      <i class="fas fa-bell"></i>
+      <div style="flex:1;">
+        <div class="banner-title">⭐ Kamu Punya Undangan Ulasan!</div>
+        <div class="banner-desc">Admin mengundang kamu menulis ulasan untuk <%= pendingReviews.length %> order. Ulasanmu akan tampil di halaman ini!</div>
+      </div>
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <% pendingReviews.forEach(pr => { %>
+          <a href="/review/<%= pr.reviewToken %>" class="btn-write-review" style="font-size:0.82rem; padding:0.6rem 1rem;">
+            <i class="fas fa-pen"></i> Tulis Ulasan #<%= pr.orderId %>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
     <% if (testimonials && testimonials.length > 0) { %>
-    <div class="testi-grid-full">
-      <% testimonials.forEach(t => { %>
-      <div class="testi-card-full">
+
+    <!-- Filter & Search Controls -->
+    <div class="testi-controls">
+      <div class="testi-filters">
+        <button class="filter-btn active" onclick="filterTesti('all', this)">Semua (<%= testimonials.length %>)</button>
+        <button class="filter-btn" onclick="filterTesti('5', this)">⭐⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===5).length %>)</button>
+        <button class="filter-btn" onclick="filterTesti('4', this)">⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===4).length %>)</button>
+        <button class="filter-btn" onclick="filterTesti('photo', this)">📸 Ada Foto (<%= testimonials.filter(t=>t.image).length %>)</button>
+      </div>
+      <div class="testi-search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Cari ulasan..." id="searchInput" oninput="searchTesti(this.value)">
+      </div>
+    </div>
+
+    <!-- No results message -->
+    <div id="noResults" style="display:none;" class="testi-empty">
+      <i class="fas fa-search-minus"></i>
+      <p>Tidak ada ulasan yang cocok.</p>
+    </div>
+
+    <!-- Masonry Grid -->
+    <div class="testi-masonry" id="testiGrid">
+      <% testimonials.forEach((t, idx) => { %>
+      <div class="testi-card-v2"
+           data-rating="<%= t.rating %>"
+           data-hasphoto="<%= t.image ? 'yes' : 'no' %>"
+           data-text="<%= (t.text + ' ' + t.name).toLowerCase() %>">
         <% if (t.image) { %>
-          <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-full-img" width="400" height="250" loading="lazy" decoding="async" fetchpriority="low">
+          <img src="<%= t.image %>" alt="Foto bukti testimoni <%= t.name %>" class="testi-img" loading="lazy" decoding="async">
         <% } %>
-        <div class="testi-content">
-          <div class="testi-stars">
-            <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < t.rating ? '#fbbf24' : '#333' %>"></i><%}%>
+        <div class="testi-card-body">
+          <div class="testi-stars-v2">
+            <% for(let i=0;i<5;i++){%>
+              <i class="fas fa-star" style="color:<%= i < (t.rating||5) ? '#fbbf24' : 'rgba(255,255,255,0.12)' %>"></i>
+            <%}%>
           </div>
-          <p class="testi-text">"<%= t.text %>"</p>
-          <div class="testi-author">
+          <p class="testi-text-v2">"<%= t.text %>"</p>
+          <div class="testi-author-v2">
             <% if (t.avatar && !t.avatar.includes('dicebear.com')) { %>
-              <img src="<%= t.avatar %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy" decoding="async">
+              <img src="<%= t.avatar %>" alt="<%= t.name %>">
             <% } else { %>
-              <div class="testi-avatar-placeholder" aria-hidden="true"><%= t.name.charAt(0).toUpperCase() %></div>
+              <div class="testi-avatar-v2"><%= t.name.charAt(0).toUpperCase() %></div>
             <% } %>
             <div>
-              <div class="testi-name"><%= t.name %></div>
-              <div class="testi-role"><%= t.role %></div>
+              <div class="testi-name-v2"><%= t.name %></div>
+              <div class="testi-role-v2"><%= t.role || 'Pelanggan AlexCloud' %></div>
+              <% if (t.source === 'web-review') { %>
+                <div class="testi-source-badge"><i class="fas fa-check-circle"></i> Ulasan Terverifikasi</div>
+              <% } %>
             </div>
           </div>
         </div>
       </div>
       <% }) %>
     </div>
+
     <% } else { %>
-    <div style="text-align:center; padding:4rem; color:var(--text-muted);">
-      <i class="fas fa-star" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i>
-      <p>Belum ada testimoni tersedia.</p>
+    <div class="testi-empty">
+      <i class="fas fa-star"></i>
+      <p>Belum ada testimoni. Jadilah yang pertama!</p>
+      <a href="/pricing" class="btn-write-review" style="margin-top:1rem;">
+        <i class="fas fa-gamepad"></i> Coba AlexCloud Sekarang
+      </a>
     </div>
     <% } %>
 
-    <div style="text-align:center; margin-top:3rem;">
-      <a href="/" class="btn-secondary"><i class="fas fa-home"></i> Kembali ke Beranda</a>
+    <!-- Bottom CTA -->
+    <div style="text-align:center; margin-top:4rem; padding:3rem; background:var(--bg-card); border:1px solid var(--border); border-radius:1.25rem;">
+      <div style="font-size:2rem; margin-bottom:0.75rem;">🎮</div>
+      <h2 style="font-family:var(--font-display); font-size:1.6rem; font-weight:800; margin-bottom:0.5rem;">Siap Bergabung?</h2>
+      <p style="color:var(--text-muted); margin-bottom:1.5rem;">Rasakan sendiri kualitas cloud gaming AlexCloud dan bagikan pengalamanmu!</p>
+      <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+        <a href="/pricing" class="btn-write-review"><i class="fas fa-rocket"></i> Order Sekarang</a>
+        <a href="/" class="btn-secondary-outline"><i class="fas fa-home"></i> Kembali ke Beranda</a>
+      </div>
     </div>
+
   </div>
 </div>
+
+<script>
+let activeFilter = 'all';
+let activeSearch = '';
+
+function filterTesti(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  applyFilters();
+}
+
+function searchTesti(val) {
+  activeSearch = val.toLowerCase().trim();
+  applyFilters();
+}
+
+function applyFilters() {
+  let visible = 0;
+  document.querySelectorAll('.testi-card-v2').forEach(card => {
+    let show = true;
+    if (activeFilter === 'photo') {
+      show = card.dataset.hasphoto === 'yes';
+    } else if (activeFilter !== 'all') {
+      show = card.dataset.rating === activeFilter;
+    }
+    if (show && activeSearch) {
+      show = (card.dataset.text || '').includes(activeSearch);
+    }
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+}
+</script>
 
 <%- include('partials/footer') %>
