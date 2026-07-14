@@ -71,7 +71,8 @@
               </form>
               <form action="/admin/orders/<%= order.id %>/reject" method="POST" style="display:inline;">
                 <button type="submit" class="btn-action btn-reject"
-                  onclick="return confirm('Tolak order <%= order.orderId %>?')">
+                  data-orderid="<%= order.orderId %>"
+                  onclick="return confirmReject(this)">
                   <i class="fas fa-times"></i> Tolak
                 </button>
               </form>
@@ -99,6 +100,7 @@
                 <% } %>
               <% } %>
             </div>
+            <% } %>
           </td>
         </tr>
         <% }) %>
@@ -112,6 +114,11 @@ function filterOrders(status) {
   document.querySelectorAll('.order-row').forEach(row => {
     row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
   });
+}
+
+function confirmReject(btn) {
+  var orderId = btn.getAttribute('data-orderid');
+  return confirm('Tolak order ' + orderId + '?');
 }
 </script>
 
