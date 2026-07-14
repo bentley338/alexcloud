@@ -211,16 +211,14 @@
 
     <!-- Big Navigation Tabs -->
     <div class="testi-tabs">
-      <button class="testi-tab active" onclick="switchTab('buyer', this)">
+      <button class="testi-tab active" onclick="switchTab('general', this)">
+        <i class="fas fa-star"></i> Testimoni
+        <div class="tab-indicator"></div>
+      </button>
+      <button class="testi-tab" onclick="switchTab('buyer', this)">
         <i class="fas fa-shopping-bag"></i> Ulasan Pembeli
         <div class="tab-indicator"></div>
       </button>
-      <% if (user) { %>
-        <button class="testi-tab" onclick="switchTab('own', this)">
-          <i class="fas fa-user-circle"></i> Ulasan Saya
-          <div class="tab-indicator"></div>
-        </button>
-      <% } %>
     </div>
 
     <!-- Filter & Search Controls -->
@@ -314,7 +312,7 @@
 </div>
 
 <script>
-let activeTab = 'buyer'; // 'buyer' or 'own'
+let activeTab = 'general'; // 'general' or 'buyer'
 let activeFilter = 'all';
 let activeSearch = '';
 
@@ -349,8 +347,8 @@ function searchTesti(val) {
 function updateFilterCounts() {
   const cards = Array.from(document.querySelectorAll('.testi-card-v2'));
   const tabCards = cards.filter(card => {
-    if (activeTab === 'buyer') return true;
-    if (activeTab === 'own') return card.dataset.own === 'yes';
+    if (activeTab === 'general') return card.dataset.source !== 'web-review';
+    if (activeTab === 'buyer') return card.dataset.source === 'web-review';
     return true;
   });
 
@@ -381,10 +379,10 @@ function applyFilters() {
     let show = true;
 
     // 1. Filter by Tab
-    if (activeTab === 'buyer') {
-      show = true;
-    } else if (activeTab === 'own') {
-      show = card.dataset.own === 'yes';
+    if (activeTab === 'general') {
+      show = card.dataset.source !== 'web-review';
+    } else if (activeTab === 'buyer') {
+      show = card.dataset.source === 'web-review';
     }
 
     // 2. Filter by Rating/Photo
@@ -413,11 +411,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const filter = urlParams.get('filter');
   
-  if (filter === 'own') {
-    const tabBtn = document.querySelector(`.testi-tab[onclick*="'own'"]`);
-    if (tabBtn) tabBtn.click();
-  } else if (filter === 'buyer') {
+  if (filter === 'buyer') {
     const tabBtn = document.querySelector(`.testi-tab[onclick*="'buyer'"]`);
+    if (tabBtn) tabBtn.click();
+  } else if (filter === 'general') {
+    const tabBtn = document.querySelector(`.testi-tab[onclick*="'general'"]`);
     if (tabBtn) tabBtn.click();
   } else if (filter) {
     const btn = document.querySelector(`.filter-btn[onclick*="'${filter}'"]`);
