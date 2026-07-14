@@ -207,6 +207,21 @@ router.post('/reviews/generate-manual', ensureAdmin, (req, res) => {
   db.get('orders').push(mockOrder).write();
 
   const reviewUrl = `${process.env.BASE_URL || 'https://alexcloud.my.id'}/review/${reviewToken}`;
+
+  // Kirim notifikasi WA ke owner/admin secara otomatis
+  try {
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    const notifMsg = `🎫 *LINK ULASAN MANUAL DIBUAT* 🎫\n\n` +
+      `👤 *Pelanggan:* ${buyerName.trim()}\n` +
+      `📦 *Produk/Game:* ${planName.trim()}\n` +
+      `🆔 *Order ID:* #${mockOrder.orderId}\n\n` +
+      `🔗 *Link Ulasan:* \n${reviewUrl}\n\n` +
+      `Silakan bagikan link tersebut kepada pembeli agar mereka dapat menulis ulasan.`;
+    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF MANUAL REVIEW]', err.message));
+  } catch (err) {
+    console.error('[WA NOTIF MANUAL REVIEW EX]', err.message);
+  }
+
   req.flash('success', `Link ulasan manual berhasil dibuat! Silakan salin: ${reviewUrl}`);
   res.redirect('/admin/reviews');
 });
