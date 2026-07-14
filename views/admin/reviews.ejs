@@ -13,6 +13,34 @@
 <% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
 <% } %>
 
+<!-- Buat Ulasan Manual Card -->
+<div class="card" style="padding: 1.5rem; margin-bottom: 2rem; border-color: rgba(251,191,36,0.25);">
+  <h2 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem; color: #fbbf24;"><i class="fas fa-plus-circle"></i> Buat Link Ulasan Manual (Beli di Luar Web)</h2>
+  <p style="color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-ui); margin-bottom: 1.25rem;">
+    Gunakan form ini untuk membuat link ulasan khusus bagi pelanggan yang membeli secara manual di luar website (misal via WhatsApp atau DM).
+  </p>
+  <form action="/admin/reviews/generate-manual" method="POST" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+    <!-- CSRF Token -->
+    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+    
+    <div style="flex: 1; min-width: 200px;">
+      <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-family: var(--font-ui);">Nama Pelanggan:</label>
+      <input type="text" name="buyerName" placeholder="Contoh: Raditya" required
+        style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); outline: none; font-family: var(--font-ui); box-sizing: border-box;">
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+      <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-family: var(--font-ui);">Paket / Game Yang Dibeli:</label>
+      <input type="text" name="planName" placeholder="Contoh: AlexCloud Ultimate (1 Bulan)" required
+        style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); outline: none; font-family: var(--font-ui); box-sizing: border-box;">
+    </div>
+    <div>
+      <button type="submit" class="btn-action btn-confirm" style="height: 38px; border-radius: var(--radius-md); font-weight: 700; background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; font-family: var(--font-ui); padding: 0 1.5rem; display: inline-flex; align-items: center; gap: 0.4rem; border: none; cursor: pointer;">
+        <i class="fas fa-magic"></i> Generate Link
+      </button>
+    </div>
+  </form>
+</div>
+
 <!-- Stats Row -->
 <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.5rem;">
   <div class="card" style="padding:1.25rem; text-align:center;">

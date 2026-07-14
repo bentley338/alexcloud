@@ -177,6 +177,37 @@ router.get('/reviews', ensureAdmin, (req, res) => {
   });
 });
 
+router.post('/reviews/generate-manual', ensureAdmin, (req, res) => {
+  const { buyerName, planName } = req.body;
+  if (!buyerName || !planName) {
+    req.flash('error', 'Nama pelanggan dan paket/game wajib diisi.');
+    return res.redirect('/admin/reviews');
+  }
+
+  const reviewToken = uuidv4();
+  const mockOrder = {
+    id: uuidv4(),
+    orderId: 'M-' + Math.floor(100000 + Math.random() * 900000),
+    userId: null,
+    userName: buyerName.trim(),
+    userEmail: 'manual-purchase@alexcloud.my.id',
+    planName: planName.trim(),
+    price: 0,
+    status: 'confirmed',
+    paidAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    reviewAllowed: true,
+    reviewToken,
+    reviewAllowedAt: new Date().toISOString()
+  };
+
+  db.get('orders').push(mockOrder).write();
+
+  const reviewUrl = `${process.env.BASE_URL || 'https://alexcloud.my.id'}/review/${reviewToken}`;
+  req.flash('success', `Link ulasan manual berhasil dibuat! Silakan salin: ${reviewUrl}`);
+  res.redirect('/admin/reviews');
+});
+
 router.post('/orders/:id/confirm', ensureAdmin, (req, res) => {
   const order = db.get('orders').find({ id: req.params.id }).value();
   if (!order) { req.flash('error', 'Order tidak ditemukan.'); return res.redirect('/admin/orders'); }
