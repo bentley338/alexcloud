@@ -1,6 +1,14 @@
 <%- include('partials/header') %>
 
 <style>
+/* ─── Testimonial Tabs ─── */
+.testi-tabs { display: flex; justify-content: center; gap: 0.5rem; margin: 0 auto 3rem; border-bottom: 1px solid var(--border); padding-bottom: 1px; max-width: 600px; }
+.testi-tab { background: transparent; border: none; color: var(--text-muted); font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; padding: 0.75rem 2rem; cursor: pointer; position: relative; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem; }
+.testi-tab:hover { color: var(--text-primary); }
+.testi-tab.active { color: #fbbf24; }
+.testi-tab .tab-indicator { position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, #fbbf24, #d97706); border-radius: 10px; display: none; }
+.testi-tab.active .tab-indicator { display: block; }
+
 /* ─── Testimonials Page Styles ─────────────────────────────────────── */
 .testi-page { min-height: 100vh; padding: 6rem 1.5rem 5rem; }
 .testi-page-inner { max-width: 1200px; margin: 0 auto; }
@@ -201,17 +209,35 @@
 
     <% if (testimonials && testimonials.length > 0) { %>
 
+    <!-- Big Navigation Tabs -->
+    <div class="testi-tabs">
+      <button class="testi-tab active" onclick="switchTab('buyer', this)">
+        <i class="fas fa-shopping-bag"></i> Ulasan Pembeli
+        <div class="tab-indicator"></div>
+      </button>
+      <% if (user) { %>
+        <button class="testi-tab" onclick="switchTab('own', this)">
+          <i class="fas fa-user-circle"></i> Ulasan Saya
+          <div class="tab-indicator"></div>
+        </button>
+      <% } %>
+    </div>
+
     <!-- Filter & Search Controls -->
     <div class="testi-controls">
       <div class="testi-filters">
-        <button class="filter-btn active" onclick="filterTesti('all', this)">Semua (<%= testimonials.length %>)</button>
-        <button class="filter-btn" onclick="filterTesti('5', this)">⭐⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===5).length %>)</button>
-        <button class="filter-btn" onclick="filterTesti('4', this)">⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===4).length %>)</button>
-        <button class="filter-btn" onclick="filterTesti('photo', this)">📸 Ada Foto (<%= testimonials.filter(t=>t.image).length %>)</button>
-        <button class="filter-btn" onclick="filterTesti('buyer', this)">🛍️ Ulasan Pembeli (<%= testimonials.filter(t=>t.source==='web-review').length %>)</button>
-        <% if (user) { %>
-          <button class="filter-btn" onclick="filterTesti('own', this)">👤 Dari Gw (<%= testimonials.filter(t=>t.isOwn).length %>)</button>
-        <% } %>
+        <button class="filter-btn active" id="filter-all-btn" onclick="filterTesti('all', this)">
+          <span id="label-count-all">Semua (<%= testimonials.length %>)</span>
+        </button>
+        <button class="filter-btn" onclick="filterTesti('5', this)">
+          <span id="label-count-5">⭐⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===5).length %>)</span>
+        </button>
+        <button class="filter-btn" onclick="filterTesti('4', this)">
+          <span id="label-count-4">⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===4).length %>)</span>
+        </button>
+        <button class="filter-btn" onclick="filterTesti('photo', this)">
+          <span id="label-count-photo">📸 Ada Foto (<%= testimonials.filter(t=>t.image).length %>)</span>
+        </button>
       </div>
       <div class="testi-search">
         <i class="fas fa-search"></i>
@@ -288,8 +314,25 @@
 </div>
 
 <script>
+let activeTab = 'buyer'; // 'buyer' or 'own'
 let activeFilter = 'all';
 let activeSearch = '';
+
+function switchTab(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.testi-tab').forEach(t => {
+    t.classList.remove('active');
+  });
+  btn.classList.add('active');
+
+  // Reset filter to 'all' on tab switch for best UX
+  activeFilter = 'all';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  const allBtn = document.getElementById('filter-all-btn');
+  if (allBtn) allBtn.classList.add('active');
+
+  applyFilters();
+}
 
 function filterTesti(filter, btn) {
   activeFilter = filter;
@@ -303,25 +346,65 @@ function searchTesti(val) {
   applyFilters();
 }
 
+function updateFilterCounts() {
+  const cards = Array.from(document.querySelectorAll('.testi-card-v2'));
+  const tabCards = cards.filter(card => {
+    if (activeTab === 'buyer') return true;
+    if (activeTab === 'own') return card.dataset.own === 'yes';
+    return true;
+  });
+
+  const total = tabCards.length;
+  const rating5 = tabCards.filter(c => c.dataset.rating === '5').length;
+  const rating4 = tabCards.filter(c => c.dataset.rating === '4').length;
+  const hasPhoto = tabCards.filter(c => c.dataset.hasphoto === 'yes').length;
+
+  const labelAll = document.getElementById('label-count-all');
+  if (labelAll) labelAll.textContent = `Semua (${total})`;
+
+  const label5 = document.getElementById('label-count-5');
+  if (label5) label5.textContent = `⭐⭐⭐⭐⭐ (${rating5})`;
+
+  const label4 = document.getElementById('label-count-4');
+  if (label4) label4.textContent = `⭐⭐⭐⭐ (${rating4})`;
+
+  const labelPhoto = document.getElementById('label-count-photo');
+  if (labelPhoto) labelPhoto.textContent = `📸 Ada Foto (${hasPhoto})`;
+}
+
 function applyFilters() {
   let visible = 0;
+  
+  updateFilterCounts();
+
   document.querySelectorAll('.testi-card-v2').forEach(card => {
     let show = true;
-    if (activeFilter === 'photo') {
-      show = card.dataset.hasphoto === 'yes';
-    } else if (activeFilter === 'buyer') {
-      show = card.dataset.source === 'web-review';
-    } else if (activeFilter === 'own') {
+
+    // 1. Filter by Tab
+    if (activeTab === 'buyer') {
+      show = true;
+    } else if (activeTab === 'own') {
       show = card.dataset.own === 'yes';
-    } else if (activeFilter !== 'all') {
-      show = card.dataset.rating === activeFilter;
     }
+
+    // 2. Filter by Rating/Photo
+    if (show) {
+      if (activeFilter === 'photo') {
+        show = card.dataset.hasphoto === 'yes';
+      } else if (activeFilter !== 'all') {
+        show = card.dataset.rating === activeFilter;
+      }
+    }
+
+    // 3. Filter by Search
     if (show && activeSearch) {
       show = (card.dataset.text || '').includes(activeSearch);
     }
+
     card.style.display = show ? '' : 'none';
     if (show) visible++;
   });
+
   document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
 }
 
@@ -329,17 +412,26 @@ function applyFilters() {
 window.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const filter = urlParams.get('filter');
-  if (filter) {
+  
+  if (filter === 'own') {
+    const tabBtn = document.querySelector(`.testi-tab[onclick*="'own'"]`);
+    if (tabBtn) tabBtn.click();
+  } else if (filter === 'buyer') {
+    const tabBtn = document.querySelector(`.testi-tab[onclick*="'buyer'"]`);
+    if (tabBtn) tabBtn.click();
+  } else if (filter) {
     const btn = document.querySelector(`.filter-btn[onclick*="'${filter}'"]`);
     if (btn) {
       btn.click();
-      // Scroll to filter controls
       const controls = document.querySelector('.testi-controls');
       if (controls) {
         controls.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
   }
+
+  // Initial count rendering
+  updateFilterCounts();
 });
 </script>
 

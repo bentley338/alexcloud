@@ -243,19 +243,7 @@
         <a href="/?ref_=nav_home" class="nav-link">Beranda</a>
         <a href="/games?ref_=nav_games" class="nav-link">Game Library</a>
         <a href="/pricing?ref_=nav_pricing" class="nav-link">Harga</a>
-        <div class="dropdown">
-          <a href="/testimonials?ref_=nav_testimonials" class="nav-link" style="display:inline-flex; align-items:center; gap:0.25rem;">
-            Testimoni <i class="fas fa-chevron-down" style="font-size:0.7rem; opacity:0.7;"></i>
-          </a>
-          <div class="dropdown-content">
-            <a href="/testimonials?filter=buyer"><i class="fas fa-shopping-bag" style="font-size:0.75rem;"></i> Ulasan Pembeli</a>
-            <% if (typeof user !== 'undefined' && user) { %>
-              <a href="/testimonials?filter=own"><i class="fas fa-user-circle" style="font-size:0.75rem;"></i> Dari Gw</a>
-            <% } else { %>
-              <a href="/login?ref_=nav_testi_login"><i class="fas fa-sign-in-alt" style="font-size:0.75rem;"></i> Dari Gw (Login)</a>
-            <% } %>
-          </div>
-        </div>
+        <a href="/testimonials?ref_=nav_testimonials" class="nav-link">Testimoni</a>
         <a href="/community?ref_=nav_community" class="nav-link" style="display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-comments" style="font-size:0.8rem;"></i> Komunitas</a>
         <a href="/faq?ref_=nav_faq" class="nav-link">FAQ</a>
         <a href="/network-test?ref_=nav_speedtest" class="nav-link" style="display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-wifi" style="font-size:0.8rem;"></i> Speed Test</a>
