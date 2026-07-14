@@ -208,6 +208,10 @@
         <button class="filter-btn" onclick="filterTesti('5', this)">⭐⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===5).length %>)</button>
         <button class="filter-btn" onclick="filterTesti('4', this)">⭐⭐⭐⭐ (<%= testimonials.filter(t=>t.rating===4).length %>)</button>
         <button class="filter-btn" onclick="filterTesti('photo', this)">📸 Ada Foto (<%= testimonials.filter(t=>t.image).length %>)</button>
+        <button class="filter-btn" onclick="filterTesti('buyer', this)">🛍️ Ulasan Pembeli (<%= testimonials.filter(t=>t.source==='web-review').length %>)</button>
+        <% if (user) { %>
+          <button class="filter-btn" onclick="filterTesti('own', this)">👤 Dari Gw (<%= testimonials.filter(t=>t.isOwn).length %>)</button>
+        <% } %>
       </div>
       <div class="testi-search">
         <i class="fas fa-search"></i>
@@ -227,6 +231,8 @@
       <div class="testi-card-v2"
            data-rating="<%= t.rating %>"
            data-hasphoto="<%= t.image ? 'yes' : 'no' %>"
+           data-source="<%= t.source || '' %>"
+           data-own="<%= t.isOwn ? 'yes' : 'no' %>"
            data-text="<%= (t.text + ' ' + t.name).toLowerCase() %>">
         <% if (t.image) { %>
           <img src="<%= t.image %>" alt="Foto bukti testimoni <%= t.name %>" class="testi-img" loading="lazy" decoding="async">
@@ -303,6 +309,10 @@ function applyFilters() {
     let show = true;
     if (activeFilter === 'photo') {
       show = card.dataset.hasphoto === 'yes';
+    } else if (activeFilter === 'buyer') {
+      show = card.dataset.source === 'web-review';
+    } else if (activeFilter === 'own') {
+      show = card.dataset.own === 'yes';
     } else if (activeFilter !== 'all') {
       show = card.dataset.rating === activeFilter;
     }

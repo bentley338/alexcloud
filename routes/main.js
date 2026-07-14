@@ -424,18 +424,25 @@ router.get('/review/:token/sukses', (req, res) => {
 router.get('/testimonials', (req, res) => {
   const testimonials = getCleanTestimonials();
 
-  // Check if logged-in user has pending review invitations
+  // Check if logged-in user has pending review invitations & fetch their orders
   let pendingReviews = [];
+  let userOrderIds = [];
   if (req.user) {
-    pendingReviews = db.get('orders')
-      .filter(o => o.userId === req.user.id && o.reviewAllowed && !o.reviewedAt)
-      .value() || [];
+    const userOrders = db.get('orders').filter({ userId: req.user.id }).value() || [];
+    userOrderIds = userOrders.map(o => o.orderId);
+    pendingReviews = userOrders.filter(o => o.reviewAllowed && !o.reviewedAt);
   }
+
+  const testimonialsWithOwn = testimonials.map(t => {
+    const isOwn = (t.orderId && userOrderIds.includes(t.orderId)) ||
+                  (req.user && t.name && t.name.toLowerCase() === req.user.name.toLowerCase());
+    return { ...t, isOwn: !!isOwn };
+  });
 
   res.render('testimonials', {
     title: 'Testimoni Pelanggan - AlexCloud',
     user: req.user || null,
-    testimonials,
+    testimonials: testimonialsWithOwn,
     pendingReviews
   });
 });
