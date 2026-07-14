@@ -317,6 +317,109 @@ router.get('/pricing', (req, res) => {
   });
 });
 
+// Review form — user writes testimonial after admin allows it
+router.get('/review/:token', (req, res) => {
+  const { token } = req.params;
+  const order = db.get('orders').find({ reviewToken: token }).value();
+
+  if (!order || !order.reviewAllowed) {
+    return res.render('error', { title: 'Link Tidak Valid', message: 'Link ulasan tidak ditemukan atau sudah tidak berlaku.', user: req.user || null });
+  }
+  if (order.reviewedAt) {
+    return res.render('error', { title: 'Sudah Diulas', message: 'Kamu sudah mengisi ulasan untuk order ini. Terima kasih! 🙏', user: req.user || null });
+  }
+
+  res.render('review', {
+    title: 'Tulis Ulasan — AlexCloud',
+    user: req.user || null,
+    order,
+    token,
+    error: req.flash('error'),
+    success: req.flash('success')
+  });
+});
+
+const reviewUpload = require('multer')({ storage: require('multer').memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+router.post('/review/:token', reviewUpload.single('reviewImage'), async (req, res) => {
+  const { token } = req.params;
+  const order = db.get('orders').find({ reviewToken: token }).value();
+
+  if (!order || !order.reviewAllowed) {
+    return res.render('error', { title: 'Link Tidak Valid', message: 'Link ulasan tidak ditemukan atau sudah tidak berlaku.', user: req.user || null });
+  }
+  if (order.reviewedAt) {
+    return res.render('error', { title: 'Sudah Diulas', message: 'Kamu sudah mengisi ulasan untuk order ini. Terima kasih! 🙏', user: req.user || null });
+  }
+
+  const { reviewerName, reviewText, reviewRating } = req.body;
+  if (!reviewerName || !reviewText || !reviewRating) {
+    req.flash('error', 'Nama, ulasan, dan rating wajib diisi.');
+    return res.redirect(`/review/${token}`);
+  }
+
+  const rating = parseInt(reviewRating, 10);
+  if (isNaN(rating) || rating < 1 || rating > 5) {
+    req.flash('error', 'Rating tidak valid.');
+    return res.redirect(`/review/${token}`);
+  }
+
+  let imageBase64 = null;
+  if (req.file) {
+    imageBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  }
+
+  const { normalizeTestimonial } = require('../utils/helpers');
+  const norm = normalizeTestimonial({ name: reviewerName, text: reviewText, rating });
+  const finalName = (norm.name || '').trim() || reviewerName.trim();
+  const finalText = (norm.text || '').trim() || reviewText.trim();
+
+  db.get('testimonials').push({
+    id: uuidv4(),
+    name: finalName,
+    role: `Pelanggan AlexCloud (${order.planName})`,
+    text: finalText,
+    rating,
+    image: imageBase64 || null,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(finalName)}`,
+    createdAt: new Date().toISOString(),
+    approved: true,
+    orderId: order.orderId,
+    source: 'web-review'
+  }).write();
+
+  // Mark order as reviewed
+  db.get('orders').find({ reviewToken: token }).assign({
+    reviewedAt: new Date().toISOString()
+  }).write();
+
+  console.log(`[REVIEW] Testimonial dari ${finalName} untuk order #${order.orderId} berhasil disimpan.`);
+
+  // Notif ke owner
+  try {
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    const stars = '⭐'.repeat(rating);
+    const notifMsg = `📝 *ULASAN BARU VIA WEB* 📝\n\n` +
+      `👤 *Nama:* ${finalName}\n` +
+      `📦 *Paket:* ${order.planName}\n` +
+      `⭐ *Rating:* ${stars}\n` +
+      `💬 *Ulasan:* "${finalText}"\n\n` +
+      `Ulasan otomatis tampil di website.`;
+    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF REVIEW]', err.message));
+  } catch (e) { console.error('[WA NOTIF REVIEW EX]', e.message); }
+
+  return res.redirect(`/review/${token}/sukses`);
+});
+
+router.get('/review/:token/sukses', (req, res) => {
+  const order = db.get('orders').find({ reviewToken: req.params.token }).value();
+  res.render('review-success', {
+    title: 'Ulasan Terkirim — AlexCloud',
+    user: req.user || null,
+    order: order || {}
+  });
+});
+
 // Testimonials page
 router.get('/testimonials', (req, res) => {
   const testimonials = getCleanTestimonials();
@@ -326,6 +429,7 @@ router.get('/testimonials', (req, res) => {
     testimonials
   });
 });
+
 
 // ─── Global Community Chat ──────────────────────────────────────────────────
 const chatPostRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 12 }); // 12 pesan/menit

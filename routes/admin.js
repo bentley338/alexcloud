@@ -277,6 +277,39 @@ router.post('/orders/:id/reject', ensureAdmin, (req, res) => {
   res.redirect('/admin/orders');
 });
 
+// Allow user to write a review for a confirmed order
+router.post('/orders/:id/allow-review', ensureAdmin, (req, res) => {
+  const order = db.get('orders').find({ id: req.params.id }).value();
+  if (!order) { req.flash('error', 'Order tidak ditemukan.'); return res.redirect('/admin/orders'); }
+  if (order.status !== 'confirmed') { req.flash('error', 'Hanya order yang sudah dikonfirmasi yang bisa diizinkan review.'); return res.redirect('/admin/orders'); }
+  if (order.reviewAllowed) { req.flash('error', 'Review sudah diizinkan untuk order ini.'); return res.redirect('/admin/orders'); }
+
+  const reviewToken = uuidv4();
+  db.get('orders').find({ id: order.id }).assign({
+    reviewAllowed: true,
+    reviewToken,
+    reviewAllowedAt: new Date().toISOString()
+  }).write();
+
+  // Kirim notifikasi WA ke user bahwa mereka bisa review
+  try {
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    const reviewUrl = `${process.env.BASE_URL || 'https://alexcloud.my.id'}/review/${reviewToken}`;
+    const notifMsg = `⭐ *IZIN ULASAN DIBERIKAN* ⭐\n\n` +
+      `Halo ${order.userName}! 👋\n\n` +
+      `Admin AlexCloud mengundang kamu untuk menulis ulasan/testimoni untuk order berikut:\n\n` +
+      `📋 Order: *#${order.orderId}*\n` +
+      `📦 Paket: *${order.planName}*\n\n` +
+      `Klik link berikut untuk menulis ulasanmu:\n${reviewUrl}\n\n` +
+      `Terima kasih sudah menjadi pelanggan AlexCloud! 🙏`;
+    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF ALLOW REVIEW]', err.message));
+  } catch (err) { console.error('[WA NOTIF ALLOW REVIEW EX]', err.message); }
+
+  req.flash('success', `Review diizinkan untuk order #${order.orderId}. User akan melihat tombol tulis ulasan di dashboard mereka.`);
+  res.redirect('/admin/orders');
+});
+
+
 // =====================
 // SIMULASI REFERRAL > 100K
 // =====================

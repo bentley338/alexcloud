@@ -1,0 +1,182 @@
+<%- include('partials/header') %>
+
+<style>
+  .review-page { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+  .review-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl, 1.25rem);
+    padding: 2.5rem 2rem;
+    max-width: 560px;
+    width: 100%;
+    box-shadow: 0 0 40px rgba(0,0,0,0.3);
+  }
+  .review-order-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25);
+    color: #fbbf24; border-radius: 100px; padding: 0.3rem 0.9rem;
+    font-family: var(--font-ui); font-size: 0.8rem; font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  .review-title { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; margin-bottom: 0.35rem; }
+  .review-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.6; }
+
+  /* Star Rating */
+  .star-rating { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-direction: row-reverse; justify-content: flex-end; }
+  .star-rating input { display: none; }
+  .star-rating label {
+    font-size: 2rem; color: rgba(255,255,255,0.2); cursor: pointer;
+    transition: color 0.15s, transform 0.15s;
+  }
+  .star-rating label:hover,
+  .star-rating label:hover ~ label,
+  .star-rating input:checked ~ label { color: #fbbf24; }
+  .star-rating label:hover { transform: scale(1.2); }
+
+  .form-label { display: block; font-family: var(--font-ui); font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-input, .form-textarea {
+    width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: var(--radius-md, 0.5rem); padding: 0.75rem 1rem;
+    color: var(--text-primary); font-family: var(--font-ui); font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+  .form-input:focus, .form-textarea:focus { border-color: #fbbf24; }
+  .form-textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+  .form-group { margin-bottom: 1.25rem; }
+
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius-md, 0.5rem);
+    padding: 1.25rem; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .upload-zone:hover { border-color: #fbbf24; background: rgba(251,191,36,0.05); }
+  .upload-zone input { display: none; }
+  .upload-zone p { color: var(--text-muted); font-size: 0.85rem; margin: 0.3rem 0 0; font-family: var(--font-ui); }
+  #previewImg { max-width: 100%; max-height: 200px; border-radius: 0.5rem; margin-top: 0.75rem; display: none; }
+
+  .btn-submit-review {
+    width: 100%; padding: 0.9rem 1.5rem;
+    background: linear-gradient(90deg, #fbbf24, #d97706);
+    color: #111; border: none; border-radius: var(--radius-md, 0.5rem);
+    font-family: var(--font-ui); font-size: 1rem; font-weight: 800;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-submit-review:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-submit-review:active { transform: translateY(0); }
+
+  .alert { padding: 0.75rem 1rem; border-radius: var(--radius-md, 0.5rem); font-family: var(--font-ui); font-size: 0.9rem; margin-bottom: 1rem; }
+  .alert-error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+</style>
+
+<div class="review-page">
+  <div class="review-card">
+    <div class="review-order-badge">
+      <i class="fas fa-box"></i>
+      Order #<%= order.orderId %> — <%= order.planName %>
+    </div>
+
+    <h1 class="review-title">Tulis Ulasan Kamu ⭐</h1>
+    <p class="review-desc">
+      Pengalamanmu sangat berarti buat kami dan calon pelanggan lainnya. Ceritakan pengalamanmu pakai AlexCloud!
+    </p>
+
+    <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+      <% error.forEach(e => { %><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+    <% } %>
+
+    <form action="/review/<%= token %>" method="POST" enctype="multipart/form-data" id="reviewForm">
+
+      <!-- Star Rating -->
+      <div class="form-group">
+        <label class="form-label">Rating Kamu <span style="color:#ef4444;">*</span></label>
+        <div class="star-rating" id="starRating">
+          <input type="radio" id="star5" name="reviewRating" value="5" required>
+          <label for="star5" title="5 bintang">★</label>
+          <input type="radio" id="star4" name="reviewRating" value="4">
+          <label for="star4" title="4 bintang">★</label>
+          <input type="radio" id="star3" name="reviewRating" value="3">
+          <label for="star3" title="3 bintang">★</label>
+          <input type="radio" id="star2" name="reviewRating" value="2">
+          <label for="star2" title="2 bintang">★</label>
+          <input type="radio" id="star1" name="reviewRating" value="1">
+          <label for="star1" title="1 bintang">★</label>
+        </div>
+        <p id="starLabel" style="font-size:0.8rem; color:var(--text-muted); margin:0; font-family:var(--font-ui);">Klik bintang untuk memberi rating</p>
+      </div>
+
+      <!-- Nama -->
+      <div class="form-group">
+        <label for="reviewerName" class="form-label">Nama Kamu <span style="color:#ef4444;">*</span></label>
+        <input type="text" id="reviewerName" name="reviewerName"
+          class="form-input"
+          placeholder="Nama yang tampil di ulasan"
+          value="<%= (typeof user !== 'undefined' && user) ? user.name : '' %>"
+          required maxlength="80">
+      </div>
+
+      <!-- Ulasan -->
+      <div class="form-group">
+        <label for="reviewText" class="form-label">Ulasan Kamu <span style="color:#ef4444;">*</span></label>
+        <textarea id="reviewText" name="reviewText" class="form-textarea"
+          placeholder="Ceritakan pengalamanmu! Misalnya: Gamenya lancar, latency rendah, support responsif, dll."
+          required maxlength="500"></textarea>
+        <small style="color:var(--text-muted); font-size:0.78rem; font-family:var(--font-ui);">
+          <span id="charCount">0</span>/500 karakter
+        </small>
+      </div>
+
+      <!-- Upload Foto (opsional) -->
+      <div class="form-group">
+        <label class="form-label">Foto Bukti <span style="color:var(--text-muted);">(Opsional)</span></label>
+        <div class="upload-zone" onclick="document.getElementById('reviewImage').click()">
+          <i class="fas fa-image" style="font-size:1.5rem; color:var(--text-muted);"></i>
+          <p>Klik untuk upload foto (maks. 5MB)</p>
+          <p style="font-size:0.75rem;">JPG, PNG, GIF, WebP</p>
+          <input type="file" id="reviewImage" name="reviewImage" accept="image/*" onchange="previewImage(this)">
+          <img id="previewImg" alt="Preview foto">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit-review" id="submitBtn">
+        <i class="fas fa-paper-plane"></i> Kirim Ulasan
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Star label text
+  const starLabels = { '1': '😞 Sangat Buruk', '2': '😕 Kurang Memuaskan', '3': '😐 Cukup', '4': '😊 Bagus!', '5': '🤩 Luar Biasa!' };
+  document.querySelectorAll('input[name="reviewRating"]').forEach(input => {
+    input.addEventListener('change', () => {
+      document.getElementById('starLabel').textContent = starLabels[input.value] || '';
+      document.getElementById('starLabel').style.color = '#fbbf24';
+    });
+  });
+
+  // Char count
+  const textarea = document.getElementById('reviewText');
+  const charCount = document.getElementById('charCount');
+  textarea.addEventListener('input', () => { charCount.textContent = textarea.value.length; });
+
+  // Image preview
+  function previewImage(input) {
+    const img = document.getElementById('previewImg');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // Prevent double submit
+  document.getElementById('reviewForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+  });
+</script>
+
+<%- include('partials/footer') %>

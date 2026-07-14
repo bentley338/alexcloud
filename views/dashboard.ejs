@@ -319,7 +319,20 @@
                   </td>
                   <td style="color:var(--text-muted); font-size:0.85rem;"><%= moment(order.createdAt).format('DD/MM/YY') %></td>
                   <td>
-                    <a href="/payment/<%= order.orderId %>" class="btn-primary" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fas fa-file-invoice"></i> Invoice</a>
+                    <div style="display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center;">
+                      <a href="/payment/<%= order.orderId %>" class="btn-primary" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fas fa-file-invoice"></i> Invoice</a>
+                      <% if (order.status === 'confirmed') { %>
+                        <% if (order.reviewAllowed && !order.reviewedAt) { %>
+                          <a href="/review/<%= order.reviewToken %>" class="btn-primary" style="padding:0.35rem 0.6rem; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.3rem; background:linear-gradient(90deg,#fbbf24,#d97706); color:#111; font-weight:700; text-decoration:none;">
+                            <i class="fas fa-star"></i> Tulis Ulasan
+                          </a>
+                        <% } else if (order.reviewedAt) { %>
+                          <span style="font-size:0.72rem; color:#fbbf24; display:inline-flex; align-items:center; gap:0.25rem;">
+                            <i class="fas fa-check-circle"></i> Sudah Diulas
+                          </span>
+                        <% } %>
+                      <% } %>
+                    </div>
                   </td>
                 </tr>
                 <% }) %>

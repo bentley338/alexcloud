@@ -77,10 +77,28 @@
               </form>
             </div>
             <% } else { %>
-            <span style="color:var(--text-muted); font-size:0.85rem;">
-              <%= order.status === 'confirmed' ? '✅ Done' : '❌ Rejected' %>
-            </span>
-            <% } %>
+            <div style="display:flex; flex-direction:column; gap:0.35rem;">
+              <span style="color:var(--text-muted); font-size:0.85rem;">
+                <%= order.status === 'confirmed' ? '✅ Done' : '❌ Rejected' %>
+              </span>
+              <% if (order.status === 'confirmed') { %>
+                <% if (order.reviewedAt) { %>
+                  <span style="display:inline-flex; align-items:center; gap:0.3rem; font-size:0.75rem; color:#fbbf24; font-weight:600;">
+                    <i class="fas fa-star"></i> Sudah Diulas
+                  </span>
+                <% } else if (order.reviewAllowed) { %>
+                  <span style="display:inline-flex; align-items:center; gap:0.3rem; font-size:0.75rem; color:#a78bfa; font-weight:600;">
+                    <i class="fas fa-hourglass-half"></i> Menunggu Ulasan
+                  </span>
+                <% } else { %>
+                  <form action="/admin/orders/<%= order.id %>/allow-review" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-action" style="font-size:0.72rem; padding:0.25rem 0.6rem; background:rgba(251,191,36,0.12); color:#fbbf24; border:1px solid rgba(251,191,36,0.3);" title="Izinkan user tulis ulasan untuk order ini">
+                      <i class="fas fa-star"></i> Izinkan Review
+                    </button>
+                  </form>
+                <% } %>
+              <% } %>
+            </div>
           </td>
         </tr>
         <% }) %>
