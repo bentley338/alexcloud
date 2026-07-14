@@ -1256,8 +1256,9 @@ section { position: relative; z-index: 1; }
 /* DASHBOARD */
 .dashboard-page {
   min-height: 100vh;
-  padding: 7rem 0 4rem;
+  padding: 8.5rem 0 4rem;
 }
+body.has-announcement .dashboard-page { padding-top: 11rem; }
 
 .dashboard-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
 
@@ -1791,7 +1792,8 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 /* ============================================
    📄 LEGAL / CONTENT PAGES (terms, privacy, refund, about)
    ============================================ */
-.legal-page { min-height: 100vh; padding: 7rem 1.5rem 5rem; }
+.legal-page { min-height: 100vh; padding: 8.5rem 1.5rem 5rem; }
+body.has-announcement .legal-page { padding-top: 11rem; }
 .legal-wrap { max-width: 860px; margin: 0 auto; }
 .legal-hero { text-align: center; margin-bottom: 3rem; }
 .legal-hero .legal-tag {
@@ -3859,9 +3861,10 @@ input:focus-visible,
    ═══════════════════════════════════════════════════════════════ */
 .community-page {
   min-height: 100vh;
-  padding: 7rem 0 4rem;
+  padding: 8.5rem 0 4rem;
   position: relative;
 }
+body.has-announcement .community-page { padding-top: 11rem; }
 .community-container {
   max-width: 880px;
   margin: 0 auto;
