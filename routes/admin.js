@@ -47,7 +47,7 @@ router.get('/', ensureAdmin, (req, res) => {
     totalOrders: orders.length,
     pendingOrders: orders.filter(o => o.status === 'pending').length,
     activeSubscriptions: subscriptions.filter(s => s.status === 'active').length,
-    totalRevenue: orders.filter(o => o.status === 'confirmed').reduce((sum, o) => sum + o.price, 0),
+    totalRevenue: orders.filter(o => o.status === 'confirmed').reduce((sum, o) => sum + (o.price || 0), 0),
     totalGames: games.length,
     activePromos: promoCodes.filter(p => p.isActive).length,
     totalTestimonials: testimonials.length

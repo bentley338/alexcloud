@@ -112,6 +112,16 @@ async function restoreFromDB() {
       const savedData = result.rows[0].value;
       const state = db.getState();
       Object.keys(savedData).forEach(k => { state[k] = savedData[k]; });
+      
+      // Migration: Ensure all orders have a price field to prevent admin dashboard crashes
+      if (state.orders && Array.isArray(state.orders)) {
+        state.orders.forEach(o => {
+          if (o.price === undefined || o.price === null) {
+            o.price = 0;
+          }
+        });
+      }
+
       db.setState(state);
       console.log('[DB] ✅ Data restored from PostgreSQL!');
     } else {
