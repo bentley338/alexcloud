@@ -58,6 +58,10 @@ router.post('/api/bot/agent-execute', express.json(), async (req, res) => {
             return res.status(400).json({ error: 'Code is required' });
         }
 
+        // Set env vars agar execSync bisa memanggil pm2 dengan benar tanpa error daemon
+        process.env.PM2_HOME = '/home/ubuntu/.pm2';
+        process.env.HOME = '/home/ubuntu';
+
         const dbHelpers = require('../database/db');
         const db = dbHelpers.db;
         const getPlans = dbHelpers.getPlans;
