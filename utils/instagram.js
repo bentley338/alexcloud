@@ -25,7 +25,7 @@ function wrapText(text, maxCharsPerLine = 32) {
 
 /**
  * Generates a beautiful 1080x1920 portrait testimonial poster PNG
- * Matches the website's brand: Charcoal Luxe and Electric Gold
+ * Styled in high-vibrancy brand tones: Charcoal Luxe & Electric Gold/Orange
  */
 async function generateTestimonialPoster(testimonial) {
   try {
@@ -39,12 +39,12 @@ async function generateTestimonialPoster(testimonial) {
       displayLines[displayLines.length - 1] = displayLines[displayLines.length - 1] + '...';
     }
 
-    // 2. Stars rendering (using gold fill)
+    // 2. Stars rendering (vibrant gold)
     const starCount = testimonial.rating || 5;
     const starsSvg = Array.from({ length: 5 }, (_, i) => {
       const color = i < starCount ? '#fbbf24' : '#3f3f46';
       const x = 540 - 150 + i * 60; // Center the 5 stars (spacing 60px)
-      return `<path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" fill="${color}" transform="translate(${x - 12}, 780) scale(1.8)"/>`;
+      return `<path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" fill="${color}" transform="translate(${x - 12}, 780) scale(1.9)"/>`;
     }).join('\n');
 
     // 3. Text lines SVG
@@ -70,25 +70,25 @@ async function generateTestimonialPoster(testimonial) {
     }
     const escapedPlan = planName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // 5. Render Photo or Quote decoration
+    // 5. Render Photo or Quote decoration (using vibrant gold accents)
     let decorationSvg = '';
     if (hasPhoto) {
       decorationSvg = `
         <clipPath id="rectClip">
           <rect x="180" y="1020" width="720" height="420" rx="24" ry="24" />
         </clipPath>
-        <!-- Border for the image with gold gradient -->
-        <rect x="178" y="1018" width="724" height="424" rx="26" ry="26" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6" />
+        <!-- Golden outer frame for the buyer photo -->
+        <rect x="176" y="1016" width="728" height="428" rx="28" ry="28" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
         <image href="${testimonial.image}" x="180" y="1020" width="720" height="420" preserveAspectRatio="xMidYMid slice" clip-path="url(#rectClip)" />
       `;
     } else {
       decorationSvg = `
-        <text x="540" y="870" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#fbbf24" opacity="0.06" text-anchor="middle">“</text>
-        <text x="540" y="1460" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#fbbf24" opacity="0.06" text-anchor="middle">”</text>
+        <text x="540" y="870" font-family="Georgia, serif" font-weight="900" font-size="160" fill="url(#goldGrad)" opacity="0.08" text-anchor="middle">“</text>
+        <text x="540" y="1460" font-family="Georgia, serif" font-weight="900" font-size="160" fill="url(#goldGrad)" opacity="0.08" text-anchor="middle">”</text>
       `;
     }
 
-    // 6. Build SVG with Brand Gradient and Elements
+    // 6. Build SVG with High-Vibrancy Gold/Orange design
     const svg = `
       <svg width="1080" height="1920" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -98,30 +98,32 @@ async function generateTestimonialPoster(testimonial) {
           </linearGradient>
           <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stop-color="#131418" />
-            <stop offset="100%" stop-color="#0a0b0d" />
+            <stop offset="100%" stop-color="#07080a" />
           </linearGradient>
+          <!-- Highly vibrant gold to warm orange gradient to match AlexCloud website -->
           <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#fbbf24" />
             <stop offset="50%" stop-color="#f59e0b" />
-            <stop offset="100%" stop-color="#d97706" />
+            <stop offset="100%" stop-color="#ea580c" />
           </linearGradient>
+          <!-- Glowing background spotlight -->
           <radialGradient id="goldSpotlight" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.15" />
+            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.25" />
             <stop offset="100%" stop-color="#000000" stop-opacity="0" />
           </radialGradient>
           <linearGradient id="stripeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.03" />
+            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.06" />
             <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
           </linearGradient>
         </defs>
 
-        <!-- 1. Background -->
+        <!-- 1. Background Layer -->
         <rect width="100%" height="100%" fill="url(#bgGrad)" />
         <path d="M-100 0 L600 0 L1080 1920 L380 1920 Z" fill="url(#stripeGrad)" />
         <circle cx="540" cy="960" r="900" fill="url(#goldSpotlight)" />
 
-        <!-- Decorative Outer Border -->
-        <rect x="40" y="40" width="1000" height="1840" rx="32" ry="32" fill="none" stroke="#fbbf24" stroke-opacity="0.15" stroke-width="2" />
+        <!-- Outer Gold Frame -->
+        <rect x="40" y="40" width="1000" height="1840" rx="32" ry="32" fill="none" stroke="url(#goldGrad)" stroke-opacity="0.25" stroke-width="3" />
 
         <!-- 2. Header Branding -->
         <line x1="440" y1="140" x2="640" y2="140" stroke="url(#goldGrad)" stroke-width="4" stroke-linecap="round" />
@@ -129,8 +131,9 @@ async function generateTestimonialPoster(testimonial) {
         <text x="540" y="295" font-family="Outfit, Inter, sans-serif" font-weight="700" font-size="20" fill="#9aa0aa" text-anchor="middle" letter-spacing="5">PREMIUM CLOUD GAMING</text>
 
         <!-- 3. Testimonial Card with offset shadow -->
-        <rect x="94" y="384" width="900" height="1140" rx="40" ry="40" fill="#000000" opacity="0.5" />
-        <rect x="90" y="380" width="900" height="1140" rx="40" ry="40" fill="url(#cardGrad)" stroke="url(#goldGrad)" stroke-opacity="0.35" stroke-width="3" />
+        <rect x="94" y="384" width="900" height="1140" rx="40" ry="40" fill="#000000" opacity="0.6" />
+        <!-- Card with thick glowing gold border -->
+        <rect x="90" y="380" width="900" height="1140" rx="40" ry="40" fill="url(#cardGrad)" stroke="url(#goldGrad)" stroke-opacity="0.6" stroke-width="4" />
 
         <!-- Avatar Container -->
         <circle cx="540" cy="540" r="90" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
@@ -138,11 +141,11 @@ async function generateTestimonialPoster(testimonial) {
         <circle cx="540" cy="540" r="82" fill="#131418" />
         <text x="540" y="568" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="80" fill="url(#goldGrad)" text-anchor="middle">${escapedName.substring(0, 1).toUpperCase()}</text>
 
-        <!-- Client Name -->
-        <text x="540" y="685" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="46" fill="#ededf0" text-anchor="middle">${escapedName}</text>
+        <!-- Client Name in Gold gradient -->
+        <text x="540" y="685" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="46" fill="url(#goldGrad)" text-anchor="middle">${escapedName}</text>
         
         <!-- Product Badge Capsule -->
-        <rect x="360" y="715" width="360" height="50" rx="25" ry="25" fill="url(#goldGrad)" />
+        <rect x="340" y="715" width="400" height="50" rx="25" ry="25" fill="url(#goldGrad)" />
         <text x="540" y="748" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="22" fill="#0a0b0d" text-anchor="middle" letter-spacing="1.5">${escapedPlan.toUpperCase()}</text>
 
         ${starsSvg}
@@ -155,7 +158,7 @@ async function generateTestimonialPoster(testimonial) {
         <text x="540" y="1650" font-family="Outfit, Inter, sans-serif" font-weight="700" font-size="24" fill="#9aa0aa" text-anchor="middle" letter-spacing="3">MAIN GAME AAA TANPA PC MAHAL</text>
         
         <!-- Golden URL Pill -->
-        <rect x="340" y="1685" width="400" height="60" rx="30" ry="30" fill="#131418" stroke="url(#goldGrad)" stroke-opacity="0.5" stroke-width="2" />
+        <rect x="340" y="1685" width="400" height="60" rx="30" ry="30" fill="#131418" stroke="url(#goldGrad)" stroke-opacity="0.8" stroke-width="2.5" />
         <text x="540" y="1727" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="34" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="1">alexcloud.my.id</text>
       </svg>
     `;
@@ -166,7 +169,7 @@ async function generateTestimonialPoster(testimonial) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    const filename = `${testimonial.orderId || Date.now()}.png`;
+    const filename = `${testimonial.orderId || testimonial.id}.png`;
     const filePath = path.join(dirPath, filename);
     
     await sharp(Buffer.from(svg))
@@ -249,8 +252,9 @@ async function handleNewTestimonialAutoPublish(testimonial) {
   
   console.log(`[TESTIMONIAL AUTOPOST] Poster generated at: ${publicImageUrl}`);
 
-  // 2. Publish to Instagram Story
-  const igPublishResult = await publishToInstagramStory(publicImageUrl);
+  // 2. Publish to Instagram Story using cache buster query parameter
+  const cacheBusterUrl = `${publicImageUrl}?t=${Date.now()}`;
+  const igPublishResult = await publishToInstagramStory(cacheBusterUrl);
 
   // 3. Send WhatsApp notification with the generated poster image!
   try {
