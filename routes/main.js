@@ -378,7 +378,7 @@ router.post('/review/:token', reviewUpload.single('reviewImage'), async (req, re
   const finalName = (norm.name || '').trim() || reviewerName.trim();
   const finalText = (norm.text || '').trim() || reviewText.trim();
 
-  db.get('testimonials').push({
+  const newTestimonial = {
     id: uuidv4(),
     name: finalName,
     role: `Pelanggan AlexCloud (${order.planName})`,
@@ -390,7 +390,9 @@ router.post('/review/:token', reviewUpload.single('reviewImage'), async (req, re
     approved: true,
     orderId: order.orderId,
     source: 'web-review'
-  }).write();
+  };
+
+  db.get('testimonials').push(newTestimonial).write();
 
   // Mark order as reviewed
   db.get('orders').find({ reviewToken: token }).assign({
@@ -399,18 +401,13 @@ router.post('/review/:token', reviewUpload.single('reviewImage'), async (req, re
 
   console.log(`[REVIEW] Testimonial dari ${finalName} untuk order #${order.orderId} berhasil disimpan.`);
 
-  // Notif ke owner
+  // Trigger Poster generation, Instagram Story posting, and WhatsApp media alert asynchronously
   try {
-    const { sendWhatsAppNotification } = require('../utils/whatsapp');
-    const stars = '⭐'.repeat(rating);
-    const notifMsg = `📝 *ULASAN BARU VIA WEB* 📝\n\n` +
-      `👤 *Nama:* ${finalName}\n` +
-      `📦 *Paket:* ${order.planName}\n` +
-      `⭐ *Rating:* ${stars}\n` +
-      `💬 *Ulasan:* "${finalText}"\n\n` +
-      `Ulasan otomatis tampil di website.`;
-    sendWhatsAppNotification(notifMsg).catch(err => console.error('[WA NOTIF REVIEW]', err.message));
-  } catch (e) { console.error('[WA NOTIF REVIEW EX]', e.message); }
+    const { handleNewTestimonialAutoPublish } = require('../utils/instagram');
+    handleNewTestimonialAutoPublish(newTestimonial).catch(err => console.error('[TESTIMONIAL AUTOPOST TRIGGER] Error:', err.message));
+  } catch (err) {
+    console.error('[TESTIMONIAL AUTOPOST TRIGGER EX] Error:', err.message);
+  }
 
   return res.redirect(`/review/${token}/sukses`);
 });
