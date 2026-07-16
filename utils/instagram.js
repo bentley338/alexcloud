@@ -41,15 +41,16 @@ async function generateTestimonialPoster(testimonial) {
 
     // 2. Stars rendering (vibrant gold)
     const starCount = testimonial.rating || 5;
+    const starsY = hasPhoto ? 685 : 780;
     const starsSvg = Array.from({ length: 5 }, (_, i) => {
       const color = i < starCount ? '#fbbf24' : '#3f3f46';
       const x = 540 - 150 + i * 60; // Center the 5 stars (spacing 60px)
-      return `<path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" fill="${color}" transform="translate(${x - 12}, 780) scale(1.9)"/>`;
+      return `<path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" fill="${color}" transform="translate(${x - 12}, ${starsY}) scale(1.9)"/>`;
     }).join('\n');
 
     // 3. Text lines SVG
-    const startY = hasPhoto ? 855 : 920;
-    const lineSpacing = hasPhoto ? 52 : 60;
+    const startY = hasPhoto ? 750 : 920;
+    const lineSpacing = hasPhoto ? 48 : 60;
     const textLinesSvg = displayLines.map((line, idx) => {
       const y = startY + idx * lineSpacing;
       const escapedLine = line
@@ -58,7 +59,7 @@ async function generateTestimonialPoster(testimonial) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
-      return `<text x="540" y="${y}" font-family="Outfit, Inter, sans-serif" font-weight="500" font-size="${hasPhoto ? 34 : 38}" fill="#ededf0" text-anchor="middle">${escapedLine}</text>`;
+      return `<text x="540" y="${y}" font-family="Outfit, Inter, sans-serif" font-weight="500" font-size="${hasPhoto ? 30 : 38}" fill="#ededf0" text-anchor="middle">${escapedLine}</text>`;
     }).join('\n');
 
     // 4. Metadata escape
@@ -75,14 +76,14 @@ async function generateTestimonialPoster(testimonial) {
     if (hasPhoto) {
       decorationSvg = `
         <clipPath id="rectClip">
-          <rect x="180" y="1020" width="720" height="420" rx="24" ry="24" />
+          <rect x="180" y="880" width="720" height="600" rx="24" ry="24" />
         </clipPath>
-        <!-- Golden outer frame for the buyer photo -->
-        <rect x="176" y="1016" width="728" height="428" rx="28" ry="28" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
+        <!-- Golden outer frame for the buyer photo (Tall 600px container) -->
+        <rect x="176" y="876" width="728" height="608" rx="28" ry="28" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
         <!-- Solid background for the picture frame area -->
-        <rect x="180" y="1020" width="720" height="420" rx="24" ry="24" fill="#07080a" />
+        <rect x="180" y="880" width="720" height="600" rx="24" ry="24" fill="#07080a" />
         <!-- Image rendered using 'meet' to ensure it is never cropped/sliced -->
-        <image href="${testimonial.image}" x="180" y="1020" width="720" height="420" preserveAspectRatio="xMidYMid meet" clip-path="url(#rectClip)" />
+        <image href="${testimonial.image}" x="180" y="880" width="720" height="600" preserveAspectRatio="xMidYMid meet" clip-path="url(#rectClip)" />
       `;
     } else {
       decorationSvg = `
@@ -139,17 +140,17 @@ async function generateTestimonialPoster(testimonial) {
         <rect x="90" y="380" width="900" height="1140" rx="40" ry="40" fill="url(#cardGrad)" stroke="url(#goldGrad)" stroke-opacity="0.6" stroke-width="4" />
 
         <!-- Avatar Container -->
-        <circle cx="540" cy="540" r="90" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
-        <circle cx="540" cy="540" r="88" fill="none" stroke="#0a0b0d" stroke-width="2" />
-        <circle cx="540" cy="540" r="82" fill="#131418" />
-        <text x="540" y="568" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="80" fill="url(#goldGrad)" text-anchor="middle">${escapedName.substring(0, 1).toUpperCase()}</text>
+        <circle cx="540" cy="${hasPhoto ? 475 : 540}" r="${hasPhoto ? 55 : 90}" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
+        <circle cx="540" cy="${hasPhoto ? 475 : 540}" r="${hasPhoto ? 53 : 88}" fill="none" stroke="#0a0b0d" stroke-width="2" />
+        <circle cx="540" cy="${hasPhoto ? 475 : 540}" r="${hasPhoto ? 48 : 82}" fill="#131418" />
+        <text x="540" y="${hasPhoto ? 494 : 568}" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="${hasPhoto ? 50 : 80}" fill="url(#goldGrad)" text-anchor="middle">${escapedName.substring(0, 1).toUpperCase()}</text>
 
         <!-- Client Name in Gold gradient -->
-        <text x="540" y="685" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="46" fill="url(#goldGrad)" text-anchor="middle">${escapedName}</text>
+        <text x="540" y="${hasPhoto ? 565 : 685}" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="${hasPhoto ? 38 : 46}" fill="url(#goldGrad)" text-anchor="middle">${escapedName}</text>
         
         <!-- Product Badge Capsule -->
-        <rect x="340" y="715" width="400" height="50" rx="25" ry="25" fill="url(#goldGrad)" />
-        <text x="540" y="748" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="22" fill="#0a0b0d" text-anchor="middle" letter-spacing="1.5">${escapedPlan.toUpperCase()}</text>
+        <rect x="${hasPhoto ? 380 : 340}" y="${hasPhoto ? 595 : 715}" width="${hasPhoto ? 320 : 400}" height="${hasPhoto ? 42 : 50}" rx="${hasPhoto ? 21 : 25}" ry="${hasPhoto ? 21 : 25}" fill="url(#goldGrad)" />
+        <text x="540" y="${hasPhoto ? 623 : 748}" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="${hasPhoto ? 18 : 22}" fill="#0a0b0d" text-anchor="middle" letter-spacing="1.5">${escapedPlan.toUpperCase()}</text>
 
         ${starsSvg}
 
@@ -172,7 +173,7 @@ async function generateTestimonialPoster(testimonial) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    const filename = `${testimonial.orderId || testimonial.id}-gold-v3.png`;
+    const filename = `${testimonial.orderId || testimonial.id}-gold-v4.png`;
     const filePath = path.join(dirPath, filename);
     
     await sharp(Buffer.from(svg))
