@@ -79,7 +79,10 @@ async function generateTestimonialPoster(testimonial) {
         </clipPath>
         <!-- Golden outer frame for the buyer photo -->
         <rect x="176" y="1016" width="728" height="428" rx="28" ry="28" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
-        <image href="${testimonial.image}" x="180" y="1020" width="720" height="420" preserveAspectRatio="xMidYMid slice" clip-path="url(#rectClip)" />
+        <!-- Solid background for the picture frame area -->
+        <rect x="180" y="1020" width="720" height="420" rx="24" ry="24" fill="#07080a" />
+        <!-- Image rendered using 'meet' to ensure it is never cropped/sliced -->
+        <image href="${testimonial.image}" x="180" y="1020" width="720" height="420" preserveAspectRatio="xMidYMid meet" clip-path="url(#rectClip)" />
       `;
     } else {
       decorationSvg = `
@@ -169,7 +172,7 @@ async function generateTestimonialPoster(testimonial) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    const filename = `${testimonial.orderId || testimonial.id}-gold-v2.png`;
+    const filename = `${testimonial.orderId || testimonial.id}-gold-v3.png`;
     const filePath = path.join(dirPath, filename);
     
     await sharp(Buffer.from(svg))
