@@ -25,7 +25,7 @@ function wrapText(text, maxCharsPerLine = 32) {
 
 /**
  * Generates a beautiful 1080x1920 portrait testimonial poster PNG
- * Supports dynamic layout depending on whether the testimonial contains a buyer-uploaded photo
+ * Matches the website's brand: Charcoal Luxe and Electric Gold
  */
 async function generateTestimonialPoster(testimonial) {
   try {
@@ -39,17 +39,17 @@ async function generateTestimonialPoster(testimonial) {
       displayLines[displayLines.length - 1] = displayLines[displayLines.length - 1] + '...';
     }
 
-    // 2. Stars rendering
+    // 2. Stars rendering (using gold fill)
     const starCount = testimonial.rating || 5;
     const starsSvg = Array.from({ length: 5 }, (_, i) => {
-      const color = i < starCount ? '#FFD700' : '#44444c';
+      const color = i < starCount ? '#fbbf24' : '#3f3f46';
       const x = 540 - 150 + i * 60; // Center the 5 stars (spacing 60px)
       return `<path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" fill="${color}" transform="translate(${x - 12}, 780) scale(1.8)"/>`;
     }).join('\n');
 
     // 3. Text lines SVG
-    const startY = hasPhoto ? 850 : 920;
-    const lineSpacing = hasPhoto ? 50 : 60;
+    const startY = hasPhoto ? 855 : 920;
+    const lineSpacing = hasPhoto ? 52 : 60;
     const textLinesSvg = displayLines.map((line, idx) => {
       const y = startY + idx * lineSpacing;
       const escapedLine = line
@@ -58,7 +58,7 @@ async function generateTestimonialPoster(testimonial) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
-      return `<text x="540" y="${y}" font-family="Outfit, Inter, sans-serif" font-weight="500" font-size="${hasPhoto ? 32 : 38}" fill="#e2e8f0" text-anchor="middle">${escapedLine}</text>`;
+      return `<text x="540" y="${y}" font-family="Outfit, Inter, sans-serif" font-weight="500" font-size="${hasPhoto ? 34 : 38}" fill="#ededf0" text-anchor="middle">${escapedLine}</text>`;
     }).join('\n');
 
     // 4. Metadata escape
@@ -77,61 +77,73 @@ async function generateTestimonialPoster(testimonial) {
         <clipPath id="rectClip">
           <rect x="180" y="1020" width="720" height="420" rx="24" ry="24" />
         </clipPath>
-        <!-- Border for the image -->
-        <rect x="178" y="1018" width="724" height="424" rx="26" ry="26" fill="none" stroke="url(#blueGrad)" stroke-width="2" opacity="0.5" />
+        <!-- Border for the image with gold gradient -->
+        <rect x="178" y="1018" width="724" height="424" rx="26" ry="26" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6" />
         <image href="${testimonial.image}" x="180" y="1020" width="720" height="420" preserveAspectRatio="xMidYMid slice" clip-path="url(#rectClip)" />
       `;
     } else {
       decorationSvg = `
-        <text x="540" y="870" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#ffffff" opacity="0.04" text-anchor="middle">“</text>
-        <text x="540" y="1460" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#ffffff" opacity="0.04" text-anchor="middle">”</text>
+        <text x="540" y="870" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#fbbf24" opacity="0.06" text-anchor="middle">“</text>
+        <text x="540" y="1460" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#fbbf24" opacity="0.06" text-anchor="middle">”</text>
       `;
     }
 
-    // 6. Build SVG
+    // 6. Build SVG with Brand Gradient and Elements
     const svg = `
       <svg width="1080" height="1920" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#0d0e12" />
-            <stop offset="50%" stop-color="#07080a" />
-            <stop offset="100%" stop-color="#020203" />
+            <stop offset="0%" stop-color="#0a0b0d" />
+            <stop offset="100%" stop-color="#050506" />
           </linearGradient>
           <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.05" />
-            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.01" />
+            <stop offset="0%" stop-color="#131418" />
+            <stop offset="100%" stop-color="#0a0b0d" />
           </linearGradient>
-          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#FFD700" />
-            <stop offset="100%" stop-color="#FFA500" />
+          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24" />
+            <stop offset="50%" stop-color="#f59e0b" />
+            <stop offset="100%" stop-color="#d97706" />
           </linearGradient>
-          <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#00d4ff" />
-            <stop offset="100%" stop-color="#0072ff" />
-          </linearGradient>
-          <radialGradient id="spotlight" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.12" />
+          <radialGradient id="goldSpotlight" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.15" />
             <stop offset="100%" stop-color="#000000" stop-opacity="0" />
           </radialGradient>
+          <linearGradient id="stripeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.03" />
+            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
+          </linearGradient>
         </defs>
 
+        <!-- 1. Background -->
         <rect width="100%" height="100%" fill="url(#bgGrad)" />
-        <circle cx="540" cy="960" r="800" fill="url(#spotlight)" />
+        <path d="M-100 0 L600 0 L1080 1920 L380 1920 Z" fill="url(#stripeGrad)" />
+        <circle cx="540" cy="960" r="900" fill="url(#goldSpotlight)" />
 
-        <text x="540" y="240" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="64" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="4">ALEXCLOUD</text>
-        <text x="540" y="295" font-family="Outfit, Inter, sans-serif" font-weight="600" font-size="22" fill="#71717a" text-anchor="middle" letter-spacing="6">PLATFORM CLOUD GAMING</text>
+        <!-- Decorative Outer Border -->
+        <rect x="40" y="40" width="1000" height="1840" rx="32" ry="32" fill="none" stroke="#fbbf24" stroke-opacity="0.15" stroke-width="2" />
 
-        <rect x="90" y="380" width="900" height="1140" rx="36" ry="36" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.08" stroke-width="2" />
+        <!-- 2. Header Branding -->
+        <line x1="440" y1="140" x2="640" y2="140" stroke="url(#goldGrad)" stroke-width="4" stroke-linecap="round" />
+        <text x="540" y="240" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="70" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="8">ALEXCLOUD</text>
+        <text x="540" y="295" font-family="Outfit, Inter, sans-serif" font-weight="700" font-size="20" fill="#9aa0aa" text-anchor="middle" letter-spacing="5">PREMIUM CLOUD GAMING</text>
 
-        <circle cx="540" cy="540" r="84" fill="none" stroke="url(#blueGrad)" stroke-width="4" opacity="0.6" />
-        <circle cx="540" cy="540" r="80" fill="#1e1f24" />
-        <text x="540" y="565" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="70" fill="url(#blueGrad)" text-anchor="middle">${escapedName.substring(0, 1).toUpperCase()}</text>
+        <!-- 3. Testimonial Card with offset shadow -->
+        <rect x="94" y="384" width="900" height="1140" rx="40" ry="40" fill="#000000" opacity="0.5" />
+        <rect x="90" y="380" width="900" height="1140" rx="40" ry="40" fill="url(#cardGrad)" stroke="url(#goldGrad)" stroke-opacity="0.35" stroke-width="3" />
 
-        <text x="540" y="680" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="44" fill="#ffffff" text-anchor="middle">${escapedName}</text>
+        <!-- Avatar Container -->
+        <circle cx="540" cy="540" r="90" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
+        <circle cx="540" cy="540" r="88" fill="none" stroke="#0a0b0d" stroke-width="2" />
+        <circle cx="540" cy="540" r="82" fill="#131418" />
+        <text x="540" y="568" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="80" fill="url(#goldGrad)" text-anchor="middle">${escapedName.substring(0, 1).toUpperCase()}</text>
+
+        <!-- Client Name -->
+        <text x="540" y="685" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="46" fill="#ededf0" text-anchor="middle">${escapedName}</text>
         
-        <rect x="390" y="710" width="300" height="46" rx="23" ry="23" fill="url(#blueGrad)" opacity="0.15" />
-        <rect x="390" y="710" width="300" height="46" rx="23" ry="23" fill="none" stroke="url(#blueGrad)" stroke-width="1.5" opacity="0.4" />
-        <text x="540" y="740" font-family="Outfit, Inter, sans-serif" font-weight="700" font-size="20" fill="#00d4ff" text-anchor="middle" letter-spacing="1">${escapedPlan.toUpperCase()}</text>
+        <!-- Product Badge Capsule -->
+        <rect x="360" y="715" width="360" height="50" rx="25" ry="25" fill="url(#goldGrad)" />
+        <text x="540" y="748" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="22" fill="#0a0b0d" text-anchor="middle" letter-spacing="1.5">${escapedPlan.toUpperCase()}</text>
 
         ${starsSvg}
 
@@ -139,8 +151,12 @@ async function generateTestimonialPoster(testimonial) {
 
         ${decorationSvg}
 
-        <text x="540" y="1650" font-family="Outfit, Inter, sans-serif" font-weight="600" font-size="22" fill="#71717a" text-anchor="middle" letter-spacing="2">MAIN GAME AAA TANPA PC MAHAL</text>
-        <text x="540" y="1710" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="36" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="1">alexcloud.my.id</text>
+        <!-- 4. Footer Brand Info -->
+        <text x="540" y="1650" font-family="Outfit, Inter, sans-serif" font-weight="700" font-size="24" fill="#9aa0aa" text-anchor="middle" letter-spacing="3">MAIN GAME AAA TANPA PC MAHAL</text>
+        
+        <!-- Golden URL Pill -->
+        <rect x="340" y="1685" width="400" height="60" rx="30" ry="30" fill="#131418" stroke="url(#goldGrad)" stroke-opacity="0.5" stroke-width="2" />
+        <text x="540" y="1727" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="34" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="1">alexcloud.my.id</text>
       </svg>
     `;
 
