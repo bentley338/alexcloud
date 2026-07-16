@@ -163,13 +163,13 @@ async function generateTestimonialPoster(testimonial) {
       </svg>
     `;
 
-    // 7. Save PNG file
+    // 7. Save PNG file with version suffix to bypass Cloudflare/Meta caches
     const dirPath = path.join(__dirname, '..', 'public', 'testimonials');
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    const filename = `${testimonial.orderId || testimonial.id}.png`;
+    const filename = `${testimonial.orderId || testimonial.id}-gold-v2.png`;
     const filePath = path.join(dirPath, filename);
     
     await sharp(Buffer.from(svg))
