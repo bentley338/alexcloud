@@ -25,14 +25,18 @@ function wrapText(text, maxCharsPerLine = 32) {
 
 /**
  * Generates a beautiful 1080x1920 portrait testimonial poster PNG
+ * Supports dynamic layout depending on whether the testimonial contains a buyer-uploaded photo
  */
 async function generateTestimonialPoster(testimonial) {
   try {
-    // 1. Text wrapping
+    const hasPhoto = !!testimonial.image;
+    
+    // 1. Text wrapping & layout limits
+    const maxLines = hasPhoto ? 3 : 6;
     const textLines = wrapText(testimonial.text || '', 28);
-    const displayLines = textLines.slice(0, 6);
-    if (textLines.length > 6) {
-      displayLines[5] = displayLines[5] + '...';
+    const displayLines = textLines.slice(0, maxLines);
+    if (textLines.length > maxLines) {
+      displayLines[displayLines.length - 1] = displayLines[displayLines.length - 1] + '...';
     }
 
     // 2. Stars rendering
@@ -44,15 +48,17 @@ async function generateTestimonialPoster(testimonial) {
     }).join('\n');
 
     // 3. Text lines SVG
+    const startY = hasPhoto ? 850 : 920;
+    const lineSpacing = hasPhoto ? 50 : 60;
     const textLinesSvg = displayLines.map((line, idx) => {
-      const y = 920 + idx * 60;
+      const y = startY + idx * lineSpacing;
       const escapedLine = line
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
-      return `<text x="540" y="${y}" font-family="Outfit, Inter, sans-serif" font-weight="500" font-size="38" fill="#e2e8f0" text-anchor="middle">${escapedLine}</text>`;
+      return `<text x="540" y="${y}" font-family="Outfit, Inter, sans-serif" font-weight="500" font-size="${hasPhoto ? 32 : 38}" fill="#e2e8f0" text-anchor="middle">${escapedLine}</text>`;
     }).join('\n');
 
     // 4. Metadata escape
@@ -64,7 +70,25 @@ async function generateTestimonialPoster(testimonial) {
     }
     const escapedPlan = planName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // 5. Build SVG
+    // 5. Render Photo or Quote decoration
+    let decorationSvg = '';
+    if (hasPhoto) {
+      decorationSvg = `
+        <clipPath id="rectClip">
+          <rect x="180" y="1020" width="720" height="420" rx="24" ry="24" />
+        </clipPath>
+        <!-- Border for the image -->
+        <rect x="178" y="1018" width="724" height="424" rx="26" ry="26" fill="none" stroke="url(#blueGrad)" stroke-width="2" opacity="0.5" />
+        <image href="${testimonial.image}" x="180" y="1020" width="720" height="420" preserveAspectRatio="xMidYMid slice" clip-path="url(#rectClip)" />
+      `;
+    } else {
+      decorationSvg = `
+        <text x="540" y="870" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#ffffff" opacity="0.04" text-anchor="middle">“</text>
+        <text x="540" y="1460" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#ffffff" opacity="0.04" text-anchor="middle">”</text>
+      `;
+    }
+
+    // 6. Build SVG
     const svg = `
       <svg width="1080" height="1920" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -111,18 +135,16 @@ async function generateTestimonialPoster(testimonial) {
 
         ${starsSvg}
 
-        <text x="540" y="870" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#ffffff" opacity="0.04" text-anchor="middle">“</text>
-
         ${textLinesSvg}
 
-        <text x="540" y="1460" font-family="Georgia, serif" font-weight="900" font-size="160" fill="#ffffff" opacity="0.04" text-anchor="middle">”</text>
+        ${decorationSvg}
 
         <text x="540" y="1650" font-family="Outfit, Inter, sans-serif" font-weight="600" font-size="22" fill="#71717a" text-anchor="middle" letter-spacing="2">MAIN GAME AAA TANPA PC MAHAL</text>
         <text x="540" y="1710" font-family="Outfit, Inter, sans-serif" font-weight="800" font-size="36" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="1">alexcloud.my.id</text>
       </svg>
     `;
 
-    // 6. Save PNG file
+    // 7. Save PNG file
     const dirPath = path.join(__dirname, '..', 'public', 'testimonials');
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
@@ -166,7 +188,7 @@ async function publishToInstagramStory(imageUrl) {
     const containerId = containerRes.data.id;
     console.log(`[INSTAGRAM STORY] Container created: ${containerId}. Waiting for processing...`);
 
-    // 2. Poll/Wait and Publish (up to 3 attempts with 5s delay)
+    // 2. Poll/Wait and Publish (up to 3 attempts with 6s delay)
     for (let attempt = 1; attempt <= 3; attempt++) {
       await new Promise(r => setTimeout(r, 6000));
       try {
