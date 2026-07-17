@@ -242,11 +242,13 @@ router.get('/', (req, res) => {
   let balance = 0;
   let lastDailyLogin = null;
   let loginStreak = 0;
+  let dailyLoginAccumulated = 0;
   if (req.user) {
     const w = getWallet(req.user.id);
     balance = w.balance || 0;
     lastDailyLogin = w.lastDailyLogin || null;
     loginStreak = w.loginStreak || 0;
+    dailyLoginAccumulated = w.dailyLoginAccumulated || 0;
   }
 
   res.render('index', {
@@ -255,6 +257,7 @@ router.get('/', (req, res) => {
     balance,
     lastDailyLogin,
     loginStreak,
+    dailyLoginAccumulated,
     games: popularGames,
     allGames: games,
     trendingGames,
@@ -2166,7 +2169,7 @@ router.post('/api/claim-daily-login', ensureAuthenticated, (req, res) => {
         
         if (penaltyAmount > 0) {
           applyWalletTx(userId, {
-            type: 'admin_debit',
+            type: 'daily_login_penalty',
             amount: penaltyAmount,
             note: 'Penalti Miss Daily Login',
             allowNegative: false
@@ -2198,7 +2201,7 @@ router.post('/api/claim-daily-login', ensureAuthenticated, (req, res) => {
       .write();
 
     applyWalletTx(userId, {
-      type: 'bonus',
+      type: 'daily_login',
       amount: reward,
       note: `Bonus Login Harian (Hari ${streak})`,
       allowNegative: false
