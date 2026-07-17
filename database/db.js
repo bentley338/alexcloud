@@ -261,7 +261,7 @@ function applyWalletTx(userId, { type, amount, refType = null, refId = null, not
   const amt = Math.round(Number(amount) || 0);
   if (!Number.isFinite(amt) || amt <= 0) throw new Error('Nominal transaksi saldo tidak valid');
 
-  const DEBIT_TYPES = ['purchase', 'admin_debit'];
+  const DEBIT_TYPES = ['purchase', 'admin_debit', 'daily_login_penalty'];
   const isDebit = DEBIT_TYPES.includes(type);
 
   // Re-fetch tepat sebelum menulis untuk mengurangi risiko balapan (single-process/event-loop).
