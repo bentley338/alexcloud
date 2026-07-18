@@ -1274,29 +1274,14 @@ section { position: relative; z-index: 1; }
   contain-intrinsic-size: auto 650px;
 }
 
-.pricing-container { max-width: 1000px; margin: 0 auto; padding: 0 1.25rem; }
+.pricing-container { max-width: 860px; margin: 0 auto; padding: 0 1.25rem; }
 .pricing-swipe-hint { display: none; }
 
-.sub-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  align-items: stretch;
-}
-
-.royal-vip-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
+.pricing-grid-2col,
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.35rem;
   align-items: stretch;
 }
 
@@ -3988,6 +3973,7 @@ input:focus-visible,
   }
 
   /* Mobile Pricing Grid (2 Cards Per Row Side-by-Side) */
+  .pricing-grid-2col:not(.home-pricing-slider),
   .sub-plans-grid:not(.home-pricing-slider),
   .royal-vip-grid,
   .page-pricing-grid,
