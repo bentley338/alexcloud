@@ -1,192 +1,181 @@
 <%- include('partials/header') %>
 
-<style>
-  /* Balanced, spacious pricing card overrides */
-  .pricing-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-    gap: 1.25rem !important;
-  }
-  .plan-card {
-    padding: 2.25rem 1.75rem !important;
-    border-radius: var(--radius-lg) !important;
-  }
-  .plan-name {
-    font-size: 1.15rem !important;
-    margin-bottom: 0.5rem !important;
-    margin-top: 0.5rem !important;
-  }
-  .plan-price {
-    font-size: 2.5rem !important;
-  }
-  .plan-price.popular-price {
-    font-size: 2.7rem !important;
-  }
-  .plan-period {
-    font-size: 0.9rem !important;
-    margin-bottom: 1.25rem !important;
-  }
-  .plan-features {
-    gap: 0.65rem !important;
-    margin-bottom: 1.5rem !important;
-  }
-  .plan-features li {
-    font-size: 0.92rem !important;
-    line-height: 1.4 !important;
-  }
-  .plan-features li i {
-    font-size: 0.85rem !important;
-  }
-  .plan-btn {
-    padding: 0.85rem 1.25rem !important;
-    font-size: 0.95rem !important;
-  }
-</style>
-
 <div class="page-wrap">
-  <div style="padding: 4rem 0 3rem; background: linear-gradient(180deg, rgba(255, 255, 255,0.04) 0%, transparent 100%);">
+  <div style="padding: 3.5rem 0 2rem; background: linear-gradient(180deg, rgba(251,191,36,0.06) 0%, transparent 100%);">
     <div class="container text-center">
-      <div class="section-tag" style="margin-bottom:1rem;">Harga</div>
-      <h1 class="section-title">Paket <span class="accent">Terjangkau</span></h1>
-      <p class="section-desc">Pilih paket yang sesuai kebutuhanmu. Semakin lama, semakin hemat!</p>
-      <div class="pricing-swipe-hint desktop-hidden" style="margin-top:0.75rem;">
-        <i class="fas fa-hand-pointer"></i> Geser samping untuk lihat paket lainnya 👉
+      <div style="display:inline-flex; align-items:center; gap:0.4rem; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-family:var(--font-ui); font-size:0.78rem; font-weight:700; padding:0.3rem 0.85rem; border-radius:100px; margin-bottom:1rem; box-shadow:0 0 15px rgba(251,191,36,0.15);">
+        <i class="fas fa-bolt"></i> ALEXCLOUD GAMING SUBSCRIPTION
       </div>
+      <h1 class="section-title">Pilih <span class="accent">Paket Gaming</span> Terbaik</h1>
+      <p class="section-desc">Mainkan 100+ game AAA langsung di HP, Laptop, atau Smart TV tanpa instalasi.</p>
     </div>
   </div>
 
-  <section class="pricing-section" style="padding-top: 2rem;">
+  <section class="pricing-section" style="padding-top: 1rem; padding-bottom: 4rem;">
     <div class="pricing-container">
       <div class="pricing-grid">
         <% plans.forEach(plan => { %>
           <% if (plan.id === 'royal_access') { %>
-            <!-- VIP Royal Access Pass Card -->
-            <div class="plan-card royal-card" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%); border: 2px solid #fbbf24; box-shadow: 0 0 25px rgba(251, 191, 36, 0.15); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+            <!-- 👑 VIP Royal Access Pass Card -->
+            <div class="plan-card royal-card" style="background: linear-gradient(155deg, rgba(251, 191, 36, 0.16) 0%, rgba(18, 19, 25, 0.98) 60%); border: 2px solid #fbbf24; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.18); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
               <div>
-                <div class="popular-badge-wrap" style="min-height: 28px; display: flex; align-items: center; margin-bottom: 0.5rem;">
-                  <div class="popular-badge" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.05em; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3); margin: 0;">👑 VIP CLUB UPGRADE</div>
+                <div class="popular-badge-wrap" style="min-height: 26px; display: flex; align-items: center; margin-bottom: 0.4rem;">
+                  <div class="popular-badge" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #000; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.05em; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.35); margin: 0; padding: 0.25rem 0.65rem; border-radius: 100px;">👑 VIP CLUB UPGRADE</div>
                 </div>
                 
-                <div class="plan-name" style="color: #fbbf24; font-weight: 800; font-size: 1.4rem;"><%= plan.name %></div>
-                <div class="plan-price" style="color: #fff; font-size: 2rem; text-shadow: 0 0 15px rgba(251,191,36,0.2);"><%= plan.priceDisplay %></div>
-                <div class="plan-period" style="color: #fbbf24; font-weight: 600; font-size:0.85rem;">Lifetime / Sekali Bayar</div>
+                <div class="plan-name" style="color: #fbbf24; font-weight: 800; font-size: 1.25rem;"><%= plan.name %></div>
+                <div class="plan-price" style="color: #fff; font-size: 1.85rem; font-weight: 800; text-shadow: 0 0 15px rgba(251,191,36,0.25); line-height: 1.1; margin-top: 0.2rem;"><%= plan.priceDisplay %></div>
+                <div class="plan-period" style="color: #fbbf24; font-weight: 600; font-size:0.8rem; margin-bottom:0.4rem;">Lifetime / Sekali Bayar</div>
                 
+                <div class="daily-chip royal" style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.73rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:6px; margin-bottom:0.75rem;">
+                  👑 Buka Sewa Harian Rp 7.000
+                </div>
+
                 <ul class="plan-features">
-                  <li><i class="fas fa-unlock" style="color:#fbbf24;"></i> Sewa Harian Rp 7.000</li>
-                  <li><i class="fas fa-server" style="color:#fbbf24;"></i> Server Latensi 30ms</li>
-                  <li><i class="fas fa-crown" style="color:#fbbf24;"></i> Badge Mahkota Emas 👑</li>
-                  <li><i class="fas fa-coins" style="color:#fbbf24;"></i> Bonus Klaim Harian Saldo</li>
+                  <li><i class="fas fa-unlock" style="color:#fbbf24;"></i> Buka Fitur Sewa Harian</li>
+                  <li><i class="fas fa-server" style="color:#fbbf24;"></i> Server Latensi Ultra-Rendah 30ms</li>
+                  <li><i class="fas fa-crown" style="color:#fbbf24;"></i> Badge Mahkota Emas Profil 👑</li>
+                  <li><i class="fas fa-coins" style="color:#fbbf24;"></i> Bonus Klaim Saldo Harian</li>
                   <li><i class="fas fa-percentage" style="color:#fbbf24;"></i> Cashback Top-up +5% &amp; CS VIP</li>
                 </ul>
               </div>
+
               <% if (typeof user !== 'undefined' && user) { %>
                 <% if (user.isRoyal) { %>
-                  <div class="plan-btn" style="background: linear-gradient(90deg, #10b981, #059669); color: white; cursor: default; border: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.85rem 1.5rem; border-radius: var(--radius-md);">
+                  <div class="plan-btn" style="background: linear-gradient(90deg, #10b981, #059669); color: white; cursor: default; border: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.7rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem;">
                     <i class="fas fa-check-circle"></i> Sudah Aktif
                   </div>
                 <% } else { %>
-                  <a href="/order/<%= plan.id %>?ref_=pricing_buy_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800; box-shadow: 0 4px 15px rgba(251,191,36,0.3);">
+                  <a href="/order/<%= plan.id %>?ref_=pricing_buy_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800; box-shadow: 0 4px 15px rgba(251,191,36,0.3); font-size: 0.85rem; padding: 0.7rem 1rem;">
                     <i class="fas fa-crown"></i> Beli Royal Access
                   </a>
                 <% } %>
               <% } else { %>
-                <a href="/login?ref_=pricing_login_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800;">
+                <a href="/login?ref_=pricing_login_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800; font-size: 0.85rem; padding: 0.7rem 1rem;">
                   Login untuk Order
                 </a>
               <% } %>
             </div>
+
           <% } else if (plan.id === 'custom_royal') { %>
-            <!-- Daily Royal Plan Card with Day Slider -->
-            <div class="plan-card" style="<%= (typeof user !== 'undefined' && user && user.isRoyal) ? 'border: 1px solid var(--accent-blue);' : 'opacity: 0.85; position: relative;' %> display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+            <!-- ⚡ Daily Royal Plan Card with Day Slider -->
+            <div class="plan-card" style="<%= (typeof user !== 'undefined' && user && user.isRoyal) ? 'border: 1px solid var(--accent-blue);' : 'opacity: 0.88; position: relative;' %> display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
               <div>
-                <div class="popular-badge-wrap" style="min-height: 28px; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                <div class="popular-badge-wrap" style="min-height: 26px; display: flex; align-items: center; margin-bottom: 0.4rem;">
                   <% if (typeof user === 'undefined' || !user || !user.isRoyal) { %>
-                    <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-ui); font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 100px;">
                       <i class="fas fa-lock"></i> ROYAL ONLY
                     </div>
                   <% } else { %>
-                    <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: #fbbf24; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: #fbbf24; font-family: var(--font-ui); font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 100px;">
                       <i class="fas fa-unlock"></i> ROYAL UNLOCKED
                     </div>
                   <% } %>
                 </div>
                 
                 <div class="plan-name" id="customDaysName">Sewa Harian (1 Hari)</div>
-                <div class="plan-price" id="customDaysPrice">Rp 7.000</div>
-                <div class="plan-period" id="customDaysPeriod">akses selama 1 hari</div>
+                <div class="plan-price" id="customDaysPrice" style="font-size: 1.85rem; font-weight: 800; line-height: 1.1; margin-top: 0.2rem;">Rp 7.000</div>
+                <div class="plan-period" id="customDaysPeriod" style="font-size:0.8rem; margin-bottom:0.4rem; color:var(--text-muted);">akses selama 1 hari</div>
 
                 <!-- SLIDER SECTION -->
-                <div style="margin: 1.25rem 0 0.85rem; text-align: left;">
-                  <label for="daysSlider" style="display: block; font-family: var(--font-ui); font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+                <div style="margin: 0.75rem 0 0.6rem; text-align: left; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.75rem;">
+                  <label for="daysSlider" style="display: flex; justify-content: space-between; font-family: var(--font-ui); font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.25rem;">
                     <span>Durasi Sewa:</span>
                     <strong style="color: var(--accent-blue);" id="sliderValueText">1 Hari</strong>
                   </label>
-                  <input type="range" id="daysSlider" min="1" max="6" value="1" style="width: 100%; accent-color: var(--accent-blue); background: rgba(255,255,255,0.1); border-radius: var(--radius-sm); outline: none; cursor: pointer;">
-                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; font-family: var(--font-ui);">
-                    <span>1 Hari</span>
+                  <input type="range" id="daysSlider" min="1" max="6" value="1" style="width: 100%; accent-color: var(--accent-blue); background: rgba(255,255,255,0.1); border-radius: var(--radius-sm); outline: none; cursor: pointer; height: 6px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem; font-family: var(--font-ui);">
+                    <span>1H</span>
                     <span>2H</span>
                     <span>3H</span>
                     <span>4H</span>
                     <span>5H</span>
-                    <span>6 Hari</span>
+                    <span>6H</span>
                   </div>
                 </div>
                 
                 <ul class="plan-features">
-                  <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
-                  <li><i class="fas fa-check"></i> Streaming 4K / 60fps &amp; Cloud Save</li>
-                  <li><i class="fas fa-check"></i> Durasi Bebas (1 s/d 6 Hari)</li>
-                  <li><i class="fas fa-check"></i> Multi-device Support</li>
-                  <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses 100+ Game Premium</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Streaming 4K &amp; Cloud Save</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Durasi Bebas (1 - 6 Hari)</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device Support</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Support WhatsApp 24/7</li>
                 </ul>
               </div>
+
               <% if (typeof user !== 'undefined' && user) { %>
                 <% if (user.isRoyal) { %>
-                  <a href="/order/<%= plan.id %>?days=1" id="customDaysBtn" class="plan-btn filled">
+                  <a href="/order/<%= plan.id %>?days=1" id="customDaysBtn" class="plan-btn filled" style="font-size:0.85rem; padding:0.7rem 1rem;">
                     <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
                   </a>
                 <% } else { %>
-                  <a href="/order/royal_access?ref_=pricing_unlock_daily" onclick="return confirm('Untuk menyewa harian, Anda harus menjadi anggota Royal Club terlebih dahulu.\n\nAnda akan diarahkan ke halaman pembayaran Royal Club Access (Rp 25.000 / Sekali Bayar). Lanjutkan?')" class="plan-btn outline" style="border-color: #fbbf24; color: #fbbf24; font-weight: 700; text-align:center;">
+                  <a href="/order/royal_access?ref_=pricing_unlock_daily" onclick="return confirm('Untuk menyewa harian, Anda harus menjadi anggota Royal Club terlebih dahulu.\n\nAnda akan diarahkan ke halaman pembayaran Royal Club Access (Rp 25.000 / Sekali Bayar). Lanjutkan?')" class="plan-btn outline" style="border-color: #fbbf24; color: #fbbf24; font-weight: 700; text-align:center; font-size:0.8rem; padding:0.65rem 0.75rem;">
                     <i class="fas fa-crown"></i> Unlock via Royal Club
                   </a>
                 <% } %>
               <% } else { %>
-                <a href="/login?ref_=pricing_login" class="plan-btn outline">
+                <a href="/login?ref_=pricing_login" class="plan-btn outline" style="font-size:0.85rem; padding:0.7rem 1rem;">
                   Login untuk Order
                 </a>
               <% } %>
             </div>
+
           <% } else { %>
-            <!-- Normal Plans -->
+            <!-- ⚡ Standard Subscription Plans -->
             <div class="plan-card <%= plan.popular ? 'popular' : '' %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
               <div>
-                <div class="popular-badge-wrap" style="min-height: 28px; display: flex; align-items: center; margin-bottom: 0.5rem;">
-                  <% if (plan.popular) { %><div class="popular-badge" style="margin: 0;">⭐ PALING POPULER</div><% } %>
+                <div class="popular-badge-wrap" style="min-height: 26px; display: flex; align-items: center; margin-bottom: 0.4rem;">
+                  <% if (plan.popular) { %>
+                    <div class="popular-badge" style="margin: 0; background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.05em; padding: 0.25rem 0.65rem; border-radius: 100px;">⭐ PALING POPULER</div>
+                  <% } %>
                 </div>
+                
                 <div class="plan-name"><%= plan.name %></div>
-                <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>"><%= plan.priceDisplay %></div>
-                <div class="plan-period">akses selama <%= plan.duration %> hari</div>
+                <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>" style="font-size: 1.85rem; font-weight: 800; line-height: 1.1; margin-top: 0.2rem;"><%= plan.priceDisplay %></div>
+                <div class="plan-period" style="font-size:0.8rem; margin-bottom:0.4rem; color:var(--text-muted);">akses selama <%= plan.duration %> hari</div>
+
+                <!-- Daily Breakdown Chip -->
+                <% if (plan.id === '1_minggu') { %>
+                  <div class="daily-chip" style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.73rem; font-weight:600; padding:0.2rem 0.55rem; border-radius:6px; margin-bottom:0.75rem;">
+                    🔥 Rp 5.714 / hari
+                  </div>
+                <% } else if (plan.id === '1_bulan') { %>
+                  <div class="daily-chip highlight" style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.73rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:6px; margin-bottom:0.75rem;">
+                    ⭐ Rp 2.000 / hari (Hemat 65%)
+                  </div>
+                <% } else if (plan.id === '2_bulan') { %>
+                  <div class="daily-chip" style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.25); color:var(--accent-green); font-size:0.73rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:6px; margin-bottom:0.75rem;">
+                    ⚡ Rp 1.666 / hari + 5H Gratis
+                  </div>
+                <% } else if (plan.id === '3_bulan') { %>
+                  <div class="daily-chip gold" style="display:inline-flex; align-items:center; gap:0.3rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.73rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:6px; margin-bottom:0.75rem;">
+                    👑 Rp 1.666 / hari + VIP Priority
+                  </div>
+                <% } %>
+
                 <ul class="plan-features">
-                  <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
-                  <li><i class="fas fa-check"></i> Streaming 4K / 60fps</li>
-                  <li><i class="fas fa-check"></i> Cloud Save Progress</li>
-                  <li><i class="fas fa-check"></i> Multi-device Support</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses 100+ Game Premium</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Streaming 4K / 60fps</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Cloud Save Progress</li>
+                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device Support</li>
                   <% if (plan.duration >= 90) { %>
                     <li><i class="fas fa-star" style="color:#fbbf24"></i> VIP Priority &amp; Early Access</li>
                   <% } else if (plan.duration >= 60) { %>
-                    <li><i class="fas fa-check"></i> 🔥 Bonus 5 Hari Gratis &amp; Request</li>
+                    <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> 🔥 Bonus 5 Hari &amp; Request</li>
                   <% } else if (plan.duration >= 30) { %>
-                    <li><i class="fas fa-check"></i> Akses Beta Game Baru</li>
+                    <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses Beta Game Baru</li>
                   <% } else { %>
-                    <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
+                    <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Support WhatsApp 24/7</li>
                   <% } %>
                 </ul>
               </div>
+
               <% if (typeof user !== 'undefined' && user) { %>
-                <a href="/order/<%= plan.id %>?ref_=pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+                <a href="/order/<%= plan.id %>?ref_=pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.85rem; padding:0.7rem 1rem;">
                   <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
                 </a>
               <% } else { %>
-                <a href="/login?ref_=pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+                <a href="/login?ref_=pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.85rem; padding:0.7rem 1rem;">
                   Login untuk Order
                 </a>
               <% } %>
@@ -195,36 +184,36 @@
         <% }) %>
       </div>
 
-      <!-- FAQ / Info -->
-      <div style="margin-top:4rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.5rem;">
-        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
-          <div style="font-size:1.5rem; margin-bottom:0.75rem;">💳</div>
-          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Metode Pembayaran</h4>
-          <p style="color:var(--text-muted); font-size:0.9rem;">QRIS (GoPay, OVO, DANA, ShopeePay, M-Banking, dan semua e-wallet yang mendukung QRIS)</p>
+      <!-- FAQ / Info Grid -->
+      <div style="margin-top:3.5rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:1.25rem;">
+        <div style="background:linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(15,16,20,0.95) 100%); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
+          <div style="font-size:1.4rem; margin-bottom:0.5rem;">💳</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.35rem; font-size:1rem;">Metode Pembayaran</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">QRIS Otomatis (GoPay, OVO, DANA, ShopeePay, M-Banking, dan e-wallet).</p>
         </div>
-        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
-          <div style="font-size:1.5rem; margin-bottom:0.75rem;">⚡</div>
-          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Aktivasi Cepat</h4>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Akun diaktifkan dalam 1-15 menit setelah konfirmasi pembayaran via WhatsApp.</p>
+        <div style="background:linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(15,16,20,0.95) 100%); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
+          <div style="font-size:1.4rem; margin-bottom:0.5rem;">⚡</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.35rem; font-size:1rem;">Aktivasi Cepat</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">Akun aktif serba otomatis dalam 1-5 menit setelah pembayaran selesai.</p>
         </div>
-        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
-          <div style="font-size:1.5rem; margin-bottom:0.75rem;">🔄</div>
-          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Perpanjangan Mudah</h4>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Perpanjang kapanpun lewat dashboard. Order baru otomatis menggantikan subscription lama.</p>
+        <div style="background:linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(15,16,20,0.95) 100%); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
+          <div style="font-size:1.4rem; margin-bottom:0.5rem;">🔄</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.35rem; font-size:1rem;">Perpanjangan Mudah</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">Perpanjang kapanpun lewat dashboard. Masa aktif otomatis terakumulasi.</p>
         </div>
-        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem;">
-          <div style="font-size:1.5rem; margin-bottom:0.75rem;">🎮</div>
-          <h4 style="font-family:var(--font-ui); margin-bottom:0.5rem;">Semua Game Termasuk</h4>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Satu paket untuk semua game. Tidak ada biaya tambahan per game!</p>
+        <div style="background:linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(15,16,20,0.95) 100%); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
+          <div style="font-size:1.4rem; margin-bottom:0.5rem;">🎮</div>
+          <h4 style="font-family:var(--font-ui); margin-bottom:0.35rem; font-size:1rem;">Semua Game Termasuk</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">Satu paket untuk 100+ game AAA. Tanpa biaya sewa tambahan per judul!</p>
         </div>
       </div>
 
       <!-- CTA WhatsApp -->
-      <div style="text-align:center; margin-top:3rem; padding:2.5rem; background:rgba(37,211,102,0.05); border:1px solid rgba(37,211,102,0.2); border-radius:var(--radius-lg);">
-        <h3 style="font-family:var(--font-display); margin-bottom:0.5rem;">Ada Pertanyaan?</h3>
-        <p style="color:var(--text-muted); margin-bottom:1.5rem;">Chat langsung dengan admin AlexCloud via WhatsApp</p>
-        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/,'') : '82328437656' %>" target="_blank" class="wa-btn" style="display:inline-flex; width:auto; padding:0.85rem 2rem;">
-          <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Chat Admin WhatsApp
+      <div style="text-align:center; margin-top:2.5rem; padding:2rem; background:rgba(37,211,102,0.04); border:1px solid rgba(37,211,102,0.18); border-radius:var(--radius-lg);">
+        <h3 style="font-family:var(--font-display); margin-bottom:0.35rem; font-size:1.2rem;">Butuh Bantuan Pilih Paket?</h3>
+        <p style="color:var(--text-muted); margin-bottom:1.25rem; font-size:0.88rem;">Customer support CS kami siap membantu 24/7 via WhatsApp</p>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/,'') : '82328437656' %>" target="_blank" class="wa-btn" style="display:inline-flex; width:auto; padding:0.75rem 1.75rem; font-size:0.9rem;">
+          <i class="fab fa-whatsapp" style="font-size:1.1rem;"></i> Chat Admin WhatsApp
         </a>
       </div>
     </div>
@@ -258,7 +247,7 @@
       }
 
       slider.addEventListener('input', updateCustomDays);
-      updateCustomDays(); // run once initially
+      updateCustomDays();
     }
   });
 </script>
