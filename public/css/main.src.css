@@ -1279,9 +1279,9 @@ section { position: relative; z-index: 1; }
 
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* Compact 2-column feature grid for Royal Access */
@@ -4003,51 +4003,37 @@ input:focus-visible,
     margin-top: 0.5rem;
     margin-bottom: 0.75rem;
   }
-  /* Homepage Pricing Slider ONLY */
-  .home-pricing-slider {
-    display: flex !important;
-    grid-template-columns: none !important;
-    overflow-x: auto !important;
-    scroll-snap-type: x mandatory;
-    gap: 0.85rem !important;
-    padding: 0.5rem 0.25rem 1.25rem;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(251, 191, 36, 0.4) transparent;
-    align-items: stretch !important;
-  }
-  .home-pricing-slider::-webkit-scrollbar {
-    height: 5px;
-  }
-  .home-pricing-slider::-webkit-scrollbar-thumb {
-    background: rgba(251, 191, 36, 0.4);
-    border-radius: 10px;
-  }
-  .home-pricing-slider .plan-card,
-  .home-pricing-slider .royal-card {
-    flex: 0 0 85% !important;
-    min-width: 270px !important;
-    max-width: 315px !important;
-    scroll-snap-align: center;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-  }
-
-  /* Pricing Page (/pricing) Grid — NO SLIDER (Vertical stacked cards) */
+  /* Mobile Pricing Grid (2 - 2 - 2 Grid Layout: 2 Cards Per Row Stacked Vertically) */
+  .pricing-grid,
+  .home-pricing-slider,
   .page-pricing-grid {
     display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 1.25rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
     overflow-x: visible !important;
     padding: 0 !important;
+    width: 100% !important;
   }
+
+  .pricing-grid .plan-card,
+  .pricing-grid .royal-card,
+  .home-pricing-slider .plan-card,
+  .home-pricing-slider .royal-card,
   .page-pricing-grid .plan-card {
     flex: none !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    box-shadow: var(--shadow-card);
+    padding: 1rem 0.65rem !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+  }
+
+  .pricing-swipe-hint {
+    display: none !important;
   }
 
   .plan-card {
