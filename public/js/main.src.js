@@ -41,6 +41,11 @@
     hamburger = document.getElementById('navToggleBtn') || document.querySelector('.hamburger, .nav-toggle');
     if (!navLinks) return;
     var isOpen = navLinks.classList.toggle('open');
+    if (isOpen) {
+      document.body.classList.add('nav-open-lock');
+    } else {
+      document.body.classList.remove('nav-open-lock');
+    }
     if (hamburger) {
       hamburger.classList.toggle('open', isOpen);
       hamburger.setAttribute('aria-expanded', String(isOpen));
@@ -67,10 +72,11 @@
     var dropdown = document.getElementById('userDropdown');
     var userBtn = document.querySelector('.nav-user-btn');
 
-    // Close mobile nav on outside click
+    // Close mobile nav when link clicked or click outside
     if (navLinks && navLinks.classList.contains('open')) {
-      if (!navLinks.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target)) {
+      if (e.target.closest('#navLinks a, #navLinks button') || (!navLinks.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target))) {
         navLinks.classList.remove('open');
+        document.body.classList.remove('nav-open-lock');
         if (hamburger) {
           hamburger.classList.remove('open');
           hamburger.setAttribute('aria-expanded', 'false');

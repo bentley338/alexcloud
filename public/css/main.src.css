@@ -256,6 +256,12 @@ body::after {
 .desktop-hidden { display: none !important; }
 .mobile-hidden { display: flex; }
 
+body.nav-open-lock {
+  overflow: hidden !important;
+  height: 100vh !important;
+  touch-action: none;
+}
+
 .logo-icon { font-size: 1.4rem; }
 
 .logo-text {
