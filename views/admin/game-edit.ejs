@@ -22,7 +22,7 @@
 <% } %>
 
 <form action="/admin/games/<%= game.id %>/edit" method="POST" id="gameEditForm">
-  <div style="display:grid; grid-template-columns:1fr 380px; gap:2rem; align-items:start;">
+  <div class="admin-edit-grid">
 
     <!-- KOLOM KIRI: Form Detail -->
     <div style="display:flex; flex-direction:column; gap:1.5rem;">
@@ -32,7 +32,7 @@
         <div class="card-header">
           <div class="card-title"><i class="fas fa-info-circle"></i> Informasi Dasar</div>
         </div>
-        <div style="padding:1.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="admin-form-grid" style="padding:1.5rem;">
           <div class="form-group" style="margin:0; grid-column:1/-1;">
             <label class="form-label">Nama Game *</label>
             <input type="text" name="name" class="form-input" value="<%= game.name %>" required placeholder="Nama game...">
