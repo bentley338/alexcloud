@@ -36,9 +36,11 @@
     if (!navLinks) return;
     var isOpen = navLinks.classList.toggle('open');
     if (isOpen) {
+      document.documentElement.classList.add('nav-open-lock');
       document.body.classList.add('nav-open-lock');
       document.addEventListener('touchmove', preventBodyTouchScroll, { passive: false });
     } else {
+      document.documentElement.classList.remove('nav-open-lock');
       document.body.classList.remove('nav-open-lock');
       document.removeEventListener('touchmove', preventBodyTouchScroll);
     }
@@ -62,6 +64,7 @@
     if (navLinks && navLinks.classList.contains('open')) {
       if (e.target.closest('#navLinks a, #navLinks button') || (!navLinks.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target))) {
         navLinks.classList.remove('open');
+        document.documentElement.classList.remove('nav-open-lock');
         document.body.classList.remove('nav-open-lock');
         document.removeEventListener('touchmove', preventBodyTouchScroll);
         if (hamburger) {

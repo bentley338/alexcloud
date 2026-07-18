@@ -256,16 +256,12 @@ body::after {
 .desktop-hidden { display: none !important; }
 .mobile-hidden { display: flex; }
 
+html.nav-open-lock,
 body.nav-open-lock {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
   overflow: hidden !important;
-  touch-action: none !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  touch-action: pan-y;
 }
 
 .logo-icon { font-size: 1.4rem; }
@@ -3598,6 +3594,9 @@ input:focus-visible,
     display: none;
     position: fixed;
     top: 58px; left: 0; right: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     max-height: calc(100vh - 58px);
     background: rgba(12, 14, 20, 0.98) !important;
     backdrop-filter: blur(25px);
@@ -3609,8 +3608,10 @@ input:focus-visible,
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
     z-index: 10005;
-    overflow-y: auto;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain !important;
   }
   .nav-links.open {
     display: flex !important;
