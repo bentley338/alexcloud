@@ -4030,6 +4030,9 @@ input:focus-visible,
     min-width: 270px !important;
     max-width: 315px !important;
     scroll-snap-align: center;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
   }
 
   /* Pricing Page (/pricing) Grid — NO SLIDER (Vertical stacked cards) */
