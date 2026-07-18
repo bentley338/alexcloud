@@ -310,6 +310,9 @@ async function handleNewTestimonialAutoPublish(testimonial) {
       };
 
       const req = httpModule.request(options);
+      req.on('error', (e) => {
+        console.error('[TESTIMONIAL AUTOPOST] Error sending WhatsApp media alert:', e.message);
+      });
       req.write(postData);
       req.end();
       console.log('[TESTIMONIAL AUTOPOST] WhatsApp media notification request sent.');

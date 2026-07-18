@@ -195,6 +195,59 @@
       }
     });
   }
+  var heroSearchTimeout;
+  var heroSearchInput = document.getElementById('heroSearchInput');
+  var heroSearchDropdown = document.getElementById('heroSearchDropdown');
+  if (heroSearchInput && heroSearchDropdown) {
+    heroSearchInput.addEventListener('input', function (e) {
+      clearTimeout(heroSearchTimeout);
+      var q = e.target.value.trim();
+      if (!q) {
+        heroSearchDropdown.classList.remove('show');
+        heroSearchDropdown.innerHTML = '';
+        return;
+      }
+      heroSearchTimeout = setTimeout(function () {
+        fetch('/api/games/search?q=' + encodeURIComponent(q))
+          .then(function (res) { return res.json(); })
+          .then(function (games) {
+            if (!games || games.length === 0) {
+              heroSearchDropdown.classList.remove('show');
+              return;
+            }
+            heroSearchDropdown.innerHTML = games.map(function (g) {
+              return '<a href="/games?q=' + encodeURIComponent(g.name) + '" class="search-result-item">' +
+                '<img src="' + g.image + '" alt="' + g.name + '" loading="lazy">' +
+                '<div class="search-result-info">' +
+                '<div class="search-result-name">' + g.name + '</div>' +
+                '<div class="search-result-genre">' + g.genre + ' · ⭐ ' + g.rating + '</div>' +
+                '</div>' +
+                '</a>';
+            }).join('');
+            heroSearchDropdown.classList.add('show');
+          })
+          .catch(function () {});
+      }, 250);
+    });
+    heroSearchInput.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        submitHeroSearch();
+      }
+    });
+    document.addEventListener('click', function (e) {
+      if (heroSearchDropdown && !heroSearchDropdown.contains(e.target) && e.target !== heroSearchInput) {
+        heroSearchDropdown.classList.remove('show');
+      }
+    });
+  }
+window.submitHeroSearch = function() {
+  var input = document.getElementById('heroSearchInput');
+  if (input && input.value.trim()) {
+    window.location.href = '/games?q=' + encodeURIComponent(input.value.trim());
+  } else {
+    window.location.href = '/games';
+  }
+};
   var faqQuestions = document.querySelectorAll('.faq-question');
   faqQuestions.forEach(function (q) {
     q.addEventListener('click', function () {
