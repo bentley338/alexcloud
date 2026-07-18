@@ -4024,10 +4024,11 @@ input:focus-visible,
     background: rgba(251, 191, 36, 0.4);
     border-radius: 10px;
   }
-  .home-pricing-slider .plan-card {
+  .home-pricing-slider .plan-card,
+  .home-pricing-slider .royal-card {
     flex: 0 0 85% !important;
-    min-width: 270px;
-    max-width: 310px;
+    min-width: 270px !important;
+    max-width: 315px !important;
     scroll-snap-align: center;
   }
 
