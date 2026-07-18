@@ -12,21 +12,21 @@
   </div>
 
   <section class="pricing-section" style="padding-top: 1rem; padding-bottom: 4rem;">
-    <div class="pricing-container" style="max-width: 720px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="pricing-container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.25rem;">
       
-      <!-- TIER 1: 4 CORE SUBSCRIPTION PLANS (2 TOP, 2 BOTTOM) -->
-      <div class="sub-plans-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem; align-items: stretch;">
+      <!-- TIER 1: 4 CORE SUBSCRIPTION PLANS -->
+      <div class="sub-plans-grid">
         <% plans.filter(p => p.id !== 'royal_access' && p.id !== 'custom_royal').forEach(plan => { %>
           <div class="plan-card <%= plan.popular ? 'popular' : '' %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
             <div>
-              <div class="popular-badge-wrap" style="min-height: 26px; display: flex; align-items: center; margin-bottom: 0.35rem;">
+              <div class="popular-badge-wrap" style="min-height: 24px; display: flex; align-items: center; margin-bottom: 0.35rem;">
                 <% if (plan.popular) { %>
                   <div class="popular-badge" style="margin: 0; background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 100px;">⭐ PALING POPULER</div>
                 <% } %>
               </div>
               
-              <div class="plan-name" style="font-size: 1.15rem; font-weight: 700;"><%= plan.name %></div>
-              <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>" style="font-size: 1.85rem; font-weight: 800; line-height: 1.1; margin-top: 0.15rem;"><%= plan.priceDisplay %></div>
+              <div class="plan-name" style="font-size: 1.1rem; font-weight: 700;"><%= plan.name %></div>
+              <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>" style="font-size: 1.75rem; font-weight: 800; line-height: 1.1; margin-top: 0.15rem;"><%= plan.priceDisplay %></div>
               <div class="plan-period" style="font-size:0.78rem; margin-bottom:0.35rem; color:var(--text-muted);">akses <%= plan.duration %> hari</div>
 
               <!-- Daily Breakdown Chip -->
@@ -66,11 +66,11 @@
             </div>
 
             <% if (typeof user !== 'undefined' && user) { %>
-              <a href="/order/<%= plan.id %>?ref_=pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.85rem; padding:0.65rem 0.75rem;">
+              <a href="/order/<%= plan.id %>?ref_=pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
                 <i class="fas fa-shopping-cart"></i> Pilih Paket
               </a>
             <% } else { %>
-              <a href="/login?ref_=pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.85rem; padding:0.65rem 0.75rem;">
+              <a href="/login?ref_=pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
                 Login Order
               </a>
             <% } %>
@@ -79,14 +79,14 @@
       </div>
 
       <!-- TIER 2: WILAYAH ROYAL CLUB VIP & SEWA HARIAN -->
-      <div style="margin-top: 3rem; text-align: center;">
-        <div style="display:inline-flex; align-items:center; gap:0.4rem; color:#fbbf24; font-family:var(--font-display); font-size:1.2rem; font-weight:800; letter-spacing:0.02em;">
+      <div style="margin-top: 3.5rem; text-align: center;">
+        <div style="display:inline-flex; align-items:center; gap:0.4rem; color:#fbbf24; font-family:var(--font-display); font-size:1.25rem; font-weight:800; letter-spacing:0.02em;">
           👑 ROYAL VIP LOUNGE &amp; SEWA HARIAN
         </div>
-        <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.25rem;">Upgrade membership sekali bayar untuk membuka fitur sewa harian fleksibel.</p>
+        <p style="color:var(--text-muted); font-size:0.88rem; margin-top:0.25rem;">Upgrade membership sekali bayar untuk membuka fitur sewa harian fleksibel.</p>
       </div>
 
-      <div class="royal-vip-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem; align-items: stretch; margin-top: 1rem;">
+      <div class="royal-vip-grid">
         <% const royalPlan = plans.find(p => p.id === 'royal_access'); %>
         <% if (royalPlan) { %>
           <!-- 👑 VIP Royal Access Pass Card -->

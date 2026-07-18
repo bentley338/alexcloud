@@ -439,7 +439,7 @@
 
 <!-- PRICING -->
 <section class="pricing-section" id="pricing">
-  <div class="pricing-container" style="max-width: 720px; margin: 0 auto; padding: 0 1.25rem;">
+  <div class="pricing-container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.25rem;">
     <div class="section-header animate-on-scroll">
       <div class="section-tag">Harga</div>
       <h2 class="section-title">Pilih <span class="accent">Paket Terbaik</span></h2>
@@ -449,8 +449,8 @@
       </div>
     </div>
 
-    <!-- TIER 1: 4 CORE SUBSCRIPTION PLANS (2 TOP, 2 BOTTOM) -->
-    <div class="sub-plans-grid home-pricing-slider" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem; align-items: stretch;">
+    <!-- TIER 1: 4 CORE SUBSCRIPTION PLANS -->
+    <div class="sub-plans-grid home-pricing-slider">
         <% plans.filter(p => p.id !== 'royal_access' && p.id !== 'custom_royal').forEach((plan, i) => { %>
           <div class="plan-card <%= plan.popular ? 'popular' : '' %> animate-on-scroll" data-delay="<%= i * 90 %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
             <div>
