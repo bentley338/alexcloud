@@ -3635,6 +3635,14 @@ input:focus-visible,
     margin-bottom: 0.5rem;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
+  .mobile-logout-pill:hover,
+  .mobile-logout-pill:active {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.32) 0%, rgba(220, 38, 38, 0.22) 100%) !important;
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
+  }
   .mobile-user-info {
     display: flex;
     align-items: center;
