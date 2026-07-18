@@ -3719,22 +3719,19 @@ input:focus-visible,
     color: #ff6b35 !important;
   }
   .nav-logout-btn {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: var(--text-secondary) !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #f87171 !important;
     margin-top: 0.5rem !important;
   }
   .nav-logout-btn:hover,
   .nav-logout-btn:active {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
+    background: rgba(239, 68, 68, 0.22) !important;
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    color: #ff8787 !important;
   }
   .nav-logout-btn i {
-    color: var(--text-muted) !important;
-  }
-  .nav-logout-btn:hover i {
-    color: #ffffff !important;
+    color: #f87171 !important;
   }
   .badge-hot {
     background: linear-gradient(90deg, #ef4444, #f59e0b);
