@@ -449,135 +449,142 @@
       </div>
     </div>
     <div class="pricing-grid home-pricing-slider">
-       <% plans.forEach((plan, i) => { %>
-         <% if (plan.id === 'custom_royal') { %>
-           <!-- Daily Royal Plan Card with Day Slider -->
-           <div class="plan-card animate-on-scroll" data-delay="<%= i * 90 %>" style="<%= (typeof user !== 'undefined' && user && user.isRoyal) ? 'border: 1px solid var(--accent-blue);' : 'opacity: 0.85; position: relative;' %> display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-             <div>
-               <% if (typeof user === 'undefined' || !user || !user.isRoyal) { %>
-                 <div style="position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px; z-index: 2;">
-                   <i class="fas fa-lock"></i> ROYAL ONLY
-                 </div>
-               <% } else { %>
-                 <div style="position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: #fbbf24; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px; z-index: 2;">
-                   <i class="fas fa-unlock"></i> ROYAL UNLOCKED
-                 </div>
-               <% } %>
-               
-               <div class="plan-name" id="customDaysName">Sewa Harian (1 Hari)</div>
-               <div class="plan-price" id="customDaysPrice">Rp 7.000</div>
-               <div class="plan-period" id="customDaysPeriod">akses selama 1 hari</div>
+        <% plans.forEach((plan, i) => { %>
+          <% if (plan.id === 'custom_royal') { %>
+            <!-- Daily Royal Plan Card with Day Slider -->
+            <div class="plan-card animate-on-scroll" data-delay="<%= i * 90 %>" style="<%= (typeof user !== 'undefined' && user && user.isRoyal) ? 'border: 1px solid var(--accent-blue);' : 'opacity: 0.85; position: relative;' %> display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+              <div>
+                <div class="popular-badge-wrap" style="min-height: 28px; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                  <% if (typeof user === 'undefined' || !user || !user.isRoyal) { %>
+                    <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px;">
+                      <i class="fas fa-lock"></i> ROYAL ONLY
+                    </div>
+                  <% } else { %>
+                    <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: #fbbf24; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px;">
+                      <i class="fas fa-unlock"></i> ROYAL UNLOCKED
+                    </div>
+                  <% } %>
+                </div>
+                
+                <div class="plan-name" id="customDaysName">Sewa Harian (1 Hari)</div>
+                <div class="plan-price" id="customDaysPrice">Rp 7.000</div>
+                <div class="plan-period" id="customDaysPeriod">akses selama 1 hari</div>
 
-               <!-- SLIDER SECTION -->
-               <div style="margin: 1.5rem 0 1rem; text-align: left;">
-                 <label for="daysSlider" style="display: block; font-family: var(--font-ui); font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
-                   <span>Durasi Sewa:</span>
-                   <strong style="color: var(--accent-blue);" id="sliderValueText">1 Hari</strong>
-                 </label>
-                 <input type="range" id="daysSlider" min="1" max="6" value="1" style="width: 100%; accent-color: var(--accent-blue); background: rgba(255,255,255,0.1); border-radius: var(--radius-sm); outline: none; cursor: pointer;">
-                 <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; font-family: var(--font-ui);">
-                   <span>1 Hari</span>
-                   <span>2H</span>
-                   <span>3H</span>
-                   <span>4H</span>
-                   <span>5H</span>
-                   <span>6 Hari</span>
-                 </div>
-               </div>
-               
-               <ul class="plan-features" style="margin-top: 0.5rem;">
-                 <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
-                 <li><i class="fas fa-check"></i> Streaming 4K / 60fps</li>
-                 <li><i class="fas fa-check"></i> Cloud Save Progress</li>
-                 <li><i class="fas fa-check"></i> Multi-device Support</li>
-                 <li><i class="fas fa-check"></i> Bebas Pilih Hari Kustom</li>
-                 <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
-               </ul>
-             </div>
-             <% if (typeof user !== 'undefined' && user) { %>
-               <% if (user.isRoyal) { %>
-                 <a href="/order/<%= plan.id %>?days=1" id="customDaysBtn" class="plan-btn filled">
-                   <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
-                 </a>
-               <% } else { %>
-                 <a href="/order/royal_access?ref_=pricing_unlock_daily" onclick="return confirm('Untuk menyewa harian, Anda harus menjadi anggota Royal Club terlebih dahulu.\n\nAnda akan diarahkan ke halaman pembayaran Royal Club Access (Rp 25.000 / Sekali Bayar). Lanjutkan?')" class="plan-btn outline" style="border-color: #fbbf24; color: #fbbf24; font-weight: 700; text-align: center;">
-                   <i class="fas fa-crown"></i> Unlock via Royal Club
-                 </a>
-               <% } %>
-             <% } else { %>
-               <a href="/login?ref_=pricing_login" class="plan-btn outline">
-                 Login untuk Order
-               </a>
-             <% } %>
-           </div>
-         <% } else if (plan.id === 'royal_access') { %>
-             <!-- VIP Royal Access Pass Card -->
-             <div class="plan-card royal-card animate-on-scroll" data-delay="<%= i * 90 %>">
-               <div>
-                 <div class="popular-badge royal-badge">👑 VIP CLUB UPGRADE</div>
-                 
-                 <div class="plan-name royal-title-text"><%= plan.name %></div>
-                 <div class="plan-price royal-price-text"><%= plan.priceDisplay %></div>
-                 <div class="plan-period royal-period-text">Lifetime / Sekali Bayar</div>
-                 
-                 <ul class="plan-features royal-features-list">
-                   <li><i class="fas fa-unlock"></i> <strong>Buka Sewa Harian (Rp 7.000)</strong></li>
-                   <li><i class="fas fa-server"></i> Server Premium Latensi Terendah</li>
-                   <li><i class="fas fa-crown"></i> Badge Mahkota Emas Profil 👑</li>
-                   <li><i class="fas fa-coins"></i> Bonus Klaim Harian Saldo +Rp 500</li>
-                   <li><i class="fas fa-star"></i> Akses Game Early Release &amp; Beta</li>
-                   <li><i class="fas fa-hdd"></i> Cloud Save Storage Lebih Besar</li>
-                   <li><i class="fas fa-video"></i> Bitrate Streaming Maksimal 100 Mbps</li>
-                   <li><i class="fas fa-gamepad"></i> Prioritas Request Game Baru</li>
-                   <li><i class="fas fa-user-shield"></i> CS VIP Fast-response 24/7</li>
-                   <li><i class="fas fa-percentage"></i> Cashback Top-up Saldo +5%</li>
-                   <li><i class="fas fa-sliders-h"></i> Layout Kontroler Virtual Kustom</li>
-                 </ul>
-               </div>
-               <% if (typeof user !== 'undefined' && user) { %>
-                 <% if (user.isRoyal) { %>
-                   <div class="plan-btn royal-btn-active">
-                     <i class="fas fa-check-circle"></i> Sudah Aktif
-                   </div>
-                 <% } else { %>
-                   <a href="/order/<%= plan.id %>?ref_=pricing_buy_royal" class="plan-btn royal-btn-buy">
-                     <i class="fas fa-crown"></i> Beli Royal Access
-                   </a>
-                 <% } %>
-               <% } else { %>
-                 <a href="/login?ref_=pricing_login_royal" class="plan-btn royal-btn-buy">
-                   Login untuk Order
-                 </a>
-               <% } %>
-             </div>
-         <% } else { %>
-           <!-- Normal Plan -->
-           <div class="plan-card <%= plan.popular ? 'popular' : '' %> animate-on-scroll" data-delay="<%= i * 90 %>">
-             <% if (plan.popular) { %><div class="popular-badge">PALING POPULER</div><% } %>
-             <div class="plan-name"><%= plan.name %></div>
-             <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>"><%= plan.priceDisplay %></div>
-             <div class="plan-period">per <%= plan.name.toLowerCase() %></div>
-             <ul class="plan-features">
-               <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
-               <li><i class="fas fa-check"></i> Streaming 4K / 60fps</li>
-               <li><i class="fas fa-check"></i> Cloud Save</li>
-               <li><i class="fas fa-check"></i> AI Assistant 24/7</li>
-               <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
-               <% if (plan.duration >= 60) { %><li><i class="fas fa-check"></i> Bonus 5 Hari Gratis</li><% } %>
-               <% if (plan.duration >= 90) { %><li><i class="fas fa-star" style="color:#fbbf24"></i> Akses Game Baru Early</li><% } %>
-             </ul>
-             <% if (typeof user !== 'undefined' && user) { %>
-               <a href="/order/<%= plan.id %>?ref_=home_pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
-                 Pilih Paket Ini
-               </a>
-             <% } else { %>
-               <a href="/login?ref_=home_pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
-                 Login untuk Order
-               </a>
-             <% } %>
-           </div>
-         <% } %>
-       <% }) %>
+                <!-- SLIDER SECTION -->
+                <div style="margin: 1.25rem 0 0.85rem; text-align: left;">
+                  <label for="daysSlider" style="display: block; font-family: var(--font-ui); font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+                    <span>Durasi Sewa:</span>
+                    <strong style="color: var(--accent-blue);" id="sliderValueText">1 Hari</strong>
+                  </label>
+                  <input type="range" id="daysSlider" min="1" max="6" value="1" style="width: 100%; accent-color: var(--accent-blue); background: rgba(255,255,255,0.1); border-radius: var(--radius-sm); outline: none; cursor: pointer;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; font-family: var(--font-ui);">
+                    <span>1 Hari</span>
+                    <span>2H</span>
+                    <span>3H</span>
+                    <span>4H</span>
+                    <span>5H</span>
+                    <span>6 Hari</span>
+                  </div>
+                </div>
+                
+                <ul class="plan-features">
+                  <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
+                  <li><i class="fas fa-check"></i> Streaming 4K / 60fps &amp; Cloud Save</li>
+                  <li><i class="fas fa-check"></i> Durasi Bebas (1 s/d 6 Hari)</li>
+                  <li><i class="fas fa-check"></i> Multi-device Support</li>
+                  <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
+                </ul>
+              </div>
+              <% if (typeof user !== 'undefined' && user) { %>
+                <% if (user.isRoyal) { %>
+                  <a href="/order/<%= plan.id %>?days=1" id="customDaysBtn" class="plan-btn filled">
+                    <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
+                  </a>
+                <% } else { %>
+                  <a href="/order/royal_access?ref_=pricing_unlock_daily" onclick="return confirm('Untuk menyewa harian, Anda harus menjadi anggota Royal Club terlebih dahulu.\n\nAnda akan diarahkan ke halaman pembayaran Royal Club Access (Rp 25.000 / Sekali Bayar). Lanjutkan?')" class="plan-btn outline" style="border-color: #fbbf24; color: #fbbf24; font-weight: 700; text-align: center;">
+                    <i class="fas fa-crown"></i> Unlock via Royal Club
+                  </a>
+                <% } %>
+              <% } else { %>
+                <a href="/login?ref_=pricing_login" class="plan-btn outline">
+                  Login untuk Order
+                </a>
+              <% } %>
+            </div>
+          <% } else if (plan.id === 'royal_access') { %>
+              <!-- VIP Royal Access Pass Card -->
+              <div class="plan-card royal-card animate-on-scroll" data-delay="<%= i * 90 %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                <div>
+                  <div class="popular-badge-wrap" style="min-height: 28px; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                    <div class="popular-badge royal-badge" style="margin: 0;">👑 VIP CLUB UPGRADE</div>
+                  </div>
+                  
+                  <div class="plan-name royal-title-text"><%= plan.name %></div>
+                  <div class="plan-price royal-price-text"><%= plan.priceDisplay %></div>
+                  <div class="plan-period royal-period-text">Lifetime / Sekali Bayar</div>
+                  
+                  <ul class="plan-features">
+                    <li><i class="fas fa-unlock" style="color:#fbbf24;"></i> Sewa Harian Rp 7.000</li>
+                    <li><i class="fas fa-server" style="color:#fbbf24;"></i> Server Latensi 30ms</li>
+                    <li><i class="fas fa-crown" style="color:#fbbf24;"></i> Badge Mahkota Emas 👑</li>
+                    <li><i class="fas fa-coins" style="color:#fbbf24;"></i> Bonus Klaim Harian Saldo</li>
+                    <li><i class="fas fa-percentage" style="color:#fbbf24;"></i> Cashback Top-up +5% &amp; CS VIP</li>
+                  </ul>
+                </div>
+                <% if (typeof user !== 'undefined' && user) { %>
+                  <% if (user.isRoyal) { %>
+                    <div class="plan-btn royal-btn-active">
+                      <i class="fas fa-check-circle"></i> Sudah Aktif
+                    </div>
+                  <% } else { %>
+                    <a href="/order/<%= plan.id %>?ref_=pricing_buy_royal" class="plan-btn royal-btn-buy">
+                      <i class="fas fa-crown"></i> Beli Royal Access
+                    </a>
+                  <% } %>
+                <% } else { %>
+                  <a href="/login?ref_=pricing_login_royal" class="plan-btn royal-btn-buy">
+                    Login untuk Order
+                  </a>
+                <% } %>
+              </div>
+          <% } else { %>
+            <!-- Normal Plan -->
+            <div class="plan-card <%= plan.popular ? 'popular' : '' %> animate-on-scroll" data-delay="<%= i * 90 %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+              <div>
+                <div class="popular-badge-wrap" style="min-height: 28px; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                  <% if (plan.popular) { %><div class="popular-badge" style="margin: 0;">PALING POPULER</div><% } %>
+                </div>
+                <div class="plan-name"><%= plan.name %></div>
+                <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>"><%= plan.priceDisplay %></div>
+                <div class="plan-period">per <%= plan.name.toLowerCase() %></div>
+                <ul class="plan-features">
+                  <li><i class="fas fa-check"></i> Akses 100+ Game Premium</li>
+                  <li><i class="fas fa-check"></i> Streaming 4K / 60fps</li>
+                  <li><i class="fas fa-check"></i> Cloud Save Progress</li>
+                  <li><i class="fas fa-check"></i> Multi-device Support</li>
+                  <% if (plan.duration >= 90) { %>
+                    <li><i class="fas fa-star" style="color:#fbbf24"></i> VIP Priority &amp; Early Access</li>
+                  <% } else if (plan.duration >= 60) { %>
+                    <li><i class="fas fa-check"></i> 🔥 Bonus 5 Hari Gratis &amp; Request</li>
+                  <% } else if (plan.duration >= 30) { %>
+                    <li><i class="fas fa-check"></i> Akses Beta Game Baru</li>
+                  <% } else { %>
+                    <li><i class="fas fa-check"></i> Support WhatsApp 24/7</li>
+                  <% } %>
+                </ul>
+              </div>
+              <% if (typeof user !== 'undefined' && user) { %>
+                <a href="/order/<%= plan.id %>?ref_=home_pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+                  Pilih Paket Ini
+                </a>
+              <% } else { %>
+                <a href="/login?ref_=home_pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>">
+                  Login untuk Order
+                </a>
+              <% } %>
+            </div>
+          <% } %>
+        <% }) %>
     </div>
   </div>
 </section>

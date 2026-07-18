@@ -1336,7 +1336,6 @@ section { position: relative; z-index: 1; }
 .plan-card.popular {
   border-color: var(--accent-blue);
   box-shadow: var(--glow-blue);
-  transform: translateY(-12px);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, var(--bg-card) 40%);
 }
 
