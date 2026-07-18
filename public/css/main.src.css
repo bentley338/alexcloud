@@ -4003,10 +4003,43 @@ input:focus-visible,
     margin-top: 0.5rem;
     margin-bottom: 0.75rem;
   }
-  /* Mobile Pricing Grid (2 - 2 - 2 Grid Layout: 2 Cards Per Row Stacked Vertically) */
-  .pricing-grid,
-  .home-pricing-slider,
-  .page-pricing-grid {
+  /* Homepage Horizontal Swipe Slider (Beranda HP) */
+  .home-pricing-slider {
+    display: flex !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    gap: 0.85rem !important;
+    padding: 0.5rem 0.25rem 1.25rem !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(251, 191, 36, 0.4) transparent;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+  .home-pricing-slider::-webkit-scrollbar {
+    height: 5px;
+  }
+  .home-pricing-slider::-webkit-scrollbar-thumb {
+    background: rgba(251, 191, 36, 0.4);
+    border-radius: 10px;
+  }
+  .home-pricing-slider .plan-card,
+  .home-pricing-slider .royal-card {
+    flex: 0 0 85% !important;
+    min-width: 275px !important;
+    max-width: 315px !important;
+    scroll-snap-align: center;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 1.25rem 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* Pricing Page (/pricing) 2-2-2 Grid Layout on Mobile */
+  .page-pricing-grid,
+  .pricing-grid:not(.home-pricing-slider) {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.75rem !important;
@@ -4015,10 +4048,8 @@ input:focus-visible,
     width: 100% !important;
   }
 
-  .pricing-grid .plan-card,
-  .pricing-grid .royal-card,
-  .home-pricing-slider .plan-card,
-  .home-pricing-slider .royal-card,
+  .pricing-grid:not(.home-pricing-slider) .plan-card,
+  .pricing-grid:not(.home-pricing-slider) .royal-card,
   .page-pricing-grid .plan-card {
     flex: none !important;
     width: 100% !important;
@@ -4033,7 +4064,7 @@ input:focus-visible,
   }
 
   .pricing-swipe-hint {
-    display: none !important;
+    display: inline-flex !important;
   }
 
   .plan-card {
