@@ -102,11 +102,11 @@
     .btn-nav-cta{background:var(--gradient-main);color:#fff !important;text-decoration:none;font-family:var(--font-ui);font-size:0.95rem;font-weight:700;padding:0.5rem 1.4rem;border-radius:8px;transition:var(--transition)}
     .nav-toggle{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:42px;height:42px;background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:12px;cursor:pointer;padding:0;margin-left:auto;transition:var(--transition)}
     .nav-toggle span{display:block;width:20px;height:2px;background:var(--text-primary);border-radius:2px}
-    .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px;overflow:hidden}
+    .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:110px;overflow:hidden}
     .page-hero{padding:6rem 0 2rem}body.has-announcement .page-hero{padding-top:8.5rem}
     .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 72% 40%,rgba(255, 255, 255,0.06) 0%,transparent 62%)}
     .hero-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:80px 80px}
-    .hero-container{max-width:1280px;margin:0 auto;padding:4rem 2rem;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+    .hero-container{max-width:1280px;margin:0 auto;padding:2.5rem 2rem 4rem;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
     .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent);padding:0.4rem 1rem;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem}
     .hero-title{font-family:var(--font-display);font-size:clamp(2.5rem,5vw,4.5rem);font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:1.5rem;color:var(--text-primary)}
     .hero-title .accent{background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -146,6 +146,7 @@
       .nav-search-icon{left:0.55rem;font-size:0.75rem}
       .nav-links{display:none}
       .nav-toggle{display:flex}
+      .hero{min-height:auto;padding-top:85px;padding-bottom:1.5rem}
     }
   </style>
 
@@ -160,7 +161,7 @@
   <!-- Main CSS: render-blocking on purpose — first paint uses final layout, so the
        desktop hero (hero-visual card, styled only in main.css) doesn't reflow when
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
-  <link href="/css/main.css?v=8.1" rel="stylesheet">
+  <link href="/css/main.css?v=9.0" rel="stylesheet">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">

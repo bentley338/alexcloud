@@ -146,7 +146,7 @@
           <% } %>
         </div>
         
-        <div class="streak-days-row">
+        <div class="streak-days-row" style="display: flex; gap: 0.4rem; justify-content: space-between; overflow-x: auto; padding-bottom: 0.5rem; user-select: none;">
           <% for(let i=1; i<=7; i++) { 
              let status = 'future';
              if (i < nextStreak || (i === nextStreak && alreadyClaimed)) status = 'passed';
@@ -171,10 +171,10 @@
                 glow = '0 0 10px rgba(16,185,129,0.5)';
              }
           %>
-          <div class="streak-day-item" style="background: <%= bg %>; border: <%= border %>; color: <%= color %>; box-shadow: <%= glow %>;">
-            <div class="day-num">H<%= i %></div>
-            <div class="day-icon"><%- icon %></div>
-            <div class="day-reward"><%= rewardMap[i] %></div>
+          <div class="streak-day-item" style="flex: 1; min-width: 42px; text-align: center; border-radius: 8px; padding: 0.5rem 0; background: <%= bg %>; border: <%= border %>; color: <%= color %>; box-shadow: <%= glow %>; transition: all 0.3s ease;">
+            <div class="day-num" style="font-size: 0.65rem; font-weight: 700; margin-bottom: 0.3rem;">H<%= i %></div>
+            <div class="day-icon" style="font-size: 0.9rem; margin-bottom: 0.3rem;"><%- icon %></div>
+            <div class="day-reward" style="font-size: 0.75rem; font-weight: 800;"><%= rewardMap[i] %></div>
           </div>
           <% } %>
         </div>
