@@ -257,9 +257,15 @@ body::after {
 .mobile-hidden { display: flex; }
 
 body.nav-open-lock {
-  overflow: hidden !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
   height: 100vh !important;
-  touch-action: none;
+  overflow: hidden !important;
+  touch-action: none !important;
 }
 
 .logo-icon { font-size: 1.4rem; }

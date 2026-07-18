@@ -36,6 +36,15 @@
   /* ==========================================================
      3. Mobile Nav Toggle
   ========================================================== */
+  function preventBodyTouchScroll(e) {
+    var navLinks = document.getElementById('navLinks');
+    if (navLinks && navLinks.classList.contains('open')) {
+      if (!navLinks.contains(e.target)) {
+        e.preventDefault();
+      }
+    }
+  }
+
   function toggleNav() {
     navLinks = document.getElementById('navLinks');
     hamburger = document.getElementById('navToggleBtn') || document.querySelector('.hamburger, .nav-toggle');
@@ -43,8 +52,10 @@
     var isOpen = navLinks.classList.toggle('open');
     if (isOpen) {
       document.body.classList.add('nav-open-lock');
+      document.addEventListener('touchmove', preventBodyTouchScroll, { passive: false });
     } else {
       document.body.classList.remove('nav-open-lock');
+      document.removeEventListener('touchmove', preventBodyTouchScroll);
     }
     if (hamburger) {
       hamburger.classList.toggle('open', isOpen);
@@ -77,6 +88,7 @@
       if (e.target.closest('#navLinks a, #navLinks button') || (!navLinks.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target))) {
         navLinks.classList.remove('open');
         document.body.classList.remove('nav-open-lock');
+        document.removeEventListener('touchmove', preventBodyTouchScroll);
         if (hamburger) {
           hamburger.classList.remove('open');
           hamburger.setAttribute('aria-expanded', 'false');

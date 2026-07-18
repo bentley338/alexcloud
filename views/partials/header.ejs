@@ -161,7 +161,7 @@
   <!-- Main CSS: render-blocking on purpose — first paint uses final layout, so the
        desktop hero (hero-visual card, styled only in main.css) doesn't reflow when
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
-  <link href="/css/main.css?v=13.0" rel="stylesheet">
+  <link href="/css/main.css?v=14.0" rel="stylesheet">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
@@ -286,7 +286,7 @@
           <div class="nav-section-divider desktop-hidden">Akun Saya</div>
           <a href="/dashboard?ref_=nav_dashboard" class="nav-link"><span><i class="fas fa-chart-line"></i> Dashboard</span></a>
           <a href="/profile?ref_=nav_profile" class="nav-link desktop-hidden"><span><i class="fas fa-user"></i> Profil Saya</span></a>
-          <a href="/wallet?ref_=nav_wallet" class="nav-link desktop-hidden"><span><i class="fas fa-coins"></i> Saldo &amp; Top-up</span></a>
+          <a href="/wallet?ref_=nav_wallet" class="nav-link desktop-hidden"><span><i class="fas fa-money-bill"></i> Saldo &amp; Top-up</span></a>
           <% if (user.role === 'admin') { %>
             <a href="/admin?ref_=nav_admin" class="nav-link nav-admin-btn"><span><i class="fas fa-cog"></i> Admin Panel ⚙️</span></a>
           <% } %>
