@@ -161,7 +161,7 @@
   <!-- Main CSS: render-blocking on purpose — first paint uses final layout, so the
        desktop hero (hero-visual card, styled only in main.css) doesn't reflow when
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
-  <link href="/css/main.css?v=10.0" rel="stylesheet">
+  <link href="/css/main.css?v=12.0" rel="stylesheet">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
@@ -249,19 +249,51 @@
       </div>
 
       <div class="nav-links" id="navLinks">
-        <a href="/?ref_=nav_home" class="nav-link">Beranda</a>
-        <a href="/games?ref_=nav_games" class="nav-link">Game Library</a>
-        <a href="/pricing?ref_=nav_pricing" class="nav-link">Harga</a>
-        <a href="/testimonials?ref_=nav_testimonials" class="nav-link">Testimoni</a>
-        <a href="/community?ref_=nav_community" class="nav-link" style="display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-comments" style="font-size:0.8rem;"></i> Komunitas</a>
-        <a href="/faq?ref_=nav_faq" class="nav-link">FAQ</a>
-        <a href="/network-test?ref_=nav_speedtest" class="nav-link" style="display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-wifi" style="font-size:0.8rem;"></i> Speed Test</a>
         <% if (typeof user !== 'undefined' && user) { %>
-          <a href="/dashboard?ref_=nav_dashboard" class="nav-link">Dashboard</a>
+          <!-- Mobile Profile Card (HP Only) -->
+          <div class="mobile-user-card desktop-hidden">
+            <div class="mobile-user-info">
+              <% if (user.avatar) { %>
+                <img src="<%= user.avatar %>" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #fbbf24;" alt="<%= user.name %>">
+              <% } else { %>
+                <div class="mobile-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
+              <% } %>
+              <div>
+                <div class="mobile-user-name">
+                  <%= user.name.split(' ')[0] %>
+                  <% if (user.isRoyal) { %>
+                    <i class="fas fa-crown" style="color:#fbbf24; font-size:0.85rem;" title="VIP Member"></i>
+                  <% } %>
+                </div>
+                <div class="mobile-user-balance">💰 Rp <%= (typeof balance !== 'undefined' ? balance : 0).toLocaleString('id-ID') %></div>
+              </div>
+            </div>
+            <a href="/wallet?ref_=nav_mobile_topup" class="btn-primary" style="padding:0.4rem 0.8rem; font-size:0.78rem; border-radius:10px;">+ Top Up</a>
+          </div>
+        <% } %>
+
+        <div class="nav-section-divider desktop-hidden">Navigasi</div>
+
+        <a href="/?ref_=nav_home" class="nav-link"><span><i class="fas fa-home"></i> Beranda</span></a>
+        <a href="/games?ref_=nav_games" class="nav-link"><span><i class="fas fa-gamepad"></i> Game Library</span> <span class="badge-hot">100+ GAME</span></a>
+        <a href="/pricing?ref_=nav_pricing" class="nav-link"><span><i class="fas fa-gem"></i> Paket &amp; Harga</span></a>
+        <a href="/testimonials?ref_=nav_testimonials" class="nav-link"><span><i class="fas fa-star"></i> Testimoni</span></a>
+        <a href="/community?ref_=nav_community" class="nav-link"><span><i class="fas fa-comments"></i> Komunitas</span></a>
+        <a href="/network-test?ref_=nav_speedtest" class="nav-link"><span><i class="fas fa-wifi"></i> Speed Test</span></a>
+        <a href="/faq?ref_=nav_faq" class="nav-link"><span><i class="fas fa-question-circle"></i> FAQ</span></a>
+
+        <% if (typeof user !== 'undefined' && user) { %>
+          <div class="nav-section-divider desktop-hidden">Akun Saya</div>
+          <a href="/dashboard?ref_=nav_dashboard" class="nav-link"><span><i class="fas fa-chart-line"></i> Dashboard</span></a>
+          <a href="/profile?ref_=nav_profile" class="nav-link desktop-hidden"><span><i class="fas fa-user"></i> Profil Saya</span></a>
+          <a href="/wallet?ref_=nav_wallet" class="nav-link desktop-hidden"><span><i class="fas fa-wallet"></i> Saldo &amp; Top-up</span></a>
           <% if (user.role === 'admin') { %>
-            <a href="/admin?ref_=nav_admin" class="nav-link nav-admin"><i class="fas fa-cog" style="font-size:0.8rem;"></i> Admin</a>
+            <a href="/admin?ref_=nav_admin" class="nav-link nav-admin-btn"><span><i class="fas fa-cog"></i> Admin Panel ⚙️</span></a>
           <% } %>
-          <div class="nav-user-menu">
+          <a href="/logout" class="nav-link nav-logout-btn desktop-hidden"><span><i class="fas fa-sign-out-alt"></i> Logout</span></a>
+
+          <!-- Desktop User Menu Dropdown -->
+          <div class="nav-user-menu mobile-hidden">
             <button class="nav-user-btn" onclick="toggleUserMenu()">
               <% if (user.avatar) { %>
                 <img src="<%= user.avatar %>" class="nav-avatar" alt="<%= user.name %>" width="28" height="28">
@@ -285,8 +317,8 @@
             </div>
           </div>
         <% } else { %>
-          <a href="/login?ref_=nav_login" class="nav-link">Login</a>
-          <a href="/register?ref_=nav_register" class="btn-nav-cta">Daftar Gratis</a>
+          <a href="/login?ref_=nav_login" class="nav-link"><span><i class="fas fa-sign-in-alt"></i> Login</span></a>
+          <a href="/register?ref_=nav_register" class="btn-nav-cta"><i class="fas fa-user-plus"></i> Daftar Gratis</a>
         <% } %>
       </div>
       <button class="nav-toggle" type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="navLinks" id="navToggleBtn">

@@ -253,6 +253,9 @@ body::after {
   flex-shrink: 0;
 }
 
+.desktop-hidden { display: none !important; }
+.mobile-hidden { display: flex; }
+
 .logo-icon { font-size: 1.4rem; }
 
 .logo-text {
@@ -3575,27 +3578,30 @@ input:focus-visible,
 
 /* ── Mobile (max 768px) ── */
 @media (max-width: 768px) {
-  /* Navbar mobile — FULL OVERLAY MENU */
+  .desktop-hidden { display: flex !important; }
+  .mobile-hidden { display: none !important; }
+
+  /* Navbar mobile — LUXURY GAMING OVERLAY MENU */
   .nav-links {
     display: none;
     position: fixed;
     top: 58px; left: 0; right: 0;
     max-height: calc(100vh - 58px);
-    background: rgba(11, 12, 15, 0.96);
-    padding: 0.85rem 1rem 1.25rem;
+    background: rgba(12, 14, 20, 0.98) !important;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    padding: 1rem 1rem 2rem;
     flex-direction: column;
-    gap: 0.25rem;
-    border-top: 1px solid var(--border);
-    border-bottom: none;
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    z-index: 999;
+    gap: 0.35rem;
+    border-top: 1px solid rgba(251, 191, 36, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+    z-index: 10005;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
   .nav-links.open {
-    display: flex;
+    display: flex !important;
     animation: navMenuIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   }
   @keyframes navMenuIn {
@@ -3604,22 +3610,119 @@ input:focus-visible,
   }
   .nav-toggle { display: flex; }
 
-  /* Nav links — compact so ALL links fit on screen at once (no scroll) */
-  .nav-link {
-    padding: 0.65rem 1rem;
-    font-size: 1rem;
-    border-radius: var(--radius);
-    width: 100%;
-    color: var(--text-primary);
+  /* Mobile User Card at top of Drawer */
+  .mobile-user-card {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    border: 1px solid transparent;
+    justify-content: space-between;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 0.75rem 0.9rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .mobile-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .mobile-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gradient-main);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fbbf24;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+  }
+  .mobile-user-name {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .mobile-user-balance {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: #fbbf24;
+    font-weight: 700;
+    margin-top: 0.1rem;
+  }
+
+  .nav-section-divider {
+    font-family: var(--font-ui);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin: 0.5rem 0 0.2rem 0.4rem;
+  }
+
+  .nav-link {
+    padding: 0.65rem 0.85rem !important;
+    font-size: 0.92rem !important;
+    font-family: var(--font-ui) !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+    color: var(--text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    transition: all 0.2s ease !important;
   }
   .nav-link:hover,
   .nav-link:active {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(251, 191, 36, 0.4) !important;
+    color: #fff !important;
+    transform: translateX(3px);
+  }
+  .nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #fbbf24;
+    margin-right: 0.4rem;
+  }
+  .nav-admin-btn {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0.05) 100%) !important;
+    border: 1px solid rgba(255, 107, 53, 0.4) !important;
+    color: #ff6b35 !important;
+  }
+  .nav-admin-btn i {
+    color: #ff6b35 !important;
+  }
+  .nav-logout-btn {
+    background: rgba(248, 113, 113, 0.1) !important;
+    border: 1px solid rgba(248, 113, 113, 0.25) !important;
+    color: #f87171 !important;
+    margin-top: 0.4rem !important;
+  }
+  .nav-logout-btn i {
+    color: #f87171 !important;
+  }
+  .badge-hot {
+    background: linear-gradient(90deg, #ef4444, #f59e0b);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
   }
 
   .btn-nav-cta {
