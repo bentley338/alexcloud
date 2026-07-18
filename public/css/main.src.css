@@ -3987,17 +3987,22 @@ input:focus-visible,
     border-radius: 16px !important;
   }
 
-  /* Pricing Page (/pricing) 2-2-2 Grid Layout on Mobile */
+  /* Mobile Pricing Grid (2 Cards Per Row Side-by-Side) */
+  .sub-plans-grid:not(.home-pricing-slider),
+  .royal-vip-grid,
   .page-pricing-grid,
   .pricing-grid:not(.home-pricing-slider) {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem !important;
+    gap: 0.65rem !important;
     overflow-x: visible !important;
     padding: 0 !important;
     width: 100% !important;
   }
 
+  .sub-plans-grid:not(.home-pricing-slider) .plan-card,
+  .royal-vip-grid .plan-card,
+  .royal-vip-grid .royal-card,
   .pricing-grid:not(.home-pricing-slider) .plan-card,
   .pricing-grid:not(.home-pricing-slider) .royal-card,
   .page-pricing-grid .plan-card {
@@ -4005,7 +4010,7 @@ input:focus-visible,
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    padding: 1rem 0.65rem !important;
+    padding: 1.1rem 0.75rem !important;
     border-radius: 14px !important;
     display: flex !important;
     flex-direction: column !important;
