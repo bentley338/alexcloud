@@ -1274,14 +1274,14 @@ section { position: relative; z-index: 1; }
   contain-intrinsic-size: auto 650px;
 }
 
-.pricing-container { max-width: 860px; margin: 0 auto; padding: 0 1.25rem; }
+.pricing-container { max-width: 680px; margin: 0 auto; padding: 0 1rem; }
 .pricing-swipe-hint { display: none; }
 
 .pricing-grid-2col,
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.35rem;
+  gap: 1.1rem;
   align-items: stretch;
 }
 
