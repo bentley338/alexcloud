@@ -32,7 +32,7 @@
   <div class="card" style="margin-bottom:1.5rem;">
     <div class="card-header"><div class="card-title"><i class="fas fa-coins"></i> Batas Nominal</div></div>
     <div class="card-body">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div class="admin-form-grid">
         <div>
           <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Minimal Top-up (Rp)</label>
           <input type="number" name="minTopup" value="<%= config.minTopup %>" min="1000" step="1000" required
@@ -53,7 +53,7 @@
       <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
         User yang top-up ≥ nominal minimum tier mendapat bonus saldo sesuai persen. Tier tertinggi yang terpenuhi yang dipakai. Kosongkan untuk menonaktifkan tier.
       </p>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+      <div class="admin-form-grid" style="margin-bottom:1rem;">
         <div>
           <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Tier 1 — Min Nominal (Rp)</label>
           <input type="number" name="tier1Min" value="<%= t1.min || '' %>" min="0" step="1000" placeholder="100000"

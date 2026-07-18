@@ -70,7 +70,7 @@
       Kirim email + notifikasi in-app ke semua user baru (< 24 jam, belum pernah dapat FOMO welcome) dengan kode promo eksklusif yang kedaluwarsa dalam waktu terbatas untuk menciptakan urgensi.
     </p>
     <form method="POST" action="/admin/marketing/fomo-welcome" onsubmit="return confirm('Kirim FOMO Welcome Campaign ke ' + <%= newUsersCount %> + ' user baru?')">
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+      <div class="admin-form-grid" style="margin-bottom: 20px;">
         <div>
           <label style="display: block; color: #9090a0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Kode Promo</label>
           <input type="text" name="promoCode" value="WELCOME-5AH7A" placeholder="WELCOME-XXXXX"

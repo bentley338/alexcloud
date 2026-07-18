@@ -19,7 +19,7 @@
     <% success.forEach(s => { %><div class="alert alert-success"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
     <% } %>
 
-    <div style="display:grid; grid-template-columns:1fr 2fr; gap:2rem; align-items:start;">
+    <div class="profile-grid">
       <!-- Avatar Card -->
       <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; text-align:center;">
         <% if (user.avatar) { %>

@@ -73,15 +73,40 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
 
 body {
   font-family: var(--font-body);
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
   line-height: 1.6;
+}
+
+/* Container & Page Overflow Safety */
+.container, .dashboard-container, .hero-container, .pricing-container, .community-container, .admin-content, .card, .dashboard-page {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Profile Page Mobile Responsive Grid */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
 }
 
 /* Background — soft cool spotlight + deep vignette for dimensional charcoal */
