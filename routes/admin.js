@@ -1113,12 +1113,13 @@ router.post('/testimonials', ensureAdmin, (req, res) => {
   });
 });
 
-// Toggle testimoni tampil/hidden
+// Toggle testimoni tampil/hidden (Tarik Ulasan / Izinkan Ulasan)
 router.post('/testimonials/:id/toggle', ensureAdmin, (req, res) => {
   const testi = db.get('testimonials').find({ id: req.params.id }).value();
   if (!testi) { req.flash('error', 'Testimoni tidak ditemukan.'); return res.redirect('/admin/testimonials'); }
-  db.get('testimonials').find({ id: testi.id }).assign({ approved: !testi.approved }).write();
-  req.flash('success', `Testimoni ${!testi.approved ? 'ditampilkan' : 'disembunyikan'}.`);
+  const newApprovedState = !testi.approved;
+  db.get('testimonials').find({ id: testi.id }).assign({ approved: newApprovedState }).write();
+  req.flash('success', newApprovedState ? `Testimoni dari "${testi.name}" berhasil disetujui & ditampilkan di publik.` : `Testimoni dari "${testi.name}" berhasil DITARIK dan disembunyikan dari publik.`);
   res.redirect('/admin/testimonials');
 });
 
@@ -1163,7 +1164,7 @@ router.post('/testimonials/:id/edit', ensureAdmin, (req, res) => {
       return res.redirect(`/admin/testimonials/${req.params.id}/edit`);
     }
 
-    const { name, role, text, rating, imageUrl, avatar } = req.body;
+    const { name, role, text, rating, imageUrl, avatar, approved } = req.body;
     if (!name || !text) {
       req.flash('error', 'Nama dan teks testimoni wajib diisi.');
       return res.redirect(`/admin/testimonials/${req.params.id}/edit`);
@@ -1183,6 +1184,8 @@ router.post('/testimonials/:id/edit', ensureAdmin, (req, res) => {
       finalImage = imageUrl.trim();
     }
 
+    const approvedStatus = approved !== undefined ? (approved === '1' || approved === 'true') : testi.approved;
+
     db.get('testimonials').find({ id: req.params.id }).assign({
       name: name.trim(),
       role: role || 'Gamer',
@@ -1190,6 +1193,7 @@ router.post('/testimonials/:id/edit', ensureAdmin, (req, res) => {
       rating: parseInt(rating) || 5,
       image: finalImage,
       avatar: avatar || testi.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+      approved: approvedStatus,
       updatedAt: new Date().toISOString()
     }).write();
 

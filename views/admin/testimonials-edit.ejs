@@ -54,6 +54,15 @@
           <input type="text" name="avatar" class="form-input" value="<%= testi.avatar || '' %>" placeholder="Kosongkan = avatar otomatis">
         </div>
 
+        <!-- Status Tampil / Tarik Ulasan -->
+        <div class="form-group" style="margin:0; grid-column:1/-1;">
+          <label class="form-label">Status Tampil di Publik</label>
+          <select name="approved" class="form-input" style="font-weight:600; <%= testi.approved ? 'color:var(--accent-green);' : 'color:#ffaa00;' %>">
+            <option value="1" <%= testi.approved ? 'selected' : '' %>>✅ Izinkan & Tampilkan di Publik</option>
+            <option value="0" <%= !testi.approved ? 'selected' : '' %>>📥 Tarik Ulasan / Sembunyikan dari Publik</option>
+          </select>
+        </div>
+
         <!-- Gambar Testimoni -->
         <div class="form-group" style="margin:0; grid-column:1/-1;">
           <label class="form-label" style="display:flex; align-items:center; gap:0.5rem;">
