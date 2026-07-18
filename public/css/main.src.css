@@ -1284,6 +1284,40 @@ section { position: relative; z-index: 1; }
   align-items: start;
 }
 
+/* Compact 2-column feature grid for Royal Access */
+.royal-features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 0.75rem;
+  margin: 1.25rem 0;
+  text-align: left;
+}
+
+.royal-feat-item {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.35;
+}
+
+.royal-feat-item i {
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .royal-features-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem 0.5rem;
+  }
+  .royal-feat-item {
+    font-size: 0.78rem;
+  }
+}
+
 .plan-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -3970,7 +4004,8 @@ input:focus-visible,
     margin-top: 0.5rem;
     margin-bottom: 0.75rem;
   }
-  .pricing-grid {
+  /* Homepage Pricing Slider ONLY */
+  .home-pricing-slider {
     display: flex !important;
     grid-template-columns: none !important;
     overflow-x: auto !important;
@@ -3982,18 +4017,37 @@ input:focus-visible,
     scrollbar-color: rgba(251, 191, 36, 0.4) transparent;
     align-items: stretch !important;
   }
-  .pricing-grid::-webkit-scrollbar {
+  .home-pricing-slider::-webkit-scrollbar {
     height: 5px;
   }
-  .pricing-grid::-webkit-scrollbar-thumb {
+  .home-pricing-slider::-webkit-scrollbar-thumb {
     background: rgba(251, 191, 36, 0.4);
     border-radius: 10px;
   }
-  .plan-card {
+  .home-pricing-slider .plan-card {
     flex: 0 0 85% !important;
     min-width: 270px;
     max-width: 310px;
     scroll-snap-align: center;
+  }
+
+  /* Pricing Page (/pricing) Grid — NO SLIDER (Vertical stacked cards) */
+  .page-pricing-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+    overflow-x: visible !important;
+    padding: 0 !important;
+  }
+  .page-pricing-grid .plan-card {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-shadow: var(--shadow-card);
+  }
+
+  .plan-card {
     padding: 1.25rem 1rem;
     border-radius: 16px;
     transform: none !important;
@@ -4003,9 +4057,8 @@ input:focus-visible,
     justify-content: space-between !important;
   }
   .royal-card {
-    flex: 0 0 85% !important;
-    min-width: 270px;
-    max-width: 310px;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   .royal-features-list {
     max-height: 200px;

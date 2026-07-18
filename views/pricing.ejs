@@ -53,7 +53,7 @@
 
   <section class="pricing-section" style="padding-top: 2rem;">
     <div class="pricing-container">
-      <div class="pricing-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; align-items: stretch;">
+      <div class="pricing-grid page-pricing-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; align-items: stretch;">
         <% plans.forEach(plan => { %>
           <% if (plan.id === 'royal_access') { %>
             <!-- VIP Royal Access Pass Card -->
@@ -62,23 +62,22 @@
                 <div class="popular-badge" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.05em; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3);">👑 VIP CLUB UPGRADE</div>
                 <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%); pointer-events: none;"></div>
                 
-                <div class="plan-name" style="color: #fbbf24; font-weight: 800; font-size: 1.5rem;"><%= plan.name %></div>
-                <div class="plan-price" style="color: #fff; font-size: 2.2rem; text-shadow: 0 0 15px rgba(251,191,36,0.2);"><%= plan.priceDisplay %></div>
-                <div class="plan-period" style="color: #fbbf24; font-weight: 600;">Lifetime / Sekali Bayar</div>
+                <div class="plan-name" style="color: #fbbf24; font-weight: 800; font-size: 1.4rem; margin-top:0.4rem;"><%= plan.name %></div>
+                <div class="plan-price" style="color: #fff; font-size: 2rem; text-shadow: 0 0 15px rgba(251,191,36,0.2);"><%= plan.priceDisplay %></div>
+                <div class="plan-period" style="color: #fbbf24; font-weight: 600; font-size:0.85rem;">Lifetime / Sekali Bayar</div>
                 
-                <ul class="plan-features" style="text-align: left; margin-bottom: 1.5rem;">
-                  <li><i class="fas fa-unlock" style="color:#fbbf24;"></i> <strong>Buka Sewa Harian (Rp 7.000)</strong></li>
-                  <li><i class="fas fa-server" style="color:#fbbf24;"></i> Server Premium Latensi Terendah</li>
-                  <li><i class="fas fa-crown" style="color:#fbbf24;"></i> Badge Mahkota Emas Profil 👑</li>
-                  <li><i class="fas fa-coins" style="color:#fbbf24;"></i> Bonus Klaim Harian Saldo +Rp 500</li>
-                  <li><i class="fas fa-star" style="color:#fbbf24;"></i> Akses Game Early Release &amp; Beta</li>
-                  <li><i class="fas fa-hdd" style="color:#fbbf24;"></i> Cloud Save Storage Lebih Besar</li>
-                  <li><i class="fas fa-video" style="color:#fbbf24;"></i> Bitrate Streaming Maksimal 100 Mbps</li>
-                  <li><i class="fas fa-gamepad" style="color:#fbbf24;"></i> Prioritas Request Game Baru</li>
-                  <li><i class="fas fa-user-shield" style="color:#fbbf24;"></i> CS VIP Fast-response 24/7</li>
-                  <li><i class="fas fa-percentage" style="color:#fbbf24;"></i> Cashback Top-up Saldo +5%</li>
-                  <li><i class="fas fa-sliders-h" style="color:#fbbf24;"></i> Layout Kontroler Virtual Kustom</li>
-                </ul>
+                <div class="royal-features-grid">
+                  <div class="royal-feat-item"><i class="fas fa-unlock" style="color:#fbbf24;"></i> <span><strong>Sewa Harian Rp 7k</strong></span></div>
+                  <div class="royal-feat-item"><i class="fas fa-server" style="color:#fbbf24;"></i> <span>Server Latensi 30ms</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-crown" style="color:#fbbf24;"></i> <span>Badge Mahkota Emas 👑</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-coins" style="color:#fbbf24;"></i> <span>Bonus Klaim Harian</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-star" style="color:#fbbf24;"></i> <span>Akses Game Beta</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-video" style="color:#fbbf24;"></i> <span>Bitrate Max 100Mbps</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-gamepad" style="color:#fbbf24;"></i> <span>Request Game VIP</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-user-shield" style="color:#fbbf24;"></i> <span>CS Fast-response</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-percentage" style="color:#fbbf24;"></i> <span>Cashback Top-up +5%</span></div>
+                  <div class="royal-feat-item"><i class="fas fa-sliders-h" style="color:#fbbf24;"></i> <span>Kontroler Kustom</span></div>
+                </div>
               </div>
               <% if (typeof user !== 'undefined' && user) { %>
                 <% if (user.isRoyal) { %>
