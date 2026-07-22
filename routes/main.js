@@ -2243,4 +2243,26 @@ router.get('/reset-session', (req, res) => {
   });
 });
 
+router.get('/qr-owner', (req, res) => {
+  const http = require('http');
+  const reqProxy = http.get('http://127.0.0.1:3001/qr-owner', (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res);
+  });
+  reqProxy.on('error', (err) => {
+    res.status(500).send('BotWA server belum aktif di port 3001: ' + err.message);
+  });
+});
+
+router.get('/reset-session-owner', (req, res) => {
+  const http = require('http');
+  const reqProxy = http.get('http://127.0.0.1:3001/reset-session-owner', (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res);
+  });
+  reqProxy.on('error', (err) => {
+    res.status(500).send('BotWA server belum aktif di port 3001: ' + err.message);
+  });
+});
+
 module.exports = { router, getPlans };
