@@ -249,7 +249,7 @@
           <span><strong><%= order.orderId %></strong></span>
         </div>
         <div class="pay-sum-row">
-          <span>Paket</span>
+          <span><%= order.orderType === 'topup' ? 'Top-up Saldo' : 'Paket' %></span>
           <span><strong><%= order.planName %></strong></span>
         </div>
         <div class="pay-sum-row total-row">
@@ -259,6 +259,19 @@
       </div>
 
       <div class="pay-stuck-helper" style="margin: 1.5rem 0; text-align: center; border-top: 1px dashed var(--border); padding-top: 1.5rem;">
+        <% if (order.orderType === 'topup') { %>
+        <!-- TOP-UP SUCCESS: 100% Otomatis, tanpa konfirmasi WA -->
+        <div style="font-family: var(--font-ui); font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.5rem; font-weight: 800;">
+          🎉 Top-up Saldo Berhasil!
+        </div>
+        <div style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.5;">
+          Saldo sebesar <strong style="color:var(--accent-green);">Rp <%= (order.topupAmount || order.price).toLocaleString('id-ID') %></strong> <%= order.topupBonus ? `(+ Bonus Rp ${order.topupBonus.toLocaleString('id-ID')})` : '' %> telah <strong>otomatis masuk</strong> ke dompet akun Anda. Tidak perlu konfirmasi manual.
+        </div>
+        <a href="/wallet" class="btn-primary" style="margin: 0 auto; max-width: 320px; display: flex; justify-content: center; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #10b981, #059669); border-color: transparent; font-weight: 700; border-radius: 12px; padding: 0.75rem 1.25rem; text-decoration: none;">
+          <i class="fas fa-wallet"></i> Cek Saldo Dompet
+        </a>
+        <% } else { %>
+        <!-- ORDER PAKET: Memerlukan Konfirmasi WA untuk minta akun -->
         <div style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.75rem;">
           Terima kasih! Pembayaran Anda telah kami terima dan pesanan sudah aktif otomatis.
         </div>
@@ -276,6 +289,7 @@
         <a href="/dashboard" class="btn-primary" style="margin: 0 auto; max-width: 320px; display: flex; justify-content: center; background: rgba(255,255,255,0.1); border-color: transparent;">
           Kembali ke Dashboard
         </a>
+        <% } %>
       </div>
     </div>
 
@@ -474,8 +488,8 @@
 
         <div class="success-recap">
           <div class="success-recap-row">
-            <span><i class="fas fa-box"></i> Paket</span>
-            <span><%= plan.name %></span>
+            <span><i class="fas fa-box"></i> <%= order.orderType === 'topup' ? 'Jenis Transaksi' : 'Paket' %></span>
+            <span><%= order.orderType === 'topup' ? 'Top-up Saldo' : plan.name %></span>
           </div>
           <div class="success-recap-row">
             <span><i class="fas fa-receipt"></i> Order ID</span>
@@ -487,6 +501,21 @@
           </div>
         </div>
 
+        <% if (order.orderType === 'topup') { %>
+        <!-- TOP-UP SUCCESS: 100% Otomatis, tanpa konfirmasi WA -->
+        <div class="topup-success-box" style="margin: 1.5rem 0; text-align: center; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 16px; padding: 1.5rem;">
+          <div style="font-size: 1.05rem; color: var(--accent-green); font-weight: 800; margin-bottom: 0.4rem;">
+            ⚡ Saldo Berhasil Ditambahkan!
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.5;">
+            Saldo sebesar <strong style="color:var(--accent-green);">Rp <%= (order.topupAmount || order.price).toLocaleString('id-ID') %></strong> <%= order.topupBonus ? `(+ Bonus Rp ${order.topupBonus.toLocaleString('id-ID')})` : '' %> telah <strong>otomatis masuk</strong> ke dompet Anda.
+          </div>
+          <a href="/wallet" class="btn-primary" style="margin: 0 auto; max-width: 300px; display: flex; justify-content: center; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #10b981, #059669); border-color: transparent; padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 12px; text-decoration: none;">
+            <i class="fas fa-wallet"></i> Lihat Saldo Dompet
+          </a>
+        </div>
+        <% } else { %>
+        <!-- ORDER PAKET: Langkah Konfirmasi WA Minta Akun -->
         <div class="wa-step-box">
           <div class="wa-step-title">
             <i class="fas fa-exclamation-circle" style="color:#fbbf24;"></i>
@@ -509,6 +538,7 @@
         <a href="/dashboard" class="success-dashboard-link">
           <i class="fas fa-tachometer-alt"></i> Lihat Dashboard
         </a>
+        <% } %>
       </div>
     </div>
 
@@ -583,6 +613,11 @@
         </div>
       </div>
 
+      <% if (order.orderType === 'topup') { %>
+      <div style="margin:1.25rem auto; max-width:320px; font-size:0.82rem; color:var(--text-muted); text-align:center; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:10px; padding:0.75rem;">
+        <i class="fas fa-bolt" style="color:var(--accent-green); margin-right:0.25rem;"></i> Top-up diproses <strong>otomatis 24/7</strong> oleh sistem. Saldo langsung masuk begitu transfer Anda terverifikasi.
+      </div>
+      <% } else { %>
       <%
         let waMsg = 'Halo Admin AlexCloud! 👋\n\n';
         waMsg += 'Saya mau konfirmasi pembayaran manual:\n';
@@ -591,6 +626,7 @@
       <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent(waMsg) %>" target="_blank" class="wa-confirm-btn" style="margin:1.25rem auto; max-width:320px; display:flex;">
         <i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp
       </a>
+      <% } %>
     </div>
     <% } %>
 
@@ -598,7 +634,9 @@
     <div class="pay-info-box">
       <i class="fas fa-shield-alt" style="color:var(--accent-blue); margin-top:2px;"></i>
       <div>
-        <% if (payState === 'instrument') { %>
+        <% if (order.orderType === 'topup') { %>
+        Top-up saldo diproses <strong>100% otomatis secara instan</strong>. Saldo otomatis masuk ke dompet begitu pembayaran terverifikasi tanpa perlu konfirmasi WhatsApp.
+        <% } else if (payState === 'instrument') { %>
         Pembayaran diproses otomatis. Akun aktif dalam <strong>hitungan detik</strong> setelah pembayaran sukses & terkonfirmasi.
         <% } else if (payState === 'select') { %>
         Pilih metode pembayaran yang paling kamu sukai. Semua pembayaran diproses otomatis & aman.
@@ -1553,33 +1591,43 @@ function showSuccess() {
   const t = document.getElementById('payTimer'); if (t) t.style.display = 'none';
   const cb = document.getElementById('cancelBtn'); if (cb) cb.style.display = 'none';
 
-  const waNumber = <%- JSON.stringify(waNumber || '82328437656') %>;
-  const userName = <%- JSON.stringify(user.name || '') %>;
-  const userEmail = <%- JSON.stringify(user.email || '') %>;
-  const planName = <%- JSON.stringify(plan.name || '') %>;
-  const orderId = ORDER_ID;
-  const totalBayar = 'Rp ' + <%- JSON.stringify(order.fr3TotalTransfer.toLocaleString('id-ID')) %>;
+  const orderType = <%- JSON.stringify(order.orderType || 'subscription') %>;
+  if (orderType !== 'topup') {
+    const waNumber = <%- JSON.stringify(waNumber || '82328437656') %>;
+    const userName = <%- JSON.stringify(user.name || '') %>;
+    const userEmail = <%- JSON.stringify(user.email || '') %>;
+    const planName = <%- JSON.stringify(plan.name || '') %>;
+    const orderId = ORDER_ID;
+    const totalBayar = 'Rp ' + <%- JSON.stringify(order.fr3TotalTransfer.toLocaleString('id-ID')) %>;
 
-  const waMsg = [
-    '✅ *KONFIRMASI PEMBAYARAN*',
-    '',
-    `📋 Order ID: *${orderId}*`,
-    `👤 Nama: ${userName}`,
-    `📧 Email: ${userEmail}`,
-    `📦 Paket: *${planName}*`,
-    `💰 Total Bayar: ${totalBayar}`,
-    `💳 Metode: ${METHOD_LABELS[METHOD] || 'QRIS'} (MustikaPay)`,
-    '',
-    '✅ Pembayaran sudah terkonfirmasi otomatis.',
-    'Mohon segera kirimkan akun cloud gaming saya.',
-    'Terima kasih! 🙏'
-  ].join('\n');
+    const waMsg = [
+      '✅ *KONFIRMASI PEMBAYARAN*',
+      '',
+      `📋 Order ID: *${orderId}*`,
+      `👤 Nama: ${userName}`,
+      `📧 Email: ${userEmail}`,
+      `📦 Paket: *${planName}*`,
+      `💰 Total Bayar: ${totalBayar}`,
+      `💳 Metode: ${METHOD_LABELS[METHOD] || 'QRIS'} (MustikaPay)`,
+      '',
+      '✅ Pembayaran sudah terkonfirmasi otomatis.',
+      'Mohon segera kirimkan akun cloud gaming saya.',
+      'Terima kasih! 🙏'
+    ].join('\n');
 
-  const waLink = `https://wa.me/62${waNumber.replace(/^0/, '')}?text=${encodeURIComponent(waMsg)}`;
-  document.getElementById('waConfirmBtn').href = waLink;
+    const waLink = `https://wa.me/62${waNumber.replace(/^0/, '')}?text=${encodeURIComponent(waMsg)}`;
+    const btn = document.getElementById('waConfirmBtn');
+    if (btn) btn.href = waLink;
+  }
 
   document.getElementById('successState').style.display = 'block';
   document.getElementById('successState').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  if (orderType === 'topup') {
+    setTimeout(() => {
+      window.location.href = '/wallet';
+    }, 2500);
+  }
 }
 
 function cancelPayment() { document.getElementById('cancelConfirmModal').style.display = 'flex'; }
