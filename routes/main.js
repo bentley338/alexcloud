@@ -2115,6 +2115,66 @@ router.post('/api/testimonials', async (req, res) => {
   }
 });
 
+// Secure endpoint to get pending (unapproved) testimonials for Bot (.accu / .izinkanulas)
+router.post('/api/bot/testimonials-pending', async (req, res) => {
+  const { secret } = req.body;
+  const BOT_SECRET = process.env.BOT_SHARED_SECRET || 'alexcloud-botwa-secret-2026';
+  if (!secret || !safeEqual(secret, BOT_SECRET)) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  try {
+    const testimonials = db.get('testimonials').value() || [];
+    const pending = testimonials.filter(t => t.approved === false || t.approved === 'false');
+    return res.json({ success: true, pending });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Secure endpoint to approve testimonial by ID from Bot (.accu / .izinkanulas)
+router.post('/api/bot/approve-testimonial', async (req, res) => {
+  const { secret, id } = req.body;
+  const BOT_SECRET = process.env.BOT_SHARED_SECRET || 'alexcloud-botwa-secret-2026';
+  if (!secret || !safeEqual(secret, BOT_SECRET)) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  try {
+    const testimonials = db.get('testimonials').value() || [];
+
+    if (id === 'all') {
+      let count = 0;
+      testimonials.forEach(t => {
+        if (!t.approved) {
+          t.approved = true;
+          count++;
+        }
+      });
+      db.write();
+      return res.json({ success: true, count, message: `${count} ulasan berhasil diizinkan!` });
+    } else {
+      const unapproved = testimonials.filter(t => !t.approved);
+      const idx = parseInt(id) - 1;
+      
+      let targetId = id;
+      if (!isNaN(idx) && unapproved[idx]) {
+        targetId = unapproved[idx].id;
+      }
+
+      const testi = db.get('testimonials').find({ id: targetId }).value();
+      if (!testi) {
+        return res.status(404).json({ success: false, error: 'Ulasan tidak ditemukan!' });
+      }
+
+      db.get('testimonials').find({ id: targetId }).assign({ approved: true }).write();
+      return res.json({ success: true, name: testi.name, message: `Ulasan dari ${testi.name} berhasil diizinkan!` });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Sitemap.xml & Robots.txt routes for robust SEO and Google Search Console indexing
 router.get('/sitemap.xml', (req, res) => {
   res.header('Content-Type', 'application/xml');
