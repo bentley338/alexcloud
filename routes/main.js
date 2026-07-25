@@ -1287,10 +1287,29 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
   } catch (e) {
     console.warn(`[PAY] create ${method} gagal:`, e.message);
 
-    let errMsg = e.message;
-    if (errMsg.includes('Feature Not Allowed') || errMsg.includes('tidak didukung')) {
-      const pName = method === 'emoney' ? (product_code || 'E-Wallet') : method.toUpperCase();
-      errMsg = `Fitur Direct ${pName} dari MustikaPay saat ini non-aktif oleh MustikaPay (Feature Not Allowed). Silakan pilih metode QRIS yang 100% mendukung DANA, OVO, ShopeePay & GoPay secara otomatis.`;
+    // Jika metode E-Money / VA gagal di MustikaPay (mis. Feature Not Allowed dari MustikaPay),
+    // coba otomatis buat MustikaPay QRIS (yang 100% aktif & sukses di MustikaPay) agar transaksi pembeli tetap berjalan lancar!
+    if (method !== 'qris') {
+      try {
+        console.log(`[PAY] Auto-fallback ke MustikaPay QRIS untuk order #${order.orderId}...`);
+        await generateQris(order.id, amount, order);
+        return res.json({ ok: true, fallbackQris: true, message: 'Dialihkan ke MustikaPay QRIS Otomatis' });
+      } catch (qrisErr) {
+        console.warn(`[PAY] Auto-fallback QRIS juga gagal:`, qrisErr.message);
+      }
+    }
+
+    // Jika QRIS juga gagal, alihkan ke Manual QRIS
+    try {
+      db.get('orders').find({ id: order.id }).assign({
+        qrisStatus: 'manual',
+        payMethodType: 'manual',
+        gateway: 'manual',
+        fr3Error: e.message,
+        paymentMethod: 'manual_qris'
+      }).write();
+    } catch (dbErr) {
+      console.error('[DB FALLBACK ERROR]', dbErr.message);
     }
 
     // Kirim notifikasi alert error gateway ke WhatsApp Owner (+6282328437656)
@@ -1302,14 +1321,14 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
         `👤 *Pelanggan:* ${order.userName} (${order.userEmail})\n` +
         `💰 *Paket/Nominal:* ${order.planName} (Rp ${order.price.toLocaleString('id-ID')})\n` +
         `💳 *Metode Dicoba:* ${method.toUpperCase()}\n\n` +
-        `📌 *Pesan Pembeli:* Pembeli melihat notifikasi kendala MustikaPay & diarahkan untuk pilih QRIS / Hubungi Admin WA.`;
+        `📌 *Tindakan Otomatis:* Pembayaran dialihkan ke *MustikaPay QRIS / Manual QRIS* agar pembeli bisa bayar lancar!`;
       
       sendWhatsAppNotification(alertMsg).catch(err => console.error('[WA ERROR NOTIF FAILED]', err.message));
     } catch (waErr) {
       console.error('[WA ERROR NOTIF EXCEPTION]', waErr.message);
     }
 
-    return res.status(400).json({ ok: false, error: errMsg });
+    return res.json({ ok: true, fallback: true, error: e.message });
   }
 });
 
