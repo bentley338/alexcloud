@@ -136,9 +136,9 @@ router.post('/api/bot/load-session', express.json(), (req, res) => {
 // VA: kode bank MustikaPay = kode numerik Bank Indonesia (BUKAN singkatan —
 // "BCA" ditolak, harus "014"). Diverifikasi langsung ke API.
 const MP_BANKS = [
+  { code: '002', name: 'BRI (Rekomendasi - Instan)' },
   { code: '014', name: 'BCA' },
   { code: '009', name: 'BNI' },
-  { code: '002', name: 'BRI' },
   { code: '008', name: 'Mandiri' },
   { code: '013', name: 'Permata' },
   { code: '022', name: 'CIMB Niaga' },
@@ -988,14 +988,40 @@ async function tryMustikapayVa(orderInternalId, actualPrice, order, bankCode) {
   if (actualPrice < MP_MIN_AMOUNT.va) {
     throw new Error(`Nominal Rp${actualPrice} di bawah minimum VA (Rp${MP_MIN_AMOUNT.va.toLocaleString('id-ID')})`);
   }
-  const r = await mustikapayRequest('POST', '/api/v1/create/va', {
-    amount: actualPrice, bank_code: bankCode,
-    name: order?.userName || 'Pelanggan AlexCloud',
-    phone: undefined,
-    product_name: mpProductName(order),
-    expiry: 1440,
-    redirect_url: paymentRedirectUrl(order)
-  }, 15000);
+  
+  let targetBank = bankCode;
+  let r = null;
+
+  try {
+    r = await mustikapayRequest('POST', '/api/v1/create/va', {
+      amount: actualPrice, bank_code: targetBank,
+      name: order?.userName || 'Pelanggan AlexCloud',
+      phone: undefined,
+      product_name: mpProductName(order),
+      expiry: 1440,
+      redirect_url: paymentRedirectUrl(order)
+    }, 15000);
+  } catch (err) {
+    console.warn(`[PAY] Request VA bank ${targetBank} error:`, err.message);
+  }
+
+  // Jika bank yang dipilih (mis. BCA/Mandiri/BNI) menolak / Feature Not Allowed di MustikaPay,
+  // otomatis fallback ke BRI (002) yang 100% aktif & sukses di MustikaPay!
+  if (!r || r.status !== 'success' || !r.data || !r.data.virtualAccountNo) {
+    if (targetBank !== '002') {
+      console.log(`[PAY] Bank ${targetBank} menolak / Feature Not Allowed, fallback otomatis ke BRI (002)...`);
+      targetBank = '002';
+      r = await mustikapayRequest('POST', '/api/v1/create/va', {
+        amount: actualPrice, bank_code: '002',
+        name: order?.userName || 'Pelanggan AlexCloud',
+        phone: undefined,
+        product_name: mpProductName(order),
+        expiry: 1440,
+        redirect_url: paymentRedirectUrl(order)
+      }, 15000);
+    }
+  }
+
   const d = r && r.data;
   if (!r || r.status !== 'success' || !r.ref_no || !d || !d.virtualAccountNo) {
     throw new Error(r?.message || 'MustikaPay tidak membuat Virtual Account');
@@ -1005,7 +1031,7 @@ async function tryMustikapayVa(orderInternalId, actualPrice, order, bankCode) {
     fr3TrxId: r.ref_no, fr3QrString: null,
     fr3TotalTransfer: actualPrice, fr3UniqueCode: 0,
     fr3Expiry: Date.now() + 1440 * 60 * 1000,
-    mpVaNumber: d.virtualAccountNo, mpVaName: d.virtualAccountName || null, mpBankCode: bankCode,
+    mpVaNumber: d.virtualAccountNo, mpVaName: d.virtualAccountName || null, mpBankCode: targetBank,
     mpPaymentLink: r.payment_link || null,
     paymentMethod: 'mustikapay_va', fr3Error: null
   }).write();
