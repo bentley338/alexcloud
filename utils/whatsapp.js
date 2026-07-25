@@ -20,7 +20,7 @@ function sendViaBotWa(settings, messageText) {
   }
   
   const postData = JSON.stringify({
-    secret: process.env.BOT_SHARED_SECRET || '',
+    secret: process.env.BOT_SHARED_SECRET || settings.botSharedSecret || '76e9491b52202d3e8028851d6c62b953a8fad7112f1ff1e23d223c755f602cdb',
     phone: phone,
     message: messageText
   });
@@ -91,7 +91,7 @@ async function sendWhatsAppNotification(messageText, isTest = false) {
   const settings = db.get('settings').value() || {};
   
   // Try sending via botwa first if BOT_WA_URL is configured
-  const botWaUrl = process.env.BOT_WA_URL || settings.botWaUrl || '';
+  const botWaUrl = process.env.BOT_WA_URL || settings.botWaUrl || 'http://localhost:3001';
   if (botWaUrl) {
     try {
       const res = await sendViaBotWa(settings, formattedMessage);
