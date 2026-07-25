@@ -1286,7 +1286,37 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
     return res.json({ ok: true });
   } catch (e) {
     console.warn(`[PAY] create ${method} gagal:`, e.message);
-    return res.status(502).json({ error: e.message });
+    
+    // Otomatis fallback ke Manual QRIS jika gateway mengalami kendala / ditangguhkan
+    try {
+      db.get('orders').find({ id: order.id }).assign({
+        qrisStatus: 'manual',
+        payMethodType: 'manual',
+        gateway: 'manual',
+        fr3Error: e.message,
+        paymentMethod: 'manual_qris'
+      }).write();
+    } catch (dbErr) {
+      console.error('[DB FALLBACK ERROR]', dbErr.message);
+    }
+
+    // Kirim notifikasi notif/alert error gateway ke WhatsApp Owner (+6282328437656)
+    try {
+      const { sendWhatsAppNotification } = require('../utils/whatsapp');
+      const alertMsg = `🚨 *PERINGATAN SISTEM PEMBAYARAN ALEXCLOUD* 🚨\n\n` +
+        `⚠️ *Error Gateway:* ${e.message}\n` +
+        `📝 *ID Order:* #${order.orderId}\n` +
+        `👤 *Pelanggan:* ${order.userName} (${order.userEmail})\n` +
+        `💰 *Paket/Nominal:* ${order.planName} (Rp ${order.price.toLocaleString('id-ID')})\n` +
+        `💳 *Metode Dicoba:* ${method.toUpperCase()}\n\n` +
+        `📌 *Tindakan Otomatis:* Pembayaran telah dialihkan ke *Manual QRIS* agar transaksi pembeli tetap berjalan lancar!`;
+      
+      sendWhatsAppNotification(alertMsg).catch(err => console.error('[WA ERROR NOTIF FAILED]', err.message));
+    } catch (waErr) {
+      console.error('[WA ERROR NOTIF EXCEPTION]', waErr.message);
+    }
+
+    return res.json({ ok: true, fallback: true, error: e.message });
   }
 });
 

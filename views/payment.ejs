@@ -1375,7 +1375,7 @@ createBtn.addEventListener('click', async () => {
       body: JSON.stringify(payload)
     });
     const data = await r.json();
-    if (r.ok && data.ok) {
+    if (r.ok && (data.ok || data.fallback)) {
       window.location.reload();
     } else {
       errBox.textContent = data.error || 'Gagal membuat pembayaran. Coba metode lain.';
