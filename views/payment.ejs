@@ -1327,21 +1327,79 @@ body.has-announcement .payment-page { padding-top: 11rem; }
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
-@keyframes iconPulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
-  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+/* Smart Error Modal Styles */
+#smartErrorModal .modal-card {
+  border: 1px solid rgba(255, 170, 0, 0.4);
 }
 </style>
+
+<!-- Smart Payment Issue Modal -->
+<div id="smartErrorModal" class="custom-modal" style="display:none;">
+  <div class="modal-backdrop" onclick="closeSmartErrorModal()"></div>
+  <div class="modal-card" style="border-color: rgba(255, 170, 0, 0.4); max-width: 440px;">
+    <div class="modal-glow" style="background: radial-gradient(circle, rgba(255, 170, 0, 0.18) 0%, transparent 70%);"></div>
+    <div class="modal-icon-wrap" style="background: rgba(255, 170, 0, 0.12); border-color: rgba(255, 170, 0, 0.35); color: #ffbb33;">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="modal-title" style="color: #ffbb33; font-size: 1.25rem;">Kendala Pembayaran Otomatis</div>
+    <div class="modal-desc" id="smartErrorDesc" style="font-size: 0.85rem; line-height: 1.6; margin-bottom: 1.5rem; text-align: center; color: rgba(255,255,255,0.85);">
+      Terjadi kendala pada koneksi gateway. Notifikasi masalah telah terkirim otomatis ke admin. Silakan chat Admin WA untuk bantuan kilat atau coba QRIS Manual.
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <a id="smartWaLink" href="#" target="_blank" class="btn-primary" style="background: linear-gradient(135deg, #25d366, #128c7e); border: none; padding: 0.85rem 1rem; border-radius: 14px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-size: 0.9rem; box-shadow: 0 4px 18px rgba(37,211,102,0.4);">
+        <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i> Chat Admin WA (Bantuan Kilat ⚡)
+      </a>
+      <button type="button" onclick="closeSmartErrorModal()" class="btn-confirm-no" style="padding: 0.65rem;">
+        Tutup & Coba Lagi
+      </button>
+    </div>
+  </div>
+</div>
 
 <% if (payState === 'select') { %>
 <script>
 const SEL_ORDER_ID = <%- JSON.stringify(order.orderId) %>;
+const WA_NUM_SMART = <%- JSON.stringify(waNumber || '82328437656') %>;
 let selectedMethod = null;
 
 const cards = document.querySelectorAll('.method-card');
 const createBtn = document.getElementById('createBtn');
 const errBox = document.getElementById('createError');
+
+function showSmartErrorModal(msg) {
+  const modal = document.getElementById('smartErrorModal');
+  const desc = document.getElementById('smartErrorDesc');
+  const waLink = document.getElementById('smartWaLink');
+  
+  if (desc) desc.textContent = msg;
+  
+  const textMsg = `Halo Admin AlexCloud! ⚠️\n\nSaya mengalami kendala pembayaran:\n📋 Order ID: *#${SEL_ORDER_ID}*\n⚠️ Pesan: ${msg}\n\nMohon bantuan verifikasi/prosesnya. Terima kasih!`;
+  if (waLink) {
+    waLink.href = `https://wa.me/62${WA_NUM_SMART.replace(/^0/, '')}?text=${encodeURIComponent(textMsg)}`;
+  }
+  
+  if (errBox) {
+    errBox.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:0.5rem; text-align:left; background:rgba(255,170,0,0.08); border:1px solid rgba(255,170,0,0.3); border-radius:12px; padding:0.85rem;">
+        <div style="font-weight:700; color:#ffbb33; display:flex; align-items:center; gap:0.4rem;">
+          <i class="fas fa-exclamation-triangle"></i> Terjadi Kendala Pembayaran
+        </div>
+        <div style="font-size:0.8rem; color:rgba(255,255,255,0.85);">${msg}</div>
+        <a href="https://wa.me/62${WA_NUM_SMART.replace(/^0/, '')}?text=${encodeURIComponent(textMsg)}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; gap:0.4rem; padding:0.6rem 0.85rem; background:linear-gradient(135deg, #25d366, #128c7e); color:white; border-radius:10px; font-weight:800; font-size:0.8rem; text-decoration:none; margin-top:0.3rem;">
+          <i class="fab fa-whatsapp"></i> Chat Admin WA (Bantuan Cepat ⚡)
+        </a>
+      </div>
+    `;
+    errBox.style.display = 'block';
+  }
+  
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeSmartErrorModal() {
+  const modal = document.getElementById('smartErrorModal');
+  if (modal) modal.style.display = 'none';
+}
 
 function showPane(method) {
   document.querySelectorAll('.sub-pane').forEach(p => p.classList.remove('show'));
@@ -1378,8 +1436,7 @@ createBtn.addEventListener('click', async () => {
   const payload = gatherPayload();
 
   if (selectedMethod === 'emoney' && !/^0\d{8,14}$/.test(payload.phone || '')) {
-    errBox.textContent = 'Masukkan nomor HP e-wallet yang valid (contoh: 081234567890).';
-    errBox.style.display = 'block';
+    showSmartErrorModal('Masukkan nomor HP e-wallet yang valid (contoh: 081234567890).');
     return;
   }
 
@@ -1397,14 +1454,12 @@ createBtn.addEventListener('click', async () => {
     if (r.ok && (data.ok || data.fallback)) {
       window.location.reload();
     } else {
-      errBox.textContent = data.error || 'Gagal membuat pembayaran. Coba metode lain.';
-      errBox.style.display = 'block';
+      showSmartErrorModal(data.error || 'Gagal membuat pembayaran. Coba metode lain.');
       createBtn.disabled = false;
       createBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Lanjut Bayar';
     }
   } catch (e) {
-    errBox.textContent = 'Terjadi kesalahan jaringan. Coba lagi.';
-    errBox.style.display = 'block';
+    showSmartErrorModal('Terjadi kendala jaringan saat menghubungi gateway. Silakan chat Admin WA untuk bantuan kilat atau coba metode lain.');
     createBtn.disabled = false;
     createBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Lanjut Bayar';
   }
