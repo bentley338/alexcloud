@@ -550,8 +550,27 @@
         <span>Pembayaran Manual (WhatsApp)</span>
       </div>
 
+      <!-- Banner Informasi Kendala Pembayaran & Bantuan WA -->
+      <div style="margin: 1.25rem 1.25rem 0.75rem; padding: 1.1rem; border-radius: 16px; background: linear-gradient(135deg, rgba(255, 170, 0, 0.12), rgba(255, 68, 68, 0.08)); border: 1.5px solid rgba(255, 170, 0, 0.3); text-align: left; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+        <div style="display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-display); font-weight: 800; color: #ffbb33; font-size: 0.95rem; margin-bottom: 0.4rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 1.1rem; color: #ffbb33;"></i>
+          <span>Kendala Pembayaran Otomatis</span>
+        </div>
+        <div style="font-family: var(--font-ui); font-size: 0.82rem; color: rgba(255,255,255,0.88); line-height: 1.55; margin-bottom: 0.85rem;">
+          Sistem otomatis mengalihkan pesanan ke <strong>Transfer QRIS Manual</strong> agar pembayaran kamu tetap berjalan lancar. Jika ada pertanyaan/butuh verifikasi cepat, hubungi Admin via WhatsApp.
+        </div>
+        <%
+          let waHelpMsg = 'Halo Admin AlexCloud! ⚠️\n\n';
+          waHelpMsg += 'Saya ingin bantuan/konfirmasi pembayaran order saya:\n';
+          waHelpMsg += '📋 Order ID: *#' + order.orderId + '*\n👤 Nama: ' + (typeof user !== 'undefined' && user ? user.name : '') + '\n📦 Paket: *' + plan.name + '*\n💰 Nominal: ' + priceDisplay + '\n\nMohon dibantu prosesnya. Terima kasih!';
+        %>
+        <a href="https://wa.me/62<%= waNumber.replace(/^0/, '') %>?text=<%= encodeURIComponent(waHelpMsg) %>" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, #25d366, #128c7e); color: white; border-radius: 12px; font-family: var(--font-ui); font-weight: 800; font-size: 0.88rem; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 4px 14px rgba(37,211,102,0.35);">
+          <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i> Bantuan Cepat via WA Admin
+        </a>
+      </div>
+
       <% if (fr3Error && typeof user !== 'undefined' && user && user.role === 'admin') { %>
-      <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start; margin: 1.25rem; padding: 1rem; border-radius: 12px; background: rgba(255, 68, 68, 0.07); border: 1px solid rgba(255, 68, 68, 0.15); color: #ff8888; text-align: left;">
+      <div class="fr3-error-banner" style="display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start; margin: 0.5rem 1.25rem 1rem; padding: 1rem; border-radius: 12px; background: rgba(255, 68, 68, 0.07); border: 1px solid rgba(255, 68, 68, 0.15); color: #ff8888; text-align: left;">
         <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700;">
           <i class="fas fa-exclamation-triangle"></i>
           <span>Debug Admin: Gateway Error</span>
