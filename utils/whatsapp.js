@@ -7,7 +7,7 @@ const { sharedHttpsAgent } = require('./helpers');
  * Sends message via our own WhatsApp Bot (botwa)
  */
 function sendViaBotWa(settings, messageText) {
-  const botWaUrl = process.env.BOT_WA_URL || settings.botWaUrl || '';
+  const botWaUrl = process.env.BOT_WA_URL || settings.botWaUrl || 'http://localhost:3001';
   let phone = settings.whatsappPhone || process.env.WA_NUMBER || '6282328437656';
   
   if (!botWaUrl) {
@@ -77,14 +77,13 @@ function sendViaBotWa(settings, messageText) {
  * @param {string} messageText - The message content to send
  */
 async function sendWhatsAppNotification(messageText, isTest = false) {
-  // Clean up markdown for WhatsApp formatting (remove asterisks and header symbols completely)
+  // Clean up markdown for WhatsApp formatting
   let formattedMessage = '';
   if (messageText) {
     formattedMessage = messageText
       .replace(/^\s*\*\s+\*/gm, '•')
       .replace(/^\s*\*\s+/gm, '• ')
       .replace(/^#+\s+/gm, '')
-      .replace(/\*/g, '')
       .trim();
   }
 
