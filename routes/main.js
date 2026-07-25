@@ -1287,7 +1287,19 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
   } catch (e) {
     console.warn(`[PAY] create ${method} gagal:`, e.message);
     
-    // Otomatis fallback ke Manual QRIS jika gateway mengalami kendala / ditangguhkan
+    // Jika metode selain QRIS (mis. E-Money / VA) gagal karena Feature Not Allowed / produk tak didukung,
+    // coba otomatis buat MUSTIKAPAY QRIS (yang 100% aktif & sukses di MustikaPay) agar pembeli langsung dapat QRIS otomatis!
+    if (method !== 'qris') {
+      try {
+        console.log(`[PAY] Mencoba auto-fallback ke MustikaPay QRIS untuk order #${order.orderId}...`);
+        await generateQris(order.id, amount, order);
+        return res.json({ ok: true, fallbackQris: true, message: 'Dialihkan ke QRIS Otomatis MustikaPay' });
+      } catch (qrisErr) {
+        console.warn(`[PAY] Auto-fallback QRIS juga gagal:`, qrisErr.message);
+      }
+    }
+
+    // Jika QRIS juga gagal, baru dialihkan ke Manual QRIS & kirim WA alert ke Owner
     try {
       db.get('orders').find({ id: order.id }).assign({
         qrisStatus: 'manual',
@@ -1300,7 +1312,7 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
       console.error('[DB FALLBACK ERROR]', dbErr.message);
     }
 
-    // Kirim notifikasi notif/alert error gateway ke WhatsApp Owner (+6282328437656)
+    // Kirim notifikasi alert error gateway ke WhatsApp Owner (+6282328437656)
     try {
       const { sendWhatsAppNotification } = require('../utils/whatsapp');
       const alertMsg = `🚨 *PERINGATAN SISTEM PEMBAYARAN ALEXCLOUD* 🚨\n\n` +
