@@ -1024,7 +1024,9 @@ async function tryMustikapayVa(orderInternalId, actualPrice, order, bankCode) {
 
   const d = r && r.data;
   if (!r || r.status !== 'success' || !r.ref_no || !d || !d.virtualAccountNo) {
-    throw new Error(r?.message || 'MustikaPay tidak membuat Virtual Account');
+    console.log(`[PAY] Virtual Account menolak (${r?.message}), fallback otomatis ke QRIS...`);
+    await generateQris(orderInternalId, actualPrice, order);
+    return;
   }
   db.get('orders').find({ id: orderInternalId }).assign({
     qrisStatus: 'ready', gateway: 'mustikapay', payMethodType: 'va',
@@ -1045,17 +1047,29 @@ async function tryMustikapayEmoney(orderInternalId, actualPrice, order, productC
   if (actualPrice < MP_MIN_AMOUNT.emoney) {
     throw new Error(`Nominal Rp${actualPrice} di bawah minimum E-Money (Rp${MP_MIN_AMOUNT.emoney.toLocaleString('id-ID')})`);
   }
-  const r = await mustikapayRequest('POST', '/api/v1/create/emoney', {
-    amount: actualPrice, product_code: productCode, phone,
-    name: order?.userName || 'Pelanggan AlexCloud',
-    product_name: mpProductName(order),
-    order_id: order.orderId,
-    expiry: 15,
-    redirect_url: paymentRedirectUrl(order)
-  }, 15000);
-  if (!r || r.status !== 'success' || !r.ref_no) {
-    throw new Error(r?.message || 'MustikaPay tidak membuat transaksi E-Money');
+  
+  let r = null;
+  try {
+    r = await mustikapayRequest('POST', '/api/v1/create/emoney', {
+      amount: actualPrice, product_code: productCode, phone,
+      name: order?.userName || 'Pelanggan AlexCloud',
+      product_name: mpProductName(order),
+      order_id: order.orderId,
+      expiry: 15,
+      redirect_url: paymentRedirectUrl(order)
+    }, 15000);
+  } catch (err) {
+    console.warn(`[PAY] Request E-Money ${productCode} error:`, err.message);
   }
+
+  // Jika MustikaPay menolak E-Money (mis. Feature Not Allowed/gangguan),
+  // otomatis alihkan ke QRIS (yang 100% aktif & mendukung DANA, ShopeePay, OVO, GoPay)!
+  if (!r || r.status !== 'success' || !r.ref_no) {
+    console.log(`[PAY] E-Money ${productCode} menolak (${r?.message}), fallback otomatis ke QRIS...`);
+    await generateQris(orderInternalId, actualPrice, order);
+    return;
+  }
+
   const link = r.payment_link || (r.data && r.data.urlPayment) || null;
   const provider = (MP_EWALLETS.find(e => e.code === productCode) || {}).name || productCode;
   db.get('orders').find({ id: orderInternalId }).assign({
@@ -1078,18 +1092,30 @@ async function tryMustikapayRetail(orderInternalId, actualPrice, order, outlet, 
   if (actualPrice > MP_MAX_AMOUNT.retail) {
     throw new Error(`Nominal Rp${actualPrice} melebihi maksimum Retail (Rp${MP_MAX_AMOUNT.retail.toLocaleString('id-ID')})`);
   }
-  const r = await mustikapayRequest('POST', '/api/v1/create/retail', {
-    amount: actualPrice, retail_outlet: outlet,
-    name: order?.userName || 'Pelanggan AlexCloud',
-    phone: phone || undefined,
-    product_name: mpProductName(order),
-    expiry: 4320,
-    redirect_url: paymentRedirectUrl(order)
-  }, 15000);
-  const d = r && r.data;
-  if (!r || r.status !== 'success' || !r.ref_no || !d || !d.paymentCode) {
-    throw new Error(r?.message || 'MustikaPay tidak membuat pembayaran Retail');
+
+  let r = null;
+  try {
+    r = await mustikapayRequest('POST', '/api/v1/create/retail', {
+      amount: actualPrice, retail_outlet: outlet,
+      name: order?.userName || 'Pelanggan AlexCloud',
+      phone: phone || undefined,
+      product_name: mpProductName(order),
+      expiry: 4320,
+      redirect_url: paymentRedirectUrl(order)
+    }, 15000);
+  } catch (err) {
+    console.warn(`[PAY] Request Retail ${outlet} error:`, err.message);
   }
+
+  const d = r && r.data;
+  // Jika MustikaPay menolak Retail (mis. Feature Not Allowed/gangguan),
+  // otomatis alihkan ke QRIS (yang 100% aktif)!
+  if (!r || r.status !== 'success' || !r.ref_no || !d || !d.paymentCode) {
+    console.log(`[PAY] Retail ${outlet} menolak (${r?.message}), fallback otomatis ke QRIS...`);
+    await generateQris(orderInternalId, actualPrice, order);
+    return;
+  }
+
   db.get('orders').find({ id: orderInternalId }).assign({
     qrisStatus: 'ready', gateway: 'mustikapay', payMethodType: 'retail',
     fr3TrxId: r.ref_no, fr3QrString: null,
