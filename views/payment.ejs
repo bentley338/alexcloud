@@ -34,168 +34,71 @@
     </div>
 
     <% if (payState === 'select') { %>
-    <!-- ======= PILIH METODE PEMBAYARAN ======= -->
-    <div class="pay-card">
-      <div class="pay-status-bar">
-        <div class="pay-status-dot pending"></div>
-        <span>Pilih metode pembayaran</span>
+    <!-- ======= PEMELIHARAAN SISTEM PEMBAYARAN - DIRECT WA ======= -->
+    <div class="pay-card" style="text-align: center; padding: 2.25rem 1.25rem; background: linear-gradient(145deg, rgba(22, 27, 34, 0.98), rgba(13, 17, 23, 0.99)); border: 1px solid rgba(245, 158, 11, 0.35); box-shadow: 0 12px 35px rgba(0,0,0,0.6), 0 0 25px rgba(245, 158, 11, 0.15); border-radius: 22px; position: relative; overflow: hidden;">
+      
+      <!-- Ambient Light Accent -->
+      <div style="position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 220px; height: 120px; background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%); filter: blur(25px); pointer-events: none;"></div>
+
+      <!-- Icon Header -->
+      <div style="width: 72px; height: 72px; margin: 0 auto 1.25rem auto; background: rgba(245, 158, 11, 0.12); border: 2px solid rgba(245, 158, 11, 0.45); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 1.85rem; box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);">
+        <i class="fas fa-tools"></i>
       </div>
 
-      <!-- Ringkasan singkat -->
-      <div class="pay-summary">
-        <div class="pay-sum-row">
-          <span>Paket</span>
-          <span><strong><%= plan.name %></strong></span>
-        </div>
-        <% if (discount > 0) { %>
-        <div class="pay-sum-row" style="color:var(--accent-green);">
-          <span>Diskon Promo</span>
-          <span>- Rp <%= discount.toLocaleString('id-ID') %></span>
-        </div>
-        <% } %>
-        <div class="pay-sum-row total-row">
-          <span>Total Bayar</span>
-          <span class="total-val"><%= priceDisplay %></span>
-        </div>
+      <!-- Status Badge -->
+      <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 0.4rem 0.95rem; border-radius: 30px; font-size: 0.8rem; font-weight: 700; margin-bottom: 1.25rem;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 10px #fbbf24;"></span>
+        Gateway Otomatis Sedang Maintenance
       </div>
 
-      <!-- Daftar metode -->
-      <div class="method-list">
-        <%
-          const vaOk = order.price >= minAmount.va;
-          const retailOk = order.price >= minAmount.retail && order.price <= maxAmount.retail;
-        %>
-        <button type="button" class="method-card" data-method="qris">
-          <div class="method-ic">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-              <line x1="7" y1="7" x2="7" y2="7" stroke-width="3.5" stroke-linecap="round" />
-              <line x1="17" y1="7" x2="17" y2="7" stroke-width="3.5" stroke-linecap="round" />
-              <line x1="7" y1="17" x2="7" y2="17" stroke-width="3.5" stroke-linecap="round" />
-            </svg>
-          </div>
-          <div class="method-body">
-            <div class="method-name" style="display:flex; align-items:center; gap:0.5rem;">
-              <span>QRIS</span>
-              <span style="font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:6px; background:rgba(0,255,136,0.15); color:var(--accent-green); border:1px solid rgba(0,255,136,0.3); font-weight:700;">⚡ Instan Otomatis</span>
-            </div>
-            <div class="method-desc">GoPay, OVO, DANA, ShopeePay, m-Banking</div>
-            <div class="method-logos">
-              <div class="method-logo-badge"><%- logoSvgs.dana %></div>
-              <div class="method-logo-badge"><%- logoSvgs.ovo %></div>
-              <div class="method-logo-badge"><%- logoSvgs.gopay %></div>
-              <div class="method-logo-badge"><%- logoSvgs.shopeepay %></div>
-            </div>
-          </div>
-          <i class="fas fa-chevron-right method-arrow"></i>
-        </button>
+      <!-- Main Title -->
+      <h2 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; color: #ffffff; margin-bottom: 0.6rem; letter-spacing: -0.01em;">
+        Pembayaran Dialihkan ke WA Admin
+      </h2>
 
-        <button type="button" class="method-card<%= vaOk ? '' : ' disabled' %>" data-method="va" <%= vaOk ? '' : 'data-disabled="1"' %>>
-          <div class="method-ic">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 22h18M6 18v-7m4 7v-7m4 7v-7m4 7v-7M3 11h18L12 3z" />
-            </svg>
-          </div>
-          <div class="method-body">
-            <div class="method-name">Virtual Account</div>
-            <div class="method-desc"><%= vaOk ? 'BCA, BNI, BRI, Mandiri, Permata, dll' : ('Min. Rp' + minAmount.va.toLocaleString('id-ID')) %></div>
-            <% if (vaOk) { %>
-            <div class="method-logos">
-              <div class="method-logo-badge"><%- logoSvgs.bca %></div>
-              <div class="method-logo-badge"><%- logoSvgs.bni %></div>
-              <div class="method-logo-badge"><%- logoSvgs.bri %></div>
-              <div class="method-logo-badge"><%- logoSvgs.mandiri %></div>
-            </div>
-            <% } %>
-          </div>
-          <i class="fas fa-chevron-right method-arrow"></i>
-        </button>
+      <!-- Description -->
+      <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.5rem; max-width: 480px; margin-left: auto; margin-right: auto;">
+        Layanan gateway pembayaran otomatis sedang mengalami gangguan jaringan.<br>
+        <strong style="color: #ffffff;">Pesanan Anda tetap diproses kilat (1-3 menit) langsung oleh Admin!</strong>
+      </p>
 
-        <button type="button" class="method-card" data-method="emoney">
-          <div class="method-ic">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12V7H5a2 2 0 0 1 0-4h14a1 1 0 0 1 1 1v3" />
-              <path d="M3 5v14a2 2 0 0 0 2 2h16a1 1 0 0 0 1-1v-5" />
-              <path d="M16 10h6v4h-6z" />
-            </svg>
-          </div>
-          <div class="method-body">
-            <div class="method-name">E-Wallet</div>
-            <div class="method-desc">DANA, ShopeePay, OVO, LinkAja</div>
-            <div class="method-logos">
-              <div class="method-logo-badge"><%- logoSvgs.dana %></div>
-              <div class="method-logo-badge"><%- logoSvgs.shopeepay %></div>
-              <div class="method-logo-badge"><%- logoSvgs.ovo %></div>
-              <div class="method-logo-badge"><%- logoSvgs.linkaja %></div>
-            </div>
-          </div>
-          <i class="fas fa-chevron-right method-arrow"></i>
-        </button>
-
-        <button type="button" class="method-card<%= retailOk ? '' : ' disabled' %>" data-method="retail" <%= retailOk ? '' : 'data-disabled="1"' %>>
-          <div class="method-ic">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 20a1 1 0 0 0 1-1V8H3v11a1 1 0 0 0 1 1z" />
-              <path d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2" />
-              <path d="M10 12h4" />
-            </svg>
-          </div>
-          <div class="method-body">
-            <div class="method-name">Retail / Minimarket</div>
-            <div class="method-desc"><%= retailOk ? 'Alfamart, Indomaret' : ('Rp' + minAmount.retail.toLocaleString('id-ID') + ' – Rp' + maxAmount.retail.toLocaleString('id-ID')) %></div>
-            <% if (retailOk) { %>
-            <div class="method-logos">
-              <div class="method-logo-badge"><%- logoSvgs.alfamart %></div>
-              <div class="method-logo-badge"><%- logoSvgs.indomaret %></div>
-            </div>
-            <% } %>
-          </div>
-          <i class="fas fa-chevron-right method-arrow"></i>
-        </button>
-      </div>
-
-      <!-- Sub-opsi per metode -->
-      <div id="subPanes" style="padding:0 1.25rem;">
-        <div class="sub-pane" id="sub-va">
-          <label class="sub-label">Pilih Bank</label>
-          <select id="vaBank" class="sub-select">
-            <% banks.forEach(function(b){ %>
-            <option value="<%= b.code %>"><%= b.name %></option>
-            <% }); %>
-          </select>
+      <!-- Order Summary Card -->
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.1rem 1.25rem; margin-bottom: 1.75rem; text-align: left;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.86rem; color: var(--text-muted);">
+          <span>ID Pesanan</span>
+          <strong style="color: #ffffff; font-family: monospace; font-size: 0.95rem;">#<%= order.orderId %></strong>
         </div>
-
-        <div class="sub-pane" id="sub-emoney">
-          <label class="sub-label">Provider E-Wallet</label>
-          <select id="ewProvider" class="sub-select">
-            <% ewallets.forEach(function(e){ %>
-            <option value="<%= e.code %>"><%= e.name %></option>
-            <% }); %>
-          </select>
-          <label class="sub-label" style="margin-top:0.75rem;">No. HP terdaftar di e-wallet</label>
-          <input type="tel" id="ewPhone" class="sub-input" placeholder="081234567890" inputmode="numeric">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.86rem; color: var(--text-muted);">
+          <span>Paket Terpilih</span>
+          <strong style="color: #ffffff;"><%= order.planName %></strong>
         </div>
-
-        <div class="sub-pane" id="sub-retail">
-          <label class="sub-label">Pilih Gerai</label>
-          <select id="retailOutlet" class="sub-select">
-            <option value="ALFAMART">Alfamart</option>
-            <option value="INDOMARET">Indomaret</option>
-          </select>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; font-weight: 800; color: var(--accent-green); border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 0.65rem; margin-top: 0.65rem;">
+          <span>Total Tagihan</span>
+          <span style="font-size: 1.2rem;"><%= priceDisplay %></span>
         </div>
       </div>
 
-      <div id="createError" class="create-error" style="display:none;"></div>
+      <!-- WA Button -->
+      <%
+        let waDirectMsg = 'Halo Admin AlexCloud! 🛒\n\n';
+        waDirectMsg += 'Saya mau bayar pesanan saya karena gateway otomatis sedang maintenance:\n';
+        waDirectMsg += '📋 ID Order: *#' + order.orderId + '*\n';
+        waDirectMsg += '👤 Nama: ' + (order.userName || user.name) + '\n';
+        waDirectMsg += '📧 Email: ' + (order.userEmail || user.email) + '\n';
+        waDirectMsg += '📦 Paket: *' + order.planName + '*\n';
+        waDirectMsg += '💰 Total Bayar: *' + priceDisplay + '*\n\n';
+        waDirectMsg += 'Mohon bantu diproseskan pembayarannya ya Admin. Terima kasih!';
+      %>
+      <a href="https://wa.me/6285810073341?text=<%= encodeURIComponent(waDirectMsg) %>" target="_blank" rel="noopener" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 0.65rem; background: linear-gradient(135deg, #25D366, #128C7E); border: none; padding: 1.05rem 1.5rem; border-radius: 14px; font-size: 1.02rem; font-weight: 800; color: #ffffff; text-decoration: none; box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4); transition: all 0.3s ease;">
+        <i class="fab fa-whatsapp" style="font-size: 1.4rem;"></i> BAYAR SEKARANG VIA WHATSAPP
+      </a>
 
-      <div style="padding:0.5rem 1.25rem 1.25rem;">
-        <button id="createBtn" class="btn-primary" style="width:100%; justify-content:center;" disabled>
-          <i class="fas fa-lock"></i> Pilih metode dulu
-        </button>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
+        <i class="fas fa-bolt" style="color: #fbbf24;"></i> Transaksi Langsung Diproses Instan &bull; 085810073341
       </div>
+
     </div>
+    <% } %>
 
     <% } else if (payState === 'bonus') { %>
     <!-- ======= BONUS REFERRAL INVOICE ======= -->
