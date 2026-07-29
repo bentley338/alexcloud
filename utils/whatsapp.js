@@ -8,7 +8,7 @@ const { sharedHttpsAgent } = require('./helpers');
  */
 function sendViaBotWa(settings, messageText) {
   const botWaUrl = process.env.BOT_WA_URL || settings.botWaUrl || 'http://localhost:3001';
-  let phone = settings.whatsappPhone || process.env.WA_NUMBER || '6282328437656';
+  let phone = settings.whatsappPhone || process.env.WA_NUMBER || '6285810073341';
   
   if (!botWaUrl) {
     return { success: false, reason: 'missing_bot_url' };

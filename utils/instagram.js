@@ -265,7 +265,7 @@ async function handleNewTestimonialAutoPublish(testimonial) {
     const { db } = require('../database/db');
     const settings = db.get('settings').value() || {};
     const botWaUrl = process.env.BOT_WA_URL || settings.botWaUrl || '';
-    let phone = settings.whatsappPhone || process.env.WA_NUMBER || '6282328437656';
+    let phone = settings.whatsappPhone || process.env.WA_NUMBER || '6285810073341';
     
     if (botWaUrl && phone) {
       phone = phone.replace(/[\s\-\+]/g, '');

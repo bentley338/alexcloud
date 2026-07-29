@@ -1283,7 +1283,7 @@ router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
     minAmount: MP_MIN_AMOUNT,
     maxAmount: MP_MAX_AMOUNT,
     qrisImage: process.env.QRIS_IMAGE || 'https://img1.pixhost.to/images/5339/592942381_rizzhosting.jpg',
-    waNumber: process.env.WA_NUMBER || '82328437656'
+    waNumber: process.env.WA_NUMBER || '85810073341'
   });
 });
 
@@ -1365,7 +1365,7 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
       console.error('[DB FALLBACK ERROR]', dbErr.message);
     }
 
-    // Kirim notifikasi alert error gateway ke WhatsApp Owner (+6282328437656)
+    // Kirim notifikasi alert error gateway ke WhatsApp Owner (+6285810073341)
     try {
       const { sendWhatsAppNotification } = require('../utils/whatsapp');
       const alertMsg = `🚨 *PERINGATAN SISTEM PEMBAYARAN ALEXCLOUD* 🚨\n\n` +

@@ -1389,7 +1389,7 @@ body.has-announcement .payment-page { padding-top: 11rem; }
 <% if (payState === 'select') { %>
 <script>
 const SEL_ORDER_ID = <%- JSON.stringify(order.orderId) %>;
-const WA_NUM_SMART = <%- JSON.stringify(waNumber || '82328437656') %>;
+const WA_NUM_SMART = <%- JSON.stringify(waNumber || '85810073341') %>;
 let selectedMethod = null;
 
 const cards = document.querySelectorAll('.method-card');
@@ -1697,7 +1697,7 @@ function showSuccess() {
 
   const orderType = <%- JSON.stringify(order.orderType || 'subscription') %>;
   if (orderType !== 'topup') {
-    const waNumber = <%- JSON.stringify(waNumber || '82328437656') %>;
+    const waNumber = <%- JSON.stringify(waNumber || '85810073341') %>;
     const userName = <%- JSON.stringify(user.name || '') %>;
     const userEmail = <%- JSON.stringify(user.email || '') %>;
     const planName = <%- JSON.stringify(plan.name || '') %>;
