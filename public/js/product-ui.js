@@ -7,7 +7,7 @@
     { title: 'Game Library', note: 'Lihat semua game yang tersedia', url: '/games', icon: 'fa-gamepad' },
     { title: 'Paket & Harga', note: 'Bandingkan paket AlexCloud', url: '/pricing', icon: 'fa-tags' },
     { title: 'Cek Koneksi', note: 'Uji kesiapan jaringan kamu', url: '/network-test', icon: 'fa-wifi' },
-    { title: 'Pusat Bantuan', note: 'Panduan dan kontak bantuan', url: '/support', icon: 'fa-life-ring' },
+    { title: 'Pusat Bantuan', note: 'Panduan dan kontak bantuan', url: '/support', icon: 'fa-headset' },
     { title: 'FAQ', note: 'Jawaban untuk pertanyaan umum', url: '/faq', icon: 'fa-question-circle' }
   ];
 
