@@ -342,6 +342,53 @@ section { scroll-margin-top: 84px; }
   .games-grid { gap: 9px !important; }
   .game-title { font-size: .87rem !important; }
 }
+
+/* Homepage: retain the same three delivery capabilities on mobile as desktop.
+   Small, equal-width tiles prevent the third item from dropping to a new row. */
+@media (max-width: 900px) {
+  .ax-trust-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-top: 16px !important;
+  }
+  .ax-trust-row span,
+  .ax-trust-row span:last-child {
+    grid-column: auto !important;
+    min-width: 0;
+    justify-content: center;
+    gap: 5px !important;
+    font-size: clamp(.58rem, 2.4vw, .73rem) !important;
+    line-height: 1.25 !important;
+    text-align: center;
+  }
+  .ax-trust-row i { flex: 0 0 auto; }
+
+  .ax-rig-specs-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+  .ax-rig-specs-bar span,
+  .ax-rig-specs-bar span:nth-child(2) {
+    display: inline-flex !important;
+    grid-column: auto !important;
+    grid-row: 1 !important;
+    min-width: 0;
+    min-height: 40px;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 3px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.035);
+    font-size: clamp(.52rem, 2.25vw, .66rem) !important;
+    line-height: 1.15;
+    text-align: center;
+  }
+  .ax-rig-specs-bar span:nth-child(1) { grid-column: 1 !important; }
+  .ax-rig-specs-bar span:nth-child(2) { grid-column: 2 !important; }
+  .ax-rig-specs-bar span:nth-child(3),
+  .ax-rig-specs-bar span:last-child { grid-column: 3 !important; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

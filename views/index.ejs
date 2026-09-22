@@ -2783,7 +2783,7 @@ input:focus-visible {
   }
   .ax-rig-specs-bar {
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     align-items: stretch !important;
     gap: 0.45rem !important;
     min-height: 0 !important;
@@ -2796,13 +2796,13 @@ input:focus-visible {
     padding: 0.45rem 0.35rem;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.035);
-    font-size: 0.68rem !important;
+    font-size: clamp(0.52rem, 2.25vw, 0.66rem) !important;
     line-height: 1.15;
     text-align: center;
   }
   .ax-rig-specs-bar span:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
-  .ax-rig-specs-bar span:nth-child(2) { display: none !important; }
-  .ax-rig-specs-bar span:nth-child(3) { grid-column: 2 !important; grid-row: 1 !important; }
+  .ax-rig-specs-bar span:nth-child(2) { display: inline-flex !important; grid-column: 2 !important; grid-row: 1 !important; }
+  .ax-rig-specs-bar span:nth-child(3) { grid-column: 3 !important; grid-row: 1 !important; }
 }
 
 </style>
@@ -2844,7 +2844,7 @@ input:focus-visible {
     <!-- Left Hero Column -->
     <div class="hero-content">
       <div class="ax-hero-badge">
-        <img src="/images/logo-icon.png" alt="AlexCloud" width="18" height="18" style="object-fit:contain; filter:drop-shadow(0 0 6px rgba(251,191,36,0.6));">
+        <img src="/images/alexcloud-cloudmark-v2.png" alt="AlexCloud cloud gaming" width="22" height="22" style="object-fit:contain; filter:drop-shadow(0 0 6px rgba(251,191,36,0.6));">
         <span class="ax-live-dot"></span>
         <span>Cloud gaming untuk perangkat yang kamu punya</span>
       </div>
@@ -2990,7 +2990,7 @@ input:focus-visible {
         </div>
 
         <div class="ax-rig-specs-bar">
-          <span><i class="fas fa-globe" style="color:#fbbf24;"></i> Via Browser</span>
+          <span><i class="fas fa-globe" style="color:#fbbf24;"></i> Browser / APK</span>
           <span><i class="fas fa-mobile-alt" style="color:#fbbf24;"></i> Multi-device</span>
           <span><i class="fas fa-cloud" style="color:#10b981;"></i> Cloud Gaming</span>
         </div>
