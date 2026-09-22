@@ -2738,6 +2738,41 @@ input:focus-visible {
   .ax-ticker-track { transform: none !important; }
 }
 
+/* Mobile-only: a moving marquee starts mid-sentence and looks clipped on phones.
+   Keep the desktop ticker intact, but turn its most useful messages into readable
+   status tiles on touch screens. */
+@media (max-width: 900px) {
+  .ax-ticker-wrap {
+    overflow: visible !important;
+    padding: 0.75rem 1rem !important;
+    background: #0b0d11 !important;
+    box-shadow: none !important;
+  }
+  .ax-ticker-track {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .ax-ticker-item {
+    min-width: 0 !important;
+    min-height: 46px;
+    padding: 0.55rem 0.65rem !important;
+    gap: 0.45rem !important;
+    white-space: normal !important;
+    font-size: 0.67rem !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.01em;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 9px;
+  }
+  .ax-ticker-item i { flex: 0 0 auto; }
+  .ax-ticker-item:nth-child(n + 5) { display: none !important; }
+}
+
 </style>
 
 <!-- HERO SECTION -->
