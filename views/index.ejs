@@ -2691,14 +2691,13 @@ input:focus-visible {
     min-height: 112px !important;
     isolation: isolate;
     background: #11151c var(--game-art) center / cover no-repeat !important;
+    /* The poster already has its own readable caption gradient. A second
+       full-card overlay created a visible seam above the footer on phones. */
+    box-shadow: none !important;
   }
   .ax-game-preview-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background: linear-gradient(180deg, transparent 35%, rgba(3, 5, 8, 0.88));
-    pointer-events: none;
+    content: none !important;
+    display: none !important;
   }
   .ax-game-preview-img {
     position: absolute !important;
@@ -2799,6 +2798,17 @@ input:focus-visible {
     font-size: clamp(0.52rem, 2.25vw, 0.66rem) !important;
     line-height: 1.15;
     text-align: center;
+  }
+  .ax-browser-apk-icon {
+    flex: 0 0 auto;
+    width: 0.9rem;
+    height: 0.9rem;
+    color: #fbbf24;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   .ax-rig-specs-bar span:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
   .ax-rig-specs-bar span:nth-child(2) { display: inline-flex !important; grid-column: 2 !important; grid-row: 1 !important; }
@@ -2990,7 +3000,13 @@ input:focus-visible {
         </div>
 
         <div class="ax-rig-specs-bar">
-          <span><i class="fas fa-globe" style="color:#fbbf24;"></i> Browser / APK</span>
+          <span>
+            <svg class="ax-browser-apk-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="3.5" y="4.5" width="17" height="13" rx="2.5"></rect>
+              <path d="M3.5 8.5h17M7 6.5h.01M10 6.5h.01M10 20h4"></path>
+            </svg>
+            Browser / APK
+          </span>
           <span><i class="fas fa-mobile-alt" style="color:#fbbf24;"></i> Multi-device</span>
           <span><i class="fas fa-cloud" style="color:#10b981;"></i> Cloud Gaming</span>
         </div>
