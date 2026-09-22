@@ -151,6 +151,21 @@ body.admin-body::before {
 .site-body .logo-text {
   color: var(--ax-text);
   font-weight: 800;
+  font-size: 1.08rem;
+  line-height: 1;
+  letter-spacing: 0.075em;
+  white-space: nowrap;
+}
+
+.site-body .nav-logo {
+  gap: 0.58rem;
+  min-width: 0;
+}
+
+.site-body .logo-icon-img {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 5px 13px rgba(245, 158, 11, 0.2));
 }
 
 .site-body .nav-links {
@@ -1139,13 +1154,14 @@ body.admin-body {
 
 @media (max-width: 380px) {
   .site-body .logo-text {
-    font-size: 0.98rem;
+    display: block !important;
+    font-size: 0.93rem;
     letter-spacing: 0.06em;
   }
 
   .site-body .logo-icon-img {
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
   }
 
   .site-body .nav-search-wrap {
@@ -1154,6 +1170,18 @@ body.admin-body {
 
   .admin-body .admin-logo > span {
     font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 340px) {
+  .site-body .logo-text {
+    font-size: 0.82rem;
+    letter-spacing: 0.045em;
+  }
+
+  .site-body .logo-icon-img {
+    width: 28px;
+    height: 28px;
   }
 }
 

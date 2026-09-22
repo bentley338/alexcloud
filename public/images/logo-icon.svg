@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="goldGradFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="35%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="darkBgSolid" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14161f" />
+      <stop offset="100%" stop-color="#050609" />
+    </linearGradient>
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Pitch Black Outer Pill Container with Gold Border -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#darkBgSolid)" stroke="url(#goldGradFull)" stroke-width="2" />
+
+  <!-- Solid Vibrant Gold Cloud -->
+  <path d="M44 42H20C15.58 42 12 38.42 12 34C12 29.9 15.08 26.52 19.12 26.07C20.48 20.25 25.56 16 31.5 16C38.38 16 44.08 21.36 44.66 28.18C48.24 28.84 51 31.96 51 35.7C51 39.18 47.9 42 44 42Z"
+        fill="url(#goldGradFull)" filter="url(#goldGlow)" />
+
+  <!-- Pure Black High-Contrast Gaming Controller Cutout Inside Cloud -->
+  <!-- D-Pad (Left) -->
+  <rect x="21" y="29.5" width="8" height="3" rx="1.2" fill="#050609" />
+  <rect x="23.5" y="27" width="3" height="8" rx="1.2" fill="#050609" />
+
+  <!-- Action Buttons (Right) -->
+  <circle cx="39" cy="28.5" r="1.6" fill="#050609" />
+  <circle cx="42.5" cy="31.5" r="1.6" fill="#050609" />
+  <circle cx="35.5" cy="31.5" r="1.6" fill="#050609" />
+  <circle cx="39" cy="34.5" r="1.6" fill="#050609" />
+
+  <!-- Center Lightning Connection -->
+  <path d="M31 28L28.5 32H31.5L30 36L34.5 31H31.5L33 28H31Z" fill="#050609" />
+</svg>

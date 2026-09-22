@@ -2650,12 +2650,77 @@ input:focus-visible {
   .ax-promo-badge { font-size: 0.62rem !important; }
   .ax-promo-text { font-size: 0.76rem !important; }
   .ax-hero-title { font-size: clamp(2.15rem, 11.3vw, 2.75rem) !important; }
-  .ax-dual-games { gap: 0.55rem !important; }
-  .ax-game-preview-card { height: 125px !important; }
-  .ax-rig-title { font-size: 0.7rem !important; }
-  .ax-rig-beacon { font-size: 0.58rem !important; }
-  .ax-rig-specs-bar { gap: 0.45rem !important; justify-content: center !important; }
+  .hero { padding: 4.85rem 0 2.25rem !important; }
+  .hero-container { gap: 1rem !important; }
+  .ax-promo-banner { gap: 0.65rem !important; }
+  .ax-promo-left { grid-template-columns: 1fr !important; gap: 0.35rem !important; }
+  .ax-promo-badge { width: max-content; }
+  .ax-hero-badge { margin-bottom: 0.75rem !important; padding: 0.45rem 0.7rem !important; font-size: 0.66rem !important; }
+  .ax-hero-title { max-width: 15ch; margin-bottom: 0.75rem !important; font-size: clamp(2.02rem, 10.6vw, 2.6rem) !important; }
+  .ax-hero-sub { margin-bottom: 1rem !important; font-size: 0.91rem !important; line-height: 1.58 !important; }
+  .ax-hero-actions { gap: 0.55rem !important; }
+  .ax-btn-hero-primary,
+  .ax-btn-hero-secondary { min-height: 48px !important; }
+  .ax-trust-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.35rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .ax-trust-row span {
+    align-items: flex-start !important;
+    font-size: 0.66rem !important;
+    line-height: 1.35 !important;
+  }
+  .ax-member-bento { gap: 0.55rem !important; padding: 0.65rem !important; }
+  .ax-streak-card { overflow-x: auto; scrollbar-width: none; }
+  .ax-streak-card::-webkit-scrollbar { display: none; }
+  .ax-hero-stats { margin-top: 1.1rem !important; padding-top: 1rem !important; row-gap: 0.95rem !important; }
+  .hero-visual { margin-top: 0 !important; }
+  .ax-rig-showcase { gap: 0.75rem !important; padding: 0.75rem !important; }
+  .ax-rig-header { padding-bottom: 0.65rem !important; }
+  .ax-dual-games {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.55rem !important;
+    min-height: 0 !important;
+  }
+  .ax-game-preview-card {
+    display: block !important;
+    height: auto !important;
+    aspect-ratio: 4 / 3 !important;
+    min-height: 112px !important;
+    isolation: isolate;
+    background: #11151c var(--game-art) center / cover no-repeat !important;
+  }
+  .ax-game-preview-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(180deg, transparent 35%, rgba(3, 5, 8, 0.88));
+    pointer-events: none;
+  }
+  .ax-game-preview-img {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    object-fit: cover !important;
+  }
+  .ax-game-preview-overlay { z-index: 2 !important; padding: 0.55rem !important; }
+  .ax-game-preview-tag { font-size: 0.54rem !important; }
+  .ax-game-preview-name { font-size: 0.72rem !important; line-height: 1.2 !important; }
+  .ax-rig-title { min-width: 0; gap: 0.4rem !important; font-size: 0.67rem !important; }
+  .ax-rig-title img { width: 22px !important; height: 22px !important; }
+  .ax-rig-beacon { flex: 0 0 auto; padding: 0.25rem 0.48rem !important; font-size: 0.56rem !important; }
+  .ax-rig-specs-bar { min-height: 42px; gap: 0.35rem !important; justify-content: space-around !important; padding: 0.55rem !important; font-size: 0.63rem !important; }
   .ax-rig-specs-bar span:nth-child(2) { display: none; }
+  #aiChatToggle { width: 52px !important; height: 52px !important; right: 12px !important; bottom: max(12px, env(safe-area-inset-bottom)) !important; }
+  .ax-ticker-wrap { padding: 0.65rem 0 !important; }
   .trending-scroll > div { flex-basis: 154px !important; height: 230px !important; }
   .ax-card-title { font-size: 0.82rem !important; }
   .ax-card-genre { font-size: 0.68rem !important; }
@@ -2839,8 +2904,8 @@ input:focus-visible {
 
         <div class="ax-dual-games">
           <!-- EA FC 26 Card -->
-          <div class="ax-game-preview-card">
-            <img src="/images/games/ea_fc_26.webp" onerror="this.src='/images/games/ea_fc_25.webp'" alt="EA SPORTS FC 26" class="ax-game-preview-img">
+          <div class="ax-game-preview-card" style="--game-art: url('/images/games/ea_fc_26.webp');">
+            <img src="/images/games/ea_fc_26.webp" onerror="this.src='/images/games/ea_fc_25.webp'" alt="EA SPORTS FC 26" class="ax-game-preview-img" width="400" height="400" loading="eager" decoding="async" fetchpriority="high">
             <div class="ax-game-preview-overlay">
               <div class="ax-game-preview-tag"><i class="fas fa-bolt" aria-hidden="true"></i> 4K 60FPS &middot; READY</div>
               <div class="ax-game-preview-name">EA SPORTS FC™ 26</div>
@@ -2848,8 +2913,8 @@ input:focus-visible {
           </div>
 
           <!-- GTA V Ray Tracing -->
-          <div class="ax-game-preview-card">
-            <img src="/images/games/gta_v.webp" alt="GTA V" class="ax-game-preview-img">
+          <div class="ax-game-preview-card" style="--game-art: url('/images/games/gta_v.webp');">
+            <img src="/images/games/gta_v.webp" alt="GTA V" class="ax-game-preview-img" width="400" height="600" loading="eager" decoding="async">
             <div class="ax-game-preview-overlay">
               <div class="ax-game-preview-tag" style="color: #fbbf24;"><i class="fas fa-sun" aria-hidden="true"></i> RAY TRACING ON</div>
               <div class="ax-game-preview-name">Grand Theft Auto V</div>
