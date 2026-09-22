@@ -2771,6 +2771,38 @@ input:focus-visible {
   }
   .ax-ticker-item i { flex: 0 0 auto; }
   .ax-ticker-item:nth-child(n + 5) { display: none !important; }
+
+  /* The rig footer previously wrapped into two uneven lines after the middle
+     item was removed for small screens. Keep the two useful capabilities in
+     one stable, tap-safe row instead. */
+  .ax-rig-showcase,
+  .ax-rig-showcase * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .ax-rig-specs-bar {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 0.45rem !important;
+    min-height: 0 !important;
+    padding: 0.45rem !important;
+  }
+  .ax-rig-specs-bar span {
+    min-width: 0;
+    min-height: 38px;
+    justify-content: center;
+    padding: 0.45rem 0.35rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+    font-size: 0.68rem !important;
+    line-height: 1.15;
+    text-align: center;
+  }
+  .ax-rig-specs-bar span:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
+  .ax-rig-specs-bar span:nth-child(2) { display: none !important; }
+  .ax-rig-specs-bar span:nth-child(3) { grid-column: 2 !important; grid-row: 1 !important; }
 }
 
 </style>
