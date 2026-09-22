@@ -1906,7 +1906,7 @@ router.get('/faq', (req, res) => {
 // =====================
 // Legal & Company Pages (Tentang Kami, Syarat, Privasi, Refund)
 // =====================
-const LEGAL_LAST_UPDATED = '22 Juni 2026';
+const LEGAL_LAST_UPDATED = '22 September 2026';
 
 router.get('/about', (req, res) => {
   res.render('about', {

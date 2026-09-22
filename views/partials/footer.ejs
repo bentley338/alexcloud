@@ -7,7 +7,7 @@
           <img src="/images/logo-icon.png" class="logo-icon-img" alt="AlexCloud Logo" width="28" height="28" style="object-fit: contain; flex-shrink:0;">
           <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
         </a>
-        <p>Platform cloud gaming terbaik di Indonesia. Main game AAA tanpa perlu PC mahal!</p>
+        <p>Cloud gaming untuk bermain dari HP, laptop, PC, dan perangkat lain yang mendukung browser.</p>
         <div class="footer-social">
           <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '85810073341' %>" target="_blank" class="social-link wa" aria-label="Hubungi kami via WhatsApp" rel="noopener noreferrer">
             <i class="fab fa-whatsapp" aria-hidden="true"></i>
@@ -34,6 +34,7 @@
       </div>
       <div class="footer-links">
         <h4>Support</h4>
+        <a href="/support?ref_=ftr_support">Pusat Bantuan</a>
         <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '85810073341' %>?text=Halo%20Admin%20AlexCloud" target="_blank">WhatsApp Admin</a>
         <a href="/faq?ref_=ftr_faq">FAQ Lengkap</a>
         <a href="/network-test?ref_=ftr_speedtest"><i class="fas fa-wifi" style="font-size:0.75rem;"></i> Speed Test</a>
@@ -50,7 +51,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© <%= new Date().getFullYear() %> AlexCloud. Seluruh hak cipta dilindungi. Cloud gaming untuk Indonesia.</p>
+      <p>&copy; <%= new Date().getFullYear() %> AlexCloud. Seluruh hak cipta dilindungi.</p>
       <nav class="footer-legal-links" aria-label="Tautan legal">
         <a href="/terms?ref_=ftr_legal_terms">Syarat &amp; Ketentuan</a>
         <span aria-hidden="true">•</span>

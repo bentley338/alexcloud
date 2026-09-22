@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<main class="page-wrap" id="main-content">
+  <section class="page-hero">
+    <div class="container" style="text-align:center">
+      <span class="section-tag">Pusat Bantuan</span>
+      <h1 class="section-title" style="margin-top:14px">Ada yang bisa kami bantu?</h1>
+      <p class="section-desc" style="max-width:640px;margin:0 auto">Temukan jawaban cepat, cek koneksi, atau hubungi tim AlexCloud saat kamu memerlukan bantuan terkait akun, paket, dan pembayaran.</p>
+    </div>
+  </section>
+
+  <section style="padding:20px 0 72px">
+    <div class="container">
+      <div class="support-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+        <a href="/faq" class="card" style="padding:24px;text-decoration:none;color:inherit">
+          <i class="fas fa-circle-question" style="color:var(--ax-orange);font-size:1.35rem" aria-hidden="true"></i>
+          <h2 style="font-size:1.1rem;margin:18px 0 8px">Pertanyaan umum</h2>
+          <p style="margin:0;font-size:.92rem">Jawaban tentang cara mulai, akun, paket, pembayaran, dan penggunaan layanan.</p>
+        </a>
+        <a href="/network-test" class="card" style="padding:24px;text-decoration:none;color:inherit">
+          <i class="fas fa-wifi" style="color:var(--ax-orange);font-size:1.35rem" aria-hidden="true"></i>
+          <h2 style="font-size:1.1rem;margin:18px 0 8px">Cek koneksi</h2>
+          <p style="margin:0;font-size:.92rem">Uji kondisi jaringan sebelum bermain dan lihat saran untuk koneksi yang lebih stabil.</p>
+        </a>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '85810073341' %>?text=Halo%20Admin%20AlexCloud%2C%20saya%20butuh%20bantuan" target="_blank" rel="noopener noreferrer" class="card" style="padding:24px;text-decoration:none;color:inherit">
+          <i class="fab fa-whatsapp" style="color:var(--ax-success);font-size:1.45rem" aria-hidden="true"></i>
+          <h2 style="font-size:1.1rem;margin:18px 0 8px">Hubungi admin</h2>
+          <p style="margin:0;font-size:.92rem">Kirim detail masalah dan bukti transaksi melalui WhatsApp untuk pemeriksaan lebih lanjut.</p>
+        </a>
+      </div>
+
+      <div class="card" style="margin-top:20px;padding:28px">
+        <h2 style="font-size:1.25rem;margin:0 0 16px">Sebelum menghubungi kami</h2>
+        <ol style="display:grid;gap:12px;margin:0;padding-left:20px;color:var(--ax-text-2)">
+          <li>Catat email atau nama akun AlexCloud yang digunakan.</li>
+          <li>Untuk kendala pembayaran, siapkan ID pesanan dan bukti pembayaran.</li>
+          <li>Untuk kendala bermain, sertakan perangkat, jaringan, dan tangkapan layar pesan error.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<style>@media(max-width:760px){.support-grid{grid-template-columns:1fr!important}}</style>
+<%- include('partials/footer') %>

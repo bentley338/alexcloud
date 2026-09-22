@@ -2,9 +2,9 @@
 <html lang="id" style="background-color: #0a0b0d; color-scheme: dark;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <title><%= typeof title !== 'undefined' ? title : 'AlexCloud | Platform Cloud Gaming Premium #1 Indonesia' %></title>
-  <meta name="description" content="AlexCloud - Layanan Cloud Gaming Premium & Terbaik di Indonesia. Mainkan ratusan game PC/Console AAA terbaru (EA FC 26, GTA VI, dll) langsung di HP, Laptop, atau Smart TV tanpa perlu beli PC mahal. Server lokal anti lag, harga mulai Rp 40.000/minggu. Coba sekarang!">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'AlexCloud | Cloud Gaming Indonesia' %></title>
+  <meta name="description" content="Mainkan game PC melalui cloud dari HP, laptop, atau TV. Jelajahi katalog game dan pilih paket AlexCloud yang sesuai kebutuhanmu.">
   <meta name="keywords" content="cloud gaming indonesia, cloud gaming murah, main game AAA di hp, game cloud server indonesia, sewa cloud gaming pc, alexcloud, alexcloud gaming">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
   <meta name="author" content="AlexCloud">
@@ -15,8 +15,8 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'https://alexcloud.my.id/' %>">
   <meta property="og:site_name" content="AlexCloud">
-  <meta property="og:title" content="AlexCloud | Platform Cloud Gaming Premium #1 Indonesia">
-  <meta property="og:description" content="Main game AAA terbaru langsung di HP, laptop, atau TV tanpa PC mahal. Mulai Rp 40.000/minggu dengan server lokal ping rendah!">
+  <meta property="og:title" content="AlexCloud | Cloud Gaming Indonesia">
+  <meta property="og:description" content="Mainkan game PC melalui cloud dari HP, laptop, atau TV tanpa mengunduh file game berukuran besar.">
   <meta property="og:image" content="https://alexcloud.my.id/images/og-cover.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -24,8 +24,8 @@
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'https://alexcloud.my.id/' %>">
-  <meta property="twitter:title" content="AlexCloud | Platform Cloud Gaming Premium #1 Indonesia">
-  <meta property="twitter:description" content="Main game AAA terbaru langsung di HP, laptop, atau TV tanpa PC mahal. Mulai Rp 40.000/minggu dengan server lokal ping rendah!">
+  <meta property="twitter:title" content="AlexCloud | Cloud Gaming Indonesia">
+  <meta property="twitter:description" content="Mainkan game PC melalui cloud dari HP, laptop, atau TV tanpa mengunduh file game berukuran besar.">
   <meta property="twitter:image" content="https://alexcloud.my.id/images/og-cover.png">
 
   <!-- Google Schema.org Structured Data -->
@@ -37,7 +37,7 @@
     "alternateName": ["Alex Cloud", "AlexCloud Gaming"],
     "url": "https://alexcloud.my.id/",
     "logo": "https://alexcloud.my.id/favicon.svg",
-    "description": "Platform Cloud Gaming Premium #1 Indonesia",
+    "description": "Platform cloud gaming untuk pengguna di Indonesia",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+62-858-1007-3341",
@@ -72,10 +72,6 @@
   <!-- DNS prefetch for external image CDNs -->
   <link rel="dns-prefetch" href="https://shared.fastly.steamstatic.com">
   <link rel="dns-prefetch" href="https://api.dicebear.com">
-  <!-- Poppins display font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Preload self-hosted fonts (text fonts arrive before first paint → no swap reflow / CLS) -->
   <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -163,6 +159,7 @@
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
   <link href="/css/main.css?v=40.0" rel="stylesheet">
   <link href="/css/alexcloud-system.css?v=1.7" rel="stylesheet">
+  <link href="/css/product-overhaul.css?v=1.0" rel="stylesheet">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
@@ -283,7 +280,7 @@
         <% } %>
 
         <a href="/?ref_=nav_home" class="nav-link"><span><i class="fas fa-home"></i> Beranda</span></a>
-        <a href="/games?ref_=nav_games" class="nav-link"><span><i class="fas fa-gamepad"></i> Game Library</span> <span class="badge-hot">100+ GAME</span></a>
+        <a href="/games?ref_=nav_games" class="nav-link"><span><i class="fas fa-gamepad"></i> Game Library</span> <span class="badge-hot"><%= typeof gameCount === 'number' ? gameCount : '' %> GAME</span></a>
         <a href="/pricing?ref_=nav_pricing" class="nav-link"><span><i class="fas fa-tags"></i> Paket &amp; Harga</span></a>
         <div class="nav-more mobile-hidden">
           <button type="button" class="nav-link nav-more-trigger" aria-haspopup="true">
@@ -351,6 +348,9 @@
       </div>
 
       <div style="display:flex; align-items:center; gap:0.45rem; margin-left:auto; position:relative; z-index:10006;" class="desktop-hidden">
+        <button type="button" class="ax-mobile-search" data-open-search aria-label="Cari game dan halaman">
+          <i class="fas fa-search" aria-hidden="true"></i>
+        </button>
         <!-- Notification Bell on Mobile Top Bar -->
         <button type="button" class="nav-notif-btn" id="notifBellBtn" onclick="toggleNotifMenu()" aria-label="Notifikasi & Promo" style="background:#181920; border:1px solid rgba(255,255,255,0.12); color:#fff; width:38px; height:38px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; position:relative;">
           <i class="fas fa-bell" style="color:#fbbf24; font-size:1.05rem;"></i>
@@ -363,6 +363,7 @@
       </div>
     </div>
   </nav>
+  <script src="/js/product-ui.js?v=1.0" defer></script>
 
 
 <style>
@@ -647,7 +648,7 @@
         <i class="fas fa-shield-alt"></i>
       </div>
       <div>
-        <div style="font-weight:800; font-size:0.8rem; color:#fff; margin-bottom:0.2rem;">Pembayaran QRIS Instan 24/7</div>
+        <div style="font-weight:800; font-size:0.8rem; color:#fff; margin-bottom:0.2rem;">Pembayaran melalui QRIS</div>
         <div style="font-size:0.75rem; color:rgba(255,255,255,0.7); line-height:1.35;">Metode pembayaran QRIS (All E-Wallet &amp; m-Banking) terkonfirmasi otomatis secara realtime 24 jam nonstop.</div>
       </div>
     </div>

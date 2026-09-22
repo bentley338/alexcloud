@@ -64,8 +64,8 @@
               <li>Server lokal Indonesia (latency &lt;30ms)</li>
               <li>Harga mulai Rp 40.000/minggu</li>
               <li>Bayar dengan QRIS/e-wallet lokal</li>
-              <li>Support bahasa Indonesia 24/7</li>
-              <li>100+ game premium</li>
+              <li>Bantuan dalam bahasa Indonesia</li>
+              <li><%= gameCount %> game di katalog saat ini</li>
               <li>Tidak perlu hardware mahal</li>
             </ul>
           </div>
@@ -226,7 +226,7 @@
         <i class="fas fa-chevron-down faq-icon"></i>
       </button>
       <div class="faq-answer">
-        <p>Ya! AlexCloud menggunakan sistem <strong>Cloud Save otomatis</strong>. Progress game tersimpan di server kami, bukan di perangkat lokal kamu.</p>
+        <p>Ketersediaan penyimpanan progres bergantung pada game dan akun platform yang digunakan. Periksa dukungan cloud save pada game terkait sebelum memulai.</p>
         <p style="margin-top:0.75rem;"><strong>Artinya kamu bisa:</strong></p>
         <ul class="faq-list">
           <li>Main pagi di smartphone → lanjut siang di laptop → lanjut malam di PC</li>
@@ -295,7 +295,7 @@
         </ol>
         <div class="faq-highlight">
           <i class="fas fa-clock"></i>
-          <span>Kami beroperasi 24/7 — tapi jika di luar jam aktif, maksimal 15 menit setelah pesan dibaca.</span>
+          <span>Waktu respons dapat berbeda tergantung antrean. Kirim detail akun, ID pesanan, dan bukti kendala agar pemeriksaan lebih cepat.</span>
         </div>
       </div>
     </div>
@@ -477,7 +477,7 @@
   <!-- CTA -->
   <div style="margin-top:4rem; background:linear-gradient(135deg, rgba(255, 255, 255,0.08), rgba(255, 255, 255,0.08)); border:1px solid rgba(255, 255, 255,0.15); border-radius:var(--radius-lg); padding:2.5rem; text-align:center;">
     <h3 style="font-family:var(--font-display); margin-bottom:0.5rem;">Masih ada pertanyaan?</h3>
-    <p style="color:var(--text-muted); font-family:var(--font-ui); margin-bottom:1.5rem;">Tim kami siap membantu 24/7 via WhatsApp atau AI Chat</p>
+    <p style="color:var(--text-muted); font-family:var(--font-ui); margin-bottom:1.5rem;">Temukan panduan cepat atau hubungi admin melalui Pusat Bantuan.</p>
     <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
       <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '85810073341' %>" target="_blank" class="btn-primary">
         <i class="fab fa-whatsapp"></i> Chat WhatsApp

@@ -7,7 +7,7 @@
         <i class="fas fa-bolt"></i> ALEXCLOUD GAMING SUBSCRIPTION
       </div>
       <h1 class="section-title">Pilih <span class="accent">Paket Gaming</span> Terbaik</h1>
-      <p class="section-desc">Mainkan 100+ game AAA langsung di HP, Laptop, atau Smart TV tanpa instalasi.</p>
+      <p class="section-desc">Pilih durasi akses yang sesuai. Katalog saat ini berisi <%= gameCount %> game dan dapat berubah mengikuti ketersediaan.</p>
     </div>
   </div>
 
@@ -49,19 +49,11 @@
               <% } %>
 
               <ul class="plan-features" style="gap:0.4rem; margin-bottom:1.1rem;">
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses 100+ Game AAA</li>
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Streaming 4K / 60fps</li>
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Cloud Save Progress</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses katalog game aktif</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Kualitas menyesuaikan koneksi</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Tanpa download file game</li>
                 <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device Support</li>
-                <% if (plan.duration >= 90) { %>
-                  <li><i class="fas fa-star" style="color:#fbbf24"></i> VIP Priority &amp; Early</li>
-                <% } else if (plan.duration >= 60) { %>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> 🔥 Bonus 5H Gratis</li>
-                <% } else if (plan.duration >= 30) { %>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses Game Baru</li>
-                <% } else { %>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> CS Support 24/7</li>
-                <% } %>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Masa aktif <%= plan.duration %> hari</li>
               </ul>
             </div>
 
@@ -170,11 +162,11 @@
               </div>
               
               <ul class="plan-features" style="gap:0.4rem; margin-bottom:1.1rem;">
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses 100+ Game Premium</li>
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Streaming 4K &amp; Cloud Save</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses katalog game aktif</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Kualitas menyesuaikan koneksi</li>
                 <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Durasi Bebas (1 - 6 Hari)</li>
                 <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device Support</li>
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Support WhatsApp 24/7</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Bantuan melalui WhatsApp</li>
               </ul>
             </div>
 
@@ -217,14 +209,14 @@
         <div style="background:linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(15,16,20,0.95) 100%); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
           <div style="font-size:1.4rem; margin-bottom:0.5rem;">🎮</div>
           <h4 style="font-family:var(--font-ui); margin-bottom:0.35rem; font-size:1rem;">Semua Game Termasuk</h4>
-          <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">Satu paket untuk 100+ game AAA. Tanpa biaya sewa tambahan per judul!</p>
+          <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">Satu paket memberi akses ke katalog game yang tersedia selama masa aktif.</p>
         </div>
       </div>
 
       <!-- CTA WhatsApp -->
       <div style="text-align:center; margin-top:2.5rem; padding:2rem; background:rgba(37,211,102,0.04); border:1px solid rgba(37,211,102,0.18); border-radius:var(--radius-lg);">
         <h3 style="font-family:var(--font-display); margin-bottom:0.35rem; font-size:1.2rem;">Butuh Bantuan Pilih Paket?</h3>
-        <p style="color:var(--text-muted); margin-bottom:1.25rem; font-size:0.88rem;">Customer support CS kami siap membantu 24/7 via WhatsApp</p>
+        <p style="color:var(--text-muted); margin-bottom:1.25rem; font-size:0.88rem;">Butuh bantuan memilih paket? Hubungi admin melalui WhatsApp.</p>
         <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/,'') : '85810073341' %>" target="_blank" class="wa-btn" style="display:inline-flex; width:auto; padding:0.75rem 1.75rem; font-size:0.9rem;">
           <i class="fab fa-whatsapp" style="font-size:1.1rem;"></i> Chat Admin WhatsApp
         </a>

@@ -122,6 +122,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '365d',        // cache 1 tahun di browser
   etag: true,            // ETag untuk conditional requests
   lastModified: true,    // Last-Modified header
+  redirect: false,       // biarkan route seperti /privacy ditangani router meski ada folder verifikasi
   setHeaders: (res, filePath) => {
     // CSS dan JS: cache 1 tahun
     if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
@@ -173,6 +174,7 @@ app.use(passport.session());
 // Menyetel res.locals.csrfToken & memvalidasi semua request yang mengubah state.
 const { csrfProtection } = require('./middleware/csrf');
 app.use(csrfProtection);
+app.use(require('./middleware/product-context'));
 
 // Global locals and tracking
 app.use((req, res, next) => {
@@ -245,8 +247,10 @@ app.use((req, res, next) => {
 const authRouter = require('./routes/auth');
 const { router: mainRouter } = require('./routes/main');
 const adminRouter = require('./routes/admin');
+const productRouter = require('./routes/product');
 
 app.use('/', authRouter);
+app.use('/', productRouter);
 app.use('/', mainRouter);
 app.use('/admin', adminRouter);
 

@@ -2779,31 +2779,31 @@ input:focus-visible {
       <div class="ax-hero-badge">
         <img src="/images/logo-icon.png" alt="AlexCloud" width="18" height="18" style="object-fit:contain; filter:drop-shadow(0 0 6px rgba(251,191,36,0.6));">
         <span class="ax-live-dot"></span>
-        <span>Cloud gaming premium &middot; Server Jakarta &lt;15ms</span>
+        <span>Cloud gaming untuk perangkat yang kamu punya</span>
       </div>
 
       <h1 class="ax-hero-title">
-        Main Game PC AAA<br>
-        <span class="ax-hero-gradient">Langsung dari HP &amp; Laptop</span>
+        Main game PC dari<br>
+        <span class="ax-hero-gradient">perangkat yang kamu punya.</span>
       </h1>
 
       <p class="ax-hero-sub">
-        Nikmati pengalaman gaming premium kualitas <strong>4K 60FPS</strong> tanpa perlu beli PC gaming mahal. Akses ratusan game favorit instan dari browser.
+        Game berjalan di cloud. Pilih game, masuk ke akunmu, dan mulai bermain tanpa mengunduh file game berukuran besar.
       </p>
 
       <div class="ax-hero-actions">
         <a href="/pricing?ref_=home_hero_pricing" class="ax-btn-hero-primary">
-          <i class="fas fa-bolt"></i> Mulai Sewa Sekarang
+          <i class="fas fa-play"></i> Mulai Bermain
         </a>
         <a href="/games?ref_=home_hero_games" class="ax-btn-hero-secondary">
-          <i class="fas fa-gamepad"></i> Jelajahi <%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '600+' %> Game
+          <i class="fas fa-gamepad"></i> Lihat <%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '' %> Game
         </a>
       </div>
 
       <div class="ax-trust-row">
-        <span><i class="fas fa-check-circle"></i> Aktif Otomatis 24 Jam</span>
-        <span><i class="fas fa-check-circle"></i> Tanpa Download / Install</span>
-        <span><i class="fas fa-check-circle"></i> Garansi Resmi 100%</span>
+        <span><i class="fas fa-check-circle"></i> Bayar lewat QRIS</span>
+        <span><i class="fas fa-check-circle"></i> Tanpa download game</span>
+        <span><i class="fas fa-check-circle"></i> HP, laptop &amp; TV</span>
       </div>
 
       <!-- Logged-in User Bento Member Bar -->
@@ -2870,20 +2870,20 @@ input:focus-visible {
       <!-- Hero Stats Counter -->
       <div class="ax-hero-stats">
         <div class="ax-stat-card">
-          <div class="ax-stat-val"><%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '600' %>+</div>
+          <div class="ax-stat-val"><%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '—' %></div>
           <div class="ax-stat-lbl">Game Tersedia</div>
         </div>
         <div class="ax-stat-card">
-          <div class="ax-stat-val">4K 60fps</div>
-          <div class="ax-stat-lbl">Resolusi Max</div>
+          <div class="ax-stat-val">QRIS</div>
+          <div class="ax-stat-lbl">Pembayaran</div>
         </div>
         <div class="ax-stat-card">
-          <div class="ax-stat-val">&lt;15ms</div>
-          <div class="ax-stat-lbl">Low Latency</div>
+          <div class="ax-stat-val">Multi</div>
+          <div class="ax-stat-lbl">Perangkat</div>
         </div>
         <div class="ax-stat-card">
-          <div class="ax-stat-val">24/7</div>
-          <div class="ax-stat-lbl">Server Support</div>
+          <div class="ax-stat-val">Admin</div>
+          <div class="ax-stat-lbl">Bantuan</div>
         </div>
       </div>
     </div>
@@ -2894,11 +2894,11 @@ input:focus-visible {
         <div class="ax-rig-header">
           <div class="ax-rig-title">
             <img src="/images/logo-circular.png" alt="AlexCloud" width="24" height="24" style="border-radius:50%; border:1.5px solid #fbbf24; box-shadow:0 0 8px rgba(251,191,36,0.4);">
-            <span>ALEXCLOUD ULTRA RIG 01</span>
+            <span>PILIHAN GAME ALEXCLOUD</span>
           </div>
           <div class="ax-rig-beacon">
             <span class="ax-live-dot"></span>
-            <span>ONLINE • 12MS</span>
+            <span>TERSEDIA DI CLOUD</span>
           </div>
         </div>
 
@@ -2907,7 +2907,7 @@ input:focus-visible {
           <div class="ax-game-preview-card" style="--game-art: url('/images/games/ea_fc_26.webp');">
             <img src="/images/games/ea_fc_26.webp" onerror="this.src='/images/games/ea_fc_25.webp'" alt="EA SPORTS FC 26" class="ax-game-preview-img" width="400" height="400" loading="eager" decoding="async" fetchpriority="high">
             <div class="ax-game-preview-overlay">
-              <div class="ax-game-preview-tag"><i class="fas fa-bolt" aria-hidden="true"></i> 4K 60FPS &middot; READY</div>
+              <div class="ax-game-preview-tag"><i class="fas fa-cloud" aria-hidden="true"></i> CLOUD READY</div>
               <div class="ax-game-preview-name">EA SPORTS FC™ 26</div>
             </div>
           </div>
@@ -2916,16 +2916,16 @@ input:focus-visible {
           <div class="ax-game-preview-card" style="--game-art: url('/images/games/gta_v.webp');">
             <img src="/images/games/gta_v.webp" alt="GTA V" class="ax-game-preview-img" width="400" height="600" loading="eager" decoding="async">
             <div class="ax-game-preview-overlay">
-              <div class="ax-game-preview-tag" style="color: #fbbf24;"><i class="fas fa-sun" aria-hidden="true"></i> RAY TRACING ON</div>
+              <div class="ax-game-preview-tag" style="color: #fbbf24;"><i class="fas fa-gamepad" aria-hidden="true"></i> GAME PILIHAN</div>
               <div class="ax-game-preview-name">Grand Theft Auto V</div>
             </div>
           </div>
         </div>
 
         <div class="ax-rig-specs-bar">
-          <span><i class="fas fa-microchip" style="color:#00f2fe;"></i> RTX 4090 OC</span>
-          <span><i class="fas fa-memory" style="color:#fbbf24;"></i> 64GB DDR5</span>
-          <span><i class="fas fa-wifi" style="color:#10b981;"></i> 10 Gbps CDN</span>
+          <span><i class="fas fa-globe" style="color:#fbbf24;"></i> Via Browser</span>
+          <span><i class="fas fa-mobile-alt" style="color:#fbbf24;"></i> Multi-device</span>
+          <span><i class="fas fa-cloud" style="color:#10b981;"></i> Cloud Gaming</span>
         </div>
       </div>
     </div>
@@ -2935,19 +2935,19 @@ input:focus-visible {
 <!-- HARDWARE & PLATFORM TICKER -->
 <div class="ax-ticker-wrap">
   <div class="ax-ticker-track">
-    <div class="ax-ticker-item"><i class="fas fa-server"></i> NVIDIA RTX 4090 SUPER RIGS</div>
-    <div class="ax-ticker-item"><i class="fas fa-bolt"></i> JAKARTA TIER-3 DATA CENTER &lt;15MS</div>
-    <div class="ax-ticker-item"><i class="fas fa-gamepad"></i> 600+ AAA TITLES PRE-INSTALLED</div>
-    <div class="ax-ticker-item"><i class="fas fa-mobile-alt"></i> PLAY ON ANDROID, IOS, PC &amp; SMART TV</div>
-    <div class="ax-ticker-item"><i class="fas fa-qrcode"></i> INSTANT QRIS 24/7 AUTO-ACTIVATION</div>
-    <div class="ax-ticker-item"><i class="fas fa-cloud"></i> STEAM &amp; EPIC GAMES CLOUD SYNC</div>
+    <div class="ax-ticker-item"><i class="fas fa-gamepad"></i> <%= totalGamesCount %> GAME DI KATALOG</div>
+    <div class="ax-ticker-item"><i class="fas fa-cloud"></i> MAIN TANPA DOWNLOAD FILE GAME</div>
+    <div class="ax-ticker-item"><i class="fas fa-mobile-alt"></i> AKSES DARI BERBAGAI PERANGKAT</div>
+    <div class="ax-ticker-item"><i class="fas fa-qrcode"></i> PEMBAYARAN QRIS</div>
+    <div class="ax-ticker-item"><i class="fas fa-tags"></i> PAKET 7 HINGGA 90 HARI</div>
+    <div class="ax-ticker-item"><i class="fas fa-life-ring"></i> BANTUAN ADMIN</div>
     <!-- Duplicate for seamless infinite loop -->
-    <div class="ax-ticker-item"><i class="fas fa-server"></i> NVIDIA RTX 4090 SUPER RIGS</div>
-    <div class="ax-ticker-item"><i class="fas fa-bolt"></i> JAKARTA TIER-3 DATA CENTER &lt;15MS</div>
-    <div class="ax-ticker-item"><i class="fas fa-gamepad"></i> 600+ AAA TITLES PRE-INSTALLED</div>
-    <div class="ax-ticker-item"><i class="fas fa-mobile-alt"></i> PLAY ON ANDROID, IOS, PC &amp; SMART TV</div>
-    <div class="ax-ticker-item"><i class="fas fa-qrcode"></i> INSTANT QRIS 24/7 AUTO-ACTIVATION</div>
-    <div class="ax-ticker-item"><i class="fas fa-cloud"></i> STEAM &amp; EPIC GAMES CLOUD SYNC</div>
+    <div class="ax-ticker-item"><i class="fas fa-gamepad"></i> <%= totalGamesCount %> GAME DI KATALOG</div>
+    <div class="ax-ticker-item"><i class="fas fa-cloud"></i> MAIN TANPA DOWNLOAD FILE GAME</div>
+    <div class="ax-ticker-item"><i class="fas fa-mobile-alt"></i> AKSES DARI BERBAGAI PERANGKAT</div>
+    <div class="ax-ticker-item"><i class="fas fa-qrcode"></i> PEMBAYARAN QRIS</div>
+    <div class="ax-ticker-item"><i class="fas fa-tags"></i> PAKET 7 HINGGA 90 HARI</div>
+    <div class="ax-ticker-item"><i class="fas fa-life-ring"></i> BANTUAN ADMIN</div>
   </div>
 </div>
 
@@ -2956,8 +2956,8 @@ input:focus-visible {
   <div class="trending-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
     <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
       <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fbbf24; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">HOT &amp; TRENDING</div>
-      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Game <span class="accent" style="color: #fbbf24;">Paling Ramai Dimainkan</span></h2>
-      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Rekomendasi game terpopuler minggu ini dari ribuan gamer AlexCloud.</p>
+      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Game dengan <span class="accent" style="color: #fbbf24;">Rating Tertinggi</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Pilihan dari game dengan rating tertinggi yang tersedia di katalog saat ini.</p>
     </div>
     
     <div class="trending-scroll" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1.25rem; scrollbar-width: thin;">
@@ -2985,38 +2985,38 @@ input:focus-visible {
     <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
       <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fbbf24; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">KENAPA ALEXCLOUD?</div>
       <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Gaming <span class="accent" style="color: #fbbf24;">Tanpa Batas</span></h2>
-      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Nikmati game AAA terbaru dengan kualitas terbaik tanpa perlu investasi hardware mahal.</p>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Satu alur yang jelas untuk mencari game, memilih paket, membayar, dan mendapatkan bantuan.</p>
     </div>
     <div class="features-grid">
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon"><i class="fas fa-bolt" style="color:#00f2fe;"></i></div>
-        <div class="feature-title">Latency Ultra Rendah</div>
-        <p class="feature-desc">Server dioptimalkan untuk Indonesia dengan ping sub-15ms untuk pengalaman gaming mulus tanpa delay.</p>
+        <div class="feature-title">Tes Koneksi Sebelum Main</div>
+        <p class="feature-desc">Gunakan halaman cek koneksi untuk melihat kondisi jaringan dan saran sebelum memulai sesi.</p>
       </div>
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon"><i class="fas fa-gamepad" style="color:#fbbf24;"></i></div>
-        <div class="feature-title">600+ Game Premium</div>
-        <p class="feature-desc">Akses game AAA terbaru seperti EA FC 26, GTA V, MotoGP 25, Hogwarts Legacy langsung ready to play.</p>
+        <div class="feature-title"><%= totalGamesCount %> Game di Katalog</div>
+        <p class="feature-desc">Jumlah game diambil langsung dari katalog aktif, sehingga informasi yang ditampilkan selalu konsisten.</p>
       </div>
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon"><i class="fas fa-tv" style="color:#10b981;"></i></div>
-        <div class="feature-title">Streaming 4K / 60fps</div>
-        <p class="feature-desc">Kualitas visual maksimal dengan resolusi tajam hingga 4K dan framerate stabil bahkan di smartphone.</p>
+        <div class="feature-title">Kualitas Adaptif</div>
+        <p class="feature-desc">Pengalaman streaming menyesuaikan kondisi koneksi, perangkat, dan ketersediaan server.</p>
       </div>
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon"><i class="fas fa-robot" style="color:#f59e0b;"></i></div>
-        <div class="feature-title">AI Assistant 24/7</div>
-        <p class="feature-desc">AlexBot AI cerdas siap memandu rekomendasi game, cek server, dan membantu kendala kapan pun.</p>
+        <div class="feature-title">Bantuan Terpadu</div>
+        <p class="feature-desc">Cari jawaban di FAQ, cek koneksi, atau hubungi admin dari Pusat Bantuan saat dibutuhkan.</p>
       </div>
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon"><i class="fas fa-save" style="color:#00f2fe;"></i></div>
-        <div class="feature-title">Cloud Save Otomatis</div>
-        <p class="feature-desc">Progress tersimpan di cloud. Main di HP, lanjut di laptop atau Smart TV tanpa kehilangan save data.</p>
+        <div class="feature-title">Akses Multi-device</div>
+        <p class="feature-desc">Buka layanan dari HP, laptop, PC, atau TV yang mendukung browser dan koneksi internet.</p>
       </div>
       <div class="feature-card animate-on-scroll">
         <div class="feature-icon"><i class="fas fa-tags" style="color:#10b981;"></i></div>
-        <div class="feature-title">Harga Paling Hemat</div>
-        <p class="feature-desc">Mulai dari Rp 2.000-an/hari saja! Jauh lebih hemat dibanding rakit PC gaming puluhan juta.</p>
+        <div class="feature-title">Pilihan Paket Jelas</div>
+        <p class="feature-desc">Bandingkan durasi dan harga paket sebelum melanjutkan ke pembayaran.</p>
       </div>
     </div>
   </div>
@@ -3047,7 +3047,7 @@ input:focus-visible {
         <div class="how-step-num">3</div>
         <div class="how-step-icon"><i class="fas fa-play" aria-hidden="true"></i></div>
         <h3 class="how-step-title">3. Langsung Gas Main!</h3>
-        <p class="how-step-desc">Game AAA jalan instan dari cloud server RTX 4090 — 4K 60fps dengan latensi ultra rendah.</p>
+        <p class="how-step-desc">Ikuti petunjuk aktivasi di dashboard, pilih game, lalu mulai sesi cloud gaming.</p>
       </div>
     </div>
   </div>
@@ -3107,7 +3107,7 @@ input:focus-visible {
     
     <div style="text-align: center;">
       <a href="/games?ref_=home_explore_games" class="ax-btn-hero-secondary" style="padding: 0.8rem 2rem; border-radius: 12px; font-weight: 800;">
-        <i class="fas fa-th-large"></i> Lihat Semua <%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '600+' %> Game
+        <i class="fas fa-th-large"></i> Lihat Semua <%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '' %> Game
       </a>
     </div>
   </div>
@@ -3145,30 +3145,30 @@ input:focus-visible {
 <section class="trust-section" id="trust" style="padding: 3.5rem 0; background: rgba(10,13,22,0.5);">
   <div class="trust-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
     <div class="section-header animate-on-scroll" style="text-align: center; margin-bottom: 2.5rem;">
-      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.35); color:#10b981; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">AMAN &amp; TERPERCAYA</div>
-      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Belanja &amp; Main dengan <span class="accent" style="color: #fbbf24;">Tenang</span></h2>
-      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Setiap transaksi di AlexCloud dilindungi sistem resmi, transparan, dan bergaransi penuh.</p>
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.35); color:#10b981; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">TRANSAKSI &amp; BANTUAN</div>
+      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Informasi yang <span class="accent" style="color: #fbbf24;">jelas sejak awal</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Lihat metode pembayaran, status pesanan, kebijakan refund, dan jalur bantuan sebelum membeli.</p>
     </div>
     <div class="trust-grid">
       <div class="trust-card animate-on-scroll">
         <div class="trust-icon"><i class="fas fa-shield-halved" style="color:#10b981;"></i></div>
-        <h3 class="trust-title">Pembayaran QRIS Resmi</h3>
+        <h3 class="trust-title">Pembayaran QRIS</h3>
         <p class="trust-desc">Mendukung DANA, GoPay, OVO, ShopeePay, dan seluruh m-Banking tanpa biaya tersembunyi.</p>
       </div>
       <div class="trust-card animate-on-scroll">
         <div class="trust-icon"><i class="fas fa-sync-alt" style="color:#fbbf24;"></i></div>
-        <h3 class="trust-title">Garansi Uang Kembali</h3>
+        <h3 class="trust-title">Kebijakan Refund</h3>
         <p class="trust-desc">Jika terjadi kendala murni dari server kami, dana kamu kami kembalikan sesuai kebijakan garansi.</p>
       </div>
       <div class="trust-card animate-on-scroll">
         <div class="trust-icon"><i class="fas fa-bolt" style="color:#00f2fe;"></i></div>
-        <h3 class="trust-title">Aktivasi Instan Otomatis</h3>
-        <p class="trust-desc">Sistem otomatis mengaktifkan akun dan sesi game detik itu juga setelah transfer diterima.</p>
+        <h3 class="trust-title">Status Pesanan Terpantau</h3>
+        <p class="trust-desc">Status pembayaran dan masa aktif dapat dilihat kembali dari dashboard akun.</p>
       </div>
       <div class="trust-card animate-on-scroll">
         <div class="trust-icon"><i class="fas fa-comments" style="color:#fbbf24;"></i></div>
-        <h3 class="trust-title">CS &amp; Bot Bantuan 24/7</h3>
-        <p class="trust-desc">Tim CS dan WhatsApp Bot AlexCloud selalu standby membantu kendala bermain Anda kapan saja.</p>
+        <h3 class="trust-title">Bantuan Saat Dibutuhkan</h3>
+        <p class="trust-desc">Gunakan FAQ, cek koneksi, atau hubungi admin melalui Pusat Bantuan.</p>
       </div>
     </div>
     <div class="trust-links" style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
@@ -3212,10 +3212,10 @@ input:focus-visible {
           </div>
 
           <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.82rem; color: #cbd5e1;">
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Akses 600+ Game Ready</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Streaming 4K / 60 FPS</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Akses katalog game aktif</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Kualitas menyesuaikan koneksi</span></li>
             <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Multi-Device (HP, PC, TV)</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Cloud Save Sync Progress</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Panduan aktivasi di dashboard</span></li>
           </ul>
         </div>
 
@@ -3287,7 +3287,7 @@ input:focus-visible {
             </li>
             <li style="display:flex; align-items:flex-start; gap:0.5rem;">
               <i class="fas fa-gamepad" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
-              <div><strong style="color:#fff;">VIP Game Library:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">100+ game &amp; bebas request</span></div>
+              <div><strong style="color:#fff;">VIP Game Library:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">Katalog aktif &amp; fitur request</span></div>
             </li>
             <li style="display:flex; align-items:flex-start; gap:0.5rem;">
               <i class="fas fa-crown" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
@@ -3359,9 +3359,9 @@ input:focus-visible {
           <!-- COMPACT FEATURES -->
           <ul style="list-style:none; padding:0; margin:0 0 1.25rem; display:flex; flex-direction:column; gap:0.55rem; font-size:0.8rem; color:#cbd5e1;">
             <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Bebas pilih durasi 1 s/d 6 hari</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Akses 600+ Game AAA Ready to Play</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Streaming 4K / 60 FPS Ultra Latency</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Aktivasi Instan Otomatis QRIS 24/7</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Akses katalog game aktif</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Kualitas menyesuaikan koneksi</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Status pembayaran terpantau di dashboard</span></li>
           </ul>
         </div>
 
@@ -3472,7 +3472,7 @@ Lanjutkan ke halaman pembayaran Royal Club Access?')" class="ax-plan-btn-standar
         Siap Bermain Game AAA Sekarang?
       </h2>
       <p style="font-size: 1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 2rem; line-height: 1.6;">
-        Hanya perlu satu klik untuk masuk ke server cloud gaming terkencang di Indonesia. Daftar akun gratis sekarang juga!
+        Buat akun, pilih paket yang sesuai, lalu ikuti petunjuk aktivasi dari dashboard AlexCloud.
       </p>
 
       <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">

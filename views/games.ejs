@@ -1,146 +1,72 @@
 <%- include('partials/header') %>
 
-<div class="page-wrap" id="main-content">
-  <div style="padding: 3.5rem 0 2rem; background: linear-gradient(180deg, rgba(255, 255, 255,0.04) 0%, transparent 100%); text-align: center;">
+<main class="library-shell" id="main-content">
+  <section class="library-hero">
+    <div class="container" style="text-align:center">
+      <div class="library-eyebrow">Game Library</div>
+      <h1 class="library-title">Temukan game yang ingin kamu mainkan.</h1>
+      <p class="library-subtitle"><%= gameCount %> game tercatat di katalog AlexCloud. Cari berdasarkan judul atau jelajahi genre yang tersedia.</p>
+      <form action="/games" method="GET" class="library-search" role="search">
+        <label for="librarySearchInput" class="sr-only">Cari game</label>
+        <input type="search" name="q" id="librarySearchInput" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" placeholder="Cari judul atau genre..." autocomplete="off">
+        <button type="submit" class="btn-primary" aria-label="Cari game"><i class="fas fa-search" aria-hidden="true"></i><span>Cari</span></button>
+      </form>
+    </div>
+  </section>
+
+  <section class="library-content">
     <div class="container">
-      <div class="section-tag" style="margin-bottom:0.75rem;">Game Library</div>
-      <h1 class="section-title"><span class="accent">Temukan Game</span> Favoritmu</h1>
-      <p class="section-desc" style="max-width: 550px; margin: 0 auto 1.5rem;"><%= games.length %> game siap dimainkan langsung dari cloud tanpa instalasi!</p>
-
-      <!-- Interactive Game Search Bar -->
-      <div style="max-width: 620px; margin: 0 auto 1.5rem; position: relative;">
-        <form action="/games" method="GET" id="gamesSearchForm" style="position: relative; display: flex; align-items: center; background: rgba(18, 20, 26, 0.85); border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 16px; padding: 6px 8px 6px 16px; backdrop-filter: blur(16px); box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 15px rgba(251,191,36,0.15); transition: all 0.3s ease;">
-          <i class="fas fa-search" style="color: #fbbf24; font-size: 1.1rem; margin-right: 0.75rem; flex-shrink: 0;"></i>
-          <input type="text" name="q" id="librarySearchInput" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" placeholder="Cari judul game (misal: FC 26, GTA V, Naruto, Tekken...)" style="flex: 1; background: transparent; border: none; color: #fff; font-family: var(--font-ui); font-size: 0.95rem; outline: none; padding: 0.6rem 0;" oninput="filterGamesLive(this.value)">
-          <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
-            <a href="/games" style="color: var(--text-muted); padding: 0.5rem; margin-right: 0.25rem; font-size: 0.9rem; text-decoration: none;" title="Reset pencarian">✕</a>
-          <% } %>
-          <button type="submit" class="btn-primary" style="padding: 0.65rem 1.25rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; background: var(--gradient-main); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">
-            <span>Cari</span>
-          </button>
-        </form>
+      <div class="library-toolbar">
+        <div class="library-count"><%= games.length %> hasil<% if (searchQuery) { %> untuk “<%= searchQuery %>”<% } %></div>
+        <nav class="genre-list" aria-label="Filter genre game">
+          <a href="/games" class="genre-chip <%= activeGenre === 'all' ? 'is-active' : '' %>">Semua</a>
+          <% genres.forEach(genre => { %>
+            <a href="/games?genre=<%= encodeURIComponent(genre) %>" class="genre-chip <%= activeGenre === genre ? 'is-active' : '' %>"><%= genre %></a>
+          <% }) %>
+        </nav>
       </div>
 
-      <!-- Quick Category Chips -->
-      <div style="display:flex; gap:0.4rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem;">
-        <span style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-muted); font-weight:600; display:flex; align-items:center; gap:0.3rem; margin-right:0.2rem;"><i class="fas fa-fire" style="color:#fbbf24;"></i> Populer:</span>
-        <a href="/games?q=FC" class="search-chip" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; text-decoration:none;">FC 26</a>
-        <a href="/games?q=GTA" class="search-chip" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; text-decoration:none;">GTA V</a>
-        <a href="/games?q=MotoGP" class="search-chip" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; text-decoration:none;">MotoGP 25</a>
-        <a href="/games?q=Hogwarts" class="search-chip" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; text-decoration:none;">Hogwarts</a>
-        <a href="/games?q=Tekken" class="search-chip" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; text-decoration:none;">Tekken 8</a>
-        <a href="/games?q=Naruto" class="search-chip" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); font-size:0.78rem; padding:0.25rem 0.7rem; border-radius:20px; text-decoration:none;">Naruto</a>
+      <% if (games.length) { %>
+        <div class="games-grid" id="libraryGamesGrid">
+          <% games.forEach(game => { %>
+            <% const hasImage = game.image && !game.image.includes('placehold.co'); %>
+            <article class="game-card" data-name="<%= (game.name || '').toLowerCase() %>" data-genre="<%= (game.genre || '').toLowerCase() %>">
+              <div class="game-img-wrap">
+                <% if (hasImage) { %>
+                  <img src="<%= game.image %>" alt="Sampul <%= game.name %>" width="300" height="400" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+                <% } %>
+                <div class="game-img-fallback" <%= hasImage ? 'hidden' : '' %> style="width:100%;height:100%;display:grid;place-items:center;padding:18px;text-align:center;background:#171717">
+                  <div><i class="fas fa-gamepad" style="display:block;color:var(--ax-orange);font-size:1.8rem;margin-bottom:12px" aria-hidden="true"></i><strong><%= game.name %></strong></div>
+                </div>
+                <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
+              </div>
+              <div class="game-body">
+                <h2 class="game-title"><%= game.name %></h2>
+                <div class="game-genre"><%= game.genre || 'Game' %></div>
+                <% if (game.description) { %><p class="game-desc"><%= game.description %></p><% } %>
+              </div>
+              <div class="game-footer">
+                <span class="game-rating"><i class="fas fa-star" aria-hidden="true"></i> <%= game.rating || '—' %></span>
+                <span class="game-platform"><i class="fas fa-cloud" aria-hidden="true"></i> Cloud</span>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="library-empty">
+          <i class="fas fa-search" style="font-size:1.8rem;color:var(--ax-orange)" aria-hidden="true"></i>
+          <h2 style="font-size:1.2rem;margin:16px 0 7px">Game tidak ditemukan</h2>
+          <p style="margin:0 0 20px">Coba kata kunci lain atau kembali ke seluruh katalog.</p>
+          <a href="/games" class="btn-secondary">Lihat semua game</a>
+        </div>
+      <% } %>
+
+      <div class="library-cta">
+        <div><h2 style="font-size:1.35rem;margin:0 0 7px">Sudah menemukan game pilihanmu?</h2><p style="margin:0">Pilih paket terlebih dahulu, lalu ikuti petunjuk aktivasi dari dashboard.</p></div>
+        <a href="<%= user ? '/pricing?ref_=games_cta' : '/register?ref_=games_cta' %>" class="btn-primary"><%= user ? 'Lihat paket' : 'Buat akun' %> <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </div>
     </div>
-  </div>
-
-  <div class="container py-5">
-    <!-- Genre Filter -->
-    <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:2.5rem;">
-      <a href="/games" class="btn-action <%= activeGenre === 'all' ? 'btn-confirm' : '' %>"
-        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === 'all' ? 'rgba(255, 255, 255,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === 'all' ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === 'all' ? 'rgba(255, 255, 255,0.3)' : 'var(--border)' %>">
-        Semua (<%= games.length %>)
-      </a>
-      <% genres.forEach(genre => { %>
-      <a href="/games?genre=<%= encodeURIComponent(genre) %>" class="btn-action"
-        style="padding:0.5rem 1rem; border-radius:50px; font-size:0.9rem; text-decoration:none; background:<%= activeGenre === genre ? 'rgba(255, 255, 255,0.15)' : 'rgba(255,255,255,0.05)' %>; color:<%= activeGenre === genre ? 'var(--accent-blue)' : 'var(--text-secondary)' %>; border:1px solid <%= activeGenre === genre ? 'rgba(255, 255, 255,0.3)' : 'var(--border)' %>">
-        <%= genre %>
-      </a>
-      <% }) %>
-    </div>
-
-    <div class="games-grid" id="libraryGamesGrid">
-      <% 
-        const getGradient = (name) => {
-          const gradients = [
-            'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)',
-            'radial-gradient(circle at center, #0f172a 0%, #1e1b4b 100%)',
-            'radial-gradient(circle at center, #180828 0%, #0a0b0d 100%)',
-            'radial-gradient(circle at center, #2e1065 0%, #0f172a 100%)',
-            'radial-gradient(circle at center, #064e3b 0%, #022c22 100%)',
-            'radial-gradient(circle at center, #831843 0%, #0f172a 100%)',
-            'radial-gradient(circle at center, #083344 0%, #0f172a 100%)'
-          ];
-          let hash = 0;
-          for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-          }
-          const index = Math.abs(hash) % gradients.length;
-          return gradients[index];
-        };
-      %>
-      <% games.forEach(game => { %>
-      <% const isPlaceholder = !game.image || game.image.includes('placehold.co'); %>
-      <div class="game-card" data-name="<%= (game.name || '').toLowerCase() %>" data-genre="<%= (game.genre || '').toLowerCase() %>">
-        <div class="game-img-wrap">
-          <% if (isPlaceholder) { %>
-          <div class="game-img-fallback" style="display: flex; width: 100%; height: 100%; background: <%= getGradient(game.name) %>; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; box-sizing: border-box; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <i class="fas fa-gamepad" style="font-size: 2.2rem; color: var(--accent); opacity: 0.6; margin-bottom: 1rem;"></i>
-            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: #fff; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><%= game.name %></div>
-          </div>
-          <% } else { %>
-          <img src="<%= game.image %>" alt="<%= game.name %>" width="300" height="450" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <div class="game-img-fallback" style="display: none; width: 100%; height: 100%; background: <%= getGradient(game.name) %>; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; box-sizing: border-box; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <i class="fas fa-gamepad" style="font-size: 2.2rem; color: var(--accent); opacity: 0.6; margin-bottom: 1rem;"></i>
-            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: #fff; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><%= game.name %></div>
-          </div>
-          <% } %>
-          <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
-        </div>
-        <div class="game-body">
-          <div class="game-title"><%= game.name %></div>
-          <div class="game-genre"><i class="fas fa-tag" aria-hidden="true"></i> <%= game.genre %></div>
-          <p class="game-desc"><%= game.description %></p>
-        </div>
-        <div class="game-footer">
-          <div class="game-rating"><i class="fas fa-star"></i> <%= game.rating %></div>
-          <span class="game-platform"><i class="fas fa-cloud"></i> Cloud</span>
-        </div>
-      </div>
-      <% }) %>
-    </div>
-
-    <div id="searchEmptyState" style="display: <%= games.length === 0 ? 'block' : 'none' %>; text-align:center; padding:5rem; color:var(--text-muted);">
-      <i class="fas fa-gamepad" style="font-size:3rem; margin-bottom:1rem; color:#fbbf24;"></i>
-      <p style="font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">Game tidak ditemukan</p>
-      <p style="font-size: 0.9rem;">Coba cari dengan kata kunci lain atau pilih kategori game di atas.</p>
-      <a href="/games?ref_=games_empty_reset" class="btn-primary" style="margin-top:1.25rem; display:inline-flex;">Lihat Semua Game</a>
-    </div>
-
-    <div style="text-align:center; margin-top:4rem; padding:3rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg);">
-      <h2 style="font-family:var(--font-display); margin-bottom:0.75rem; font-size:1.5rem;">Siap Main?</h2>
-      <p style="color:var(--text-muted); margin-bottom:1.5rem;">Subscribe sekarang dan mainkan semua game ini!</p>
-      <a href="<%= typeof user !== 'undefined' && user ? '/pricing?ref_=games_footer_pricing' : '/register?ref_=games_footer_register' %>" class="btn-primary">
-        <i class="fas fa-gamepad"></i> <%= typeof user !== 'undefined' && user ? 'Pilih Paket' : 'Daftar Sekarang' %>
-      </a>
-    </div>
-  </div>
-</div>
-
-<script>
-  function filterGamesLive(query) {
-    const term = (query || '').toLowerCase().trim();
-    const cards = document.querySelectorAll('#libraryGamesGrid .game-card');
-    let visibleCount = 0;
-    
-    cards.forEach(card => {
-      const name = card.getAttribute('data-name') || '';
-      const genre = card.getAttribute('data-genre') || '';
-      const desc = (card.querySelector('.game-desc')?.textContent || '').toLowerCase();
-      
-      if (!term || name.includes(term) || genre.includes(term) || desc.includes(term)) {
-        card.style.display = '';
-        visibleCount++;
-      } else {
-        card.style.display = 'none';
-      }
-    });
-
-    const emptyState = document.getElementById('searchEmptyState');
-    if (emptyState) {
-      emptyState.style.display = (visibleCount === 0) ? 'block' : 'none';
-    }
-  }
-</script>
+  </section>
+</main>
 
 <%- include('partials/footer') %>

@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<main class="page-wrap" id="main-content">
+  <section class="page-hero">
+    <div class="container">
+      <span class="section-tag">Legal & privasi</span>
+      <h1 class="section-title" style="margin:14px 0 8px">Kebijakan Cookie</h1>
+      <p class="section-desc">Terakhir diperbarui: <%= lastUpdated %></p>
+    </div>
+  </section>
+  <section style="padding:10px 0 72px">
+    <article class="container card legal-content" style="padding:clamp(22px,5vw,48px);max-width:860px!important">
+      <h2>Ringkasan</h2>
+      <p>AlexCloud menggunakan cookie untuk menjaga sesi tetap aman, menjalankan fungsi akun dan pembayaran, mengingat preferensi, serta—jika kamu menyetujuinya—mencatat sumber kunjungan untuk evaluasi produk.</p>
+
+      <h2>Cookie wajib</h2>
+      <p>Cookie sesi, keamanan, dan pilihan privasi selalu aktif karena diperlukan untuk login, perlindungan permintaan, serta proses transaksi. Menonaktifkannya dari browser dapat membuat sebagian layanan tidak bekerja.</p>
+
+      <h2>Cookie preferensi</h2>
+      <p>Cookie atau penyimpanan lokal dapat mengingat pilihan tampilan pada perangkatmu. Kategori ini hanya digunakan setelah kamu mengaktifkannya melalui pengaturan cookie.</p>
+
+      <h2>Analitik dan atribusi</h2>
+      <p>Jika disetujui, AlexCloud dapat menyimpan parameter kampanye seperti UTM atau pengenal klik untuk mengetahui asal kunjungan. AlexCloud tidak mengaktifkan kategori opsional ini sebelum persetujuan diberikan.</p>
+
+      <h2>Mengubah pilihan</h2>
+      <p>Kamu dapat mengubah atau menarik persetujuan kapan saja. Perubahan akan berlaku untuk kunjungan berikutnya pada browser ini.</p>
+      <button type="button" class="btn-primary" onclick="window.AlexCloudUI && window.AlexCloudUI.openCookieSettings()">Atur pilihan cookie</button>
+
+      <h2>Dokumen terkait</h2>
+      <p>Baca juga <a href="/privacy">Kebijakan Privasi</a> dan <a href="/terms">Syarat & Ketentuan</a> AlexCloud.</p>
+    </article>
+  </section>
+</main>
+
+<style>.legal-content h2{font-size:1.2rem;margin:28px 0 9px}.legal-content h2:first-child{margin-top:0}.legal-content p{line-height:1.75}.legal-content a{color:var(--ax-orange)}</style>
+<%- include('partials/footer') %>
