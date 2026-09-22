@@ -162,6 +162,7 @@
        desktop hero (hero-visual card, styled only in main.css) doesn't reflow when
        an async stylesheet applies. Same-origin ~14KB gzip; FCP cost is tiny, CLS→~0. -->
   <link href="/css/main.css?v=40.0" rel="stylesheet">
+  <link rel="preload" href="/css/alexcloud-system.css?v=1.6" as="style">
 
   <!-- FontAwesome: self-hosted subset (~11KB woff2 vs ~290KB full kit), load non-blocking -->
   <link rel="stylesheet" href="/css/fontawesome.min.css?v=1" media="print" onload="this.media='all'">
@@ -226,7 +227,8 @@
   })();
   </script>
 </head>
-<body>
+<% const bodyPageClass = 'page-' + ((typeof title !== 'undefined' && title ? title : 'alexcloud').split(' - ')[0].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')); %>
+<body class="site-body <%= bodyPageClass %>">
   <!-- Scroll Progress Indicator -->
   <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -283,10 +285,22 @@
         <a href="/?ref_=nav_home" class="nav-link"><span><i class="fas fa-home"></i> Beranda</span></a>
         <a href="/games?ref_=nav_games" class="nav-link"><span><i class="fas fa-gamepad"></i> Game Library</span> <span class="badge-hot">100+ GAME</span></a>
         <a href="/pricing?ref_=nav_pricing" class="nav-link"><span><i class="fas fa-tags"></i> Paket &amp; Harga</span></a>
-        <a href="/testimonials?ref_=nav_testimonials" class="nav-link"><span><i class="fas fa-star"></i> Testimoni</span></a>
-        <a href="/community?ref_=nav_community" class="nav-link"><span><i class="fas fa-comments"></i> Komunitas</span></a>
-        <a href="/network-test?ref_=nav_speedtest" class="nav-link"><span><i class="fas fa-wifi"></i> Speed Test</span></a>
-        <a href="/faq?ref_=nav_faq" class="nav-link"><span><i class="fas fa-question-circle"></i> FAQ</span></a>
+        <div class="nav-more mobile-hidden">
+          <button type="button" class="nav-link nav-more-trigger" aria-haspopup="true">
+            <span><i class="fas fa-compass"></i> Eksplorasi</span>
+            <i class="fas fa-chevron-down nav-more-chevron" aria-hidden="true"></i>
+          </button>
+          <div class="nav-more-menu" aria-label="Menu eksplorasi">
+            <a href="/testimonials?ref_=nav_testimonials"><i class="fas fa-star"></i><span><strong>Testimoni</strong><small>Ulasan pelanggan AlexCloud</small></span></a>
+            <a href="/community?ref_=nav_community"><i class="fas fa-comments"></i><span><strong>Komunitas</strong><small>Terhubung dengan gamer lain</small></span></a>
+            <a href="/network-test?ref_=nav_speedtest"><i class="fas fa-wifi"></i><span><strong>Speed Test</strong><small>Cek kesiapan koneksi kamu</small></span></a>
+            <a href="/faq?ref_=nav_faq"><i class="fas fa-question-circle"></i><span><strong>FAQ</strong><small>Jawaban dan bantuan cepat</small></span></a>
+          </div>
+        </div>
+        <a href="/testimonials?ref_=nav_testimonials" class="nav-link desktop-hidden"><span><i class="fas fa-star"></i> Testimoni</span></a>
+        <a href="/community?ref_=nav_community" class="nav-link desktop-hidden"><span><i class="fas fa-comments"></i> Komunitas</span></a>
+        <a href="/network-test?ref_=nav_speedtest" class="nav-link desktop-hidden"><span><i class="fas fa-wifi"></i> Speed Test</span></a>
+        <a href="/faq?ref_=nav_faq" class="nav-link desktop-hidden"><span><i class="fas fa-question-circle"></i> FAQ</span></a>
 
         <% if (typeof user !== 'undefined' && user) { %>
           <% if (user.role === 'admin') { %>
