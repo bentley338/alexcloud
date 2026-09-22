@@ -1,796 +1,3591 @@
 <%- include('partials/header') %>
 
-<!-- HERO -->
-<section class="hero" id="main-content" aria-label="Hero utama">
-  <div class="hero-bg"></div>
-  <div class="hero-grid-overlay"></div>
-  <div class="hero-particles" aria-hidden="true"></div>
-  <div class="hero-container">
-    <!-- Pengumuman dari admin — tampil di atas beranda (bukan banner fixed seluruh situs) -->
-    <% if (typeof announcement !== 'undefined' && announcement) { %>
-    <div class="home-announce home-announce--<%= announcement.type || 'info' %>" id="siteAnnounce" data-ann-id="<%= announcement.id || 'default' %>">
-      <i class="fas fa-<%= announcement.type === 'promo' ? 'gift' : (announcement.type === 'warn' ? 'triangle-exclamation' : 'bullhorn') %>" aria-hidden="true"></i>
-      <span class="home-announce-text"><%= announcement.text %></span>
-      <% if (announcement.link && announcement.linkText) { %>
-        <a href="<%= announcement.link %>" class="home-announce-link"><%= announcement.linkText %> →</a>
-      <% } %>
-      <button class="home-announce-close" type="button" onclick="dismissAnnounce()" aria-label="Tutup pengumuman">✕</button>
-    </div>
-    <style>
-      .home-announce{grid-column:1/-1;display:flex;align-items:center;gap:0.7rem;width:100%;margin-bottom:2rem;padding:0.85rem 1.1rem;border-radius:14px;font-family:var(--font-ui);font-size:0.92rem;font-weight:500;color:#fff;background:var(--gradient-main);box-shadow:0 8px 24px rgba(0,0,0,0.30);border:1px solid rgba(255,255,255,0.12)}
-      .home-announce--promo{background:linear-gradient(135deg,#7c3aed 0%,#db2777 100%)}
-      .home-announce--warn{background:linear-gradient(135deg,#d97706 0%,#dc2626 100%)}
-      .home-announce > i{flex-shrink:0;font-size:1.05rem}
-      .home-announce-text{flex:1;min-width:0;line-height:1.45}
-      .home-announce-link{color:#fff;font-weight:700;text-decoration:underline;white-space:nowrap;flex-shrink:0}
-      .home-announce-close{flex-shrink:0;background:rgba(255,255,255,0.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:0.8rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
-      .home-announce-close:hover{background:rgba(255,255,255,0.38)}
-      @media(max-width:768px){.home-announce{font-size:0.84rem;margin-bottom:1.25rem;padding:0.7rem 0.9rem}}
-    </style>
-    <script>
-      (function () {
-        var el = document.getElementById('siteAnnounce');
-        if (!el) return;
-        var id = el.getAttribute('data-ann-id') || 'default';
-        try { if (localStorage.getItem('annDismissed') === id) { el.remove(); } } catch (e) {}
-      })();
-      function dismissAnnounce() {
-        var el = document.getElementById('siteAnnounce');
-        if (!el) return;
-        var id = el.getAttribute('data-ann-id') || 'default';
-        try { localStorage.setItem('annDismissed', id); } catch (e) {}
-        el.remove();
-      }
-    </script>
-    <% } %>
-    <div class="hero-content">
-      <div class="hero-badge">
-        <i class="fas fa-bolt"></i>
-        <span>Platform Cloud Gaming #1 Indonesia</span>
-      </div>
-      <h1 class="hero-title">
-        Main Game AAA<br><span class="accent">Tanpa PC Mahal</span>
-      </h1>
-      <p class="hero-subtitle">
-        AlexCloud menghadirkan pengalaman gaming premium langsung dari cloud. 
-        Akses ratusan game terbaru dengan koneksi internet biasa. 
-        Mulai dari Rp 40.000/minggu!
-      </p>
+<style>
+/* ==========================================================================
+   ALEXCLOUD ULTRA TIER-1 GLOBAL GAMING DESIGN SYSTEM
+   Fluid Responsive Scaling, Mobile-First Performance & High-Tech Obsidian Dark
+   ========================================================================== */
 
-      <div class="hero-actions">
-        <a href="/pricing?ref_=home_hero_pricing" class="btn-primary">
-          <i class="fas fa-gamepad"></i> Mulai Sekarang
-        </a>
-        <a href="/games?ref_=home_hero_games" class="btn-secondary">
-          <i class="fas fa-search"></i> Cari &amp; Lihat Game
-        </a>
-      </div>
-      <% if (user) { %>
-      <div class="hero-wallet-widget">
-        <div style="display: flex; align-items: center; gap: 0.85rem;">
-          <div class="hero-wallet-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path>
-              <path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path>
-            </svg>
-          </div>
-          <div>
-            <div class="hero-wallet-label">Saldo Dompet</div>
-            <div id="heroWalletBalance" class="hero-wallet-amount">Rp <%= balance.toLocaleString('id-ID') %></div>
-          </div>
-        </div>
-        <a href="/wallet?ref_=home_wallet_topup" class="btn-primary hero-wallet-topup-btn">
-          <i class="fas fa-plus" style="font-size: 0.8rem;"></i> Top Up
-        </a>
-      </div>
+:root {
+  --ax-bg-void: #06070c;
+  --ax-bg-card: rgba(15, 18, 28, 0.85);
+  --ax-bg-card-hover: rgba(22, 27, 42, 0.95);
+  --ax-border: rgba(255, 255, 255, 0.08);
+  --ax-border-gold: rgba(251, 191, 36, 0.35);
+  --ax-border-cyan: rgba(0, 242, 254, 0.35);
+  --ax-gold: #fbbf24;
+  --ax-gold-glow: rgba(251, 191, 36, 0.25);
+  --ax-cyan: #00f2fe;
+  --ax-cyan-glow: rgba(0, 242, 254, 0.25);
+  --ax-green: #10b981;
+  --ax-text-main: #f8fafc;
+  --ax-text-muted: #94a3b8;
+  --ax-radius-lg: 20px;
+  --ax-radius-md: 14px;
+}
 
-      <% 
-         let today = new Date();
-         today.setUTCHours(0,0,0,0);
-         let todayDate = today.toISOString().split('T')[0];
-         let alreadyClaimed = lastDailyLogin === todayDate;
-         
-         let currentStreak = loginStreak || 0;
-         let nextStreak = alreadyClaimed ? currentStreak : (currentStreak + 1 > 7 ? 1 : currentStreak + 1);
+body {
+  background-color: var(--ax-bg-void) !important;
+  color: var(--ax-text-main) !important;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden !important;
+}
 
-         // Cek apakah bolong
-         let lastClaim = null;
-         if (lastDailyLogin) {
-            lastClaim = new Date(lastDailyLogin);
-            lastClaim.setUTCHours(0,0,0,0);
-         }
-         let isMissed = false;
-         if (lastClaim) {
-            let diffDays = Math.round((today.getTime() - lastClaim.getTime()) / (1000*60*60*24));
-            if (diffDays > 1) {
-               isMissed = true;
-               nextStreak = 1;
-            }
-         }
-         if (!lastDailyLogin) nextStreak = 1;
+/* Atmospheric Lighting Gradients */
+.ax-ambient-mesh {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
 
-         const rewardMap = { 1: '1k', 2: '2k', 3: '3k', 4: '4k', 5: '5k', 6: '7k', 7: '10k' };
-      %>
-      <div id="streakWidget" class="hero-streak-widget">
-        <div class="streak-header-row">
-          <div>
-            <div class="streak-mini-label">Reward Harian</div>
-            <div class="streak-title-text">7-Day Login Streak</div>
-          </div>
-          <% if (alreadyClaimed) { %>
-            <button class="btn-secondary streak-btn" disabled>
-              <i class="fas fa-check"></i> Hari Ini Diklaim
-            </button>
-          <% } else { %>
-            <button id="btnDailyLogin" onclick="claimDailyLogin()" class="btn-primary streak-claim-btn">
-              <i class="fas fa-gift"></i> Klaim Sekarang
-            </button>
-          <% } %>
-        </div>
-        
-        <div class="streak-days-row" style="display: flex; gap: 0.4rem; justify-content: space-between; overflow-x: auto; padding-bottom: 0.5rem; user-select: none;">
-          <% for(let i=1; i<=7; i++) { 
-             let status = 'future';
-             if (i < nextStreak || (i === nextStreak && alreadyClaimed)) status = 'passed';
-             else if (i === nextStreak && !alreadyClaimed) status = 'today';
-             
-             let bg = 'rgba(255,255,255,0.05)';
-             let border = '1px solid rgba(255,255,255,0.05)';
-             let color = 'rgba(255,255,255,0.4)';
-             let icon = '<i class="fas fa-lock"></i>';
-             let glow = 'none';
+.ax-mesh-glow-1 {
+  position: absolute;
+  top: -60px;
+  left: 10%;
+  width: 550px;
+  height: 550px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.12) 0%, rgba(217, 119, 6, 0.02) 60%, transparent 80%);
+  filter: blur(80px);
+}
 
-             if (status === 'passed') {
-                bg = 'rgba(16,185,129,0.15)';
-                border = '1px solid rgba(16,185,129,0.3)';
-                color = '#10b981';
-                icon = '<i class="fas fa-check-circle"></i>';
-             } else if (status === 'today') {
-                bg = 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.8))';
-                border = '1px solid #10b981';
-                color = '#fff';
-                icon = '<i class="fas fa-gift"></i>';
-                glow = '0 0 10px rgba(16,185,129,0.5)';
-             }
-          %>
-          <div class="streak-day-item" style="flex: 1; min-width: 42px; text-align: center; border-radius: 8px; padding: 0.5rem 0; background: <%= bg %>; border: <%= border %>; color: <%= color %>; box-shadow: <%= glow %>; transition: all 0.3s ease;">
-            <div class="day-num" style="font-size: 0.65rem; font-weight: 700; margin-bottom: 0.3rem;">H<%= i %></div>
-            <div class="day-icon" style="font-size: 0.9rem; margin-bottom: 0.3rem;"><%- icon %></div>
-            <div class="day-reward" style="font-size: 0.75rem; font-weight: 800;"><%= rewardMap[i] %></div>
-          </div>
-          <% } %>
-        </div>
-        <% if (isMissed && !alreadyClaimed) { %>
-          <div class="streak-missed-alert">
-            <i class="fas fa-exclamation-triangle"></i>
-            <div>Anda melewatkan login harian kemarin. Streak hangus & saldo bonus akan dipotong penalti saat Anda melakukan klaim.</div>
-          </div>
-        <% } %>
-      </div>
-      <% } %>
-      <div class="hero-stats">
-        <div class="stat-item glass">
-          <span class="stat-num" data-count="<%= allGames.length %>">0</span>
-          <span class="stat-label">Game Tersedia</span>
-        </div>
-        <div class="stat-item glass">
-          <span class="stat-num">4K</span>
-          <span class="stat-label">Resolusi Max</span>
-        </div>
-        <div class="stat-item glass">
-          <span class="stat-num">60fps</span>
-          <span class="stat-label">Smooth Gaming</span>
-        </div>
-        <div class="stat-item glass">
-          <span class="stat-num">24/7</span>
-          <span class="stat-label">Support</span>
-        </div>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="hero-card-stack">
-        <div class="floating-badge badge-price">Mulai Rp 40.000</div>
-        <div class="hero-main-card">
-          <div class="hero-card-header">
-            <div class="hero-card-icon"><i class="fas fa-gamepad"></i></div>
-            <div>
-              <div class="hero-card-title">AlexCloud Gaming</div>
-              <div class="hero-card-sub">Server Online • Low Latency</div>
-            </div>
-          </div>
-          <div class="hero-game-list">
-            <% games.slice(0, 4).forEach((game, i) => { %>
-            <div class="hero-game-item">
-              <div class="game-dot <%= ['blue','purple','green','orange'][i % 4] %>"></div>
-              <span class="game-name"><%= game.name %></span>
-              <span class="game-status">● Online</span>
-            </div>
-            <% }) %>
-          </div>
-        </div>
-        <div class="floating-badge badge-users">Ribuan Gamer Aktif</div>
-      </div>
-    </div>
-  </div>
-</section>
+.ax-mesh-glow-2 {
+  position: absolute;
+  top: 100px;
+  right: 5%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.1) 0%, rgba(59, 130, 246, 0.02) 60%, transparent 80%);
+  filter: blur(80px);
+}
 
-<!-- AI TRENDING SECTION -->
-<section class="trending-section">
-  <div class="trending-container">
-    <div class="section-header">
-      <div class="section-tag">Trending</div>
-      <h2 class="section-title">Game <span class="accent">Trending Minggu Ini</span></h2>
-      <p class="section-desc">Rekomendasi cerdas AI berdasarkan rating & popularitas terkini</p>
-    </div>
-    <div class="trending-scroll">
-      <% trendingGames.forEach((game, idx) => { %>
-      <div class="trending-card">
-        <div class="trending-rank">#<%= idx + 1 %></div>
-        <img src="<%= game.image %>" alt="<%= game.name %>" class="trending-img" width="200" height="300" loading="lazy" decoding="async">
-        <div class="trending-info">
-          <div class="trending-name"><%= game.name %></div>
-          <div class="trending-genre"><%= game.genre %></div>
-          <div class="trending-rating">
-            <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < Math.floor(game.rating) ? '#fbbf24' : '#333' %>;font-size:0.65rem;"></i><%}%>
-            <span><%= game.rating %></span>
-          </div>
-        </div>
-        <span class="trending-tag"><%= game.tag %></span>
-      </div>
-      <% }) %>
-    </div>
-  </div>
-</section>
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+.hero {
+  position: relative;
+  width: 100%;
+  padding-top: 8.5rem !important;
+  padding-bottom: 3.5rem !important;
+  background: transparent !important;
+  overflow: hidden;
+  box-sizing: border-box;
+}
 
-<!-- FEATURES -->
-<section class="features-section">
-  <div class="features-container">
-    <div class="section-header animate-on-scroll">
-      <div class="section-tag">Kenapa AlexCloud?</div>
-      <h2 class="section-title">Gaming <span class="accent">Tanpa Batas</span></h2>
-      <p class="section-desc">Nikmati game AAA terbaru dengan kualitas terbaik tanpa perlu investasi hardware mahal.</p>
-    </div>
-    <div class="features-grid">
-      <div class="feature-card animate-on-scroll" data-delay="0">
-        <div class="feature-icon blue"><i class="fas fa-bolt" style="color:var(--accent-blue)"></i></div>
-        <div class="feature-title">Latency Ultra Rendah</div>
-        <p class="feature-desc">Server dioptimalkan untuk Indonesia dengan ping di bawah 30ms untuk pengalaman gaming yang mulus.</p>
-      </div>
-      <div class="feature-card animate-on-scroll" data-delay="80">
-        <div class="feature-icon purple"><i class="fas fa-gamepad" style="color:#a3a3a3"></i></div>
-        <div class="feature-title">100+ Game Premium</div>
-        <p class="feature-desc">Akses game AAA terbaru seperti EA FC 26, MotoGP 25, Hogwarts Legacy, dan masih banyak lagi.</p>
-      </div>
-      <div class="feature-card animate-on-scroll" data-delay="160">
-        <div class="feature-icon green"><i class="fas fa-tv" style="color:var(--accent-green)"></i></div>
-        <div class="feature-title">Streaming 4K / 60fps</div>
-        <p class="feature-desc">Kualitas visual maksimal dengan resolusi hingga 4K dan framerate stabil 60fps bahkan di HP.</p>
-      </div>
-      <div class="feature-card animate-on-scroll" data-delay="0">
-        <div class="feature-icon orange"><i class="fas fa-robot" style="color:var(--accent-orange)"></i></div>
-        <div class="feature-title">AI Assistant 24/7</div>
-        <p class="feature-desc">AlexBot AI siap menjawab pertanyaanmu, merekomendasikan game, dan membantu masalah kapanpun.</p>
-      </div>
-      <div class="feature-card animate-on-scroll" data-delay="80">
-        <div class="feature-icon blue"><i class="fas fa-save" style="color:var(--accent-blue)"></i></div>
-        <div class="feature-title">Cloud Save</div>
-        <p class="feature-desc">Progress game tersimpan di cloud. Main di HP, lanjut di TV, atau sebaliknya tanpa kehilangan data.</p>
-      </div>
-      <div class="feature-card animate-on-scroll" data-delay="160">
-        <div class="feature-icon purple"><i class="fas fa-tags" style="color:#a3a3a3"></i></div>
-        <div class="feature-title">Harga Terjangkau</div>
-        <p class="feature-desc">Mulai dari Rp 40.000/minggu saja! Jauh lebih hemat dibanding beli PC gaming jutaan rupiah.</p>
-      </div>
-    </div>
-  </div>
-</section>
+.hero-container {
+  max-width: 1240px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 1.5rem !important;
+  display: grid !important;
+  grid-template-columns: 1.15fr 0.85fr !important;
+  gap: 2.5rem !important;
+  align-items: center !important;
+  position: relative !important;
+  z-index: 2 !important;
+  box-sizing: border-box !important;
+}
 
-<!-- HOW IT WORKS / CARA PAKAI -->
-<section class="how-section" id="how-it-works">
-  <div class="how-container">
-    <div class="section-header animate-on-scroll">
-      <div class="section-tag">Cara Pakai</div>
-      <h2 class="section-title">Mulai Main dalam <span class="accent">3 Langkah</span></h2>
-      <p class="section-desc">Tanpa download berat, tanpa install ribet. Cukup punya internet — langsung gas.</p>
-    </div>
-    <div class="how-steps">
-      <div class="how-step animate-on-scroll" data-delay="0">
-        <div class="how-step-num">1</div>
-        <div class="how-step-icon"><i class="fas fa-shopping-cart" aria-hidden="true"></i></div>
-        <h3 class="how-step-title">Pilih Paket</h3>
-        <p class="how-step-desc">Daftar gratis, lalu pilih paket mulai Rp 40.000/minggu sesuai kebutuhanmu.</p>
-      </div>
-      <div class="how-step animate-on-scroll" data-delay="130">
-        <div class="how-step-num">2</div>
-        <div class="how-step-icon"><i class="fas fa-laptop" aria-hidden="true"></i></div>
-        <h3 class="how-step-title">Buka di Perangkat Apa Saja</h3>
-        <p class="how-step-desc">HP, laptop, tablet, atau Smart TV — cukup lewat browser, tanpa PC mahal.</p>
-      </div>
-      <div class="how-step animate-on-scroll" data-delay="260">
-        <div class="how-step-num">3</div>
-        <div class="how-step-icon"><i class="fas fa-play" aria-hidden="true"></i></div>
-        <h3 class="how-step-title">Langsung Main</h3>
-        <p class="how-step-desc">Game AAA jalan instan dari cloud — 4K 60fps, ping rendah, tanpa loading lama.</p>
-      </div>
-    </div>
-  </div>
-</section>
+/* ==========================================================================
+   PROMO SPESIAL FLOATING TOP BANNER (GRID-COLUMN SPAN ALL)
+   ========================================================================== */
+.ax-promo-banner-wrap {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 1rem !important;
+  box-sizing: border-box !important;
+  position: relative;
+  z-index: 10;
+}
 
-<!-- POPULAR GAMES with View Mode Toggle -->
-<section class="games-section" id="games-section">
-  <div class="games-container">
-    <div class="section-header animate-on-scroll">
-      <div class="section-tag">Game Terpopuler</div>
-      <h2 class="section-title">Pilihan <span class="accent">Game Terbaik</span></h2>
-      <p class="section-desc">Dari sepak bola, balap, hingga RPG epik — semua ada di AlexCloud!</p>
-    </div>
+.ax-promo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(217, 119, 6, 0.08) 50%, rgba(15, 18, 28, 0.95) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 14px;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
 
-    <!-- View Mode Toggle -->
-    <div class="view-mode-bar">
-      <span class="view-mode-label"><i class="fas fa-eye"></i> Mode Tampilan:</span>
-      <div class="view-mode-btns">
-        <button class="view-mode-btn active" id="btn-grid" onclick="setViewMode('grid')" title="Grid View" aria-label="Tampilan Grid" aria-pressed="true">
-          <i class="fas fa-th-large" aria-hidden="true"></i> Grid
-        </button>
-        <button class="view-mode-btn" id="btn-list" onclick="setViewMode('list')" title="List View" aria-label="Tampilan List" aria-pressed="false">
-          <i class="fas fa-list" aria-hidden="true"></i> List
-        </button>
-        <button class="view-mode-btn" id="btn-compact" onclick="setViewMode('compact')" title="Compact View" aria-label="Tampilan Compact" aria-pressed="false">
-          <i class="fas fa-grip-horizontal" aria-hidden="true"></i> Compact
-        </button>
-      </div>
-    </div>
+.ax-promo-banner:hover {
+  border-color: rgba(251, 191, 36, 0.6);
+  box-shadow: 0 6px 25px rgba(251, 191, 36, 0.25);
+}
 
-    <div class="games-grid" id="gamesDisplay">
-      <% games.slice(0, 8).forEach((game, i) => { %>
-      <div class="game-card animate-on-scroll" data-delay="<%= (i % 4) * 70 %>">
-        <div class="game-img-wrap">
-          <img src="<%= game.image %>" alt="<%= game.name %>" width="300" height="450" loading="lazy" decoding="async">
-          <% if (game.tag) { %><span class="game-tag"><%= game.tag %></span><% } %>
-        </div>
-        <div class="game-body">
-          <div class="game-title"><%= game.name %></div>
-          <div class="game-genre"><i class="fas fa-tag"></i> <%= game.genre %></div>
-          <p class="game-desc"><%= game.description %></p>
-        </div>
-        <div class="game-footer">
-          <div class="game-rating"><i class="fas fa-star"></i> <%= game.rating %></div>
-          <span class="game-platform"><i class="fas fa-cloud"></i> Cloud</span>
-        </div>
-      </div>
-      <% }) %>
-    </div>
-    <div class="games-cta">
-      <a href="/games?ref_=home_explore_games" class="btn-primary"><i class="fas fa-th-large"></i> Lihat Semua Game</a>
-    </div>
-</section>
+.ax-promo-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 4px; height: 100%;
+  background: linear-gradient(180deg, #fbbf24, #d97706);
+}
 
-<!-- TIKTOK GAMEPLAY SECTION -->
-<section class="tiktok-section" id="tiktok-section">
-  <div class="tiktok-card-container animate-on-scroll">
-    <div class="section-header text-center">
-      <div class="section-tag">Bukti Nyata</div>
-      <h2 class="section-title">Bukti <span class="accent">Nyata</span></h2>
-      <p class="section-desc">Lihat sendiri gameplay FC26 smooth di HP — banyak video di TikTok kami</p>
-    </div>
+.ax-promo-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 1;
+}
 
-    <div class="tiktok-card-wrapper">
-      <div class="tiktok-premium-card">
-        <div class="tiktok-card-glow"></div>
-        <div class="tiktok-card-inner">
-          <div class="tiktok-card-logo">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.75a8.27 8.27 0 004.84 1.55V6.84a4.85 4.85 0 01-1.07-.15z"/></svg>
-          </div>
-          
-          <p class="tiktok-card-desc">Banyak video gameplay FC26 di HP — langsung main via AlexCloud</p>
-          
-          <a href="https://www.tiktok.com/@bentleysaja_" target="_blank" rel="noopener noreferrer" class="tiktok-premium-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.75a8.27 8.27 0 004.84 1.55V6.84a4.85 4.85 0 01-1.07-.15z"/></svg>
-            Tonton di TikTok @bentleysaja_
-            <span class="tiktok-btn-arrow">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+.ax-promo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #000;
+  font-weight: 900;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+}
+
+.ax-promo-text {
+  font-size: 0.88rem;
+  color: #f8fafc;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.ax-promo-text strong {
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+.ax-promo-code {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  border: 1px dashed rgba(251, 191, 36, 0.5);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  font-weight: 800;
+  transition: all 0.2s;
+}
+
+.ax-promo-code:hover {
+  background: rgba(251, 191, 36, 0.3);
+  border-color: #fbbf24;
+}
+
+.ax-promo-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.ax-btn-copy-promo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #000 !important;
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(251, 191, 36, 0.35);
+}
+
+.ax-btn-copy-promo:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
+}
+
+/* Hero Badge */
+.ax-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 1.15rem;
+  border-radius: 100px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: #fbbf24;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 1.35rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 25px rgba(251, 191, 36, 0.15);
+  transition: all 0.3s ease;
+}
+
+.ax-hero-badge:hover {
+  transform: translateY(-2px);
+  border-color: #fbbf24;
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.3);
+}
+
+.ax-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: axPulse 1.8s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes axPulse {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Hero Typography */
+.ax-hero-title {
+  font-size: 3.2rem;
+  font-weight: 900;
+  line-height: 1.14;
+  letter-spacing: -0.035em;
+  color: #ffffff;
+  margin-bottom: 1.15rem;
+}
+
+.ax-hero-gradient {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.3));
+}
+
+.ax-hero-sub {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  max-width: 560px;
+  margin-bottom: 1.75rem;
+}
+
+/* Hero CTA Buttons */
+.ax-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.ax-btn-hero-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1.85rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #06070c !important;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  box-shadow: 0 8px 30px rgba(251, 191, 36, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.ax-btn-hero-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  animation: axShimmer 3.5s infinite;
+}
+
+@keyframes axShimmer {
+  0% { left: -100%; }
+  25%, 100% { left: 200%; }
+}
+
+.ax-btn-hero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(251, 191, 36, 0.5);
+  color: #000 !important;
+}
+
+.ax-btn-hero-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1.65rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.ax-btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.ax-trust-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 1.75rem;
+}
+
+.ax-trust-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ax-trust-row i {
+  color: #10b981;
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   MEMBER CONTROL BENTO WIDGET
+   ========================================================================== */
+.ax-member-bento {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 0.85rem;
+  background: rgba(15, 18, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--ax-radius-md);
+  padding: 1rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  margin-bottom: 1.75rem;
+}
+
+.ax-wallet-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+}
+
+.ax-wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ax-wallet-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.1));
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ax-wallet-lbl {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.ax-wallet-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: -0.01em;
+}
+
+.ax-topup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #06070c !important;
+  font-weight: 800;
+  font-size: 0.75rem;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+  transition: all 0.2s ease;
+}
+
+.ax-topup-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
+}
+
+.ax-streak-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ax-streak-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+}
+
+.ax-streak-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ax-streak-claim-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s;
+}
+
+.ax-streak-days {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: space-between;
+}
+
+.ax-day-pill {
+  flex: 1;
+  text-align: center;
+  padding: 0.2rem 0;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.ax-day-pill.passed {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.ax-day-pill.today {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(217, 119, 6, 0.2));
+  border-color: #fbbf24;
+  color: #fbbf24;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+}
+
+.ax-day-pill.future {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: #64748b;
+}
+
+/* Hero Stats Counter */
+.ax-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1.5rem;
+}
+
+.ax-stat-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+}
+
+.ax-stat-val {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.ax-stat-lbl {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   RIGHT HERO - LIVE RIG SHOWCASE
+   ========================================================================== */
+.ax-rig-showcase {
+  background: rgba(15, 18, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--ax-radius-lg);
+  padding: 1.35rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ax-rig-showcase::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 150px; height: 150px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ax-rig-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.75rem;
+}
+
+.ax-rig-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #f8fafc;
+  letter-spacing: 0.5px;
+}
+
+.ax-rig-beacon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 100px;
+}
+
+.ax-dual-games {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.ax-game-preview-card {
+  position: relative;
+  height: 145px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.ax-game-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ax-game-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(6,7,12,0.92) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.65rem;
+}
+
+.ax-game-preview-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #00f2fe;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.ax-game-preview-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.ax-rig-specs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 0.65rem;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.ax-rig-specs-bar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ax-rig-specs-bar strong {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   INFINITE HARDWARE & CLOUD TECH TICKER
+   ========================================================================== */
+.ax-ticker-wrap {
+  width: 100%;
+  background: rgba(10, 13, 22, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.85rem 0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.ax-ticker-track {
+  display: flex;
+  gap: 2.5rem;
+  width: max-content;
+  animation: axTickerScroll 35s linear infinite;
+}
+
+.ax-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes axTickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ax-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.ax-ticker-item i {
+  color: #fbbf24;
+}
+
+/* ==========================================================================
+   KENAPA ALEXCLOUD (FEATURES) - MATCHING CARA MAIN BACKGROUND & CONTRAST
+   ========================================================================== */
+.features-section {
+  padding: 3.5rem 0;
+  background: var(--ax-bg-void) !important;
+  position: relative;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.feature-card {
+  background: #131418 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--ax-radius-lg) !important;
+  padding: 2rem 1.6rem !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+.feature-card:hover {
+  border-color: rgba(251, 191, 36, 0.35) !important;
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(251, 191, 36, 0.2) !important;
+}
+
+.feature-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.feature-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.feature-desc {
+  color: #94a3b8;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   CARA MAIN (HOW IT WORKS)
+   ========================================================================== */
+.how-section {
+  padding: 3.5rem 0;
+  background: var(--ax-bg-void) !important;
+  position: relative;
+}
+
+/* ==========================================================================
+   STEAM-STYLE GAME CARDS & 2-COL MOBILE GRID
+   ========================================================================== */
+.ax-game-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.ax-card {
+  background: rgba(15, 18, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.ax-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(251, 191, 36, 0.2);
+}
+
+.ax-card-poster {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  background: #090c14;
+}
+
+.ax-card-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ax-card:hover .ax-card-poster img {
+  transform: scale(1.08);
+}
+
+.ax-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.ax-card-body {
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.ax-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.35;
+  margin-bottom: 0.35rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ax-card-genre {
+  font-size: 0.75rem;
+  color: #00f2fe;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.ax-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.65rem;
+}
+
+.ax-card-rating {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fbbf24;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ax-card-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+/* ==========================================================================
+   PRICING LUXURY CARDS & HIGH-CONTRAST BUTTONS
+   ========================================================================== */
+.ax-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 3.5rem;
+}
+
+.ax-plan-card {
+  background: rgba(15, 18, 28, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.6rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ax-plan-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+}
+
+.ax-plan-card.popular {
+  background: linear-gradient(165deg, rgba(251, 191, 36, 0.14) 0%, rgba(15, 18, 28, 0.98) 100%);
+  border: 2px solid #fbbf24;
+  box-shadow: 0 15px 45px rgba(251, 191, 36, 0.3);
+  transform: scale(1.03);
+  z-index: 2;
+}
+
+.ax-plan-card.popular:hover {
+  transform: scale(1.03) translateY(-6px);
+  box-shadow: 0 25px 55px rgba(251, 191, 36, 0.45);
+}
+
+.ax-plan-btn-popular {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #06070c !important;
+  font-weight: 900;
+  font-size: 0.92rem;
+  text-decoration: none;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.45);
+  transition: all 0.25s ease;
+  border: none;
+}
+
+.ax-plan-btn-popular:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(251, 191, 36, 0.65);
+  color: #000 !important;
+}
+
+.ax-plan-btn-standard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(251, 191, 36, 0.45);
+  color: #fbbf24 !important;
+  font-weight: 800;
+  font-size: 0.92rem;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+
+.ax-plan-btn-standard:hover {
+  background: #fbbf24;
+  color: #06070c !important;
+  border-color: #fbbf24;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+}
 
 
-<!-- TRUST / GARANSI -->
-<section class="trust-section" id="trust">
-  <div class="trust-container">
-    <div class="section-header animate-on-scroll">
-      <div class="section-tag">Aman &amp; Terpercaya</div>
-      <h2 class="section-title">Belanja dengan <span class="accent">Tenang</span></h2>
-      <p class="section-desc">Kami tahu kamu mengeluarkan uang. Karena itu, setiap transaksi di AlexCloud dirancang aman, transparan, dan bergaransi.</p>
-    </div>
-    <div class="trust-grid">
-      <div class="trust-card animate-on-scroll" data-delay="0">
-        <div class="trust-icon"><i class="fas fa-shield-halved"></i></div>
-        <h3 class="trust-title">Pembayaran Aman</h3>
-        <p class="trust-desc">Lewat QRIS resmi (DANA, GoPay, OVO, ShopeePay, m-banking). Tanpa biaya tersembunyi.</p>
-      </div>
-      <div class="trust-card animate-on-scroll" data-delay="80">
-        <div class="trust-icon"><i class="fas fa-sync-alt"></i></div>
-        <h3 class="trust-title">Garansi Refund</h3>
-        <p class="trust-desc">Kalau kendala murni dari sisi kami, dana kamu kami kembalikan. <a href="/refund?ref_=home_refund_policy">Lihat kebijakan</a>.</p>
-      </div>
-      <div class="trust-card animate-on-scroll" data-delay="160">
-        <div class="trust-icon"><i class="fas fa-bolt"></i></div>
-        <h3 class="trust-title">Aktivasi Instan</h3>
-        <p class="trust-desc">Akun langsung aktif otomatis begitu pembayaran terkonfirmasi. Tanpa nunggu lama.</p>
-      </div>
-      <div class="trust-card animate-on-scroll" data-delay="240">
-        <div class="trust-icon"><i class="fas fa-comments"></i></div>
-        <h3 class="trust-title">Support 24/7</h3>
-        <p class="trust-desc">Tim &amp; AI kami siap bantu lewat WhatsApp, Telegram, dan live chat kapan saja.</p>
-      </div>
-    </div>
-    <div class="trust-links">
-      <a href="/about?ref_=home_links_about"><i class="fas fa-circle-info"></i> Tentang Kami</a>
-      <a href="/terms?ref_=home_links_terms"><i class="fas fa-file-contract"></i> Syarat &amp; Ketentuan</a>
-      <a href="/privacy?ref_=home_links_privacy"><i class="fas fa-user-shield"></i> Kebijakan Privasi</a>
-      <a href="/refund?ref_=home_links_refund"><i class="fas fa-rotate-left"></i> Kebijakan Refund</a>
-    </div>
-  </div>
-</section>
+.ax-royal-vip-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
 
-<!-- PRICING -->
-<section class="pricing-section" id="pricing">
-  <div class="pricing-container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.25rem;">
-    <div class="section-header animate-on-scroll">
-      <div class="section-tag">Harga</div>
-      <h2 class="section-title">Pilih <span class="accent">Paket Terbaik</span></h2>
-      <p class="section-desc">Harga bersahabat untuk semua kalangan gamer. Semakin lama, semakin hemat!</p>
-      <div class="pricing-swipe-hint">
-        <i class="fas fa-hand-pointer"></i> Geser samping untuk lihat paket lainnya 👉
-      </div>
-    </div>
+.ax-royal-card {
+  background: linear-gradient(155deg, rgba(251, 191, 36, 0.14) 0%, rgba(15, 18, 28, 0.96) 60%);
+  border: 1.5px solid #fbbf24;
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(251, 191, 36, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
-    <!-- TIER 1: 4 CORE SUBSCRIPTION PLANS -->
-    <div class="sub-plans-grid home-pricing-slider">
-        <% plans.filter(p => p.id !== 'royal_access' && p.id !== 'custom_royal').forEach((plan, i) => { %>
-          <div class="plan-card <%= plan.popular ? 'popular' : '' %> animate-on-scroll" data-delay="<%= i * 90 %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-            <div>
-              <div class="popular-badge-wrap" style="min-height: 24px; display: flex; align-items: center; margin-bottom: 0.35rem;">
-                <% if (plan.popular) { %>
-                  <div class="popular-badge" style="margin: 0; background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 100px;">⭐ PALING POPULER</div>
-                <% } %>
-              </div>
-              
-              <div class="plan-name" style="font-size: 1.1rem; font-weight: 700;"><%= plan.name %></div>
-              <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>" style="font-size: 1.75rem; font-weight: 800; line-height: 1.1; margin-top: 0.15rem;"><%= plan.priceDisplay %></div>
-              <div class="plan-period" style="font-size:0.78rem; margin-bottom:0.35rem; color:var(--text-muted);">akses <%= plan.duration %> hari</div>
+.ax-custom-card {
+  background: rgba(15, 18, 28, 0.9);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
-              <!-- Daily Breakdown Chip -->
-              <% if (plan.id === '1_minggu') { %>
-                <div class="daily-chip" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.7rem; font-weight:600; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
-                  🔥 Rp 5.714 / hari
-                </div>
-              <% } else if (plan.id === '1_bulan') { %>
-                <div class="daily-chip highlight" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.7rem; font-weight:700; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
-                  ⭐ Rp 2.000 / hari
-                </div>
-              <% } else if (plan.id === '2_bulan') { %>
-                <div class="daily-chip" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.25); color:var(--accent-green); font-size:0.7rem; font-weight:700; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
-                  ⚡ Rp 1.666 / hari
-                </div>
-              <% } else if (plan.id === '3_bulan') { %>
-                <div class="daily-chip gold" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.7rem; font-weight:700; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
-                  👑 Rp 1.666 / hari
-                </div>
-              <% } %>
+/* ==========================================================================
+   TESTIMONIAL CAROUSEL
+   ========================================================================== */
+.ax-testi-wrap {
+  position: relative;
+  overflow: hidden;
+  padding: 0.5rem 0 2rem;
+}
 
-              <ul class="plan-features" style="gap:0.4rem; margin-bottom:1.1rem;">
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses 100+ Game AAA</li>
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Streaming 4K / 60fps</li>
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Cloud Save Progress</li>
-                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device Support</li>
-                <% if (plan.duration >= 90) { %>
-                  <li><i class="fas fa-star" style="color:#fbbf24"></i> VIP Priority &amp; Early</li>
-                <% } else if (plan.duration >= 60) { %>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> 🔥 Bonus 5H Gratis</li>
-                <% } else if (plan.duration >= 30) { %>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses Game Baru</li>
-                <% } else { %>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> CS Support 24/7</li>
-                <% } %>
-              </ul>
-            </div>
+.ax-testi-track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 1.25rem;
+}
 
-            <% if (typeof user !== 'undefined' && user) { %>
-              <a href="/order/<%= plan.id %>?ref_=home_pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
-                <i class="fas fa-shopping-cart"></i> Pilih Paket
-              </a>
-            <% } else { %>
-              <a href="/login?ref_=home_pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
-                Login Order
-              </a>
-            <% } %>
-          </div>
-        <% }) %>
-    </div>
+.ax-testi-card {
+  flex: 0 0 calc(33.333% - 0.75rem);
+  box-sizing: border-box;
+  background: rgba(15, 18, 28, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.85rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s ease;
+}
 
-    <!-- TIER 2: WILAYAH ROYAL CLUB VIP & SEWA HARIAN -->
-    <div style="margin-top: 3.5rem; text-align: center;">
-      <div style="display:inline-flex; align-items:center; gap:0.4rem; color:#fbbf24; font-family:var(--font-display); font-size:1.25rem; font-weight:800; letter-spacing:0.02em;">
-        👑 ROYAL VIP LOUNGE &amp; SEWA HARIAN
-      </div>
-      <p style="color:var(--text-muted); font-size:0.88rem; margin-top:0.25rem;">Upgrade membership sekali bayar untuk membuka fitur sewa harian fleksibel.</p>
-    </div>
+.ax-testi-card:hover {
+  border-color: rgba(251, 191, 36, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
 
-    <div class="royal-vip-grid">
-      <% const royalPlan = plans.find(p => p.id === 'royal_access'); %>
-      <% if (royalPlan) { %>
-        <!-- 👑 VIP Royal Access Pass Card -->
-        <div class="plan-card royal-card animate-on-scroll" style="background: linear-gradient(155deg, rgba(251, 191, 36, 0.16) 0%, rgba(18, 19, 25, 0.98) 60%); border: 2px solid #fbbf24; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.18); display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-          <div>
-            <div class="popular-badge-wrap" style="min-height: 24px; display: flex; align-items: center; margin-bottom: 0.35rem;">
-              <div class="popular-badge" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #000; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.04em; margin: 0; padding: 0.2rem 0.6rem; border-radius: 100px;">👑 VIP CLUB UPGRADE</div>
-            </div>
-            
-            <div class="plan-name" style="color: #fbbf24; font-weight: 800; font-size: 1.25rem;"><%= royalPlan.name %></div>
-            <div class="plan-price" style="color: #fff; font-size: 1.85rem; font-weight: 800; text-shadow: 0 0 15px rgba(251,191,36,0.25); line-height: 1.1; margin-top: 0.15rem;"><%= royalPlan.priceDisplay %></div>
-            <div class="plan-period" style="color: #fbbf24; font-weight: 600; font-size:0.78rem; margin-bottom:0.35rem;">Lifetime / Sekali Bayar</div>
-            
-            <div class="daily-chip royal" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.7rem; font-weight:700; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
-              👑 Buka Sewa Harian Rp 7.000
-            </div>
+.ax-testi-screenshot {
+  width: 100%;
+  height: 115px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #090c14;
+}
 
-            <ul class="plan-features" style="gap:0.4rem; margin-bottom:1.1rem;">
-              <li><i class="fas fa-unlock" style="color:#fbbf24;"></i> Buka Fitur Sewa Harian (Rp 7k)</li>
-              <li><i class="fas fa-server" style="color:#fbbf24;"></i> Server Latensi Ultra-Rendah 30ms</li>
-              <li><i class="fas fa-crown" style="color:#fbbf24;"></i> Badge Mahkota Emas Profil 👑</li>
-              <li><i class="fas fa-coins" style="color:#fbbf24;"></i> Bonus Klaim Saldo Harian +Rp 500</li>
-              <li><i class="fas fa-percentage" style="color:#fbbf24;"></i> Cashback Top-up +5% &amp; CS VIP</li>
-            </ul>
-          </div>
+.ax-testi-screenshot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
 
-          <% if (typeof user !== 'undefined' && user) { %>
-            <% if (user.isRoyal) { %>
-              <div class="plan-btn" style="background: linear-gradient(90deg, #10b981, #059669); color: white; cursor: default; border: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.65rem 0.75rem; border-radius: var(--radius-md); font-size: 0.82rem;">
-                <i class="fas fa-check-circle"></i> Sudah Aktif
-              </div>
-            <% } else { %>
-              <a href="/order/<%= royalPlan.id %>?ref_=home_buy_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800; box-shadow: 0 4px 15px rgba(251,191,36,0.3); font-size: 0.82rem; padding: 0.65rem 0.75rem;">
-                <i class="fas fa-crown"></i> Beli Royal Access
-              </a>
-            <% } %>
-          <% } else { %>
-            <a href="/login?ref_=home_login_royal" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; border: none; font-weight: 800; font-size: 0.82rem; padding: 0.65rem 0.75rem;">
-              Login untuk Order
-            </a>
-          <% } %>
-        </div>
-      <% } %>
+.ax-testi-screenshot img:hover {
+  transform: scale(1.05);
+}
 
-      <% const customPlan = plans.find(p => p.id === 'custom_royal'); %>
-      <% if (customPlan) { %>
-        <!-- ⚡ Daily Royal Plan Card with Day Slider -->
-        <div class="plan-card animate-on-scroll" style="<%= (typeof user !== 'undefined' && user && user.isRoyal) ? 'border: 1px solid var(--accent-blue);' : 'opacity: 0.88; position: relative;' %> display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-          <div>
-            <div class="popular-badge-wrap" style="min-height: 24px; display: flex; align-items: center; margin-bottom: 0.35rem;">
-              <% if (typeof user === 'undefined' || !user || !user.isRoyal) { %>
-                <div style="display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-ui); font-size: 0.68rem; font-weight: 700; padding: 0.18rem 0.5rem; border-radius: 100px;">
-                  <i class="fas fa-lock"></i> ROYAL ONLY
-                </div>
-              <% } else { %>
-                <div style="display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: #fbbf24; font-family: var(--font-ui); font-size: 0.68rem; font-weight: 700; padding: 0.18rem 0.5rem; border-radius: 100px;">
-                  <i class="fas fa-unlock"></i> ROYAL UNLOCKED
-                </div>
-              <% } %>
-            </div>
-            
-            <div class="plan-name" id="customDaysName" style="font-size: 1.1rem; font-weight: 700;">Sewa Harian (1 Hari)</div>
-            <div class="plan-price" id="customDaysPrice" style="font-size: 1.75rem; font-weight: 800; line-height: 1.1; margin-top: 0.15rem;">Rp 7.000</div>
-            <div class="plan-period" id="customDaysPeriod" style="font-size:0.78rem; margin-bottom:0.35rem; color:var(--text-muted);">akses 1 hari</div>
+.ax-testi-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
 
-            <!-- SLIDER SECTION -->
-            <div style="margin: 0.6rem 0 0.5rem; text-align: left; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.65rem;">
-              <label for="daysSlider" style="display: flex; justify-content: space-between; font-family: var(--font-ui); font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.2rem;">
-                <span>Durasi Sewa:</span>
-                <strong style="color: var(--accent-blue);" id="sliderValueText">1 Hari</strong>
-              </label>
-              <input type="range" id="daysSlider" min="1" max="6" value="1" style="width: 100%; accent-color: var(--accent-blue); background: rgba(255,255,255,0.1); border-radius: var(--radius-sm); outline: none; cursor: pointer; height: 5px;">
-              <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted); margin-top: 0.1rem; font-family: var(--font-ui);">
-                <span>1H</span>
-                <span>2H</span>
-                <span>3H</span>
-                <span>4H</span>
-                <span>5H</span>
-                <span>6H</span>
-              </div>
-            </div>
-            
-            <ul class="plan-features" style="gap:0.4rem; margin-bottom:1.1rem;">
-              <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses 100+ Game Premium</li>
-              <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Streaming 4K &amp; Cloud Save</li>
-              <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Durasi Bebas (1 - 6 Hari)</li>
-              <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device Support</li>
-              <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Support WhatsApp 24/7</li>
-            </ul>
-          </div>
+.ax-testi-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #fbbf24;
+}
 
-          <% if (typeof user !== 'undefined' && user) { %>
-            <% if (user.isRoyal) { %>
-              <a href="/order/<%= customPlan.id %>?days=1" id="customDaysBtn" class="plan-btn filled" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
-                <i class="fas fa-shopping-cart"></i> Pilih Paket Ini
-              </a>
-            <% } else { %>
-              <a href="/order/royal_access?ref_=home_unlock_daily" onclick="return confirm('Untuk menyewa harian, Anda harus menjadi anggota Royal Club terlebih dahulu.\n\nAnda akan diarahkan ke halaman pembayaran Royal Club Access (Rp 25.000 / Sekali Bayar). Lanjutkan?')" class="plan-btn outline" style="border-color: #fbbf24; color: #fbbf24; font-weight: 700; text-align:center; font-size:0.78rem; padding:0.6rem 0.65rem;">
-                <i class="fas fa-crown"></i> Unlock via Royal Club
-              </a>
-            <% } %>
-          <% } else { %>
-            <a href="/login?ref_=home_login" class="plan-btn outline" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
-              Login untuk Order
-            </a>
-          <% } %>
-        </div>
-      <% } %>
-    </div>
-  </div>
-</section>
+.ax-testi-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
 
-<!-- TESTIMONIALS SECTION -->
-<section class="testimonials-section" id="testimonials">
-  <div class="testi-container">
-    <div class="section-header">
-      <div class="section-tag">Testimoni</div>
-      <h2 class="section-title">Apa Kata <span class="accent">Gamer Kita?</span></h2>
-      <p class="section-desc">Ribuan gamer puas bermain bersama AlexCloud. Ini cerita mereka.</p>
-    </div>
-    <% if (testimonials && testimonials.length > 0) { %>
-    <div class="testi-slider-wrap">
-      <button class="testi-nav testi-prev" onclick="testiPrev()" aria-label="Testimoni sebelumnya"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
-      <div class="testi-slider" id="testiSlider">
-        <% testimonials.forEach((t, idx) => { %>
-        <div class="testi-card <%= idx === 0 ? 'active' : '' %>" data-idx="<%= idx %>">
-          <% if (t.image) { %>
-            <img src="<%= t.image %>" alt="Testimoni <%= t.name %>" class="testi-img" width="400" height="250" loading="lazy" decoding="async" fetchpriority="low">
-          <% } %>
-          <div class="testi-content">
-            <div class="testi-stars">
-              <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < t.rating ? '#fbbf24' : '#333' %>"></i><%}%>
-            </div>
-            <p class="testi-text"><span class="testi-quote-mark" aria-hidden="true">❝</span><%= t.text %></p>
-            <div class="testi-author">
-              <% if (t.avatar && !t.avatar.includes('dicebear.com')) { %>
-                <img src="<%= t.avatar %>" alt="<%= t.name %>" class="testi-avatar" width="44" height="44" loading="lazy" decoding="async">
-              <% } else { %>
-                <div class="testi-avatar-placeholder" aria-hidden="true"><%= t.name.charAt(0).toUpperCase() %></div>
-              <% } %>
-              <div>
-                <div class="testi-name"><%= t.name %></div>
-                <div class="testi-role"><%= t.role %></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <% }) %>
-      </div>
-      <button class="testi-nav testi-next" onclick="testiNext()" aria-label="Testimoni berikutnya"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
-    </div>
-    <div class="testi-dots" id="testiDots">
-      <% testimonials.forEach((t, idx) => { %>
-      <span class="testi-dot <%= idx === 0 ? 'active' : '' %>" onclick="goToTesti(<%= idx %>)"></span>
-      <% }) %>
-    </div>
-    <% } %>
-    <div class="testi-cta">
-      <a href="/testimonials?ref_=home_all_testi" class="btn-secondary"><i class="fas fa-star"></i> Lihat Semua Testimoni</a>
-    </div>
-  </div>
-</section>
+.ax-testi-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-<!-- CTA -->
-<section class="cta-section" id="cta">
-  <div class="container">
-    <div class="cta-card">
-      <div class="cta-bg" aria-hidden="true"></div>
-      <div class="cta-content">
-        <div class="section-tag" style="margin-bottom: 1.5rem;">Mulai Sekarang</div>
-        <h2 class="section-title">Siap Masuk ke Dunia <span class="accent">Cloud Gaming?</span></h2>
-        <p class="section-desc" style="margin-bottom: 2.5rem;">Daftar gratis sekarang dan nikmati pengalaman gaming premium tanpa batas!</p>
-        <div class="cta-actions">
-          <a href="/register?ref_=home_footer_cta" class="btn-primary"><i class="fas fa-user-plus"></i> Daftar Gratis</a>
-          <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '85810073341' %>?text=Halo%20Admin%20AlexCloud" target="_blank" class="btn-secondary">
-            <i class="fab fa-whatsapp"></i> Hubungi Admin
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+.ax-testi-nav-btn:hover {
+  background: #fbbf24;
+  color: #000;
+  border-color: #fbbf24;
+}
 
-<script>
-async function claimDailyLogin() {
-  const btn = document.getElementById('btnDailyLogin');
-  const originalHtml = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 0.85rem;"></i> Proses...';
-  btn.disabled = true;
-  btn.style.opacity = '0.7';
-  btn.style.cursor = 'not-allowed';
+.ax-testi-dots {
+  display: flex;
+  gap: 0.4rem;
+}
 
-  try {
-    const res = await fetch('/api/claim-daily-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const data = await res.json();
-    
-    if (data.success) {
-      if (window.showToast) {
-        showToast('Yeay! Berhasil klaim reward harian Rp ' + data.amount.toLocaleString('id-ID'), 'success');
-      } else {
-        alert('Yeay! Berhasil klaim reward harian Rp ' + data.amount.toLocaleString('id-ID'));
-      }
-      
-      // Update balance UI
-      const balEl = document.getElementById('heroWalletBalance');
-      if (balEl) {
-        const currentStr = balEl.innerText.replace(/[^0-9]/g, '');
-        const currentNum = parseInt(currentStr) || 0;
-        balEl.innerText = 'Rp ' + (currentNum + data.amount).toLocaleString('id-ID');
-      }
+.ax-testi-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+}
 
-      // Reload to update the 7-day streak UI
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-    } else {
-      if (window.showToast) {
-        showToast(data.message || 'Gagal klaim', 'error');
-      } else {
-        alert(data.message || 'Gagal klaim');
-      }
-      btn.innerHTML = originalHtml;
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.cursor = 'pointer';
-    }
-  } catch (err) {
-    if (window.showToast) {
-      showToast('Terjadi kesalahan jaringan', 'error');
-    } else {
-      alert('Terjadi kesalahan jaringan');
-    }
-    btn.innerHTML = originalHtml;
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
+.ax-testi-dot.active {
+  width: 24px;
+  border-radius: 10px;
+  background: #fbbf24;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVE OVERRIDES (PERFECT COMPACT EXPERIENCE)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .hero {
+    padding-top: 6.5rem !important;
+    padding-bottom: 2rem !important;
+  }
+  .hero-container {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 0 1rem !important;
+  }
+  .ax-promo-banner-wrap {
+    margin-top: 0.5rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .ax-promo-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+  }
+  .ax-promo-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .ax-promo-text {
+    font-size: 0.82rem;
+  }
+  .ax-promo-actions {
+    width: 100%;
+  }
+  .ax-btn-copy-promo {
+    width: 100%;
+    justify-content: center;
+    padding: 0.55rem 1rem;
+    font-size: 0.8rem;
+  }
+  .ax-hero-badge {
+    font-size: 0.68rem;
+    padding: 0.35rem 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .ax-hero-title {
+    font-size: 2.1rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.85rem;
+  }
+  .ax-hero-sub {
+    font-size: 0.9rem;
+    margin-bottom: 1.35rem;
+  }
+  .ax-hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.65rem;
+  }
+  .ax-btn-hero-primary, .ax-btn-hero-secondary {
+    width: 100%;
+    padding: 0.8rem 1.25rem;
+    font-size: 0.88rem;
+  }
+  .ax-member-bento {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    padding: 0.85rem;
+  }
+  .ax-hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+  .ax-stat-card {
+    padding: 0.6rem 0.4rem;
+    border-radius: 10px;
+  }
+  .ax-stat-val {
+    font-size: 1.15rem;
+  }
+  .ax-stat-lbl {
+    font-size: 0.65rem;
+  }
+
+  /* Mobile Rig Showcase */
+  .ax-rig-showcase {
+    padding: 1rem;
+    border-radius: 16px;
+    gap: 0.85rem;
+  }
+  .ax-rig-title {
+    font-size: 0.78rem;
+  }
+  .ax-rig-beacon {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+  }
+  .ax-game-preview-card {
+    height: 110px;
+    border-radius: 10px;
+  }
+  .ax-game-preview-overlay {
+    padding: 0.5rem;
+  }
+  .ax-game-preview-name {
+    font-size: 0.72rem;
+  }
+  .ax-game-preview-tag {
+    font-size: 0.58rem;
+  }
+  .ax-rig-specs-bar {
+    font-size: 0.65rem;
+    padding: 0.5rem 0.6rem;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  /* Mobile Ticker */
+  .ax-ticker-wrap {
+    padding: 0.6rem 0;
+  }
+  .ax-ticker-item {
+    font-size: 0.72rem;
+  }
+
+  /* Mobile 2-Column Game Grid */
+  .ax-game-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  .ax-card {
+    border-radius: 14px;
+  }
+  .ax-card-poster {
+    height: 155px;
+  }
+  .ax-card-badge {
+    font-size: 0.58rem;
+    padding: 0.2rem 0.45rem;
+    top: 6px;
+    left: 6px;
+    border-radius: 6px;
+  }
+  .ax-card-body {
+    padding: 0.75rem 0.65rem;
+  }
+  .ax-card-title {
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+  }
+  .ax-card-genre {
+    font-size: 0.68rem;
+    margin-bottom: 0.4rem;
+  }
+  .ax-card-footer {
+    padding-top: 0.45rem;
+    margin-top: 0.3rem;
+  }
+  .ax-card-rating {
+    font-size: 0.72rem;
+  }
+  .ax-card-status {
+    font-size: 0.62rem;
+    padding: 0.15rem 0.45rem;
+  }
+
+  /* Mobile Pricing Grid */
+  .ax-pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .ax-plan-card.popular {
+    transform: none;
+  }
+  .ax-plan-card.popular:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Mobile Royal VIP Lounge */
+  .ax-vip-lounge-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 1.35rem !important;
+  }
+
+  /* Testimonial single slide on mobile - 100% precision */
+  .ax-testi-track {
+    gap: 0 !important;
+  }
+  .ax-testi-card {
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 1.25rem 1rem !important;
+    box-sizing: border-box !important;
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  const slider = document.getElementById('daysSlider');
-  if (slider) {
-    const nameEl = document.getElementById('customDaysName');
-    const priceEl = document.getElementById('customDaysPrice');
-    const periodEl = document.getElementById('customDaysPeriod');
-    const valTextEl = document.getElementById('sliderValueText');
-    const btnEl = document.getElementById('customDaysBtn');
-
-    function updateCustomDays() {
-      const days = parseInt(slider.value);
-      const price = days * 7000;
-      
-      nameEl.innerText = `Sewa Harian (${days} Hari)`;
-      priceEl.innerText = `Rp ${price.toLocaleString('id-ID')}`;
-      periodEl.innerText = `akses selama ${days} hari`;
-      valTextEl.innerText = `${days} Hari`;
-      
-      if (btnEl) {
-        btnEl.href = `/order/custom_royal?days=${days}`;
-      }
-    }
-
-    slider.addEventListener('input', updateCustomDays);
-    updateCustomDays(); // run once initially
+@media (max-width: 900px) {
+  .ax-royal-vip-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.15rem !important;
   }
-});
+  .ax-royal-card, .ax-custom-card {
+    padding: 1.25rem 1.1rem !important;
+    border-radius: 16px !important;
+  }
+  .ax-benefit-extra {
+    display: none !important;
+  }
+  .ax-benefit-sub {
+    font-size: 0.72rem !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   AAA UI/UX POLISH OVERRIDES — NVIDIA / XBOX CLOUD / STEAM QUALITY
+   Fluid Typography, Spacing Rhythm, Card Refinement, Mobile Precision
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. FLUID TYPOGRAPHY SCALE ── */
+.ax-hero-title {
+  font-size: clamp(2rem, 5vw + 0.5rem, 3.5rem) !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.ax-hero-gradient {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #d97706 70%, #00f2fe 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.ax-hero-sub {
+  font-size: clamp(0.88rem, 1.5vw + 0.3rem, 1.08rem) !important;
+  line-height: 1.7 !important;
+  color: #94a3b8 !important;
+  font-weight: 400 !important;
+}
+
+/* Uniform Section Titles — fluid, gradient accent span */
+.section-title {
+  font-family: var(--font-display, 'Poppins', sans-serif) !important;
+  font-size: clamp(1.45rem, 3.5vw + 0.2rem, 2.15rem) !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: #f8fafc !important;
+}
+
+.section-title .accent,
+.section-title span[style*="color: #fbbf24"] {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Section description text */
+.section-desc {
+  font-size: clamp(0.84rem, 1.2vw + 0.2rem, 0.95rem) !important;
+  line-height: 1.6 !important;
+  color: #94a3b8 !important;
+  max-width: 600px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Section tags — slightly larger, better tracking */
+.section-tag {
+  font-size: 0.72rem !important;
+  letter-spacing: 1.2px !important;
+  padding: 0.28rem 0.85rem !important;
+}
+
+/* Feature card titles */
+.feature-title {
+  font-family: var(--font-display, 'Poppins', sans-serif) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.feature-desc {
+  font-size: 0.86rem !important;
+  line-height: 1.65 !important;
+}
+
+/* Trust card titles */
+.trust-title {
+  font-family: var(--font-display, 'Poppins', sans-serif) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
+
+.trust-desc {
+  font-size: 0.86rem !important;
+  line-height: 1.65 !important;
+}
+
+/* How-to step titles */
+.how-step-title {
+  font-family: var(--font-display, 'Poppins', sans-serif) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
+
+.how-step-desc {
+  font-size: 0.86rem !important;
+  line-height: 1.6 !important;
+}
+
+/* ── 2. SECTION SPACING RHYTHM ── */
+.features-section,
+.how-section,
+.games-section,
+.tiktok-section,
+.trust-section,
+.testimonials-section {
+  padding: clamp(2.5rem, 5vw, 4.5rem) 0 !important;
+}
+
+.pricing-section {
+  padding: clamp(3rem, 5vw, 5rem) 0 !important;
+}
+
+.cta-section {
+  padding: clamp(3rem, 5vw, 5rem) 0 clamp(3.5rem, 6vw, 6rem) !important;
+}
+
+/* Section header consistent bottom margin */
+.section-header {
+  margin-bottom: 2.25rem !important;
+}
+
+/* ── 3. CARDS & HOVER EFFECTS REFINEMENT ── */
+
+/* Game Cards */
+.ax-card {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  will-change: transform !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.35s ease !important;
+}
+
+.ax-card:hover {
+  transform: translateY(-6px) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 
+              0 0 0 1px rgba(251, 191, 36, 0.18),
+              0 0 20px rgba(251, 191, 36, 0.08) !important;
+}
+
+.ax-card-poster {
+  height: 220px !important;
+}
+
+/* Feature Cards */
+.feature-card {
+  padding: 1.75rem 1.5rem !important;
+  border-radius: 16px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  will-change: transform !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s ease, 
+              border-color 0.3s ease !important;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(251, 191, 36, 0.3) !important;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55), 
+              0 0 0 1px rgba(251, 191, 36, 0.15) !important;
+}
+
+.feature-icon {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 13px !important;
+  font-size: 1.35rem !important;
+  margin-bottom: 1.15rem !important;
+}
+
+/* Pricing Cards */
+.ax-plan-card {
+  border-radius: 18px !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s ease, 
+              border-color 0.3s ease !important;
+  will-change: transform !important;
+}
+
+.ax-plan-card:hover {
+  transform: translateY(-5px) !important;
+}
+
+.ax-plan-card.popular {
+  transform: scale(1.02) !important;
+  border-radius: 18px !important;
+}
+
+.ax-plan-card.popular:hover {
+  transform: scale(1.02) translateY(-5px) !important;
+}
+
+/* Plan Buttons subtle glow refinement */
+.ax-plan-btn-popular {
+  border-radius: 11px !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+.ax-plan-btn-standard {
+  border-radius: 11px !important;
+  transition: all 0.25s ease !important;
+}
+
+/* Royal VIP Cards */
+.ax-royal-card {
+  border-radius: 18px !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.ax-royal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5), 0 0 30px rgba(251, 191, 36, 0.12);
+}
+
+.ax-custom-card {
+  border-radius: 18px !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.ax-custom-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 242, 254, 0.1);
+}
+
+/* Trust Cards — match feature card styling */
+.trust-card {
+  background: #131418 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 1.75rem 1.5rem !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  will-change: transform !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s ease, 
+              border-color 0.3s ease !important;
+}
+
+.trust-card:hover {
+  border-color: rgba(251, 191, 36, 0.3) !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55), 
+              0 0 0 1px rgba(251, 191, 36, 0.15) !important;
+}
+
+/* How-to Steps */
+.how-step {
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  will-change: transform !important;
+}
+
+.how-step:hover {
+  transform: translateY(-4px) !important;
+}
+
+/* Testimonial Cards */
+.ax-testi-card {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s ease, 
+              border-color 0.3s ease !important;
+  will-change: transform !important;
+}
+
+/* Testi screenshot — consistent rounded corners */
+.ax-testi-screenshot {
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+
+/* ── 4. COLOR / HIERARCHY POLISH ── */
+
+/* Hero badge — slightly more visible */
+.ax-hero-badge {
+  font-size: 0.72rem !important;
+  padding: 0.4rem 1rem !important;
+  letter-spacing: 0.8px !important;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.12) !important;
+}
+
+/* Stats values — consistent font */
+.ax-stat-val {
+  font-family: var(--font-display, 'Poppins', sans-serif) !important;
+  font-size: clamp(1.1rem, 2vw, 1.5rem) !important;
+  font-weight: 900 !important;
+}
+
+.ax-stat-lbl {
+  font-size: 0.7rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #64748b !important;
+}
+
+/* Trending game cards — consistent overlay gradient */
+.trending-scroll > div {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+.trending-scroll > div:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(251, 191, 36, 0.1) !important;
+}
+
+/* ── 5. MICRO-INTERACTIONS & POLISH ── */
+
+/* Smoother ticker */
+.ax-ticker-track {
+  animation-duration: 40s !important;
+}
+
+/* CTA section card — refined radius and glow */
+.cta-section > div > div {
+  border-radius: 24px !important;
+}
+
+/* Promo banner shimmer subtle */
+.ax-promo-banner {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Smoother image zoom on game cards */
+.ax-card-poster img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.ax-card:hover .ax-card-poster img {
+  transform: scale(1.06) !important;
+}
+
+/* ── 6. COMPREHENSIVE MOBILE FIXES (≤900px) ── */
+@media (max-width: 900px) {
+  .hero {
+    padding-top: 4.6rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .hero-container {
+    padding: 0 1rem !important;
+    gap: 1.5rem !important;
+  }
+
+  .ax-promo-banner-wrap {
+    margin-top: 0 !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  /* Section titles — smaller on mobile via clamp, already fluid */
+
+  /* Section spacing — tighter on mobile */
+  .features-section,
+  .how-section,
+  .games-section,
+  .tiktok-section,
+  .trust-section,
+  .testimonials-section {
+    padding: 2.25rem 0 !important;
+  }
+
+  .pricing-section {
+    padding: 2.5rem 0 !important;
+  }
+
+  .cta-section {
+    padding: 2.5rem 0 3rem !important;
+  }
+
+  /* Section headers tighter on mobile */
+  .section-header {
+    margin-bottom: 1.75rem !important;
+  }
+
+  /* Game Grid — tighter mobile */
+  .ax-game-grid {
+    gap: 0.65rem !important;
+  }
+
+  .ax-card-poster {
+    height: 140px !important;
+  }
+
+  .ax-card {
+    border-radius: 12px !important;
+  }
+
+  .ax-card-body {
+    padding: 0.65rem 0.6rem !important;
+  }
+
+  .ax-card-title {
+    font-size: 0.82rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .ax-card-genre {
+    font-size: 0.66rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .ax-card-footer {
+    padding-top: 0.4rem !important;
+  }
+
+  .ax-card-rating {
+    font-size: 0.7rem !important;
+  }
+
+  .ax-card-status {
+    font-size: 0.6rem !important;
+    padding: 0.12rem 0.4rem !important;
+  }
+
+  .ax-card-badge {
+    font-size: 0.56rem !important;
+    padding: 0.18rem 0.4rem !important;
+  }
+
+  /* Feature cards — compact mobile */
+  .feature-card {
+    padding: 1.25rem 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .feature-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 11px !important;
+    font-size: 1.15rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .feature-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .feature-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.55 !important;
+  }
+
+  /* Features grid mobile — 1 column */
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  /* Trust cards — compact mobile */
+  .trust-card {
+    padding: 1.25rem 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  /* How steps mobile */
+  .how-step-title {
+    font-size: 0.95rem !important;
+  }
+
+  .how-step-desc {
+    font-size: 0.82rem !important;
+  }
+
+  /* Pricing cards mobile */
+  .ax-plan-card {
+    padding: 1.35rem 1.15rem !important;
+    border-radius: 16px !important;
+  }
+
+  .ax-plan-card.popular {
+    transform: none !important;
+  }
+
+  .ax-plan-card.popular:hover {
+    transform: translateY(-3px) !important;
+  }
+
+  /* Royal VIP mobile */
+  .ax-royal-card, .ax-custom-card {
+    border-radius: 14px !important;
+  }
+
+  /* Testimonial controls mobile */
+  .ax-testi-controls {
+    margin-top: 1rem !important;
+  }
+
+  /* CTA section mobile */
+  .cta-section > div > div {
+    padding: 2.25rem 1.25rem !important;
+    border-radius: 20px !important;
+  }
+
+  /* Trending games mobile — smaller cards */
+  .trending-scroll > div {
+    flex: 0 0 155px !important;
+    height: 240px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Ticker mobile */
+  .ax-ticker-item {
+    font-size: 0.7rem !important;
+  }
+
+  /* Tiktok card mobile */
+  .tiktok-premium-card {
+    padding: 1.5rem 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* Hero badge mobile */
+  .ax-hero-badge {
+    font-size: 0.65rem !important;
+    padding: 0.3rem 0.75rem !important;
+    gap: 0.4rem !important;
+  }
+
+  /* Stats mobile */
+  .ax-stat-val {
+    font-size: 1.1rem !important;
+  }
+
+  .ax-stat-lbl {
+    font-size: 0.62rem !important;
+  }
+
+  .ax-stat-card {
+    padding: 0.55rem 0.35rem !important;
+    border-radius: 10px !important;
+  }
+
+  /* Trust links mobile */
+  .trust-links {
+    gap: 0.85rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .trust-links a {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* ── 7. ULTRA-SMALL MOBILE (≤480px) ── */
+@media (max-width: 480px) {
+  .hero {
+    padding-top: 4.4rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .hero-container {
+    padding: 0 0.85rem !important;
+  }
+
+  .ax-promo-banner-wrap {
+    margin-top: 0 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .ax-hero-title {
+    font-size: 1.85rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .section-title {
+    font-size: 1.35rem !important;
+  }
+
+  .section-desc {
+    font-size: 0.82rem !important;
+  }
+
+  .ax-hero-sub {
+    font-size: 0.85rem !important;
+  }
+
+  .ax-hero-actions {
+    gap: 0.55rem !important;
+  }
+
+  .ax-btn-hero-primary, .ax-btn-hero-secondary {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.84rem !important;
+    border-radius: 10px !important;
+  }
+
+  .ax-game-grid {
+    gap: 0.5rem !important;
+  }
+
+  .ax-card-poster {
+    height: 125px !important;
+  }
+
+  .ax-card-body {
+    padding: 0.55rem 0.5rem !important;
+  }
+
+  .ax-card-title {
+    font-size: 0.78rem !important;
+  }
+
+  .feature-card {
+    padding: 1.1rem 0.9rem !important;
+  }
+
+  .feature-icon {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.05rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .feature-title {
+    font-size: 0.9rem !important;
+  }
+
+  .feature-desc {
+    font-size: 0.8rem !important;
+  }
+
+  .trust-card {
+    padding: 1.1rem 0.9rem !important;
+  }
+
+  /* Pricing tighter */
+  .ax-plan-card {
+    padding: 1.15rem 1rem !important;
+  }
+
+  .ax-plan-btn-popular,
+  .ax-plan-btn-standard {
+    padding: 0.7rem 0.85rem !important;
+    font-size: 0.84rem !important;
+  }
+
+  /* CTA */
+  .cta-section > div > div {
+    padding: 1.75rem 1rem !important;
+    border-radius: 18px !important;
+  }
+}
+
+/* ==========================================================================
+   ALEXCLOUD HOMEPAGE — PROFESSIONAL RESPONSIVE FINISH
+   One final cascade layer to unify the older component rules above.
+   ========================================================================== */
+:root {
+  --home-bg: #07090d;
+  --home-surface: #101319;
+  --home-surface-raised: #151922;
+  --home-border: rgba(255, 255, 255, 0.1);
+  --home-border-strong: rgba(255, 255, 255, 0.16);
+  --home-copy: #f8fafc;
+  --home-muted: #a4aec0;
+  --home-accent: #fbbf24;
+  --home-accent-strong: #f59e0b;
+  --home-success: #34d399;
+  --home-cyan: #67e8f9;
+  --home-radius: 18px;
+  --home-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+body {
+  background:
+    radial-gradient(circle at 76% 11%, rgba(14, 165, 233, 0.07), transparent 28rem),
+    radial-gradient(circle at 18% 9%, rgba(245, 158, 11, 0.08), transparent 26rem),
+    var(--home-bg) !important;
+  color: var(--home-copy) !important;
+  text-rendering: optimizeLegibility;
+}
+
+/* Single-row, product-focused desktop navigation. Secondary pages remain in
+   the mobile drawer and footer, keeping the primary navigation easy to scan. */
+.navbar {
+  min-height: 72px;
+  padding: 0 !important;
+  background: rgba(7, 9, 13, 0.88) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(18px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+}
+
+.nav-container {
+  width: min(100% - 40px, 1240px) !important;
+  min-height: 72px;
+  padding: 0 !important;
+  gap: 1.1rem !important;
+  flex-wrap: nowrap !important;
+}
+
+.nav-logo { min-height: 48px; }
+.logo-text { letter-spacing: 0.08em !important; }
+.nav-links {
+  flex-wrap: nowrap !important;
+  gap: 0.15rem !important;
+  min-width: 0;
+}
+.nav-link {
+  min-height: 44px;
+  padding: 0.7rem 0.72rem !important;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.86rem !important;
+  white-space: nowrap;
+}
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: #fff !important;
+}
+.nav-search-wrap { max-width: 190px !important; }
+.nav-search-input { min-height: 42px; }
+.nav-user-btn, .btn-nav-cta { min-height: 44px; white-space: nowrap; }
+
+@media (min-width: 901px) {
+  .nav-links > a[href^="/testimonials"],
+  .nav-links > a[href^="/community"],
+  .nav-links > a[href^="/network-test"],
+  .nav-links > a[href^="/faq"] {
+    display: none !important;
+  }
+}
+
+/* Hero */
+.hero {
+  min-height: 760px;
+  padding: 7.6rem 0 5rem !important;
+  display: flex;
+  align-items: center;
+  isolation: isolate;
+}
+
+.ax-ambient-mesh { opacity: 0.7; }
+.ax-mesh-glow-1,
+.ax-mesh-glow-2 { filter: blur(110px); }
+
+.hero-container {
+  width: min(100% - 40px, 1240px) !important;
+  max-width: 1240px !important;
+  padding: 0 !important;
+  grid-template-columns: minmax(0, 1.08fr) minmax(390px, 0.92fr) !important;
+  column-gap: clamp(3rem, 6vw, 5.75rem) !important;
+  row-gap: 2rem !important;
+}
+
+.ax-promo-banner-wrap {
+  margin: 0 0 1.5rem !important;
+}
+.ax-promo-banner {
+  min-height: 52px;
+  padding: 0.65rem 0.75rem 0.65rem 0.8rem !important;
+  background: rgba(17, 20, 27, 0.92) !important;
+  border-color: rgba(251, 191, 36, 0.24) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22) !important;
+}
+.ax-promo-banner::before { width: 3px; }
+.ax-promo-badge {
+  box-shadow: none !important;
+  border-radius: 7px !important;
+  letter-spacing: 0.08em !important;
+}
+.ax-promo-text {
+  color: #d9deea !important;
+  font-size: 0.82rem !important;
+}
+.ax-btn-copy-promo {
+  min-height: 40px;
+  padding: 0.55rem 0.9rem !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.hero-content { max-width: 650px; }
+.ax-hero-badge {
+  margin-bottom: 1.35rem !important;
+  padding: 0.48rem 0.85rem !important;
+  color: #f8cc5b !important;
+  background: rgba(251, 191, 36, 0.07) !important;
+  border-color: rgba(251, 191, 36, 0.22) !important;
+  box-shadow: none !important;
+  letter-spacing: 0.075em !important;
+}
+.ax-hero-title {
+  max-width: 700px;
+  margin-bottom: 1.25rem !important;
+  font-size: clamp(3.25rem, 4.6vw, 4.35rem) !important;
+  line-height: 1.035 !important;
+  letter-spacing: -0.052em !important;
+  text-wrap: balance;
+}
+.ax-hero-gradient {
+  color: var(--home-accent) !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+  filter: none !important;
+}
+.ax-hero-sub {
+  max-width: 610px !important;
+  margin-bottom: 1.75rem !important;
+  color: var(--home-muted) !important;
+  font-size: 1rem !important;
+  line-height: 1.75 !important;
+}
+.ax-hero-sub strong { color: #eef2f7; }
+.ax-hero-actions { gap: 0.75rem !important; margin-bottom: 1.35rem !important; }
+.ax-btn-hero-primary,
+.ax-btn-hero-secondary,
+.ax-plan-btn-popular,
+.ax-plan-btn-standard,
+.tiktok-premium-btn {
+  min-height: 48px;
+  touch-action: manipulation;
+}
+.ax-btn-hero-primary {
+  padding: 0.86rem 1.4rem !important;
+  border-radius: 10px !important;
+  background: var(--home-accent) !important;
+  box-shadow: 0 10px 28px rgba(245, 158, 11, 0.2) !important;
+}
+.ax-btn-hero-primary::after { display: none !important; }
+.ax-btn-hero-primary:hover {
+  background: #fcd34d !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 34px rgba(245, 158, 11, 0.28) !important;
+}
+.ax-btn-hero-secondary {
+  padding: 0.86rem 1.35rem !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+.ax-btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.075) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  transform: translateY(-2px) !important;
+}
+
+.ax-trust-row {
+  gap: 0.65rem 1.1rem !important;
+  margin-bottom: 1.7rem !important;
+  color: #9ba6b8 !important;
+}
+.ax-trust-row span { font-size: 0.75rem !important; }
+.ax-trust-row i { color: var(--home-success) !important; }
+
+.ax-member-bento {
+  margin-top: 0 !important;
+  padding: 0.75rem !important;
+  background: rgba(16, 19, 25, 0.78) !important;
+  border-color: var(--home-border) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+.ax-wallet-card,
+.ax-streak-card {
+  background: rgba(255, 255, 255, 0.025) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.ax-hero-stats {
+  margin-top: 1.6rem !important;
+  padding-top: 1.35rem !important;
+  gap: 0 !important;
+  border-top: 1px solid var(--home-border) !important;
+}
+.ax-stat-card {
+  padding: 0 1.15rem !important;
+  border: 0 !important;
+  border-right: 1px solid var(--home-border) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ax-stat-card:first-child { padding-left: 0 !important; }
+.ax-stat-card:last-child { border-right: 0 !important; }
+.ax-stat-val {
+  color: #fff !important;
+  font-size: 1.2rem !important;
+  letter-spacing: -0.025em;
+}
+.ax-stat-lbl {
+  margin-top: 0.3rem;
+  color: #7f8a9d !important;
+  letter-spacing: 0.04em !important;
+}
+
+.hero-visual {
+  display: block !important;
+  position: relative;
+}
+.hero-visual::before {
+  content: '';
+  position: absolute;
+  inset: -13% -10%;
+  z-index: -1;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.12), transparent 64%);
+  filter: blur(20px);
+}
+.ax-rig-showcase {
+  padding: 1.2rem !important;
+  gap: 1rem !important;
+  border-color: rgba(255, 255, 255, 0.13) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(160deg, rgba(23, 27, 36, 0.98), rgba(12, 15, 21, 0.98)) !important;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42) !important;
+  transform: perspective(1200px) rotateY(-2deg) rotateX(1deg);
+}
+.ax-game-preview-card { height: 205px !important; }
+.ax-rig-specs-bar {
+  min-height: 48px;
+  background: rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Calm section rhythm and a single visual language across the full page. */
+.trending-container,
+.features-container,
+.how-container,
+.games-container,
+.tiktok-card-container,
+.trust-container,
+.pricing-container,
+.testimonials-container,
+.cta-container {
+  width: min(100% - 40px, 1180px) !important;
+  max-width: 1180px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.trending-section,
+.features-section,
+.how-section,
+.games-section,
+.tiktok-section,
+.trust-section,
+.pricing-section,
+.testimonials-section,
+.cta-section {
+  position: relative;
+  padding: clamp(4.5rem, 7vw, 6.75rem) 0 !important;
+}
+.trending-section,
+.games-section,
+.trust-section,
+.testimonials-section {
+  background: rgba(255, 255, 255, 0.018) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.045);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+}
+.section-header {
+  max-width: 720px;
+  margin: 0 auto 2.75rem !important;
+}
+.section-tag {
+  margin-bottom: 0.8rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #eabf55 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.14em !important;
+}
+.section-title {
+  margin: 0 0 0.85rem !important;
+  font-size: clamp(2rem, 3.4vw, 2.8rem) !important;
+  line-height: 1.14 !important;
+  letter-spacing: -0.04em !important;
+  text-wrap: balance;
+}
+.section-title .accent,
+.section-title span[style*="color: #fbbf24"] {
+  color: var(--home-accent) !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.section-desc {
+  color: var(--home-muted) !important;
+  font-size: 0.98rem !important;
+  line-height: 1.7 !important;
+}
+
+.features-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 1rem !important; }
+.feature-card,
+.trust-card,
+.how-step,
+.ax-card,
+.ax-plan-card,
+.ax-testi-card,
+.ax-royal-card,
+.ax-custom-card {
+  background: var(--home-surface) !important;
+  border: 1px solid var(--home-border) !important;
+  border-radius: var(--home-radius) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2) !important;
+}
+.feature-card,
+.trust-card {
+  padding: 1.6rem !important;
+}
+.feature-card:hover,
+.trust-card:hover,
+.how-step:hover,
+.ax-card:hover,
+.ax-testi-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--home-border-strong) !important;
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.28) !important;
+}
+.feature-icon,
+.trust-icon,
+.how-step-icon {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+}
+.feature-desc,
+.trust-desc,
+.how-step-desc { color: var(--home-muted) !important; }
+
+.how-steps { gap: 1rem !important; }
+.how-step { padding: 1.8rem 1.5rem !important; }
+.how-step-num {
+  color: rgba(251, 191, 36, 0.12) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.trending-scroll {
+  gap: 0.9rem !important;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-inline: contain;
+}
+.trending-scroll > div {
+  flex-basis: 180px !important;
+  height: 270px !important;
+  border-radius: 15px !important;
+  border-color: var(--home-border) !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24) !important;
+  scroll-snap-align: start;
+}
+
+.ax-game-grid { gap: 1rem !important; }
+.ax-card { box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22) !important; }
+.ax-card-poster { height: 230px !important; }
+.ax-card-body { padding: 1rem !important; }
+.ax-card-status { white-space: nowrap; }
+
+.tiktok-premium-card {
+  max-width: 820px;
+  margin-inline: auto;
+  padding: 2.6rem !important;
+  background: var(--home-surface) !important;
+  border-color: var(--home-border) !important;
+  border-radius: var(--home-radius) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+.tiktok-premium-btn {
+  background: #fff !important;
+  color: #090b10 !important;
+  border-radius: 10px !important;
+}
+
+.trust-grid { gap: 1rem !important; }
+.trust-links a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ax-pricing-grid { gap: 1rem !important; }
+.ax-plan-card { padding: 1.5rem !important; }
+.ax-plan-card.popular {
+  transform: none !important;
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.09), var(--home-surface) 38%) !important;
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.26) !important;
+}
+.ax-plan-card.popular:hover { transform: translateY(-3px) !important; }
+.ax-plan-btn-popular {
+  background: var(--home-accent) !important;
+  box-shadow: none !important;
+  border-radius: 10px !important;
+}
+.ax-plan-btn-standard {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid var(--home-border-strong) !important;
+  color: #f5f7fa !important;
+  border-radius: 10px !important;
+}
+.ax-plan-btn-standard:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #fff !important;
+}
+.ax-royal-card { border-color: rgba(251, 191, 36, 0.36) !important; }
+.ax-custom-card { border-color: rgba(103, 232, 249, 0.28) !important; }
+
+.ax-testi-card { padding: 1rem !important; }
+.ax-testi-nav-btn {
+  width: 44px !important;
+  height: 44px !important;
+}
+.ax-testi-dot {
+  min-width: 10px;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+}
+
+.cta-section > .cta-container > div {
+  padding: clamp(2.5rem, 6vw, 4.5rem) 1.5rem !important;
+  background: linear-gradient(145deg, rgba(251, 191, 36, 0.1), rgba(16, 19, 25, 0.98) 54%) !important;
+  border: 1px solid rgba(251, 191, 36, 0.28) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Keyboard visibility and stable interactions */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(251, 191, 36, 0.55) !important;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .nav-search-wrap { display: none !important; }
+  .hero {
+    min-height: auto;
+    padding-top: 7rem !important;
+  }
+  .hero-container {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.8fr) !important;
+    column-gap: 2.5rem !important;
+  }
+  .ax-hero-title { font-size: clamp(2.9rem, 5vw, 3.7rem) !important; }
+  .ax-game-preview-card { height: 170px !important; }
+  .ax-pricing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 900px) {
+  html { scroll-padding-top: 72px; }
+  .navbar, .nav-container { min-height: 64px; }
+  .nav-container { width: calc(100% - 28px) !important; }
+  .nav-logo { min-height: 44px; }
+  .nav-search-wrap { display: none !important; }
+  .nav-toggle,
+  .nav-notif-btn { width: 44px !important; height: 44px !important; }
+
+  .hero {
+    min-height: auto;
+    padding: 5.35rem 0 3.5rem !important;
+    align-items: flex-start;
+  }
+  .hero-container {
+    width: calc(100% - 32px) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+  .ax-promo-banner-wrap { margin-bottom: 0.55rem !important; }
+  .ax-promo-banner { min-height: auto; padding: 0.75rem !important; }
+  .ax-promo-left {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    align-items: center !important;
+    gap: 0.55rem !important;
+  }
+  .ax-promo-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    line-height: 1.45 !important;
+  }
+  .ax-promo-actions { width: 100%; }
+  .ax-btn-copy-promo { width: 100%; min-height: 44px; }
+  .hero-content { max-width: none; }
+  .ax-hero-badge {
+    max-width: 100%;
+    margin-bottom: 1rem !important;
+    white-space: normal;
+    line-height: 1.45;
+  }
+  .ax-hero-title {
+    max-width: 18ch;
+    margin-bottom: 1rem !important;
+    font-size: clamp(2.35rem, 10.5vw, 3.35rem) !important;
+    line-height: 1.06 !important;
+  }
+  .ax-hero-sub {
+    max-width: 58ch !important;
+    margin-bottom: 1.4rem !important;
+    font-size: 0.98rem !important;
+    line-height: 1.7 !important;
+  }
+  .ax-hero-actions { flex-direction: column; align-items: stretch; gap: 0.65rem !important; }
+  .ax-btn-hero-primary,
+  .ax-btn-hero-secondary { width: 100%; min-height: 50px; }
+  .ax-trust-row {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 0.55rem !important;
+    margin-bottom: 1.4rem !important;
+  }
+  .ax-trust-row span { font-size: 0.8rem !important; }
+  .ax-member-bento { grid-template-columns: 1fr !important; }
+  .ax-hero-stats { grid-template-columns: repeat(2, 1fr) !important; row-gap: 1.15rem !important; }
+  .ax-stat-card { padding: 0 0.9rem !important; }
+  .ax-stat-card:nth-child(2) { border-right: 0 !important; }
+  .ax-stat-card:nth-child(3) { padding-left: 0 !important; }
+  .hero-visual { display: block !important; margin-top: 0.25rem; }
+  .ax-rig-showcase { transform: none; padding: 0.9rem !important; border-radius: 17px !important; }
+  .ax-game-preview-card { height: 145px !important; }
+
+  .trending-container,
+  .features-container,
+  .how-container,
+  .games-container,
+  .tiktok-card-container,
+  .trust-container,
+  .pricing-container,
+  .testimonials-container,
+  .cta-container { width: calc(100% - 32px) !important; }
+  .trending-section,
+  .features-section,
+  .how-section,
+  .games-section,
+  .tiktok-section,
+  .trust-section,
+  .pricing-section,
+  .testimonials-section,
+  .cta-section { padding: 4rem 0 !important; }
+  .section-header { text-align: left !important; margin: 0 0 2rem !important; }
+  .section-title {
+    font-size: clamp(1.8rem, 8vw, 2.35rem) !important;
+    line-height: 1.16 !important;
+  }
+  .section-desc { margin-left: 0 !important; font-size: 0.95rem !important; }
+  .features-grid,
+  .trust-grid,
+  .how-steps { grid-template-columns: 1fr !important; gap: 0.75rem !important; }
+  .feature-card,
+  .trust-card,
+  .how-step { padding: 1.25rem !important; }
+  .ax-pricing-grid,
+  .ax-royal-vip-grid { grid-template-columns: 1fr !important; gap: 0.85rem !important; }
+  .ax-plan-card { padding: 1.3rem !important; }
+  .ax-game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.65rem !important; }
+  .ax-card-poster { height: clamp(145px, 48vw, 205px) !important; }
+  .ax-card-body { padding: 0.75rem !important; }
+  .ax-card-status { display: none; }
+  .tiktok-premium-card { padding: 1.75rem 1.15rem !important; }
+  .trust-links { justify-content: flex-start !important; gap: 0.25rem 1rem !important; }
+  .cta-section > .cta-container > div { padding: 2.5rem 1.15rem !important; }
+}
+
+@media (max-width: 480px) {
+  .hero-container,
+  .trending-container,
+  .features-container,
+  .how-container,
+  .games-container,
+  .tiktok-card-container,
+  .trust-container,
+  .pricing-container,
+  .testimonials-container,
+  .cta-container { width: calc(100% - 24px) !important; }
+  .ax-promo-badge { font-size: 0.62rem !important; }
+  .ax-promo-text { font-size: 0.76rem !important; }
+  .ax-hero-title { font-size: clamp(2.15rem, 11.3vw, 2.75rem) !important; }
+  .ax-dual-games { gap: 0.55rem !important; }
+  .ax-game-preview-card { height: 125px !important; }
+  .ax-rig-title { font-size: 0.7rem !important; }
+  .ax-rig-beacon { font-size: 0.58rem !important; }
+  .ax-rig-specs-bar { gap: 0.45rem !important; justify-content: center !important; }
+  .ax-rig-specs-bar span:nth-child(2) { display: none; }
+  .trending-scroll > div { flex-basis: 154px !important; height: 230px !important; }
+  .ax-card-title { font-size: 0.82rem !important; }
+  .ax-card-genre { font-size: 0.68rem !important; }
+  .ax-testi-card { padding: 0.9rem !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ax-ticker-track { transform: none !important; }
+}
+
+</style>
+
+<!-- HERO SECTION -->
+<section class="hero" id="main-content" aria-label="Hero utama">
+  <div class="ax-ambient-mesh">
+    <div class="ax-mesh-glow-1"></div>
+    <div class="ax-mesh-glow-2"></div>
+  </div>
+
+  <div class="hero-container">
+    <!-- SINGLE UNIFIED TOP PROMO / ANNOUNCEMENT BANNER -->
+    <div class="ax-promo-banner-wrap" id="topPromoBanner">
+      <div class="ax-promo-banner">
+        <div class="ax-promo-left">
+          <div class="ax-promo-badge">
+            <i class="fas fa-gift"></i> PROMO SPESIAL
+          </div>
+          <div class="ax-promo-text">
+            <% if (typeof announcement !== 'undefined' && announcement && announcement.text) { %>
+              <%= announcement.text %>
+              <% if (announcement.link && announcement.linkText) { %>
+                <a href="<%= announcement.link %>" style="color:#fbbf24; font-weight:800; text-decoration:underline; margin-left:0.5rem;"><%= announcement.linkText %> →</a>
+              <% } %>
+            <% } else { %>
+              Hemat 10% untuk transaksi di atas Rp100.000 dengan kode <span class="ax-promo-code" onclick="copyPromoCode('ALEX10')" title="Klik untuk salin">ALEX10</span>.
+            <% } %>
+          </div>
+        </div>
+        <div class="ax-promo-actions">
+          <button type="button" class="ax-btn-copy-promo" onclick="copyPromoCode('ALEX10')">
+            <i class="fas fa-copy"></i> Salin Kode: ALEX10
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Left Hero Column -->
+    <div class="hero-content">
+      <div class="ax-hero-badge">
+        <img src="/images/logo-icon.png" alt="AlexCloud" width="18" height="18" style="object-fit:contain; filter:drop-shadow(0 0 6px rgba(251,191,36,0.6));">
+        <span class="ax-live-dot"></span>
+        <span>Cloud gaming premium &middot; Server Jakarta &lt;15ms</span>
+      </div>
+
+      <h1 class="ax-hero-title">
+        Main Game PC AAA<br>
+        <span class="ax-hero-gradient">Langsung dari HP &amp; Laptop</span>
+      </h1>
+
+      <p class="ax-hero-sub">
+        Nikmati pengalaman gaming premium kualitas <strong>4K 60FPS</strong> tanpa perlu beli PC gaming mahal. Akses ratusan game favorit instan dari browser.
+      </p>
+
+      <div class="ax-hero-actions">
+        <a href="/pricing?ref_=home_hero_pricing" class="ax-btn-hero-primary">
+          <i class="fas fa-bolt"></i> Mulai Sewa Sekarang
+        </a>
+        <a href="/games?ref_=home_hero_games" class="ax-btn-hero-secondary">
+          <i class="fas fa-gamepad"></i> Jelajahi <%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '600+' %> Game
+        </a>
+      </div>
+
+      <div class="ax-trust-row">
+        <span><i class="fas fa-check-circle"></i> Aktif Otomatis 24 Jam</span>
+        <span><i class="fas fa-check-circle"></i> Tanpa Download / Install</span>
+        <span><i class="fas fa-check-circle"></i> Garansi Resmi 100%</span>
+      </div>
+
+      <!-- Logged-in User Bento Member Bar -->
+      <% if (typeof user !== 'undefined' && user) { %>
+      <div class="ax-member-bento">
+        <!-- Saldo Wallet with Reliable Inline SVG Icon -->
+        <div class="ax-wallet-card">
+          <div class="ax-wallet-info">
+            <div class="ax-wallet-icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path>
+                <path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="ax-wallet-lbl">Saldo Akun</div>
+              <div id="heroWalletBalance" class="ax-wallet-val">Rp <%= (balance || 0).toLocaleString('id-ID') %></div>
+            </div>
+          </div>
+          <a href="/wallet?ref_=home_wallet_topup" class="ax-topup-btn">
+            <i class="fas fa-plus"></i> Top Up
+          </a>
+        </div>
+
+        <!-- 7-Day Daily Login Streak -->
+        <% 
+           let today = new Date();
+           today.setUTCHours(0,0,0,0);
+           let todayDate = today.toISOString().split('T')[0];
+           let alreadyClaimed = lastDailyLogin === todayDate;
+           let currentStreak = loginStreak || 0;
+           let nextStreak = alreadyClaimed ? currentStreak : (currentStreak + 1 > 7 ? 1 : currentStreak + 1);
+           const rewardMap = { 1: '1k', 2: '2k', 3: '3k', 4: '4k', 5: '5k', 6: '7k', 7: '10k' };
+        %>
+        <div class="ax-streak-card">
+          <div class="ax-streak-top">
+            <div class="ax-streak-title">
+              <i class="fas fa-fire" style="color:#fbbf24;"></i> 7-Day Login Streak
+            </div>
+            <% if (alreadyClaimed) { %>
+              <span style="font-size:0.7rem; color:#10b981; font-weight:700;"><i class="fas fa-check-circle"></i> Hari Ini Diklaim</span>
+            <% } else { %>
+              <button id="btnDailyLogin" onclick="claimDailyLogin()" class="ax-streak-claim-btn">
+                <i class="fas fa-gift"></i> Klaim Hadiah
+              </button>
+            <% } %>
+          </div>
+          <div class="ax-streak-days">
+            <% for(let i=1; i<=7; i++) { 
+               let status = 'future';
+               if (i < nextStreak || (i === nextStreak && alreadyClaimed)) status = 'passed';
+               else if (i === nextStreak && !alreadyClaimed) status = 'today';
+            %>
+            <div class="ax-day-pill <%= status %>">
+              <div>H<%= i %></div>
+              <div><%= rewardMap[i] %></div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Hero Stats Counter -->
+      <div class="ax-hero-stats">
+        <div class="ax-stat-card">
+          <div class="ax-stat-val"><%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '600' %>+</div>
+          <div class="ax-stat-lbl">Game Tersedia</div>
+        </div>
+        <div class="ax-stat-card">
+          <div class="ax-stat-val">4K 60fps</div>
+          <div class="ax-stat-lbl">Resolusi Max</div>
+        </div>
+        <div class="ax-stat-card">
+          <div class="ax-stat-val">&lt;15ms</div>
+          <div class="ax-stat-lbl">Low Latency</div>
+        </div>
+        <div class="ax-stat-card">
+          <div class="ax-stat-val">24/7</div>
+          <div class="ax-stat-lbl">Server Support</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Hero Column - Live Rig Showcase -->
+    <div class="hero-visual">
+      <div class="ax-rig-showcase">
+        <div class="ax-rig-header">
+          <div class="ax-rig-title">
+            <img src="/images/logo-circular.png" alt="AlexCloud" width="24" height="24" style="border-radius:50%; border:1.5px solid #fbbf24; box-shadow:0 0 8px rgba(251,191,36,0.4);">
+            <span>ALEXCLOUD ULTRA RIG 01</span>
+          </div>
+          <div class="ax-rig-beacon">
+            <span class="ax-live-dot"></span>
+            <span>ONLINE • 12MS</span>
+          </div>
+        </div>
+
+        <div class="ax-dual-games">
+          <!-- EA FC 26 Card -->
+          <div class="ax-game-preview-card">
+            <img src="/images/games/ea_fc_26.webp" onerror="this.src='/images/games/ea_fc_25.webp'" alt="EA SPORTS FC 26" class="ax-game-preview-img">
+            <div class="ax-game-preview-overlay">
+              <div class="ax-game-preview-tag"><i class="fas fa-bolt" aria-hidden="true"></i> 4K 60FPS &middot; READY</div>
+              <div class="ax-game-preview-name">EA SPORTS FC™ 26</div>
+            </div>
+          </div>
+
+          <!-- GTA V Ray Tracing -->
+          <div class="ax-game-preview-card">
+            <img src="/images/games/gta_v.webp" alt="GTA V" class="ax-game-preview-img">
+            <div class="ax-game-preview-overlay">
+              <div class="ax-game-preview-tag" style="color: #fbbf24;"><i class="fas fa-sun" aria-hidden="true"></i> RAY TRACING ON</div>
+              <div class="ax-game-preview-name">Grand Theft Auto V</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ax-rig-specs-bar">
+          <span><i class="fas fa-microchip" style="color:#00f2fe;"></i> RTX 4090 OC</span>
+          <span><i class="fas fa-memory" style="color:#fbbf24;"></i> 64GB DDR5</span>
+          <span><i class="fas fa-wifi" style="color:#10b981;"></i> 10 Gbps CDN</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HARDWARE & PLATFORM TICKER -->
+<div class="ax-ticker-wrap">
+  <div class="ax-ticker-track">
+    <div class="ax-ticker-item"><i class="fas fa-server"></i> NVIDIA RTX 4090 SUPER RIGS</div>
+    <div class="ax-ticker-item"><i class="fas fa-bolt"></i> JAKARTA TIER-3 DATA CENTER &lt;15MS</div>
+    <div class="ax-ticker-item"><i class="fas fa-gamepad"></i> 600+ AAA TITLES PRE-INSTALLED</div>
+    <div class="ax-ticker-item"><i class="fas fa-mobile-alt"></i> PLAY ON ANDROID, IOS, PC &amp; SMART TV</div>
+    <div class="ax-ticker-item"><i class="fas fa-qrcode"></i> INSTANT QRIS 24/7 AUTO-ACTIVATION</div>
+    <div class="ax-ticker-item"><i class="fas fa-cloud"></i> STEAM &amp; EPIC GAMES CLOUD SYNC</div>
+    <!-- Duplicate for seamless infinite loop -->
+    <div class="ax-ticker-item"><i class="fas fa-server"></i> NVIDIA RTX 4090 SUPER RIGS</div>
+    <div class="ax-ticker-item"><i class="fas fa-bolt"></i> JAKARTA TIER-3 DATA CENTER &lt;15MS</div>
+    <div class="ax-ticker-item"><i class="fas fa-gamepad"></i> 600+ AAA TITLES PRE-INSTALLED</div>
+    <div class="ax-ticker-item"><i class="fas fa-mobile-alt"></i> PLAY ON ANDROID, IOS, PC &amp; SMART TV</div>
+    <div class="ax-ticker-item"><i class="fas fa-qrcode"></i> INSTANT QRIS 24/7 AUTO-ACTIVATION</div>
+    <div class="ax-ticker-item"><i class="fas fa-cloud"></i> STEAM &amp; EPIC GAMES CLOUD SYNC</div>
+  </div>
+</div>
+
+<!-- TRENDING GAMES HORIZONTAL SCROLL -->
+<section class="trending-section" id="trending-section" style="padding: 3.5rem 0 2rem;">
+  <div class="trending-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fbbf24; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">HOT &amp; TRENDING</div>
+      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Game <span class="accent" style="color: #fbbf24;">Paling Ramai Dimainkan</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Rekomendasi game terpopuler minggu ini dari ribuan gamer AlexCloud.</p>
+    </div>
+    
+    <div class="trending-scroll" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1.25rem; scrollbar-width: thin;">
+      <% trendingGames.forEach((game, idx) => { %>
+      <div style="flex: 0 0 190px; height: 280px; background: #0c0f18; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; position: relative; transition: all 0.35s ease; box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
+        <div style="position: absolute; top: 10px; left: 10px; z-index: 3; background: rgba(0,0,0,0.8); border: 1px solid rgba(251,191,36,0.4); color: #fbbf24; font-weight: 900; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 6px;">#<%= idx + 1 %></div>
+        <img src="<%= game.image %>" alt="<%= game.name %>" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy" decoding="async">
+        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(6,7,12,0.95) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 0.85rem; z-index: 2;">
+          <div style="font-weight: 800; font-size: 0.92rem; color: #fff; margin-bottom: 0.15rem;"><%= game.name %></div>
+          <div style="font-size: 0.72rem; color: #00f2fe; margin-bottom: 0.3rem;"><%= game.genre %></div>
+          <div style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: #fbbf24;">
+            <% for(let i=0;i<5;i++){%><i class="fas fa-star" style="color:<%= i < Math.floor(game.rating) ? '#fbbf24' : '#334155' %>;font-size:0.65rem;"></i><%}%>
+            <span style="font-weight: 800;"><%= game.rating %></span>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES: KENAPA ALEXCLOUD (BACKGROUND & CARDS MATCHING CARA MAIN) -->
+<section class="features-section" id="kenapa-alexcloud" style="padding: 3.5rem 0; background: var(--ax-bg-void) !important;">
+  <div class="features-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fbbf24; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">KENAPA ALEXCLOUD?</div>
+      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Gaming <span class="accent" style="color: #fbbf24;">Tanpa Batas</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Nikmati game AAA terbaru dengan kualitas terbaik tanpa perlu investasi hardware mahal.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon"><i class="fas fa-bolt" style="color:#00f2fe;"></i></div>
+        <div class="feature-title">Latency Ultra Rendah</div>
+        <p class="feature-desc">Server dioptimalkan untuk Indonesia dengan ping sub-15ms untuk pengalaman gaming mulus tanpa delay.</p>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon"><i class="fas fa-gamepad" style="color:#fbbf24;"></i></div>
+        <div class="feature-title">600+ Game Premium</div>
+        <p class="feature-desc">Akses game AAA terbaru seperti EA FC 26, GTA V, MotoGP 25, Hogwarts Legacy langsung ready to play.</p>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon"><i class="fas fa-tv" style="color:#10b981;"></i></div>
+        <div class="feature-title">Streaming 4K / 60fps</div>
+        <p class="feature-desc">Kualitas visual maksimal dengan resolusi tajam hingga 4K dan framerate stabil bahkan di smartphone.</p>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon"><i class="fas fa-robot" style="color:#f59e0b;"></i></div>
+        <div class="feature-title">AI Assistant 24/7</div>
+        <p class="feature-desc">AlexBot AI cerdas siap memandu rekomendasi game, cek server, dan membantu kendala kapan pun.</p>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon"><i class="fas fa-save" style="color:#00f2fe;"></i></div>
+        <div class="feature-title">Cloud Save Otomatis</div>
+        <p class="feature-desc">Progress tersimpan di cloud. Main di HP, lanjut di laptop atau Smart TV tanpa kehilangan save data.</p>
+      </div>
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon"><i class="fas fa-tags" style="color:#10b981;"></i></div>
+        <div class="feature-title">Harga Paling Hemat</div>
+        <p class="feature-desc">Mulai dari Rp 2.000-an/hari saja! Jauh lebih hemat dibanding rakit PC gaming puluhan juta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS / CARA PAKAI (3 LANGKAH MUDAH) -->
+<section class="how-section" id="how-it-works" style="padding: 3.5rem 0; background: var(--ax-bg-void) !important;">
+  <div class="how-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(0,242,254,0.1); border:1px solid rgba(0,242,254,0.35); color:#00f2fe; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">CARA MAIN</div>
+      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Mulai Main dalam <span class="accent" style="color: #fbbf24;">3 Langkah Mudah</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Tanpa download bergiga-giga, tanpa install ribet. Cukup punya internet — langsung gas.</p>
+    </div>
+    <div class="how-steps">
+      <div class="how-step animate-on-scroll">
+        <div class="how-step-num">1</div>
+        <div class="how-step-icon"><i class="fas fa-shopping-cart" aria-hidden="true"></i></div>
+        <h3 class="how-step-title">1. Pilih Paket Sewa</h3>
+        <p class="how-step-desc">Daftar akun gratis, lalu pilih paket harian atau bulanan sesuai kebutuhanmu via QRIS instan.</p>
+      </div>
+      <div class="how-step animate-on-scroll">
+        <div class="how-step-num">2</div>
+        <div class="how-step-icon"><i class="fas fa-laptop" aria-hidden="true"></i></div>
+        <h3 class="how-step-title">2. Buka di Perangkat Apa Saja</h3>
+        <p class="how-step-desc">Gunakan HP Android, iPhone/iPad, Laptop, PC kantor, atau Smart TV langsung lewat browser.</p>
+      </div>
+      <div class="how-step animate-on-scroll">
+        <div class="how-step-num">3</div>
+        <div class="how-step-icon"><i class="fas fa-play" aria-hidden="true"></i></div>
+        <h3 class="how-step-title">3. Langsung Gas Main!</h3>
+        <p class="how-step-desc">Game AAA jalan instan dari cloud server RTX 4090 — 4K 60fps dengan latensi ultra rendah.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR GAMES (LARGE STEAM POSTER GRID) -->
+<section class="games-section" id="games-section" style="padding: 3.5rem 0; background: rgba(10,13,22,0.6);">
+  <div class="games-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header" style="text-align: center; margin-bottom: 2.25rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(0,242,254,0.1); border:1px solid rgba(0,242,254,0.35); color:#00f2fe; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">KATALOG GAME</div>
+      <h2 class="section-title" style="font-size: 2rem; font-weight: 900; color: #fff;">Pilihan <span class="accent" style="color: #fbbf24;">Game Terbaik</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Dari sepak bola, balap, hingga RPG epik — semua siap dimainkan instan!</p>
+    </div>
+
+    <div class="ax-game-grid" id="gamesDisplay">
+      <% 
+        function getBadgeStyle(tag) {
+          const t = (tag || '').toUpperCase();
+          if (t.includes('POPULAR')) return 'background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; box-shadow: 0 4px 14px rgba(251,191,36,0.35);';
+          if (t.includes('HOT')) return 'background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; box-shadow: 0 4px 14px rgba(239,68,68,0.35);';
+          if (t.includes('NEW')) return 'background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,0.35);';
+          if (t.includes('BESTSELLER')) return 'background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; box-shadow: 0 4px 14px rgba(139,92,246,0.35);';
+          if (t.includes('TOP RATED')) return 'background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; box-shadow: 0 4px 14px rgba(245,158,11,0.35);';
+          if (t.includes('CLASSIC')) return 'background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; box-shadow: 0 4px 14px rgba(59,130,246,0.35);';
+          if (t.includes('COMING SOON')) return 'background: linear-gradient(135deg, #64748b, #334155); color: #fff; box-shadow: 0 4px 14px rgba(100,116,139,0.35);';
+          return 'background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.25); color: #fbbf24;';
+        }
+      %>
+
+      <% games.slice(0, 8).forEach((game, i) => { %>
+      <div class="ax-card">
+        <div class="ax-card-poster">
+          <img src="<%= game.image %>" alt="<%= game.name %>" loading="lazy" decoding="async">
+          <% if (game.tag) { %>
+            <div class="ax-card-badge" style="<%= getBadgeStyle(game.tag) %>">
+              <% if (game.tag.toUpperCase().includes('POPULAR')) { %><i class="fas fa-fire"></i><% } %>
+              <% if (game.tag.toUpperCase().includes('HOT')) { %><i class="fas fa-bolt"></i><% } %>
+              <% if (game.tag.toUpperCase().includes('TOP RATED')) { %><i class="fas fa-star"></i><% } %>
+              <% if (game.tag.toUpperCase().includes('BESTSELLER')) { %><i class="fas fa-crown"></i><% } %>
+              <%= game.tag %>
+            </div>
+          <% } %>
+        </div>
+        <div class="ax-card-body">
+          <div>
+            <div class="ax-card-title"><%= game.name %></div>
+            <div class="ax-card-genre"><i class="fas fa-tag"></i> <%= game.genre %></div>
+          </div>
+          <div class="ax-card-footer">
+            <div class="ax-card-rating"><i class="fas fa-star"></i> <%= game.rating %></div>
+            <span class="ax-card-status"><i class="fas fa-cloud"></i> Ready Cloud</span>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    
+    <div style="text-align: center;">
+      <a href="/games?ref_=home_explore_games" class="ax-btn-hero-secondary" style="padding: 0.8rem 2rem; border-radius: 12px; font-weight: 800;">
+        <i class="fas fa-th-large"></i> Lihat Semua <%= typeof totalGamesCount !== 'undefined' ? totalGamesCount : '600+' %> Game
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TIKTOK GAMEPLAY SECTION -->
+<section class="tiktok-section" id="tiktok-section" style="padding: 3.5rem 0;">
+  <div class="tiktok-card-container animate-on-scroll" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header text-center" style="text-align: center; margin-bottom: 2rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fbbf24; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">BUKTI NYATA</div>
+      <h2 class="section-title" style="font-size: 2rem; font-weight: 900; color: #fff;">Gameplay Nyata di <span class="accent" style="color: #fbbf24;">TikTok</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Lihat sendiri video gameplay FC26 & GTA V super mulus di HP tanpa lag</p>
+    </div>
+
+    <div class="tiktok-card-wrapper">
+      <div class="tiktok-premium-card" style="background: linear-gradient(135deg, rgba(20,24,38,0.95), rgba(10,12,18,0.95)); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 2rem; text-align: center;">
+        <div class="tiktok-card-inner">
+          <div class="tiktok-card-logo" style="margin-bottom: 1rem; color: #00f2fe;">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.75a8.27 8.27 0 004.84 1.55V6.84a4.85 4.85 0 01-1.07-.15z"/></svg>
+          </div>
+          <p class="tiktok-card-desc" style="font-size: 1rem; color: #e2e8f0; margin-bottom: 1.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+            Puluhan rekaman gameplay live game AAA dari komunitas AlexCloud. Langsung tonton di TikTok resmi kami!
+          </p>
+          <a href="https://www.tiktok.com/@bentleysaja_" target="_blank" rel="noopener noreferrer" class="tiktok-premium-btn" style="display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.8rem; border-radius: 12px; background: linear-gradient(135deg, #00f2fe, #3b82f6); color: #000 !important; font-weight: 800; text-decoration: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.75a8.27 8.27 0 004.84 1.55V6.84a4.85 4.85 0 01-1.07-.15z"/></svg>
+            Tonton di TikTok @bentleysaja_ →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST & GARANSI / SYARAT & KETENTUAN SECTION -->
+<section class="trust-section" id="trust" style="padding: 3.5rem 0; background: rgba(10,13,22,0.5);">
+  <div class="trust-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header animate-on-scroll" style="text-align: center; margin-bottom: 2.5rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.35); color:#10b981; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">AMAN &amp; TERPERCAYA</div>
+      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Belanja &amp; Main dengan <span class="accent" style="color: #fbbf24;">Tenang</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Setiap transaksi di AlexCloud dilindungi sistem resmi, transparan, dan bergaransi penuh.</p>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card animate-on-scroll">
+        <div class="trust-icon"><i class="fas fa-shield-halved" style="color:#10b981;"></i></div>
+        <h3 class="trust-title">Pembayaran QRIS Resmi</h3>
+        <p class="trust-desc">Mendukung DANA, GoPay, OVO, ShopeePay, dan seluruh m-Banking tanpa biaya tersembunyi.</p>
+      </div>
+      <div class="trust-card animate-on-scroll">
+        <div class="trust-icon"><i class="fas fa-sync-alt" style="color:#fbbf24;"></i></div>
+        <h3 class="trust-title">Garansi Uang Kembali</h3>
+        <p class="trust-desc">Jika terjadi kendala murni dari server kami, dana kamu kami kembalikan sesuai kebijakan garansi.</p>
+      </div>
+      <div class="trust-card animate-on-scroll">
+        <div class="trust-icon"><i class="fas fa-bolt" style="color:#00f2fe;"></i></div>
+        <h3 class="trust-title">Aktivasi Instan Otomatis</h3>
+        <p class="trust-desc">Sistem otomatis mengaktifkan akun dan sesi game detik itu juga setelah transfer diterima.</p>
+      </div>
+      <div class="trust-card animate-on-scroll">
+        <div class="trust-icon"><i class="fas fa-comments" style="color:#fbbf24;"></i></div>
+        <h3 class="trust-title">CS &amp; Bot Bantuan 24/7</h3>
+        <p class="trust-desc">Tim CS dan WhatsApp Bot AlexCloud selalu standby membantu kendala bermain Anda kapan saja.</p>
+      </div>
+    </div>
+    <div class="trust-links" style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
+      <a href="/about?ref_=home_links_about" style="color:#94a3b8; text-decoration:none; font-size:0.85rem; font-weight:600;"><i class="fas fa-circle-info" style="color:#fbbf24;"></i> Tentang Kami</a>
+      <a href="/terms?ref_=home_links_terms" style="color:#94a3b8; text-decoration:none; font-size:0.85rem; font-weight:600;"><i class="fas fa-file-contract" style="color:#00f2fe;"></i> Syarat &amp; Ketentuan</a>
+      <a href="/privacy?ref_=home_links_privacy" style="color:#94a3b8; text-decoration:none; font-size:0.85rem; font-weight:600;"><i class="fas fa-user-shield" style="color:#10b981;"></i> Kebijakan Privasi</a>
+      <a href="/refund?ref_=home_links_refund" style="color:#94a3b8; text-decoration:none; font-size:0.85rem; font-weight:600;"><i class="fas fa-rotate-left" style="color:#fbbf24;"></i> Kebijakan Refund</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING SECTION -->
+<section class="pricing-section" id="pricing" style="padding: 4.5rem 0;">
+  <div class="pricing-container" style="max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.3rem 0.9rem; border-radius:100px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fbbf24; font-size:0.72rem; font-weight:800; text-transform:uppercase; margin-bottom:0.6rem;">HARGA TERBAIK</div>
+      <h2 class="section-title" style="font-size: 2.1rem; font-weight: 900; color: #fff;">Pilihan Paket <span class="accent" style="color: #fbbf24;">Sewa Fleksibel</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.9rem;">Tanpa komitmen panjang, aktif instan dalam hitungan detik setelah pembayaran QRIS.</p>
+    </div>
+
+    <!-- 4 CORE SUBSCRIPTION PLANS (ONLY 1 BULAN / 60K HAS REKOMENDASI BADGE) -->
+    <div class="ax-pricing-grid">
+      <% plans.filter(p => p.id !== 'royal_access' && p.id !== 'custom_royal').forEach((plan, i) => { %>
+      <div class="ax-plan-card <%= plan.popular ? 'popular' : '' %>">
+        <div>
+          <!-- Top Badge: ONLY for 60K (1 Bulan / popular) -->
+          <div style="min-height: 28px; margin-bottom: 0.6rem;">
+            <% if (plan.popular) { %>
+              <span style="background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 900; font-size: 0.68rem; padding: 0.25rem 0.75rem; border-radius: 100px; display: inline-block; letter-spacing: 0.5px; box-shadow: 0 2px 12px rgba(251,191,36,0.5);">
+                ⭐ PALING REKOMENDASI
+              </span>
+            <% } %>
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff;"><%= plan.name %></div>
+          <div style="font-size: 2.1rem; font-weight: 900; color: <%= plan.popular ? '#fbbf24' : '#ffffff' %>; margin: 0.35rem 0 0.15rem; letter-spacing: -0.02em;">
+            <%= plan.priceDisplay %>
+          </div>
+          <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 1.25rem; font-weight: 600;">
+            Akses Penuh <%= plan.duration %> Hari
+          </div>
+
+          <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.82rem; color: #cbd5e1;">
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Akses 600+ Game Ready</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Streaming 4K / 60 FPS</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Multi-Device (HP, PC, TV)</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Cloud Save Sync Progress</span></li>
+          </ul>
+        </div>
+
+        <% if (plan.popular) { %>
+          <a href="/order/<%= plan.id %>" class="ax-plan-btn-popular">
+            <span>Pilih <%= plan.name %></span> <i class="fas fa-bolt" style="font-size: 0.85rem;"></i>
+          </a>
+        <% } else { %>
+          <a href="/order/<%= plan.id %>" class="ax-plan-btn-standard">
+            <span>Pilih <%= plan.name %></span> <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
+          </a>
+        <% } %>
+      </div>
+      <% }) %>
+    </div>
+
+    <!-- ROYAL VIP LOUNGE & SEWA HARIAN -->
+    <div style="margin-top: 3.5rem; margin-bottom: 1.75rem; text-align: center;">
+      <div style="display:inline-flex; align-items:center; gap:0.4rem; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.4); color:#fbbf24; font-size:0.72rem; font-weight:800; padding:0.3rem 0.85rem; border-radius:100px; text-transform:uppercase; margin-bottom:0.6rem; box-shadow:0 0 12px rgba(251,191,36,0.2);">
+        ROYAL VIP LOUNGE &amp; SEWA HARIAN
+      </div>
+      <h3 style="font-size: clamp(1.6rem, 3.5vw, 2rem); font-weight: 900; color: #fff; margin-bottom: 0.35rem; letter-spacing: -0.02em;">
+        Wilayah Eksklusif <span style="color: #fbbf24;">Member Royal VIP</span>
+      </h3>
+      <p style="color:#94a3b8; font-size:0.88rem; max-width:640px; margin:0 auto; line-height:1.5;">
+        Upgrade membership sekali seumur hidup untuk membuka fitur sewa harian fleksibel dan fasilitas VIP prioritas.
+      </p>
+    </div>
+
+    <div class="ax-royal-vip-grid">
+      <% const royalPlan = plans.find(p => p.id === 'royal_access'); %>
+      <% const customPlan = plans.find(p => p.id === 'custom_royal'); %>
+
+      <!-- 👑 CARD 1: ROYAL ACCESS LIFETIME PASS -->
+      <div class="ax-royal-card">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.65rem; gap:0.5rem; flex-wrap:wrap;">
+            <span style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #000; font-weight: 900; font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 100px; letter-spacing: 0.4px; white-space:nowrap; box-shadow: 0 2px 8px rgba(251,191,36,0.4);">
+              VIP UPGRADE
+            </span>
+            <span style="font-size:0.68rem; color:#fbbf24; font-weight:700; white-space:nowrap;">LIFETIME PASS</span>
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: 800; color: #fbbf24;"><%= royalPlan ? royalPlan.name : 'Royal Club Access' %></div>
+          <div style="font-size: 2rem; font-weight: 900; color: #ffffff; margin: 0.15rem 0 0.05rem; text-shadow: 0 0 15px rgba(251,191,36,0.25); letter-spacing: -0.02em; white-space:nowrap;">
+            <%= royalPlan ? royalPlan.priceDisplay : 'Rp 25.000' %>
+          </div>
+          <div style="font-size: 0.76rem; color: #fbbf24; margin-bottom: 0.65rem; font-weight: 700;">
+            Sekali Bayar • Aktif Selamanya
+          </div>
+
+          <div style="display:inline-flex; align-items:center; gap:0.35rem; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.68rem; font-weight:800; padding:0.2rem 0.55rem; border-radius:6px; margin-bottom:1rem;">
+            <i class="fas fa-key"></i> Kunci Akses Sewa Harian Rp 7.000/hari
+          </div>
+
+          <!-- 7 BENEFIT LENGKAP (COMPACT ON MOBILE) -->
+          <ul style="list-style:none; padding:0; margin:0 0 1.25rem; display:flex; flex-direction:column; gap:0.55rem; font-size:0.8rem;">
+            <li style="display:flex; align-items:flex-start; gap:0.5rem;">
+              <i class="fas fa-unlock" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
+              <div><strong style="color:#fff;">Buka Sewa Harian:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">Bebas sewa 1–6 hari (Rp 7k/hari)</span></div>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:0.5rem;">
+              <i class="fas fa-ticket-alt" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
+              <div><strong style="color:#fff;">Voucher Diskon Spesial:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">Akses promo bulanan member</span></div>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:0.5rem;">
+              <i class="fas fa-bolt" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
+              <div><strong style="color:#fff;">Prioritas Server 30ms:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">Bebas antrean &amp; low latency</span></div>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:0.5rem;">
+              <i class="fas fa-gamepad" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
+              <div><strong style="color:#fff;">VIP Game Library:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">100+ game &amp; bebas request</span></div>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:0.5rem;">
+              <i class="fas fa-crown" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
+              <div><strong style="color:#fff;">Mahkota Emas VIP:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">Badge eksklusif di akun</span></div>
+            </li>
+            <li class="ax-benefit-extra" style="display:flex; align-items:flex-start; gap:0.5rem;">
+              <i class="fas fa-coins" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
+              <div><strong style="color:#fff;">Bonus Referral 2x:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">Komisi saldo lebih tinggi</span></div>
+            </li>
+            <li class="ax-benefit-extra" style="display:flex; align-items:flex-start; gap:0.5rem;">
+              <i class="fas fa-shield-alt" style="color:#fbbf24; margin-top:0.15rem; flex-shrink:0;"></i>
+              <div><strong style="color:#fff;">Garansi Akun &amp; CS VIP:</strong> <span class="ax-benefit-sub" style="color:#cbd5e1;">Bantuan prioritas Owner</span></div>
+            </li>
+          </ul>
+        </div>
+
+        <% if (typeof user !== 'undefined' && user && user.isRoyal) { %>
+          <div style="background:linear-gradient(90deg, #10b981, #059669); color:#fff; font-weight:800; font-size:0.84rem; padding:0.75rem 1rem; border-radius:10px; text-align:center; display:flex; align-items:center; justify-content:center; gap:0.4rem; box-shadow:0 4px 15px rgba(16,185,129,0.3);">
+            <i class="fas fa-check-circle"></i> Member Royal VIP Aktif
+          </div>
+        <% } else { %>
+          <a href="/order/royal_access" class="ax-plan-btn-popular" style="width:100%; box-sizing:border-box; font-size:0.86rem; padding:0.75rem 1rem;">
+            <i class="fas fa-crown"></i> Beli Royal Access (Rp 25.000) →
+          </a>
+        <% } %>
+      </div>
+
+      <!-- ⚡ CARD 2: SEWA HARIAN FLEKSIBEL (1-6 HARI) -->
+      <div class="ax-custom-card">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.65rem; gap:0.5rem; flex-wrap:wrap;">
+            <% if (typeof user !== 'undefined' && user && user.isRoyal) { %>
+              <span style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; font-weight:800; font-size:0.65rem; padding:0.2rem 0.6rem; border-radius:100px; display:inline-flex; align-items:center; gap:0.25rem; white-space:nowrap;">
+                <i class="fas fa-unlock"></i> ROYAL UNLOCKED
+              </span>
+            <% } else { %>
+              <span style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; font-weight:800; font-size:0.65rem; padding:0.2rem 0.6rem; border-radius:100px; display:inline-flex; align-items:center; gap:0.25rem; white-space:nowrap;">
+                <i class="fas fa-lock"></i> ROYAL ONLY
+              </span>
+            <% } %>
+            <span style="font-size:0.68rem; color:#00f2fe; font-weight:700; white-space:nowrap;">SEWA HARIAN</span>
+          </div>
+
+          <div id="homeCustomDaysName" style="font-size: 1.25rem; font-weight: 800; color: #ffffff;">Sewa Harian (1 Hari)</div>
+          <div id="homeCustomDaysPrice" style="font-size: 2rem; font-weight: 900; color: #00f2fe; margin: 0.15rem 0 0.05rem; letter-spacing: -0.02em; white-space:nowrap;">
+            Rp 7.000
+          </div>
+          <div id="homeCustomDaysPeriod" style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 0.85rem; font-weight: 600;">
+            Akses fleksibel 1 hari (Rp 7.000/hari)
+          </div>
+
+          <!-- COMPACT SLIDER CONTROL -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:0.75rem 0.85rem; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#94a3b8; font-weight:700; margin-bottom:0.4rem;">
+              <span>Pilih Durasi Hari:</span>
+              <strong id="homeSliderValText" style="color:#00f2fe; font-size:0.88rem; font-weight:900;">1 Hari</strong>
+            </div>
+            <input type="range" id="homeDaysSlider" min="1" max="6" value="1" style="width:100%; accent-color:#00f2fe; cursor:pointer; height:5px;" oninput="updateHomeCustomDays(this.value)">
+            <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#64748b; font-weight:800; margin-top:0.3rem;">
+              <span>1H</span>
+              <span>2H</span>
+              <span>3H</span>
+              <span>4H</span>
+              <span>5H</span>
+              <span>6H</span>
+            </div>
+          </div>
+
+          <!-- COMPACT FEATURES -->
+          <ul style="list-style:none; padding:0; margin:0 0 1.25rem; display:flex; flex-direction:column; gap:0.55rem; font-size:0.8rem; color:#cbd5e1;">
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Bebas pilih durasi 1 s/d 6 hari</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Akses 600+ Game AAA Ready to Play</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Streaming 4K / 60 FPS Ultra Latency</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981; flex-shrink:0;"></i> <span>Aktivasi Instan Otomatis QRIS 24/7</span></li>
+          </ul>
+        </div>
+
+        <% if (typeof user !== 'undefined' && user && user.isRoyal) { %>
+          <a id="homeCustomOrderBtn" href="/order/custom_royal?days=1" class="ax-plan-btn-popular" style="width:100%; box-sizing:border-box; background:linear-gradient(135deg, #00f2fe 0%, #3b82f6 100%); color:#000 !important; box-shadow:0 6px 20px rgba(0,242,254,0.4); font-size:0.86rem; padding:0.75rem 1rem;">
+            <i class="fas fa-shopping-cart"></i> Sewa Harian Sekarang →
+          </a>
+        <% } else { %>
+          <a id="homeCustomOrderBtn" href="/order/royal_access" onclick="return confirm('Untuk menyewa harian, Anda harus menjadi anggota Royal Club terlebih dahulu (Rp 25.000 Sekali Bayar).
+
+Lanjutkan ke halaman pembayaran Royal Club Access?')" class="ax-plan-btn-standard" style="width:100%; box-sizing:border-box; border-color:#fbbf24; color:#fbbf24; font-size:0.86rem; padding:0.75rem 1rem;">
+            <i class="fas fa-crown"></i> Unlock via Royal Club (Rp 25k) →
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS INTERACTIVE CAROUSEL (SLEEK & COMPACT CARD) -->
+<section class="testimonials-section" id="testimonials" style="padding: 3.5rem 0; background: rgba(10,13,22,0.6);">
+  <div class="testimonials-container" style="max-width: 1160px; margin: 0 auto; padding: 0 1.25rem;">
+    <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+      <div class="section-tag" style="display:inline-block; padding:0.25rem 0.8rem; border-radius:100px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fbbf24; font-size:0.7rem; font-weight:800; text-transform:uppercase; margin-bottom:0.5rem;">BUKTI &amp; ULASAN PELANGGAN</div>
+      <h2 class="section-title" style="font-size: 1.95rem; font-weight: 900; color: #fff;">Kata Mereka Tentang <span class="accent" style="color: #fbbf24;">AlexCloud</span></h2>
+      <p class="section-desc" style="color: #94a3b8; font-size: 0.88rem;">Foto bukti transaksi asli dan ulasan gamer yang telah berlangganan.</p>
+    </div>
+
+    <!-- CAROUSEL TRACK -->
+    <div class="ax-testi-wrap" style="padding: 0.25rem 0 1.5rem;">
+      <div class="ax-testi-track" id="testiTrack">
+        <% testimonials.forEach((testi, i) => { %>
+        <div class="ax-testi-card">
+          <div>
+            <!-- Compact Customer Proof Photo -->
+            <% if (testi.image) { %>
+            <div class="ax-testi-screenshot" style="position:relative; width:100%; height:115px; border-radius:10px; overflow:hidden; margin-bottom:0.65rem; border:1px solid rgba(255,255,255,0.08); background:#0c0f18;">
+              <img src="<%= testi.image %>" alt="Bukti Testimoni <%= testi.name %>" onclick="openImageModal('<%= testi.image %>')" loading="lazy" style="width:100%; height:100%; object-fit:cover; object-position:center; cursor:pointer; transition:transform 0.25s ease;">
+              <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.8); border:1px solid rgba(251,191,36,0.4); color:#fbbf24; font-size:0.58rem; font-weight:800; padding:0.12rem 0.4rem; border-radius:5px; pointer-events:none; display:flex; align-items:center; gap:0.25rem;">
+                <i class="fas fa-search-plus"></i> Foto Bukti
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Star Ratings & Verified Badge -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+              <div style="display: flex; gap: 0.2rem; color: #fbbf24;">
+                <% for(let s=0; s<5; s++) { %>
+                  <i class="fas fa-star" style="font-size: 0.75rem; color: <%= s < (testi.rating || 5) ? '#fbbf24' : '#334155' %>;"></i>
+                <% } %>
+              </div>
+              <span style="font-size:0.65rem; color:#10b981; font-weight:700;"><i class="fas fa-check-circle"></i> Terverifikasi</span>
+            </div>
+
+            <!-- Customer Review Text -->
+            <p style="color: #cbd5e1; font-size: 0.84rem; line-height: 1.45; font-style: italic; margin: 0 0 0.65rem; min-height: 2.5em;">
+              "<%= testi.text || testi.comment || 'Layanan cloud gaming lancar dan mantap!' %>"
+            </p>
+          </div>
+
+          <!-- Compact Customer Profile Footer -->
+          <div class="ax-testi-user" style="display:flex; align-items:center; gap:0.55rem; padding-top:0.45rem; border-top:1px solid rgba(255,255,255,0.06); margin-top:0.25rem;">
+            <% if (testi.avatar && !testi.avatar.includes('dicebear.com')) { %>
+              <img src="<%= testi.avatar %>" alt="<%= testi.name %>" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1.5px solid #fbbf24;" onerror="this.src='/images/default-avatar.png'">
+            <% } else { %>
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #d97706); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.78rem; color: #000; flex-shrink: 0;">
+                <%= (testi.name || 'G').charAt(0).toUpperCase() %>
+              </div>
+            <% } %>
+            <div style="min-width:0; overflow:hidden;">
+              <div style="font-weight: 800; font-size: 0.8rem; color: #fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;"><%= testi.name || 'Pelanggan AlexCloud' %></div>
+              <div style="font-size: 0.68rem; color: #94a3b8; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;"><%= testi.role || testi.game || 'Pelanggan AlexCloud' %></div>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- NAVIGATION & DOTS -->
+      <div class="ax-testi-controls" style="margin-top: 1.25rem;">
+        <button class="ax-testi-nav-btn" onclick="prevTesti()" aria-label="Testimoni Sebelumnya" style="width:34px; height:34px; font-size:0.8rem;"><i class="fas fa-chevron-left"></i></button>
+        <div class="ax-testi-dots" id="testiDots">
+          <% for(let d=0; d<Math.min(testimonials.length, 6); d++) { %>
+            <button type="button" class="ax-testi-dot <%= d===0?'active':'' %>" onclick="goToTesti(<%= d %>)" aria-label="Tampilkan testimoni <%= d + 1 %>"></button>
+          <% } %>
+        </div>
+        <button class="ax-testi-nav-btn" onclick="nextTesti()" aria-label="Testimoni Selanjutnya" style="width:34px; height:34px; font-size:0.8rem;"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 1.25rem;">
+      <a href="/testimonials?ref_=home_all_testimonials" class="ax-btn-hero-secondary" style="padding: 0.65rem 1.6rem; border-radius: 10px; font-size: 0.82rem; font-weight: 800;">
+        <i class="fas fa-images"></i> Lihat Semua <%= testimonials.length %>+ Foto Bukti &amp; Testimoni Lengkap →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CALL TO ACTION (CTA) BANNER -->
+<section class="cta-section" style="padding: 5rem 0 6rem; position: relative;">
+  <div class="cta-container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.25rem;">
+    <div style="background: linear-gradient(135deg, rgba(251,191,36,0.18) 0%, rgba(0,242,254,0.1) 50%, rgba(15,18,28,0.98) 100%); border: 1.5px solid rgba(251,191,36,0.4); border-radius: 28px; padding: 3.5rem 2rem; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15); position: relative; overflow: hidden;">
+      <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(251,191,36,0.25), transparent 70%); pointer-events: none;"></div>
+      
+      <img src="/images/logo-circular.png" alt="AlexCloud" width="60" height="60" style="border-radius: 50%; border: 2px solid #fbbf24; margin-bottom: 1.25rem; box-shadow: 0 0 25px rgba(251,191,36,0.5);">
+      
+      <h2 style="font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: #fff; margin-bottom: 0.85rem; letter-spacing: -0.02em;">
+        Siap Bermain Game AAA Sekarang?
+      </h2>
+      <p style="font-size: 1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 2rem; line-height: 1.6;">
+        Hanya perlu satu klik untuk masuk ke server cloud gaming terkencang di Indonesia. Daftar akun gratis sekarang juga!
+      </p>
+
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="/register?ref_=cta_home_register" class="ax-btn-hero-primary" style="padding: 0.95rem 2.2rem; font-size: 1rem;">
+          <i class="fas fa-rocket"></i> Buat Akun &amp; Main Sekarang
+        </a>
+        <a href="https://wa.me/6285810073341?text=Halo%20Admin%20AlexCloud,%20saya%20mau%20tanya%20sewa%20cloud%20gaming" target="_blank" rel="noopener noreferrer" class="ax-btn-hero-secondary" style="padding: 0.95rem 1.8rem; font-size: 1rem;">
+          <i class="fab fa-whatsapp" style="color: #25d366;"></i> Tanya CS WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMAGE MODAL VIEWER -->
+<div id="imageModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:999999; align-items:center; justify-content:center; padding:1rem;" onclick="this.style.display='none'">
+  <img id="modalImg" src="" alt="Bukti testimoni pelanggan" style="max-width:90vw; max-height:85vh; border-radius:12px; border:2px solid #fbbf24; box-shadow:0 0 40px rgba(0,0,0,0.9);">
+</div>
+
+<script>
+// Home Custom Royal Days Slider Calculator
+function updateHomeCustomDays(days) {
+  var d = parseInt(days, 10);
+  var valText = document.getElementById('homeSliderValText');
+  var nameEl = document.getElementById('homeCustomDaysName');
+  var priceEl = document.getElementById('homeCustomDaysPrice');
+  var periodEl = document.getElementById('homeCustomDaysPeriod');
+  var btnEl = document.getElementById('homeCustomOrderBtn');
+
+  if (valText) valText.innerText = d + ' Hari';
+  if (nameEl) nameEl.innerText = 'Sewa Harian (' + d + ' Hari)';
+  var total = d * 7000;
+  if (priceEl) priceEl.innerText = 'Rp ' + total.toLocaleString('id-ID');
+  if (periodEl) periodEl.innerText = 'Akses fleksibel ' + d + ' hari (Rp 7.000/hari)';
+  
+  if (btnEl) {
+    <% if (typeof user !== 'undefined' && user && user.isRoyal) { %>
+      btnEl.href = '/order/custom_royal?days=' + d;
+    <% } else { %>
+      btnEl.href = '/order/royal_access';
+    <% } %>
+  }
+}
+
+// Interactive Testimonials Carousel Controller with Precise Positioning & Touch Support
+var currentTestiIndex = 0;
+var totalTestis = <%= testimonials.length %>;
+
+function updateTestiSlider() {
+  var track = document.getElementById('testiTrack');
+  if (!track) return;
+  var cards = track.querySelectorAll('.ax-testi-card');
+  if (!cards || cards.length === 0) return;
+  
+  if (currentTestiIndex >= totalTestis) currentTestiIndex = 0;
+  if (currentTestiIndex < 0) currentTestiIndex = totalTestis - 1;
+
+  var isMobile = window.innerWidth <= 900;
+  if (isMobile) {
+    track.style.transform = 'translateX(-' + (currentTestiIndex * 100) + '%)';
+  } else {
+    var maxIndex = Math.max(0, totalTestis - 3);
+    var targetIndex = Math.min(currentTestiIndex, maxIndex);
+    if (cards[targetIndex]) {
+      var offset = cards[targetIndex].offsetLeft;
+      track.style.transform = 'translateX(-' + offset + 'px)';
+    }
+  }
+  
+  var dots = document.querySelectorAll('.ax-testi-dot');
+  dots.forEach(function(dot, idx) {
+    if (idx === currentTestiIndex) dot.classList.add('active');
+    else dot.classList.remove('active');
+  });
+}
+
+function nextTesti() {
+  var isMobile = window.innerWidth <= 900;
+  var maxIndex = isMobile ? (totalTestis - 1) : Math.max(0, totalTestis - 3);
+  if (currentTestiIndex < maxIndex) {
+    currentTestiIndex++;
+  } else {
+    currentTestiIndex = 0;
+  }
+  updateTestiSlider();
+}
+
+function prevTesti() {
+  var isMobile = window.innerWidth <= 900;
+  var maxIndex = isMobile ? (totalTestis - 1) : Math.max(0, totalTestis - 3);
+  if (currentTestiIndex > 0) {
+    currentTestiIndex--;
+  } else {
+    currentTestiIndex = maxIndex;
+  }
+  updateTestiSlider();
+}
+
+function goToTesti(index) {
+  currentTestiIndex = index;
+  updateTestiSlider();
+}
+
+// Auto Slide every 6 seconds
+var testiInterval = setInterval(function() {
+  nextTesti();
+}, 6000);
+
+// Touch Swipe Gesture Support for Mobile
+(function() {
+  var track = document.getElementById('testiTrack');
+  if (!track) return;
+  var startX = 0;
+  var startY = 0;
+  var distX = 0;
+  var distY = 0;
+
+  track.addEventListener('touchstart', function(e) {
+    var touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+    distX = 0;
+    distY = 0;
+    clearInterval(testiInterval);
+  }, { passive: true });
+
+  track.addEventListener('touchmove', function(e) {
+    if (!startX || !startY) return;
+    var touch = e.touches[0];
+    distX = touch.clientX - startX;
+    distY = touch.clientY - startY;
+  }, { passive: true });
+
+  track.addEventListener('touchend', function() {
+    if (Math.abs(distX) > 40 && Math.abs(distX) > Math.abs(distY)) {
+      if (distX < 0) nextTesti();
+      else prevTesti();
+    }
+    startX = 0;
+    startY = 0;
+    testiInterval = setInterval(function() { nextTesti(); }, 6000);
+  }, { passive: true });
+})();
+
+// Image Modal Opener
+function openImageModal(src) {
+  var modal = document.getElementById('imageModal');
+  var img = document.getElementById('modalImg');
+  if (modal && img) {
+    img.src = src;
+    modal.style.display = 'flex';
+  }
+}
+
+// Claim Daily Login Streak
+function claimDailyLogin() {
+  var btn = document.getElementById('btnDailyLogin');
+  if (btn) btn.disabled = true;
+  
+  fetch('/api/claim-daily-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      alert('🎉 ' + data.message);
+      window.location.reload();
+    } else {
+      alert('⚠️ ' + (data.message || 'Gagal klaim'));
+      if (btn) btn.disabled = false;
+    }
+  })
+  .catch(function(err) {
+    alert('Terjadi kesalahan koneksi.');
+    if (btn) btn.disabled = false;
+  });
+}
 </script>
 
 <%- include('partials/footer') %>

@@ -248,13 +248,13 @@
         </div>
       </div>
 
-      <div class="nav-links" id="navLinks">
+            <div class="nav-links" id="navLinks">
         <% if (typeof user !== 'undefined' && user) { %>
-          <!-- Mobile Profile Card (HP Only) -->
+          <!-- Mobile Profile Card (Header Drawer) -->
           <div class="mobile-user-card desktop-hidden">
             <div class="mobile-user-info">
               <% if (user.avatar) { %>
-                <img src="<%= user.avatar %>" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid #fbbf24;" alt="<%= user.name %>">
+                <img src="<%= user.avatar %>" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid #fbbf24;" alt="<%= user.name %>">
               <% } else { %>
                 <div class="mobile-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
               <% } %>
@@ -265,19 +265,20 @@
                     <i class="fas fa-crown" style="color:#fbbf24; font-size:0.85rem;" title="VIP Member"></i>
                   <% } %>
                 </div>
-                <div class="mobile-user-balance">💰 Rp <%= (typeof balance !== 'undefined' ? balance : 0).toLocaleString('id-ID') %></div>
+                <div class="mobile-user-balance"><i class="fas fa-wallet" aria-hidden="true"></i> Rp <%= (typeof balance !== 'undefined' ? balance : 0).toLocaleString('id-ID') %></div>
               </div>
             </div>
-            <div style="display:flex; align-items:center; gap:0.45rem;">
-              <a href="/wallet?ref_=nav_mobile_topup" class="btn-primary" style="padding:0.38rem 0.65rem; font-size:0.75rem; font-weight:700; border-radius:10px; box-shadow:0 2px 10px rgba(251,191,36,0.25);">+ Top Up</a>
-              <a href="/logout" class="mobile-logout-pill" style="padding:0.38rem 0.65rem; font-size:0.75rem; font-weight:700; border-radius:10px; background:linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(220,38,38,0.1) 100%); border:1px solid rgba(239,68,68,0.35); color:#f87171; text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem; box-shadow:0 2px 8px rgba(239,68,68,0.15);">
-                <i class="fas fa-power-off" style="color:#ef4444; font-size:0.72rem;"></i> Logout
-              </a>
+            <div class="mobile-user-actions">
+              <div class="mobile-user-btn-row">
+                <% if (user.role === 'admin') { %>
+                  <a href="/admin?ref_=nav_mobile_admin" class="btn-mobile-admin"><i class="fas fa-shield-alt" aria-hidden="true"></i> Admin</a>
+                <% } %>
+                <a href="/wallet?ref_=nav_mobile_topup" class="btn-mobile-topup">+ Top Up</a>
+              </div>
+              <a href="/logout" class="btn-mobile-logout">Logout</a>
             </div>
           </div>
         <% } %>
-
-        <div class="nav-section-divider desktop-hidden">Navigasi</div>
 
         <a href="/?ref_=nav_home" class="nav-link"><span><i class="fas fa-home"></i> Beranda</span></a>
         <a href="/games?ref_=nav_games" class="nav-link"><span><i class="fas fa-gamepad"></i> Game Library</span> <span class="badge-hot">100+ GAME</span></a>
@@ -288,13 +289,16 @@
         <a href="/faq?ref_=nav_faq" class="nav-link"><span><i class="fas fa-question-circle"></i> FAQ</span></a>
 
         <% if (typeof user !== 'undefined' && user) { %>
-          <div class="nav-section-divider desktop-hidden">Akun Saya</div>
+          <% if (user.role === 'admin') { %>
+            <div class="nav-section-divider desktop-hidden nav-admin-divider">ADMINISTRATOR</div>
+            <a href="/admin?ref_=nav_admin" class="nav-link nav-admin-card desktop-hidden"><span><i class="fas fa-shield-alt" aria-hidden="true"></i> Admin Panel</span></a>
+            <a href="/admin?ref_=nav_admin" class="nav-link mobile-hidden" style="color:#fbbf24; font-weight:700;"><span style="display:inline-flex; align-items:center; gap:0.35rem;"><i class="fas fa-crown" style="color:#fbbf24;"></i> Admin Panel</span></a>
+          <% } %>
+
+          <div class="nav-section-divider desktop-hidden">AKUN SAYA</div>
           <a href="/dashboard?ref_=nav_dashboard" class="nav-link"><span><i class="fas fa-chart-line"></i> Dashboard</span></a>
           <a href="/profile?ref_=nav_profile" class="nav-link desktop-hidden"><span><i class="fas fa-user"></i> Profil Saya</span></a>
           <a href="/wallet?ref_=nav_wallet" class="nav-link desktop-hidden"><span><i class="fas fa-money-bill"></i> Saldo &amp; Top-up</span></a>
-          <% if (user.role === 'admin') { %>
-            <a href="/admin?ref_=nav_admin" class="nav-link nav-admin-btn"><span><i class="fas fa-cog"></i> Admin Panel ⚙️</span></a>
-          <% } %>
 
           <!-- Desktop User Menu Dropdown -->
           <div class="nav-user-menu mobile-hidden">
@@ -306,13 +310,19 @@
               <% } %>
               <span style="display:inline-flex; align-items:center; gap:0.25rem;">
                 <%= user.name.split(' ')[0] %>
-                <% if (user.isRoyal) { %>
+                <% if (user.role === 'admin') { %>
+                  <i class="fas fa-crown" style="color:#fbbf24; font-size:0.85rem;" title="Administrator"></i>
+                <% } else if (user.isRoyal) { %>
                   <i class="fas fa-crown" style="color:#fbbf24; font-size:0.85rem;" title="Royal Club Member"></i>
                 <% } %>
               </span>
               <i class="fas fa-chevron-down"></i>
             </button>
             <div class="user-dropdown" id="userDropdown">
+              <% if (user.role === 'admin') { %>
+                <a href="/admin?ref_=nav_user_admin" style="color:#fbbf24; font-weight:700;"><i class="fas fa-shield-alt" style="color:#fbbf24;"></i> Admin Panel</a>
+                <hr>
+              <% } %>
               <a href="/profile?ref_=nav_user_profile"><i class="fas fa-user"></i> Profil</a>
               <a href="/dashboard?ref_=nav_user_dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
               <a href="/wallet?ref_=nav_user_wallet"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 0.2rem;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg> Saldo &amp; Top-up</a>
@@ -325,8 +335,331 @@
           <a href="/register?ref_=nav_register" class="btn-nav-cta"><i class="fas fa-user-plus"></i> Daftar Gratis</a>
         <% } %>
       </div>
-      <button class="nav-toggle" type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="navLinks" id="navToggleBtn">
-        <span></span><span></span><span></span>
-      </button>
+
+      <div style="display:flex; align-items:center; gap:0.45rem; margin-left:auto; position:relative; z-index:10006;" class="desktop-hidden">
+        <!-- Notification Bell on Mobile Top Bar -->
+        <button type="button" class="nav-notif-btn" id="notifBellBtn" onclick="toggleNotifMenu()" aria-label="Notifikasi & Promo" style="background:#181920; border:1px solid rgba(255,255,255,0.12); color:#fff; width:38px; height:38px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; position:relative;">
+          <i class="fas fa-bell" style="color:#fbbf24; font-size:1.05rem;"></i>
+        </button>
+        <button class="nav-toggle" type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="navLinks" id="navToggleBtn" style="background:#181920; border:1px solid rgba(255,255,255,0.12); border-radius:10px; width:38px; height:38px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; padding:0;">
+          <span style="display:block; width:18px; height:2px; background:#ededf0; border-radius:2px; transition:0.2s;"></span>
+          <span style="display:block; width:18px; height:2px; background:#ededf0; border-radius:2px; transition:0.2s;"></span>
+          <span style="display:block; width:18px; height:2px; background:#ededf0; border-radius:2px; transition:0.2s;"></span>
+        </button>
+      </div>
     </div>
   </nav>
+
+
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   MOBILE NAVIGATION DRAWER - EXACT MATCH TO SCREENSHOT (COMPACT EDITION)
+   Strictly scoped to <= 900px. DESKTOP IS 100% UNTOUCHED!
+   ══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .nav-links {
+    display: none;
+    position: fixed !important;
+    top: 58px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    height: calc(100dvh - 58px) !important;
+    max-height: calc(100dvh - 58px) !important;
+    background: rgba(13, 15, 20, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    padding: 0.75rem 0.85rem 3.5rem !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important; /* NO 2nd column wrapping! */
+    gap: 0 !important;
+    z-index: 10005 !important;
+    overflow-x: hidden !important; /* NO horizontal overflow or peeking cards! */
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+  .nav-links.open {
+    display: flex !important;
+  }
+  
+  /* Strictly hide desktop user dropdown menu on mobile drawer */
+  .nav-links .nav-user-menu,
+  .nav-links .nav-user-menu.mobile-hidden {
+    display: none !important;
+  }
+  .nav-toggle.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px) !important;
+  }
+  .nav-toggle.open span:nth-child(2) {
+    opacity: 0 !important;
+  }
+  .nav-toggle.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px) !important;
+  }
+
+  /* 1. Mobile Profile Card (Compact) */
+  .mobile-user-card {
+    background: #181920 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 0.65rem 0.85rem !important;
+    margin-bottom: 0.45rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .mobile-user-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+  }
+  .mobile-avatar-placeholder {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background: #8b5cf6 !important; /* Purple circle */
+    border: 2px solid #fbbf24 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .mobile-user-name {
+    font-family: var(--font-display, sans-serif) !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
+  }
+  .mobile-user-balance {
+    font-family: var(--font-ui, sans-serif) !important;
+    font-size: 0.8rem !important;
+    color: #fbbf24 !important;
+    font-weight: 700 !important;
+    margin-top: 1px !important;
+  }
+  .mobile-user-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 0.25rem !important;
+  }
+  .mobile-user-btn-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+  }
+  .btn-mobile-admin,
+  .btn-mobile-topup {
+    background: #f59e0b !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+    font-size: 0.72rem !important;
+    padding: 0.25rem 0.55rem !important;
+    border-radius: 7px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.2rem !important;
+    line-height: 1.2 !important;
+  }
+  .btn-mobile-logout {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: #fca5a5 !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    padding: 0.15rem 0.5rem !important;
+    border-radius: 5px !important;
+    text-decoration: none !important;
+    line-height: 1.2 !important;
+  }
+
+  /* 2. Menu Items (Separate Compact Card Boxes) */
+  .nav-links .nav-link {
+    background: #181920 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 11px !important;
+    padding: 0.5rem 0.9rem !important;
+    margin-bottom: 0.32rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    color: #f1f5f9 !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    min-height: 40px !important;
+  }
+  .nav-links .nav-link:active {
+    background: #20222a !important;
+    transform: scale(0.99) !important;
+  }
+  .nav-links .nav-link span {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+  }
+  .nav-links .nav-link i {
+    color: #fbbf24 !important; /* Gold icons */
+    font-size: 1rem !important;
+    width: 18px !important;
+    text-align: center !important;
+  }
+
+  /* 3. Badge "100+ GAME" */
+  .nav-links .badge-hot {
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%) !important;
+    color: #ffffff !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    padding: 0.2rem 0.5rem !important;
+    border-radius: 9999px !important;
+    letter-spacing: 0.04em !important;
+    border: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+
+  /* 4. Section Dividers (Compact) */
+  .nav-section-divider {
+    text-align: center !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.18em !important;
+    color: #94a3b8 !important;
+    margin: 0.65rem 0 0.3rem !important;
+    text-transform: uppercase !important;
+    width: 100% !important;
+  }
+  .nav-admin-divider {
+    color: #f59e0b !important;
+  }
+
+  /* 5. Special Admin Panel Card (Compact) */
+  .nav-links .nav-admin-card {
+    border: 1.5px solid #eab308 !important; /* Gold border */
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 0.52rem 0.9rem !important;
+    min-height: 40px !important;
+  }
+  .nav-links .nav-admin-card span {
+    color: #fbbf24 !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    justify-content: center !important;
+  }
+}
+</style>
+
+
+<!-- Pusat Notifikasi & Promo Drawer / Modal Popup -->
+<style>
+.notif-dropdown-box {
+  display: none;
+  position: fixed;
+  top: 60px;
+  right: 8px;
+  width: 320px;
+  max-width: calc(100vw - 16px);
+  max-height: 440px;
+  overflow-y: auto;
+  background: #11131f;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
+  z-index: 99999999 !important;
+}
+.notif-backdrop-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99999998 !important;
+}
+</style>
+
+<div class="notif-backdrop-overlay" id="notifBackdrop" onclick="toggleNotifMenu()"></div>
+
+<div class="notif-dropdown-box" id="notifDropdown">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08);">
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <i class="fas fa-bell" style="color:#fbbf24;"></i>
+      <span style="font-weight:800; font-size:0.9rem; color:#fff;">Pusat Notifikasi &amp; Promo</span>
+    </div>
+    <button type="button" onclick="toggleNotifMenu()" style="background:none; border:none; color:rgba(255,255,255,0.6); font-size:1.1rem; cursor:pointer;">&times;</button>
+  </div>
+
+  <div style="max-height:360px; overflow-y:auto; padding:0.75rem;">
+    <!-- Promo Box -->
+    <div style="background:linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(217,119,6,0.08) 100%); border:1px solid rgba(251,191,36,0.3); border-radius:12px; padding:0.85rem; margin-bottom:0.75rem;">
+      <div style="font-weight:800; font-size:0.82rem; color:#fbbf24; margin-bottom:0.35rem; display:flex; align-items:center; gap:0.35rem;">
+        <i class="fas fa-gift"></i> Kode Promo Spesial 10%
+      </div>
+      <div style="font-size:0.8rem; color:rgba(255,255,255,0.9); line-height:1.4; margin-bottom:0.6rem;">
+        Pakai kode promo <strong style="color:#fbbf24;">ALEX10</strong> saat pembelian paket/top-up saldo di atas Rp100.000 untuk potongan harga 10%!
+      </div>
+      <button type="button" onclick="copyPromoCode('ALEX10')" style="background:linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color:#000; border:none; border-radius:8px; padding:0.35rem 0.75rem; font-size:0.75rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:0.35rem; width:100%; justify-content:center;">
+        <i class="fas fa-copy"></i> Salin Kode: ALEX10
+      </button>
+    </div>
+
+    <!-- Feature Update Notification -->
+    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:0.75rem; margin-bottom:0.6rem; display:flex; gap:0.6rem;">
+      <div style="width:32px; height:32px; border-radius:8px; background:rgba(59,130,246,0.2); color:#60a5fa; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <i class="fas fa-gamepad"></i>
+      </div>
+      <div>
+        <div style="font-weight:800; font-size:0.8rem; color:#fff; margin-bottom:0.2rem;">EA FC 26 &amp; GTA V Ready</div>
+        <div style="font-size:0.75rem; color:rgba(255,255,255,0.7); line-height:1.35;">Sewa Cloud Gaming RTX - Main EA FC 26 &amp; GTA V Expanded langsung dari HP &amp; PC tanpa install!</div>
+      </div>
+    </div>
+
+    <!-- Payment Notification -->
+    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:0.75rem; display:flex; gap:0.6rem;">
+      <div style="width:32px; height:32px; border-radius:8px; background:rgba(16,185,129,0.2); color:#34d399; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <div>
+        <div style="font-weight:800; font-size:0.8rem; color:#fff; margin-bottom:0.2rem;">Pembayaran QRIS Instan 24/7</div>
+        <div style="font-size:0.75rem; color:rgba(255,255,255,0.7); line-height:1.35;">Metode pembayaran QRIS (All E-Wallet &amp; m-Banking) terkonfirmasi otomatis secara realtime 24 jam nonstop.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleNotifMenu() {
+  var el = document.getElementById('notifDropdown');
+  var bd = document.getElementById('notifBackdrop');
+  if (!el) return;
+  var isOpen = el.style.display === 'block';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (bd) bd.style.display = isOpen ? 'none' : 'block';
+}
+
+function copyPromoCode(code) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(function() {
+      alert('✅ Kode Promo ' + code + ' Berhasil Disalin!');
+    }).catch(function() {
+      alert('Kode Promo: ' + code);
+    });
+  } else {
+    alert('Kode Promo: ' + code);
+  }
+}
+</script>
+
