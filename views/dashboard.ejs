@@ -45,7 +45,28 @@
       </div>
     </div>
 
-    <!-- Status Cards -->
+    <!-- 🎡 FULL-WIDTH LUXURY SPIN THE WHEEL BANNER -->
+    <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.06) 100%); border: 1.5px solid rgba(245, 158, 11, 0.45); border-radius: 18px; padding: 1.15rem 1.4rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 30px rgba(245,158,11,0.12);">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 4px 18px rgba(245,158,11,0.45); flex-shrink: 0;">
+          🎡
+        </div>
+        <div>
+          <div style="font-weight: 900; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span>Roda Keberuntungan Harian</span>
+            <span style="font-size: 0.7rem; background: #00ff88; color: #000; font-weight: 900; padding: 0.15rem 0.55rem; border-radius: 50px; letter-spacing: 0.5px;">GRATIS 1X / 24 JAM</span>
+          </div>
+          <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 0.25rem;">
+            Putar roda setiap hari untuk kesempatan memenangkan voucher diskon s/d 10%, saldo dompet, &amp; poin gamers!
+          </div>
+        </div>
+      </div>
+      <button type="button" onclick="openSpinWheelModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight: 900; padding: 0.75rem 1.5rem; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 18px rgba(245,158,11,0.35); font-size: 0.92rem; display: flex; align-items: center; gap: 0.45rem; white-space: nowrap; transition: transform 0.15s ease;">
+        <i class="fas fa-play" style="font-size: 0.8rem;"></i> Putar Roda Sekarang
+      </button>
+    </div>
+
+    <!-- 4 Status Cards (Grid Sempurna) -->
     <div class="dashboard-grid">
       <a href="/wallet?ref_=dash_wallet_card" class="stat-card" style="text-decoration:none; color:inherit; position:relative;">
         <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg></div>
@@ -78,697 +99,230 @@
           <div class="value"><%= subscription ? subscription.daysLeft + ' hari' : '-' %></div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon orange"><i class="fas fa-tag"></i></div>
-        <div class="stat-info">
-          <div class="label">Paket Aktif</div>
-          <div class="value" style="font-size:0.9rem"><%= subscription ? subscription.planName : 'Tidak Ada' %></div>
-        </div>
+    </div>
+
+
+
+
+<!-- ===================== MODAL CASINO LUCKY WHEEL ===================== -->
+<div id="spinModalOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(12px); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%); border:2px solid #fbbf24; border-radius:28px; max-width:460px; width:100%; text-align:center; padding:2rem 1.5rem 1.75rem; box-shadow:0 25px 70px rgba(0,0,0,0.95), 0 0 50px rgba(251,191,36,0.3); position:relative;">
+    
+    <button type="button" onclick="closeSpinWheelModal()" style="position:absolute; top:16px; right:18px; background:rgba(255,255,255,0.1); border:none; color:#cbd5e1; font-size:1.35rem; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</button>
+
+    <div style="font-weight:900; font-size:1.35rem; color:#fbbf24; letter-spacing:0.5px; text-shadow:0 2px 10px rgba(251,191,36,0.5);">
+      🎡 Roda Keberuntungan Harian
+    </div>
+    <div style="font-size:0.82rem; color:#cbd5e1; margin-top:0.25rem; margin-bottom:1.5rem;">
+      Uji keberuntunganmu hari ini dan menangkan hadiah menarik!
+    </div>
+
+    <!-- Authentic Casino Lucky Wheel Container -->
+    <div style="position:relative; width:310px; height:310px; margin:0 auto 1.5rem; display:flex; align-items:center; justify-content:center;">
+      
+      <!-- Golden Outer Bezel with Lights -->
+      <div style="position:absolute; width:310px; height:310px; border-radius:50%; background:radial-gradient(circle, #f59e0b 0%, #78350f 100%); border:4px solid #fef08a; box-shadow:0 0 30px rgba(245,158,11,0.5), inset 0 0 15px rgba(0,0,0,0.6); z-index:1;"></div>
+
+      <!-- Top Stopper Indicator / Pointer (Triangle with Pin) -->
+      <div id="wheelPointer" style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:15px solid transparent; border-right:15px solid transparent; border-top:28px solid #ef4444; z-index:20; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.8)); transition:transform 0.1s ease;"></div>
+      
+      <!-- Canvas Rotating Disc -->
+      <canvas id="wheelCanvas" width="280" height="280" style="border-radius:50%; position:relative; z-index:10; box-shadow:0 0 20px rgba(0,0,0,0.8);"></canvas>
+      
+      <!-- Center Metallic Golden Cap -->
+      <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:56px; height:56px; border-radius:50%; background:radial-gradient(circle, #fef08a 0%, #d97706 80%, #78350f 100%); border:3px solid #fff; display:flex; align-items:center; justify-content:center; font-size:1.35rem; color:#000; box-shadow:0 0 15px rgba(0,0,0,0.8); z-index:15;">
+        ⚡
       </div>
     </div>
 
-    <!-- Content -->
-    <div class="content-grid">
-      <!-- Left Column -->
-      <div>
-        <% if (user.isRoyal) { %>
-        <!-- 👑 ROYAL CLUB MEMBER LOUNGE 👑 -->
-        <div class="card" style="border: 2px solid #fbbf24; background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(17,17,17,0.95) 50%, rgba(251,191,36,0.02) 100%); margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(251,191,36,0.1);">
-          <div class="card-header" style="border-bottom: 1px solid rgba(251,191,36,0.15); display: flex; justify-content: space-between; align-items: center; background: rgba(251,191,36,0.03);">
-            <div class="card-title" style="color: #fbbf24; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-crown"></i> Royal Club Lounge
-            </div>
-            <span style="font-size: 0.75rem; font-weight: 700; background: #fbbf24; color: #111; padding: 0.2rem 0.6rem; border-radius: 100px; font-family: var(--font-ui);">
-              VIP PERK ACTIVE
-            </span>
-          </div>
-          <div class="card-body" style="padding: 1.5rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
-              
-              <!-- CLAIM DAILY COINS -->
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(251,191,36,0.15); padding: 1.25rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                  <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fbbf24; display: flex; align-items: center; gap: 0.4rem;">
-                    <i class="fas fa-coins"></i> Klaim Bonus Harian
-                  </h4>
-                  <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 1rem;">
-                    Ambil bonus saldo gratis **Rp 500** setiap 24 jam khusus untuk member Royal Club.
-                  </p>
-                </div>
-                <div id="dailyClaimArea">
-                  <% 
-                    let canClaim = true;
-                    if (user.lastRoyalClaim) {
-                      const lastClaim = new Date(user.lastRoyalClaim);
-                      const diffTime = Math.abs(new Date() - lastClaim);
-                      const diffHours = diffTime / (1000 * 60 * 60);
-                      if (diffHours < 24) {
-                        canClaim = false;
-                      }
-                    }
-                  %>
-                  <% if (canClaim) { %>
-                    <button onclick="claimRoyalDaily()" class="plan-btn filled" style="background: linear-gradient(90deg, #fbbf24, #d97706); color: #111; font-weight: 800; border: none; width: 100%; text-align: center; justify-content: center; cursor: pointer; height: 42px; border-radius: 8px;">
-                      <i class="fas fa-gift"></i> Klaim Rp 500 Sekarang
-                    </button>
-                  <% } else { %>
-                    <button class="plan-btn" disabled style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); width: 100%; text-align: center; justify-content: center; height: 42px; border-radius: 8px; cursor: not-allowed;">
-                      <i class="fas fa-clock"></i> Sudah Diklaim (Kembali Besok)
-                    </button>
-                  <% } %>
-                </div>
-              </div>
-
-              <!-- STREAMING QUALITY CONTROLS -->
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px;">
-                <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fff; display: flex; align-items: center; gap: 0.4rem;">
-                  <i class="fas fa-sliders-h"></i> Pengaturan Bitrate VIP
-                </h4>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem;">
-                  Sesuaikan batas bitrate maksimal streaming cloud gaming (hingga 100 Mbps).
-                </p>
-                <div style="margin-top: 0.5rem;">
-                  <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem; font-family:var(--font-ui);">
-                    <span>Bitrate Target:</span>
-                    <strong style="color:var(--accent-blue);" id="bitrateVal"><%= user.royalBitrate || 50 %> Mbps</strong>
-                  </div>
-                  <input type="range" min="10" max="100" step="5" value="<%= user.royalBitrate || 50 %>" id="bitrateSlider" oninput="updateBitrateDisplay(this.value)" onchange="saveRoyalSettings('bitrate', this.value)" style="width:100%; accent-color:var(--accent-blue); background:rgba(255,255,255,0.1); outline:none; cursor:pointer;">
-                </div>
-              </div>
-
-              <!-- CUSTOM VIRTUAL CONTROLLER -->
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px;">
-                <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fff; display: flex; align-items: center; gap: 0.4rem;">
-                  <i class="fas fa-gamepad"></i> Layout Kontroler Virtual
-                </h4>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem;">
-                  Pilih jenis preset layout kontroler virtual kustom di layar HP.
-                </p>
-                <select id="controllerPreset" onchange="saveRoyalSettings('controller', this.value)" style="width: 100%; padding: 0.6rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-family: var(--font-ui); outline: none; font-size: 0.85rem; margin-top: 0.25rem;">
-                  <option value="default" <%= (user.royalController === 'default' || !user.royalController) ? 'selected' : '' %>>Xbox Console (Standar)</option>
-                  <option value="playstation" <%= user.royalController === 'playstation' ? 'selected' : '' %>>PlayStation Layout</option>
-                  <option value="retro" <%= user.royalController === 'retro' ? 'selected' : '' %>>Classic Retro (NES/SNES)</option>
-                  <option value="rpg" <%= user.royalController === 'rpg' ? 'selected' : '' %>>RPG Kustom Buttons</option>
-                </select>
-              </div>
-
-              <!-- REQUEST GAME CUSTOM FORM -->
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; grid-column: 1 / -1;">
-                <h4 style="margin: 0 0 0.5rem; font-family: var(--font-ui); color: #fff; display: flex; align-items: center; gap: 0.4rem;">
-                  <i class="fas fa-plus-circle"></i> Ajukan Request Game Baru (VIP Priority)
-                </h4>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem;">
-                  Ingin game tertentu ditambahkan ke cloud gaming? Kirim request Anda, kami prioritaskan langsung!
-                </p>
-                <form id="gameRequestForm" onsubmit="submitGameRequest(event)" style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-                  <input type="text" id="reqGameTitle" required placeholder="Contoh: GTA V, FIFA 24, Cyberpunk 2077..." style="flex: 1; padding: 0.6rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-family: var(--font-ui); outline: none; font-size: 0.85rem;">
-                  <button type="submit" class="btn-primary" style="padding: 0 1.25rem; font-size: 0.85rem; height: 38px; border-radius: var(--radius-sm);">
-                    Kirim Request
-                  </button>
-                </form>
-                <div id="gameRequestAlert" style="margin-top:0.5rem; font-size:0.8rem; display:none;"></div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        
-        <!-- ROYAL LOUNGE SCRIPTS -->
-        <script>
-          function claimRoyalDaily() {
-            const btn = document.querySelector('#dailyClaimArea button');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-            
-            fetch('/api/royal/claim-daily', { method: 'POST' })
-              .then(res => res.json())
-              .then(data => {
-                if (data.success) {
-                  alert('Selamat! Saldo Rp 500 berhasil ditambahkan ke dompet Anda!');
-                  location.reload();
-                } else {
-                  alert(data.message || 'Gagal melakukan klaim.');
-                  btn.disabled = false;
-                  btn.innerHTML = '<i class="fas fa-gift"></i> Klaim Rp 500 Sekarang';
-                }
-              })
-              .catch(err => {
-                console.error(err);
-                alert('Terjadi kesalahan jaringan.');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-gift"></i> Klaim Rp 500 Sekarang';
-              });
-          }
-          
-          function updateBitrateDisplay(val) {
-            document.getElementById('bitrateVal').innerText = val + ' Mbps';
-          }
-          
-          function saveRoyalSettings(key, value) {
-            fetch('/api/royal/settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ key, value })
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (!data.success) {
-                alert(data.message || 'Gagal menyimpan pengaturan.');
-              }
-            })
-            .catch(err => console.error(err));
-          }
-          
-          function submitGameRequest(e) {
-            e.preventDefault();
-            const titleInput = document.getElementById('reqGameTitle');
-            const gameTitle = titleInput.value.trim();
-            if (!gameTitle) return;
-            
-            const alertDiv = document.getElementById('gameRequestAlert');
-            const submitBtn = document.querySelector('#gameRequestForm button');
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            fetch('/api/royal/game-request', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ title: gameTitle })
-            })
-            .then(res => res.json())
-            .then(data => {
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = 'Kirim Request';
-              if (data.success) {
-                alertDiv.style.display = 'block';
-                alertDiv.style.color = 'var(--accent-green)';
-                alertDiv.innerHTML = '<i class="fas fa-check-circle"></i> Request game "' + gameTitle + '" berhasil diajukan!';
-                titleInput.value = '';
-                setTimeout(() => { alertDiv.style.display = 'none'; }, 4000);
-              } else {
-                alertDiv.style.display = 'block';
-                alertDiv.style.color = '#ef4444';
-                alertDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (data.message || 'Gagal mengirim request.');
-              }
-            })
-            .catch(err => {
-              console.error(err);
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = 'Kirim Request';
-            });
-          }
-        </script>
-        <% } %>
-
-        <!-- Orders Table -->
-        <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i class="fas fa-history"></i> Riwayat Order</div>
-          <a href="/pricing?ref_=dash_history_order_new" class="btn-action btn-confirm"><i class="fas fa-plus"></i> Order Baru</a>
-        </div>
-        <div class="card-body" style="padding:0;">
-          <% if (orders.length === 0) { %>
-          <div style="text-align:center; padding:3rem; color:var(--text-muted);">
-            <i class="fas fa-inbox" style="font-size:2rem; margin-bottom:1rem;"></i>
-            <p>Belum ada order. <a href="/pricing?ref_=dash_history_order_empty" style="color:var(--accent-blue)">Order sekarang!</a></p>
-          </div>
-          <% } else { %>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Paket</th>
-                  <th>Harga</th>
-                  <th>Status</th>
-                  <th>Tanggal</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% orders.forEach(order => { %>
-                <tr>
-                  <td><span style="font-family:var(--font-display);font-size:0.8rem;color:var(--accent-blue)"><%= order.orderId %></span></td>
-                  <td><%= order.planName %></td>
-                  <td style="color:var(--accent-green)">Rp <%= order.price.toLocaleString('id-ID') %></td>
-                  <td>
-                    <span class="status-badge status-<%= order.status %>">
-                      <%= order.status === 'pending' ? '⏳ Menunggu' : order.status === 'confirmed' ? '✅ Dikonfirmasi' : '❌ Ditolak' %>
-                    </span>
-                  </td>
-                  <td style="color:var(--text-muted); font-size:0.85rem;"><%= moment(order.createdAt).format('DD/MM/YY') %></td>
-                  <td>
-                    <div style="display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center;">
-                      <a href="/payment/<%= order.orderId %>" class="btn-primary" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fas fa-file-invoice"></i> Invoice</a>
-                      <% if (order.status === 'confirmed') { %>
-                        <% if (order.reviewAllowed && !order.reviewedAt) { %>
-                          <a href="/review/<%= order.reviewToken %>" class="btn-primary" style="padding:0.35rem 0.6rem; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.3rem; background:linear-gradient(90deg,#fbbf24,#d97706); color:#111; font-weight:700; text-decoration:none;">
-                            <i class="fas fa-star"></i> Tulis Ulasan
-                          </a>
-                        <% } else if (order.reviewedAt) { %>
-                          <span style="font-size:0.72rem; color:#fbbf24; display:inline-flex; align-items:center; gap:0.25rem;">
-                            <i class="fas fa-check-circle"></i> Sudah Diulas
-                          </span>
-                        <% } %>
-                      <% } %>
-                    </div>
-                  </td>
-                </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-          <% } %>
-        </div>
-      </div>
-
-      <!-- Sub Info + Plans -->
-      <div>
-        <% if (subscription) { %>
-        <div class="sub-card" style="margin-bottom:1.5rem;">
-          <div class="sub-active-label">✅ Subscription Aktif</div>
-          <div class="sub-plan-name"><%= subscription.planName %></div>
-          <div class="sub-expires">Berakhir: <%= subscription.expiryFormatted %></div>
-          <div class="sub-days-badge"><%= subscription.daysLeft %> hari tersisa</div>
-        </div>
-        <% } else { %>
-        <div class="no-sub card" style="margin-bottom:1.5rem;">
-          <div class="card-body" style="text-align:center; padding:2rem;">
-            <i class="fas fa-lock" style="font-size:2.5rem; color:var(--text-muted); margin-bottom:1rem;"></i>
-            <p style="color:var(--text-muted); margin-bottom:1.25rem;">Kamu belum memiliki subscription aktif</p>
-            <a href="/pricing?ref_=dash_no_sub_subscribe" class="btn-primary"><i class="fas fa-gamepad"></i> Subscribe Sekarang</a>
-          </div>
-        </div>
-        <% } %>
-
-        <!-- ═══ AJAK TEMAN (Referral) ═══ -->
-        <% if (typeof referral !== 'undefined' && referral) {
-             const welcomeRp = 'Rp ' + (referral.welcomeDiscount || 0).toLocaleString('id-ID');
-             const rewardRp  = 'Rp ' + (referral.referrerReward || 0).toLocaleString('id-ID'); %>
-        <div class="card rf-card">
-          <div class="card-header">
-            <div class="card-title"><i class="fas fa-gift"></i> Ajak Teman, Dapat Diskon</div>
-          </div>
-          <div class="card-body">
-            <p class="rf-intro">
-              Ajak temanmu berlangganan AlexCloud. Mereka hemat <strong><%= welcomeRp %></strong>,
-              dan kamu dapat kode diskon <strong><%= rewardRp %></strong> tiap teman order pertama kali. 🎉
-            </p>
-
-            <!-- ── TUTORIAL: Cara Kerjanya ── -->
-            <div class="rf-tut">
-              <div class="rf-tut-title"><i class="fas fa-circle-info"></i> Cara Kerjanya</div>
-              <ol class="rf-steps">
-                <li class="rf-step">
-                  <span class="rf-step-num">1</span>
-                  <div class="rf-step-body">
-                    <div class="rf-step-head">Bagikan kode / link kamu</div>
-                    <div class="rf-step-desc">Kirim ke teman lewat WhatsApp, Instagram, atau Telegram pakai tombol di bawah.</div>
-                  </div>
-                </li>
-                <li class="rf-step">
-                  <span class="rf-step-num">2</span>
-                  <div class="rf-step-body">
-                    <div class="rf-step-head">Teman daftar pakai kodemu</div>
-                    <div class="rf-step-desc">Begitu daftar dengan kodemu, teman langsung dapat diskon welcome <strong><%= welcomeRp %></strong>.</div>
-                  </div>
-                </li>
-                <li class="rf-step">
-                  <span class="rf-step-num">3</span>
-                  <div class="rf-step-body">
-                    <div class="rf-step-head">Teman order & bayar paket pertama</div>
-                    <div class="rf-step-desc">Reward baru dihitung setelah pembayaran teman dikonfirmasi admin (anti-abuse).</div>
-                  </div>
-                </li>
-                <li class="rf-step">
-                  <span class="rf-step-num">4</span>
-                  <div class="rf-step-body">
-                    <div class="rf-step-head">Reward kamu cair otomatis</div>
-                    <div class="rf-step-desc">
-                      Kode diskon <strong><%= rewardRp %></strong> masuk ke bagian <em>“Kupon Diskon Kamu”</em>. 
-                      <strong style="color:var(--accent-green); display:block; margin-top:0.35rem;"><i class="fas fa-gift"></i> BONUS SUPER:</strong> Jika teman membeli paket di atas Rp 100.000, masa aktif langganan kamu akan <strong>otomatis ditambah 7 Hari GRATIS!</strong>
-                    </div>
-                  </div>
-                </li>
-                <li class="rf-step">
-                  <span class="rf-step-num">5</span>
-                  <div class="rf-step-body">
-                    <div class="rf-step-head">Klaim Bonus SUPER 7 Hari</div>
-                    <div class="rf-step-desc">Setelah bonus otomatis masuk, klik tombol <strong>Invoice</strong> pada baris order Rp 0 di tabel <strong>Riwayat Order</strong>, lalu tekan tombol konfirmasi WhatsApp ke Admin agar akunmu diproses!</div>
-                  </div>
-                </li>
-              </ol>
-            </div>
-
-            <!-- ── Kode Referral ── -->
-            <label class="rf-label">Kode Referral Kamu</label>
-            <div class="rf-inputrow">
-              <input id="refCodeInput" class="rf-input rf-input-code" type="text" readonly value="<%= referral.code %>">
-              <button type="button" class="btn-action btn-confirm rf-iconbtn" onclick="copyRef('refCodeInput', this)" title="Salin kode"><i class="fas fa-copy"></i></button>
-            </div>
-
-            <!-- ── Tombol Bagikan ── -->
-            <div class="rf-share">
-              <a class="rf-share-btn rf-wa" id="rfShareWa" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-              <a class="rf-share-btn rf-tg" id="rfShareTg" target="_blank" rel="noopener"><i class="fab fa-telegram"></i> Telegram</a>
-              <button type="button" class="rf-share-btn rf-copy" onclick="copyRef('refLinkInput', this)"><i class="fas fa-link"></i> Salin Link</button>
-            </div>
-
-            <!-- ── Link Undangan ── -->
-            <label class="rf-label">Link Undangan</label>
-            <div class="rf-inputrow">
-              <input id="refLinkInput" class="rf-input rf-input-link" type="text" readonly value="<%= referral.link %>">
-              <button type="button" class="btn-action btn-confirm rf-iconbtn" onclick="copyRef('refLinkInput', this)" title="Salin link"><i class="fas fa-copy"></i></button>
-            </div>
-
-            <!-- ── Statistik ── -->
-            <div class="rf-stats">
-              <div class="rf-stat">
-                <div class="rf-stat-num"><%= referral.invitedCount %></div>
-                <div class="rf-stat-label">Teman Diajak</div>
-              </div>
-              <div class="rf-stat">
-                <div class="rf-stat-num" style="color:var(--accent-green);"><%= referral.rewardedCount %></div>
-                <div class="rf-stat-label">Reward Cair</div>
-              </div>
-            </div>
-
-            <!-- ── Kupon milik user ── -->
-            <% if (referral.myCoupons && referral.myCoupons.length > 0) { %>
-            <div class="rf-coupons">
-              <label class="rf-label">Kupon Diskon Kamu</label>
-              <% referral.myCoupons.forEach(c => { %>
-              <div class="rf-coupon">
-                <div class="rf-coupon-info">
-                  <div class="rf-coupon-code"><%= c.code %></div>
-                  <div class="rf-coupon-meta"><%= c.kind === 'welcome' ? '🎁 Welcome' : '⭐ Referral' %> · Potongan Rp <%= (c.value||0).toLocaleString('id-ID') %></div>
-                </div>
-                <button type="button" class="btn-action btn-confirm rf-iconbtn" onclick="copyText('<%= c.code %>', this)"><i class="fas fa-copy"></i></button>
-              </div>
-              <% }) %>
-              <p class="rf-hint">Pakai kode ini saat checkout paket.</p>
-            </div>
-            <% } %>
-
-            <!-- ── Redeem kode teman ── -->
-            <% if (!user.referredBy) { %>
-            <div class="rf-redeem">
-              <label class="rf-label">Punya Kode dari Teman?</label>
-              <div class="rf-inputrow">
-                <input id="redeemCodeInput" class="rf-input rf-input-redeem" type="text" placeholder="Masukkan kode referral">
-                <button type="button" class="btn-primary rf-redeem-btn" onclick="redeemReferral()"><i class="fas fa-check"></i> Pakai</button>
-              </div>
-              <p class="rf-hint">Sekali pakai — kamu langsung dapat diskon welcome <strong><%= welcomeRp %></strong>.</p>
-            </div>
-            <% } %>
-          </div>
-        </div>
-        <% } %>
-
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><i class="fas fa-tags"></i> Pilih Paket</div>
-          </div>
-          <div class="card-body">
-            <div style="display:flex; flex-direction:column; gap:0.75rem;">
-              <% plans.forEach(plan => { %>
-              <a href="/order/<%= plan.id %>" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; text-decoration:none; transition:var(--transition);"
-                onmouseover="this.style.borderColor='var(--accent-blue)'" onmouseout="this.style.borderColor='var(--border)'">
-                <div>
-                  <div style="font-family:var(--font-ui); font-weight:700; color:var(--text-primary)"><%= plan.name %></div>
-                  <div style="font-size:0.8rem; color:var(--text-muted)"><%= plan.duration %> hari akses</div>
-                </div>
-                <div style="text-align:right;">
-                  <div style="font-family:var(--font-display); font-weight:700; color:<%= plan.popular ? 'var(--accent-blue)' : 'var(--text-primary)' %>"><%= plan.priceDisplay %></div>
-                  <% if (plan.popular) { %><div style="font-size:0.7rem; color:var(--accent-blue)">POPULER</div><% } %>
-                </div>
-              </a>
-              <% }) %>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- Spin Button -->
+    <div style="margin-bottom:0.75rem;">
+      <button type="button" id="btnDoSpin" onclick="triggerWheelSpin()" style="background:linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color:#000; border:none; font-weight:900; font-size:1.05rem; padding:0.85rem 2.5rem; border-radius:50px; cursor:pointer; box-shadow:0 4px 25px rgba(251,191,36,0.5); letter-spacing:0.5px; transition:transform 0.15s ease;">
+        PUTAR RODA SEKARANG!
+      </button>
     </div>
+
+    <div id="spinResultFeedback" style="font-size:0.88rem; min-height:24px; color:#cbd5e1; font-weight:700;"></div>
+
   </div>
 </div>
 
-<style>
-  /* ═══ Referral card (scoped, mobile-first) ═══ */
-  .rf-card {
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--accent-line);
-    background: linear-gradient(160deg, var(--accent-soft) 0%, transparent 60%);
-  }
-  .rf-intro {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 1.25rem;
-  }
-  .rf-intro strong { color: var(--accent-hover); }
-
-  /* Tutorial */
-  .rf-tut {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1rem 1.1rem;
-    margin-bottom: 1.5rem;
-  }
-  .rf-tut-title {
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.9rem;
-  }
-  .rf-tut-title i { color: var(--accent-hover); }
-  .rf-steps { list-style: none; margin: 0; padding: 0; }
-  .rf-step {
-    display: flex;
-    gap: 0.75rem;
-    align-items: flex-start;
-    position: relative;
-    padding-bottom: 1rem;
-  }
-  .rf-step:last-child { padding-bottom: 0; }
-  /* Connector line between step numbers */
-  .rf-step:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: 13px;
-    top: 28px;
-    bottom: 2px;
-    width: 2px;
-    background: linear-gradient(var(--accent-line), transparent);
-  }
-  .rf-step-num {
-    flex-shrink: 0;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--gradient-main);
-    color: #fff;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-  }
-  .rf-step-body { flex: 1; min-width: 0; }
-  .rf-step-head {
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-    margin-bottom: 0.15rem;
-  }
-  .rf-step-desc {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-  }
-  .rf-step-desc strong { color: var(--accent-hover); }
-  .rf-step-desc em { color: var(--text-primary); font-style: normal; font-weight: 600; }
-
-  /* Labels + inputs */
-  .rf-label {
-    display: block;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    font-weight: 700;
-    margin-bottom: 0.45rem;
-  }
-  .rf-inputrow {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-  .rf-input {
-    flex: 1;
-    min-width: 0; /* penting: cegah overflow di HP */
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.7rem 0.9rem;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-  }
-  .rf-input-code {
-    font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--accent-hover);
-    border-style: dashed;
-    border-color: var(--accent-line);
-    font-size: 1.05rem;
-  }
-  .rf-input-link { color: var(--text-secondary); font-size: 0.8rem; }
-  .rf-input-redeem { text-transform: uppercase; }
-  .rf-input-redeem::placeholder { text-transform: none; letter-spacing: 0; }
-  .rf-iconbtn { flex-shrink: 0; }
-
-  /* Share buttons */
-  .rf-share {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-  }
-  .rf-share-btn {
-    flex: 1 1 auto;
-    min-width: 0;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.6rem 0.5rem;
-    border-radius: 10px;
-    font-family: var(--font-ui);
-    font-weight: 600;
-    font-size: 0.82rem;
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    background: rgba(255,255,255,0.04);
-    transition: var(--transition);
-  }
-  .rf-share-btn:hover { border-color: var(--border-hover); transform: translateY(-1px); }
-  .rf-wa { background: rgba(37,211,102,0.14); border-color: rgba(37,211,102,0.35); color: #4ade80; }
-  .rf-tg { background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.35); color: var(--accent-hover); }
-  .rf-share-btn i { font-size: 1rem; }
-
-  /* Stats */
-  .rf-stats { display: flex; gap: 0.75rem; margin-bottom: 0.25rem; }
-  .rf-stat {
-    flex: 1;
-    text-align: center;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 0.85rem 0.5rem;
-  }
-  .rf-stat-num { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
-  .rf-stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.15rem; }
-
-  /* Coupons */
-  .rf-coupons { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-  .rf-coupon {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    background: rgba(255,255,255,0.03);
-    border: 1px dashed var(--accent-line);
-    border-radius: 10px;
-    padding: 0.6rem 0.85rem;
-    margin-bottom: 0.5rem;
-  }
-  .rf-coupon-info { min-width: 0; }
-  .rf-coupon-code { font-family: var(--font-display); font-weight: 700; color: var(--accent-hover); letter-spacing: 1px; word-break: break-all; }
-  .rf-coupon-meta { font-size: 0.72rem; color: var(--text-muted); }
-  .rf-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; line-height: 1.5; }
-  .rf-hint strong { color: var(--accent-hover); }
-
-  /* Redeem */
-  .rf-redeem { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-  .rf-redeem-btn { flex-shrink: 0; padding: 0.7rem 1.1rem; }
-
-  /* Small phones: labels/share text breathe a bit more */
-  @media (max-width: 380px) {
-    .rf-share-btn { font-size: 0.78rem; padding: 0.55rem 0.35rem; }
-    .rf-redeem-btn { padding: 0.7rem 0.85rem; }
-  }
-</style>
-
 <script>
-  function _flashCopied(btn) {
-    if (!btn) return;
-    var old = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check"></i>';
-    setTimeout(function () { btn.innerHTML = old; }, 1400);
-  }
-  function copyText(text, btn) {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function () { _flashCopied(btn); });
-    } else {
-      var ta = document.createElement('textarea');
-      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.focus(); ta.select();
-      try { document.execCommand('copy'); _flashCopied(btn); } catch (e) {}
-      document.body.removeChild(ta);
-    }
-  }
-  function copyRef(inputId, btn) {
-    var el = document.getElementById(inputId);
-    if (el) copyText(el.value, btn);
-  }
-  // Susun tombol bagikan (WhatsApp & Telegram) dari kode + link referral.
-  (function initShare() {
-    var linkEl = document.getElementById('refLinkInput');
-    var codeEl = document.getElementById('refCodeInput');
-    if (!linkEl || !codeEl) return;
-    var link = linkEl.value;
-    var code = codeEl.value;
-    var msg = 'Halo! Aku main game AAA di HP tanpa PC mahal pakai AlexCloud 🎮\n\n' +
-      'Daftar pakai kodeku *' + code + '* biar kamu langsung dapat diskon welcome. Cus daftar di sini:\n' + link;
-    var wa = document.getElementById('rfShareWa');
-    var tg = document.getElementById('rfShareTg');
-    if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
-    if (tg) tg.href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(msg);
-  })();
+var wheelCanvas = document.getElementById('wheelCanvas');
+var wheelCtx = wheelCanvas ? wheelCanvas.getContext('2d') : null;
+var wheelSectors = [
+  { label: 'Coba Lagi', icon: '😢', color: '#1e293b', text: '#fff' },
+  { label: 'Diskon 5%', icon: '🎟️', color: '#2563eb', text: '#fff' },
+  { label: '+10 Poin', icon: '⭐', color: '#7c3aed', text: '#fff' },
+  { label: 'Zonk', icon: '🍀', color: '#334155', text: '#fff' },
+  { label: 'Diskon 10%', icon: '💎', color: '#ea580c', text: '#fff' },
+  { label: 'Saldo 250', icon: '💵', color: '#059669', text: '#fff' },
+  { label: '+25 Poin', icon: '🎮', color: '#4f46e5', text: '#fff' },
+  { label: 'Saldo 500', icon: '👑', color: '#eab308', text: '#000' }
+];
+var isWheelSpinning = false;
+var countdownTimerInterval = null;
 
-  function redeemReferral() {
-    var code = document.getElementById('redeemCodeInput').value;
-    if (!code) return alert('Masukkan kode terlebih dahulu!');
-    
-    fetch('/api/referral/redeem', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refCode: code })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        alert(data.message);
-        window.location.reload();
-      } else {
-        alert('Gagal: ' + data.message);
-      }
-    })
-    .catch(err => {
-      alert('Terjadi kesalahan sistem.');
-    });
+function drawWheel() {
+  if (!wheelCtx) return;
+  var num = wheelSectors.length;
+  var arc = (2 * Math.PI) / num;
+  var radius = 140;
+
+  wheelCtx.clearRect(0, 0, 280, 280);
+
+  for (var i = 0; i < num; i++) {
+    var angle = i * arc;
+    wheelCtx.beginPath();
+    wheelCtx.fillStyle = wheelSectors[i].color;
+    wheelCtx.moveTo(140, 140);
+    wheelCtx.arc(140, 140, radius, angle, angle + arc);
+    wheelCtx.lineTo(140, 140);
+    wheelCtx.fill();
+
+    // Sector border
+    wheelCtx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    wheelCtx.lineWidth = 2;
+    wheelCtx.stroke();
+
+    // Sector text and icon
+    wheelCtx.save();
+    wheelCtx.translate(140, 140);
+    wheelCtx.rotate(angle + arc / 2);
+    wheelCtx.textAlign = 'right';
+    wheelCtx.fillStyle = wheelSectors[i].text;
+    wheelCtx.font = 'bold 11px sans-serif';
+    wheelCtx.fillText(wheelSectors[i].icon + ' ' + wheelSectors[i].label, radius - 16, 4);
+    wheelCtx.restore();
   }
+}
+
+function formatCountdown(totalSec) {
+  var h = Math.floor(totalSec / 3600);
+  var m = Math.floor((totalSec % 3600) / 60);
+  var s = totalSec % 60;
+  return (h < 10 ? '0'+h : h) + ':' + (m < 10 ? '0'+m : m) + ':' + (s < 10 ? '0'+s : s);
+}
+
+function startCountdown(sec) {
+  if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+  var currentSec = sec;
+  var btn = document.getElementById('btnDoSpin');
+  var fb = document.getElementById('spinResultFeedback');
+
+  function update() {
+    if (currentSec <= 0) {
+      clearInterval(countdownTimerInterval);
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.background = 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)';
+        btn.innerHTML = 'PUTAR RODA SEKARANG!';
+      }
+      if (fb) fb.innerHTML = '<span style="color:#00ff88;">✅ Kesempatan putar roda hari ini siap!</span>';
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      btn.style.background = '#334155';
+      btn.innerHTML = '⏳ BUKA DALAM ' + formatCountdown(currentSec);
+    }
+    if (fb) {
+      fb.innerHTML = '<span style="color:#94a3b8;">Kesempatan 1x per hari sudah terpakai. Reset dalam ' + formatCountdown(currentSec) + '</span>';
+    }
+    currentSec--;
+  }
+
+  update();
+  countdownTimerInterval = setInterval(update, 1000);
+}
+
+async function checkSpinStatus() {
+  try {
+    var res = await fetch('/api/spin-wheel/status');
+    var data = await res.json();
+    if (data.success && !data.canSpin) {
+      startCountdown(data.remainingSec || 86400);
+    } else {
+      var btn = document.getElementById('btnDoSpin');
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.background = 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)';
+        btn.innerHTML = 'PUTAR RODA SEKARANG!';
+      }
+    }
+  } catch(e) {}
+}
+
+function openSpinWheelModal() {
+  var m = document.getElementById('spinModalOverlay');
+  if (m) m.style.display = 'flex';
+  drawWheel();
+  checkSpinStatus();
+}
+
+function closeSpinWheelModal() {
+  if (isWheelSpinning) return;
+  var m = document.getElementById('spinModalOverlay');
+  if (m) m.style.display = 'none';
+  if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+}
+
+async function triggerWheelSpin() {
+  if (isWheelSpinning) return;
+  var btn = document.getElementById('btnDoSpin');
+  var fb = document.getElementById('spinResultFeedback');
+  fb.textContent = 'Memutar roda keberuntungan...';
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+
+  try {
+    var metaToken = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+    var res = await fetch('/api/spin-wheel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': metaToken }
+    });
+    var data = await res.json();
+
+    if (!data.success) {
+      fb.innerHTML = '<span style="color:#f87171;">' + (data.message || 'Kesempatan sudah habis.') + '</span>';
+      if (data.remainingSec) startCountdown(data.remainingSec);
+      return;
+    }
+
+    isWheelSpinning = true;
+
+    var targetIndex = data.selectedIndex || 0;
+    var num = wheelSectors.length;
+    var arcDeg = 360 / num;
+
+    // Center of target slice aligned to top pointer (270 deg / -90 deg)
+    var targetDeg = 360 - (targetIndex * arcDeg + arcDeg / 2) - 90;
+    var fullSpins = 6 * 360; // 6 full fast spins
+    var totalRotation = fullSpins + targetDeg;
+
+    wheelCanvas.style.transition = 'transform 5s cubic-bezier(0.12, 0.95, 0.2, 1)';
+    wheelCanvas.style.transform = 'rotate(' + totalRotation + 'deg)';
+
+    setTimeout(function() {
+      isWheelSpinning = false;
+      fb.innerHTML = '<span style="color:#00ff88; font-size:0.95rem; font-weight:900;">' + data.message + '</span>';
+      if (data.voucherCode) {
+        fb.innerHTML += '<br><span style="font-size:0.8rem; color:#fbbf24;">Kode Voucher Diskon: <strong>' + data.voucherCode + '</strong> (Tersimpan di akun kamu)</span>';
+      }
+      startCountdown(24 * 3600);
+    }, 5200);
+
+  } catch(e) {
+    fb.innerHTML = '<span style="color:#ef4444;">Terjadi kesalahan koneksi.</span>';
+    isWheelSpinning = false;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+}
 </script>
 
 <%- include('partials/footer') %>

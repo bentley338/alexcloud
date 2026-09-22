@@ -1,67 +1,247 @@
 <% currentPage = 'dashboard'; %>
 <%- include('layout-header') %>
 
-<h1 class="admin-page-title"><i class="fas fa-tachometer-alt"></i> Dashboard Admin</h1>
+<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.15rem;">
+  <div>
+    <h1 class="admin-page-title" style="margin:0;"><i class="fas fa-tachometer-alt" style="color:var(--admin-gold);"></i> Admin Master Control</h1>
+    <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.15rem;">Live radar pengunjung, pelacak GPS akurat, deteksi VPN &amp; riwayat aktivitas user</div>
+  </div>
+  <div style="display:flex; align-items:center; gap:0.45rem; flex-wrap:wrap;">
+    <a href="/admin/backup-db" class="btn-action" style="background:rgba(251,191,36,0.12); color:var(--admin-gold); border:1px solid rgba(251,191,36,0.3); font-size:0.78rem; padding:0.4rem 0.8rem; border-radius:8px;">
+      <i class="fas fa-download"></i> Backup DB (.json)
+    </a>
+  </div>
+</div>
 
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+  <% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem; background:rgba(0,255,136,0.1); border:1px solid #00ff88; color:#00ff88; padding:0.75rem 1rem; border-radius:10px;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
+<% } %>
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+  <% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem; background:rgba(255,68,68,0.1); border:1px solid #ff4444; color:#ff4444; padding:0.75rem 1rem; border-radius:10px;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
+<% } %>
+
+<!-- 🔴 PUSAT RADAR AKTIVITAS & PELACAK PENGUNJUNG REAL-TIME (ONLINE & OFFLINE) -->
+<div class="card" style="margin-bottom:1.25rem; border:1px solid rgba(0, 255, 136, 0.4); box-shadow: 0 0 30px rgba(0, 255, 136, 0.09);">
+  <div class="card-header" style="background:linear-gradient(90deg, rgba(0, 255, 136, 0.1) 0%, rgba(17, 19, 31, 0.98) 100%);">
+    <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+      <div class="card-title" style="color:#00ff88; font-size:0.95rem; margin-right:0.5rem;">
+        <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#00ff88; box-shadow:0 0 10px #00ff88; animation:pulse 1.5s infinite;"></span>
+        <span>Radar Aktivitas &amp; GPS Pengunjung</span>
+      </div>
+      <!-- Tab Controls -->
+      <div style="display:flex; align-items:center; gap:0.35rem; background:rgba(0,0,0,0.4); padding:0.2rem; border-radius:50px; border:1px solid rgba(255,255,255,0.1);">
+        <button type="button" onclick="switchRadarTab('live')" id="tabBtnLive" class="radar-tab-btn active">
+          🟢 Live Online (<span id="countLiveBadge">0</span>)
+        </button>
+        <button type="button" onclick="switchRadarTab('users')" id="tabBtnUsers" class="radar-tab-btn">
+          👥 Semua User (<span id="countUsersBadge"><%= clientUsers.length %></span>)
+        </button>
+        <button type="button" onclick="switchRadarTab('map')" id="tabBtnMap" class="radar-tab-btn">
+          🗺️ Live Map Satelit
+        </button>
+        <button type="button" onclick="switchRadarTab('tuyul')" id="tabBtnTuyul" class="radar-tab-btn" style="color:#ef4444;">
+          🚨 Anti-Tuyul (<span id="countTuyulBadge">0</span>)
+        </button>
+      </div>
+    </div>
+    <div style="font-size:0.72rem; color:#94a3b8; display:flex; align-items:center; gap:0.35rem;">
+      <i class="fas fa-sync-alt fa-spin" style="font-size:0.68rem; color:#00ff88;"></i> Real-Time 2.5s
+    </div>
+  </div>
+  
+  <div style="padding:0.85rem;">
+    <!-- Live Tab 1: Active Visitors Now -->
+    <div id="radarViewLive">
+      <div id="liveVisitorsContainer" style="display:flex; flex-direction:column; gap:0.65rem; max-height:380px; overflow-y:auto;">
+        <div style="text-align:center; padding:1.75rem; color:#94a3b8; font-size:0.82rem;">
+          <i class="fas fa-circle-notch fa-spin"></i> Menghubungkan ke live radar aktivitas pengunjung...
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Tab 2: Registered Users (Online & Offline Tracker) -->
+    <div id="radarViewUsers" style="display:none;">
+      <div style="margin-bottom:0.75rem;">
+        <input type="text" id="offlineUserSearchInput" class="admin-modal-input" placeholder="🔍 Cari user untuk cek lokasi GPS, IP & waktu terakhir masuk..." style="margin-bottom:0.4rem;" oninput="filterOfflineUserList()">
+      </div>
+      <div id="offlineUsersContainer" style="display:flex; flex-direction:column; gap:0.55rem; max-height:380px; overflow-y:auto;">
+        <div style="text-align:center; padding:1.5rem; color:#94a3b8; font-size:0.82rem;">
+          <i class="fas fa-spinner fa-spin"></i> Memuat status seluruh user...
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Tab 3: Live Leaflet Interactive Map -->
+    <div id="radarViewMap" style="display:none;">
+      <div id="adminLiveMapContainer" style="height:360px; width:100%; border-radius:12px; overflow:hidden; border:1px solid rgba(0,255,136,0.3);">
+      </div>
+    </div>
+
+    <!-- Tuyul Tab 4: Multi-Account Detection -->
+    <div id="radarViewTuyul" style="display:none;">
+      <div id="multiAccountListContainer" style="display:flex; flex-direction:column; gap:0.65rem; max-height:380px; overflow-y:auto;">
+        <div style="text-align:center; padding:1.5rem; color:#94a3b8; font-size:0.82rem;">
+          <i class="fas fa-shield-alt" style="color:#00ff88;"></i> Sistem aman! Belum terdeteksi multi-akun atau tuyul aktif.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+}
+.radar-tab-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.radar-tab-btn.active {
+  background: #00ff88;
+  color: #000;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(0, 255, 136, 0.4);
+}
+.visitor-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+  transition: all 0.2s ease;
+}
+.visitor-card.is-me {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.04);
+}
+.visitor-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.offline-user-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  transition: 0.15s;
+}
+.offline-user-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+</style>
+
+<!-- ⚡ PUSAT FITUR ADMIN REAL & EKSEKUSI KILAT (QUICK TOOLS) -->
+<div class="card" style="margin-bottom:1.25rem; border:1px solid rgba(251, 191, 36, 0.25);">
+  <div class="card-header" style="background:rgba(251,191,36,0.04);">
+    <div class="card-title" style="color:var(--admin-gold); font-size:0.92rem;"><i class="fas fa-bolt"></i> Menu Eksekusi &amp; Manajemen Cepat (HP Optimized)</div>
+  </div>
+  <div style="padding:0.85rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:0.55rem;">
+    <!-- Top-up User -->
+    <button type="button" onclick="openModal('quickWalletModal')" class="btn-action" style="padding:0.75rem 0.5rem; background:rgba(0, 255, 136, 0.08); border:1px solid rgba(0, 255, 136, 0.3); color:#00ff88; border-radius:10px; flex-direction:column; gap:0.3rem; justify-content:center; text-align:center;">
+      <i class="fas fa-wallet" style="font-size:1.15rem;"></i>
+      <span style="font-size:0.78rem; font-weight:700;">+ Saldo User</span>
+    </button>
+    <!-- Grant Royal VIP -->
+    <button type="button" onclick="openModal('quickRoyalModal')" class="btn-action" style="padding:0.75rem 0.5rem; background:rgba(251, 191, 36, 0.08); border:1px solid rgba(251, 191, 36, 0.3); color:#fbbf24; border-radius:10px; flex-direction:column; gap:0.3rem; justify-content:center; text-align:center;">
+      <i class="fas fa-crown" style="font-size:1.15rem;"></i>
+      <span style="font-size:0.78rem; font-weight:700;">Beri VIP Royal</span>
+    </button>
+    <!-- Quick Add Game -->
+    <button type="button" onclick="openModal('quickGameModal')" class="btn-action" style="padding:0.75rem 0.5rem; background:rgba(20, 184, 166, 0.08); border:1px solid rgba(20, 184, 166, 0.3); color:#2dd4bf; border-radius:10px; flex-direction:column; gap:0.3rem; justify-content:center; text-align:center;">
+      <i class="fas fa-gamepad" style="font-size:1.15rem;"></i>
+      <span style="font-size:0.78rem; font-weight:700;">+ Tambah Game</span>
+    </button>
+    <!-- Quick Promo -->
+    <button type="button" onclick="openModal('quickPromoModal')" class="btn-action" style="padding:0.75rem 0.5rem; background:rgba(59, 130, 246, 0.08); border:1px solid rgba(59, 130, 246, 0.3); color:#60a5fa; border-radius:10px; flex-direction:column; gap:0.3rem; justify-content:center; text-align:center;">
+      <i class="fas fa-tag" style="font-size:1.15rem;"></i>
+      <span style="font-size:0.78rem; font-weight:700;">Buat Promo</span>
+    </button>
+    <!-- Broadcast Message -->
+    <button type="button" onclick="openModal('quickBroadcastModal')" class="btn-action" style="padding:0.75rem 0.5rem; background:rgba(168, 85, 247, 0.08); border:1px solid rgba(168, 85, 247, 0.3); color:#c084fc; border-radius:10px; flex-direction:column; gap:0.3rem; justify-content:center; text-align:center;">
+      <i class="fas fa-bullhorn" style="font-size:1.15rem;"></i>
+      <span style="font-size:0.78rem; font-weight:700;">Broadcast Web</span>
+    </button>
+    <!-- WA Bot Automation -->
+    <a href="/admin/settings/whatsapp" class="btn-action" style="padding:0.75rem 0.5rem; background:rgba(37, 211, 102, 0.08); border:1px solid rgba(37, 211, 102, 0.3); color:#25d366; border-radius:10px; flex-direction:column; gap:0.3rem; justify-content:center; text-align:center; text-decoration:none;">
+      <i class="fab fa-whatsapp" style="font-size:1.15rem;"></i>
+      <span style="font-size:0.78rem; font-weight:700;">Setelan WA Bot</span>
+    </a>
+  </div>
+</div>
+
+<!-- 📊 GRID STATISTIK FINANSIAL & PENGGUNA (2 KOLOM HP) -->
 <div class="admin-stats-grid">
   <div class="admin-stat-card">
     <div class="admin-stat-value" style="color:var(--accent-blue)"><%= stats.totalUsers %></div>
-    <div class="admin-stat-label"><i class="fas fa-users"></i> Total User</div>
+    <div class="admin-stat-label"><i class="fas fa-users"></i> Total User Terdaftar</div>
   </div>
   <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:#fbbf24"><%= stats.totalOrders %></div>
-    <div class="admin-stat-label"><i class="fas fa-shopping-cart"></i> Total Order</div>
-  </div>
-  <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:var(--accent-orange)"><%= stats.pendingOrders %></div>
-    <div class="admin-stat-label"><i class="fas fa-clock"></i> Order Pending</div>
+    <div class="admin-stat-value" style="color:#fbbf24"><%= stats.royalMembersCount || 0 %></div>
+    <div class="admin-stat-label"><i class="fas fa-crown"></i> Member Royal VIP</div>
   </div>
   <div class="admin-stat-card">
     <div class="admin-stat-value" style="color:var(--accent-green)"><%= stats.activeSubscriptions %></div>
     <div class="admin-stat-label"><i class="fas fa-id-card"></i> Subscription Aktif</div>
   </div>
   <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:#F43F5E; font-size:1.4rem;">Rp <%= stats.totalRevenue.toLocaleString('id-ID') %></div>
-    <div class="admin-stat-label"><i class="fas fa-money-bill"></i> Total Revenue</div>
+    <div class="admin-stat-value" style="color:#2dd4bf"><%= stats.totalGames %></div>
+    <div class="admin-stat-label"><i class="fas fa-gamepad"></i> Game di Library</div>
   </div>
-  <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:var(--accent-blue)"><%= stats.totalGames %></div>
-    <div class="admin-stat-label"><i class="fas fa-gamepad"></i> Total Game</div>
-  </div>
-  <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:var(--accent-green)"><%= stats.activePromos %></div>
-    <div class="admin-stat-label"><i class="fas fa-tag"></i> Promo Aktif</div>
-  </div>
-  <div class="admin-stat-card">
-    <div class="admin-stat-value" style="color:#fbbf24"><%= stats.totalTestimonials %></div>
-    <div class="admin-stat-label"><i class="fas fa-star"></i> Total Testimoni</div>
+  <div class="admin-stat-card" style="grid-column: span 2; background: linear-gradient(135deg, rgba(244,63,94,0.12) 0%, rgba(17,19,31,0.95) 100%);">
+    <div class="admin-stat-value" style="color:#F43F5E;">Rp <%= stats.totalRevenue.toLocaleString('id-ID') %></div>
+    <div class="admin-stat-label"><i class="fas fa-money-bill-wave"></i> Total Pendapatan Bersih</div>
   </div>
 </div>
 
-<!-- Quick Actions -->
-<div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-bottom:2rem;">
-  <a href="/admin/simulate-order" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-magic"></i> Simulasi Order</a>
-  <a href="/admin/announcement" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-bullhorn"></i> Pengumuman</a>
-  <a href="/admin/promo" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-tag"></i> Buat Promo</a>
-  <a href="/admin/testimonials" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-star"></i> Tambah Testimoni</a>
-  <a href="/admin/plans" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-dollar-sign"></i> Edit Harga</a>
-  <a href="/admin/games" class="btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;"><i class="fas fa-gamepad"></i> Kelola Game</a>
+<!-- 🖥️ CLOUD GAMING NODE & SYSTEM HEALTH -->
+<div class="card" style="margin-bottom:1.25rem;">
+  <div class="card-header">
+    <div class="card-title"><i class="fas fa-network-wired" style="color:var(--accent-green);"></i> Status Server Node Cloud Gaming &amp; Gateway</div>
+  </div>
+  <div style="padding:0.85rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.65rem;">
+    <% serverNodes.forEach(node => { %>
+    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--admin-border); border-radius:12px; padding:0.85rem;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-weight:800; font-size:0.85rem; color:#fff;"><%= node.name %></span>
+        <span style="font-size:0.72rem; color:#00ff88; font-weight:800; background:rgba(0,255,136,0.1); padding:0.15rem 0.45rem; border-radius:50px;"><%= node.ping %></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:0.5rem; font-size:0.76rem; color:#94a3b8;">
+        <span>Beban Node: <strong style="color:#cbd5e1;"><%= node.load %></strong></span>
+        <span>Online Players: <strong style="color:var(--accent-blue);"><%= node.players %></strong></span>
+      </div>
+    </div>
+    <% }); %>
+    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--admin-border); border-radius:12px; padding:0.85rem;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-weight:800; font-size:0.85rem; color:#fff;">⚡ Payment Gateway Engine</span>
+        <span style="font-size:0.72rem; color:#00ff88; font-weight:800; background:rgba(0,255,136,0.1); padding:0.15rem 0.45rem; border-radius:50px;">100% ONLINE</span>
+      </div>
+      <div style="margin-top:0.5rem; font-size:0.76rem; color:#94a3b8;">
+        QRIS, VA Bank &amp; E-Wallet Terverifikasi Otomatis
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Pending Orders Alert -->
-<% if (stats.pendingOrders > 0) { %>
-<div style="background:rgba(251, 191, 36,0.08); border:1px solid rgba(251, 191, 36,0.3); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:2rem; display:flex; align-items:center; gap:0.75rem; font-family:var(--font-ui);">
-  <i class="fas fa-bell" style="color:#fbbf24; font-size:1.1rem;"></i>
-  <span>Ada <strong style="color:#fbbf24"><%= stats.pendingOrders %> order</strong> yang menunggu konfirmasi!</span>
-  <a href="/admin/orders" style="margin-left:auto; color:var(--accent-blue); text-decoration:none; font-weight:600;">Konfirmasi Sekarang →</a>
-</div>
-<% } %>
-
-<!-- Recent Orders -->
+<!-- Recent Transactions Log -->
 <div class="card">
   <div class="card-header">
-    <div class="card-title"><i class="fas fa-history"></i> Order Terbaru</div>
-    <a href="/admin/orders" class="btn-action btn-confirm">Lihat Semua</a>
+    <div class="card-title"><i class="fas fa-history"></i> Transaksi Terverifikasi Otomatis</div>
+    <a href="/admin/orders" class="btn-action btn-detail">Lihat Semua Data →</a>
   </div>
   <div class="table-wrap">
     <table>
@@ -69,55 +249,621 @@
         <tr>
           <th>Order ID</th>
           <th>User</th>
-          <th>Paket</th>
-          <th>Harga</th>
-          <th>Promo</th>
+          <th>Paket / Nominal</th>
           <th>Status</th>
-          <th>Tanggal</th>
-          <th>Aksi</th>
         </tr>
       </thead>
       <tbody>
         <% if (recentOrders.length === 0) { %>
-        <tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Belum ada order</td></tr>
+        <tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-muted);">Belum ada riwayat order.</td></tr>
         <% } %>
         <% recentOrders.forEach(order => { %>
         <tr>
-          <td><span style="font-family:var(--font-display); font-size:0.8rem; color:var(--accent-blue)"><%= order.orderId %></span></td>
           <td>
-            <div style="font-family:var(--font-ui); font-size:0.9rem;"><%= order.userName %></div>
-            <div style="font-size:0.78rem; color:var(--text-muted)"><%= order.userEmail %></div>
+            <span style="font-family:var(--font-display); font-size:0.78rem; color:var(--accent-blue); font-weight:800;"><%= order.orderId %></span>
+            <div style="font-size:0.7rem; color:#64748b;"><%= moment(order.createdAt).format('DD MMM, HH:mm') %></div>
           </td>
-          <td><%= order.planName %></td>
-          <td style="color:var(--accent-green); font-family:var(--font-ui); font-weight:600;">Rp <%= (order.price || 0).toLocaleString('id-ID') %></td>
           <td>
-            <% if (order.promoCode) { %>
-              <span style="background:rgba(0,212,255,0.1); color:var(--accent-blue); border:1px solid rgba(0,212,255,0.3); padding:0.15rem 0.4rem; border-radius:4px; font-size:0.75rem; font-family:var(--font-display);"><%= order.promoCode %></span>
-            <% } else { %><span style="color:var(--text-muted); font-size:0.8rem;">—</span><% } %>
+            <div style="font-weight:700; font-size:0.85rem;"><%= order.userName %></div>
+            <div style="font-size:0.72rem; color:var(--text-muted);"><%= order.userEmail %></div>
           </td>
-          <td><span class="status-badge status-<%= order.status %>">
-            <%= order.status === 'pending' ? '⏳ Pending' : order.status === 'confirmed' ? '✅ Confirmed' : '❌ Rejected' %>
-          </span></td>
-          <td style="font-size:0.85rem; color:var(--text-muted)"><%= moment(order.createdAt).format('DD/MM/YY HH:mm') %></td>
           <td>
-            <% if (order.status === 'pending') { %>
-            <div style="display:flex; gap:0.4rem;">
-              <form action="/admin/orders/<%= order.id %>/confirm" method="POST" style="display:inline;">
-                <button type="submit" class="btn-action btn-confirm" title="Konfirmasi">✅</button>
-              </form>
-              <form action="/admin/orders/<%= order.id %>/reject" method="POST" style="display:inline;">
-                <button type="submit" class="btn-action btn-reject" title="Tolak">❌</button>
-              </form>
-            </div>
-            <% } else { %>
-            <span style="color:var(--text-muted); font-size:0.85rem;">—</span>
-            <% } %>
+            <div style="font-size:0.82rem; font-weight:600;"><%= order.planName || 'Top-up Saldo' %></div>
+            <div style="color:var(--accent-green); font-weight:800; font-size:0.85rem;">Rp <%= (order.price || 0).toLocaleString('id-ID') %></div>
+          </td>
+          <td>
+            <span class="status-badge status-<%= order.status %>">
+              <%= order.status === 'confirmed' ? '✅ Otomatis Lunas' : order.status === 'pending' ? '⏳ Menunggu Bayar' : '❌ Batal' %>
+            </span>
           </td>
         </tr>
-        <% }) %>
+        <% }); %>
       </tbody>
     </table>
   </div>
 </div>
 
+<!-- ===================== MODALS ===================== -->
+
+<!-- Modal: Smart History & User Detail Master -->
+<div class="admin-modal" id="smartHistoryModal">
+  <div class="admin-modal-box" style="max-width:540px;">
+    <div class="admin-modal-head">
+      <div class="admin-modal-title" style="font-size:0.95rem; display:flex; align-items:center; gap:0.45rem;">
+        <i class="fas fa-fingerprint" style="color:var(--accent-green);"></i>
+        <span>Profil &amp; Riwayat Cerdas Pengunjung</span>
+      </div>
+      <button class="admin-modal-close" onclick="closeModal('smartHistoryModal')">×</button>
+    </div>
+
+    <div style="margin-bottom:0.85rem; padding:0.75rem 0.95rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:0.65rem;">
+        <div id="histAvatar" style="width:38px; height:38px; border-radius:50%; background:#00ff88; color:#000; font-weight:900; font-size:1rem; display:flex; align-items:center; justify-content:center;">U</div>
+        <div>
+          <div style="font-weight:800; font-size:0.92rem; color:#fff;" id="histName">-</div>
+          <div style="font-size:0.75rem; color:#94a3b8;" id="histEmail">-</div>
+        </div>
+      </div>
+      <div id="histStatusBadge"></div>
+    </div>
+
+    <!-- Smart Sections -->
+    <div style="display:flex; flex-direction:column; gap:0.85rem; max-height:420px; overflow-y:auto; padding-right:0.25rem;">
+      
+      <!-- 1. Riwayat Lokasi & IP -->
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(0,255,136,0.25); border-radius:12px; padding:0.85rem;">
+        <div style="font-size:0.82rem; font-weight:800; color:#00ff88; margin-bottom:0.55rem; display:flex; align-items:center; gap:0.35rem;">
+          <i class="fas fa-map-marked-alt"></i> Riwayat Lokasi &amp; Jaringan IP (Deteksi VPN)
+        </div>
+        <div id="histLocationList" style="display:flex; flex-direction:column; gap:0.45rem;">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- 2. Riwayat Alur Halaman (Breadcrumbs) -->
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:0.85rem;">
+        <div style="font-size:0.82rem; font-weight:800; color:#38bdf8; margin-bottom:0.55rem; display:flex; align-items:center; gap:0.35rem;">
+          <i class="fas fa-route"></i> Alur Jejak Halaman yang Dibuka
+        </div>
+        <div id="histPageList" style="font-size:0.75rem; color:#cbd5e1; line-height:1.6;">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- 3. Perangkat & Statistik Sesi -->
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(251,191,36,0.25); border-radius:12px; padding:0.85rem;">
+        <div style="font-size:0.82rem; font-weight:800; color:#fbbf24; margin-bottom:0.55rem; display:flex; align-items:center; gap:0.35rem;">
+          <i class="fas fa-laptop-mobile"></i> Perangkat &amp; Statistik Kunjungan
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; font-size:0.75rem; color:#94a3b8;">
+          <div>Total Kunjungan: <strong id="histVisitCount" style="color:#fff;">1x</strong></div>
+          <div>Total Halaman: <strong id="histTotalPages" style="color:#fff;">1</strong></div>
+          <div style="grid-column:span 2;">Perangkat: <strong id="histDevices" style="color:#cbd5e1;">-</strong></div>
+        </div>
+      </div>
+
+      <!-- 4. Aksi Kilat Admin (Jika user terdaftar) -->
+      <div id="histUserActionArea" style="display:none; padding-top:0.4rem;">
+        <form action="/admin/quick-user-action" method="POST">
+          <input type="hidden" name="userId" id="histTargetUserId">
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button type="submit" name="action" value="reset_pw" class="btn-action btn-detail" style="flex:1; padding:0.6rem; justify-content:center; font-size:0.78rem;">
+              <i class="fas fa-key"></i> Reset Password
+            </button>
+            <button type="submit" name="action" id="histBanBtn" value="ban" class="btn-action btn-reject" style="flex:1; padding:0.6rem; justify-content:center; font-size:0.78rem;">
+              <i class="fas fa-ban"></i> Blokir Akun
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Quick Add Game -->
+<div class="admin-modal" id="quickGameModal">
+  <div class="admin-modal-box">
+    <div class="admin-modal-head">
+      <div class="admin-modal-title"><i class="fas fa-gamepad" style="color:#2dd4bf;"></i> Tambah Game ke Cloud Library</div>
+      <button class="admin-modal-close" onclick="closeModal('quickGameModal')">×</button>
+    </div>
+    <form action="/admin/quick-add-game" method="POST">
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Judul Game:</label>
+      <input type="text" name="title" class="admin-modal-input" placeholder="contoh: Grand Theft Auto V / Cyberpunk 2077" required>
+      
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Genre Game:</label>
+      <input type="text" name="genre" class="admin-modal-input" placeholder="contoh: Open World / RPG / FPS" value="Action / Adventure">
+
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">URL Gambar Cover (Poster):</label>
+      <input type="text" name="image" class="admin-modal-input" placeholder="contoh: https://... / /images/games/gta5.jpg" required>
+
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Kategori Tampilan:</label>
+      <select name="category" class="admin-modal-input" style="background:#1a1d2e;">
+        <option value="featured">🔥 Featured &amp; Populer</option>
+        <option value="action">⚔️ Action &amp; Adventure</option>
+        <option value="sports">⚽ Sports &amp; Racing</option>
+        <option value="rpg">🧙 RPG &amp; Open World</option>
+      </select>
+
+      <button type="submit" class="btn-action btn-confirm" style="width:100%; padding:0.75rem; justify-content:center; border-radius:10px; font-size:0.9rem; background:#2dd4bf; color:#000;">
+        <i class="fas fa-plus"></i> Terbitkan Game Sekarang
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Quick Adjust Saldo -->
+<div class="admin-modal" id="quickWalletModal">
+  <div class="admin-modal-box">
+    <div class="admin-modal-head">
+      <div class="admin-modal-title"><i class="fas fa-wallet" style="color:var(--accent-green);"></i> Top-up / Atur Saldo User</div>
+      <button class="admin-modal-close" onclick="closeModal('quickWalletModal')">×</button>
+    </div>
+    <form action="/admin/quick-adjust-wallet" method="POST">
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Email atau Username User:</label>
+      <input type="text" name="userQuery" class="admin-modal-input" placeholder="contoh: user@gmail.com / nama_user" required>
+      
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Tipe Operasi:</label>
+      <select name="type" class="admin-modal-input" style="background:#1a1d2e;">
+        <option value="CREDIT_ADMIN">➕ Tambah Saldo (+)</option>
+        <option value="DEBIT_ADMIN">➖ Kurangi Saldo (-)</option>
+        <option value="SET_EXACT">🎯 Setel Saldo Tepat (=)</option>
+      </select>
+
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Nominal (Rp):</label>
+      <input type="number" name="amount" class="admin-modal-input" placeholder="contoh: 50000" min="1" required>
+
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Catatan / Alasan:</label>
+      <input type="text" name="note" class="admin-modal-input" placeholder="contoh: Bonus Top Up / Reward">
+
+      <button type="submit" class="btn-action btn-confirm" style="width:100%; padding:0.75rem; justify-content:center; border-radius:10px; font-size:0.9rem;">
+        <i class="fas fa-check-circle"></i> Eksekusi Saldo Sekarang
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Quick Grant Royal VIP -->
+<div class="admin-modal" id="quickRoyalModal">
+  <div class="admin-modal-box">
+    <div class="admin-modal-head">
+      <div class="admin-modal-title"><i class="fas fa-crown" style="color:var(--admin-gold);"></i> Beri Akses Royal Club VIP</div>
+      <button class="admin-modal-close" onclick="closeModal('quickRoyalModal')">×</button>
+    </div>
+    <form action="/admin/quick-grant-royal" method="POST">
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Email atau Username User:</label>
+      <input type="text" name="userQuery" class="admin-modal-input" placeholder="contoh: user@gmail.com" required>
+      
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Durasi VIP:</label>
+      <select name="durationDays" class="admin-modal-input" style="background:#1a1d2e;">
+        <option value="30">30 Hari (1 Bulan)</option>
+        <option value="90">90 Hari (3 Bulan)</option>
+        <option value="365">365 Hari (1 Tahun)</option>
+        <option value="9999">Selamanya (Lifetime VIP)</option>
+      </select>
+
+      <button type="submit" class="btn-action btn-confirm" style="width:100%; padding:0.75rem; justify-content:center; border-radius:10px; font-size:0.9rem; background:linear-gradient(135deg, #fbbf24, #d97706); color:#000;">
+        <i class="fas fa-crown"></i> Berikan Status VIP Sekarang
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Quick Create Promo -->
+<div class="admin-modal" id="quickPromoModal">
+  <div class="admin-modal-box">
+    <div class="admin-modal-head">
+      <div class="admin-modal-title"><i class="fas fa-tag" style="color:#60a5fa;"></i> Buat Kode Promo Kilat</div>
+      <button class="admin-modal-close" onclick="closeModal('quickPromoModal')">×</button>
+    </div>
+    <form action="/admin/quick-create-promo" method="POST">
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Kode Promo (Huruf Kapital):</label>
+      <input type="text" name="code" class="admin-modal-input" placeholder="contoh: DISKON50 / PROMOBARU" style="text-transform:uppercase;" required>
+      
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Tipe Diskon:</label>
+      <select name="discountType" class="admin-modal-input" style="background:#1a1d2e;">
+        <option value="percentage">Persentase (%)</option>
+        <option value="fixed">Nominal Tetap (Rp)</option>
+      </select>
+
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Nilai Diskon (cth: 20 untuk 20% atau 10000 untuk Rp 10.000):</label>
+      <input type="number" name="discountValue" class="admin-modal-input" placeholder="contoh: 20" min="1" required>
+
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Maksimal Penggunaan:</label>
+      <input type="number" name="maxUsage" class="admin-modal-input" value="100" min="1">
+
+      <button type="submit" class="btn-action btn-confirm" style="width:100%; padding:0.75rem; justify-content:center; border-radius:10px; font-size:0.9rem;">
+        <i class="fas fa-plus"></i> Terbitkan Kode Promo
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Quick Broadcast Message -->
+<div class="admin-modal" id="quickBroadcastModal">
+  <div class="admin-modal-box">
+    <div class="admin-modal-head">
+      <div class="admin-modal-title"><i class="fas fa-bullhorn" style="color:#c084fc;"></i> Kirim Pengumuman Broadcast</div>
+      <button class="admin-modal-close" onclick="closeModal('quickBroadcastModal')">×</button>
+    </div>
+    <form action="/admin/broadcast-message" method="POST">
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Judul Pengumuman:</label>
+      <input type="text" name="title" class="admin-modal-input" placeholder="contoh: Server Node Baru Telah Aktif!" required>
+      
+      <label style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem; display:block;">Isi Pesan:</label>
+      <textarea name="message" class="admin-modal-input" rows="4" style="resize:vertical;" placeholder="Tuliskan pengumuman yang akan muncul di banner web..." required></textarea>
+
+      <button type="submit" class="btn-action btn-confirm" style="width:100%; padding:0.75rem; justify-content:center; border-radius:10px; font-size:0.9rem; background:#a855f7; color:#fff;">
+        <i class="fas fa-paper-plane"></i> Broadcast Sekarang
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openModal(id) {
+  var m = document.getElementById(id);
+  if (m) m.style.display = 'flex';
+}
+function closeModal(id) {
+  var m = document.getElementById(id);
+  if (m) m.style.display = 'none';
+}
+document.querySelectorAll('.admin-modal').forEach(function(m) {
+  m.addEventListener('click', function(e) {
+    if (e.target === m) m.style.display = 'none';
+  });
+});
+
+function switchRadarTab(tab) {
+  var viewLive = document.getElementById('radarViewLive');
+  var viewUsers = document.getElementById('radarViewUsers');
+  var viewMap = document.getElementById('radarViewMap');
+  var viewTuyul = document.getElementById('radarViewTuyul');
+
+  var btnLive = document.getElementById('tabBtnLive');
+  var btnUsers = document.getElementById('tabBtnUsers');
+  var btnMap = document.getElementById('tabBtnMap');
+  var btnTuyul = document.getElementById('tabBtnTuyul');
+
+  [viewLive, viewUsers, viewMap, viewTuyul].forEach(function(v) { if (v) v.style.display = 'none'; });
+  [btnLive, btnUsers, btnMap, btnTuyul].forEach(function(b) { if (b) b.classList.remove('active'); });
+
+  if (tab === 'live') {
+    viewLive.style.display = 'block';
+    btnLive.classList.add('active');
+  } else if (tab === 'users') {
+    viewUsers.style.display = 'block';
+    btnUsers.classList.add('active');
+  } else if (tab === 'map') {
+    viewMap.style.display = 'block';
+    btnMap.classList.add('active');
+    initAdminMapIfNeeded();
+  } else if (tab === 'tuyul') {
+    viewTuyul.style.display = 'block';
+    btnTuyul.classList.add('active');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 🔴 SMART VISITOR & USER DETAIL MODAL
+// ══════════════════════════════════════════════════════════════════════════════
+var globalLiveVisitorsMap = new Map();
+var globalUsersCache = [];
+
+function openSmartHistoryModal(id, isUser) {
+  var data = null;
+  if (isUser) {
+    data = globalUsersCache.find(function(u) { return u.id === id; });
+  } else {
+    data = globalLiveVisitorsMap.get(id);
+  }
+  if (!data) return;
+
+  document.getElementById('histAvatar').textContent = (data.name || 'U').charAt(0).toUpperCase();
+  document.getElementById('histName').textContent = data.name;
+  document.getElementById('histEmail').textContent = data.email || 'Pengunjung Tamu (Belum Login)';
+
+  var statusBadge = document.getElementById('histStatusBadge');
+  if (data.isOnline) {
+    statusBadge.innerHTML = '<span style="color:#00ff88; font-weight:800; font-size:0.75rem; background:rgba(0,255,136,0.15); padding:0.2rem 0.55rem; border-radius:50px;">● ONLINE</span>';
+  } else {
+    statusBadge.innerHTML = '<span style="color:#94a3b8; font-size:0.75rem; background:rgba(255,255,255,0.06); padding:0.2rem 0.55rem; border-radius:50px;">○ Offline</span>';
+  }
+
+  // Render Location History List
+  var locContainer = document.getElementById('histLocationList');
+  var locList = data.locationHistory || [];
+  if (locList.length === 0) {
+    locContainer.innerHTML = '<div style="font-size:0.75rem; color:#94a3b8;">' + (data.lastLocation || 'Indonesia 🇮🇩') + ' (IP: ' + (data.lastIp || '-') + ')</div>';
+  } else {
+    var locHtml = '';
+    locList.forEach(function(l) {
+      locHtml += '<div style="display:flex; align-items:center; justify-content:space-between; gap:0.4rem; padding:0.35rem 0.5rem; background:rgba(255,255,255,0.02); border-radius:8px;">';
+      locHtml += '  <div>';
+      locHtml += '    <div style="font-weight:700; font-size:0.78rem; color:#fff;">' + (l.type === 'GPS Akurat 🎯' ? '🎯 ' : '📍 ') + l.location + '</div>';
+      locHtml += '    <div style="font-size:0.7rem; color:#94a3b8;">IP: ' + l.ip + (l.isp ? (' • ' + l.isp) : '') + '</div>';
+      locHtml += '  </div>';
+      if (l.mapsUrl) {
+        locHtml += '  <a href="' + l.mapsUrl + '" target="_blank" class="btn-action" style="background:rgba(0,255,136,0.15); color:#00ff88; border:1px solid #00ff88; font-size:0.65rem; padding:0.15rem 0.45rem; border-radius:4px; text-decoration:none; font-weight:800;"><i class="fas fa-map-marked-alt"></i> Peta</a>';
+      }
+      locHtml += '</div>';
+    });
+    locContainer.innerHTML = locHtml;
+  }
+
+  // Render Page History List
+  var pageContainer = document.getElementById('histPageList');
+  var pageList = data.pageHistory || [];
+  if (pageList.length === 0) {
+    pageContainer.textContent = data.lastPage || 'Beranda';
+  } else {
+    pageContainer.innerHTML = pageList.map(function(p, idx) {
+      return (idx === pageList.length - 1) ? ('<strong style="color:#38bdf8;">' + p + '</strong>') : ('<span>' + p + '</span>');
+    }).join(' ➔ ');
+  }
+
+  // Device and Stats
+  document.getElementById('histVisitCount').textContent = (data.visitCount || 1) + 'x Kunjungan';
+  document.getElementById('histTotalPages').textContent = (data.totalPagesViewed || 1) + ' Halaman';
+  document.getElementById('histDevices').textContent = (data.deviceHistory && data.deviceHistory.length > 0) ? data.deviceHistory.join(', ') : (data.lastDevice || 'Mobile');
+
+  // User Action Controls
+  var actionArea = document.getElementById('histUserActionArea');
+  if (isUser && data.id) {
+    actionArea.style.display = 'block';
+    document.getElementById('histTargetUserId').value = data.id;
+    var banBtn = document.getElementById('histBanBtn');
+    if (data.isBanned) {
+      banBtn.value = 'unban';
+      banBtn.className = 'btn-action btn-confirm';
+      banBtn.innerHTML = '<i class="fas fa-unlock"></i> Buka Blokir';
+    } else {
+      banBtn.value = 'ban';
+      banBtn.className = 'btn-action btn-reject';
+      banBtn.innerHTML = '<i class="fas fa-ban"></i> Blokir Akun';
+    }
+  } else {
+    actionArea.style.display = 'none';
+  }
+
+  openModal('smartHistoryModal');
+}
+
+function formatTimeAgo(timestamp) {
+  if (!timestamp) return 'Belum ada data';
+  var t = typeof timestamp === 'string' ? new Date(timestamp).getTime() : timestamp;
+  var diffSec = Math.floor((Date.now() - t) / 1000);
+  if (diffSec < 4) return 'Baru saja ⚡';
+  if (diffSec < 60) return diffSec + ' detik lalu';
+  var diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return diffMin + ' menit lalu';
+  var diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return diffHour + ' jam lalu';
+  var diffDay = Math.floor(diffHour / 24);
+  return diffDay + ' hari lalu';
+}
+
+async function fetchLiveVisitors() {
+  try {
+    var res = await fetch('/admin/api/live-visitors');
+    if (!res.ok) return;
+    var data = await res.json();
+    
+    // Update Badge Counts
+    var countLiveBadge = document.getElementById('countLiveBadge');
+    if (countLiveBadge) countLiveBadge.textContent = data.count;
+    var countUsersBadge = document.getElementById('countUsersBadge');
+    if (countUsersBadge && data.totalRegistered) countUsersBadge.textContent = data.totalRegistered;
+
+    // 1. Render Live Active Tab
+    var container = document.getElementById('liveVisitorsContainer');
+    if (container) {
+      globalLiveVisitorsMap.clear();
+      if (!data.visitors || data.visitors.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:1.5rem; color:#94a3b8; font-size:0.82rem;"><i class="fas fa-moon"></i> Belum ada pengunjung aktif lain saat ini.</div>';
+      } else {
+        var html = '';
+        data.visitors.forEach(function(v) {
+          globalLiveVisitorsMap.set(v.id, v);
+          var isMe = (v.name === "<%= user.name %>");
+          var timeAgo = formatTimeAgo(v.lastSeen);
+          var roleBadge = v.role === 'admin' ? '<span style="color:#fbbf24; font-size:0.7rem; font-weight:800; background:rgba(251,191,36,0.15); padding:0.1rem 0.4rem; border-radius:4px;">👑 Admin</span>' : 
+                          v.isRoyal ? '<span style="color:#fbbf24; font-size:0.7rem; font-weight:800; background:rgba(251,191,36,0.15); padding:0.1rem 0.4rem; border-radius:4px;">👑 VIP</span>' :
+                          v.isUser ? '<span style="color:#00ff88; font-size:0.7rem; font-weight:800; background:rgba(0,255,136,0.15); padding:0.1rem 0.4rem; border-radius:4px;">Member</span>' : 
+                          '<span style="color:#94a3b8; font-size:0.7rem; background:rgba(255,255,255,0.06); padding:0.1rem 0.4rem; border-radius:4px;">Tamu</span>';
+
+          var locText = '';
+          var mapsBtn = '';
+
+          if (v.gps && v.gps.lat && v.gps.lng) {
+            var addr = v.gps.address || (v.gps.lat + ', ' + v.gps.lng);
+            locText = '<span style="color:#00ff88; font-weight:800;"><i class="fas fa-crosshairs"></i> GPS Akurat: ' + addr + ' 🎯 🇮🇩</span>';
+            var mapsLink = 'https://www.google.com/maps?q=' + v.gps.lat + ',' + v.gps.lng;
+            mapsBtn = '<a href="' + mapsLink + '" target="_blank" class="btn-action" style="background:rgba(0,255,136,0.15); color:#00ff88; border:1px solid #00ff88; font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:5px; text-decoration:none; margin-left:0.35rem; font-weight:800;"><i class="fas fa-map-marked-alt"></i> 🗺️ Peta GPS</a>';
+          } else {
+            var loc = v.location || {};
+            var cityName = loc.city ? (loc.city + ', ' + (loc.region || loc.country || 'Indonesia')) : 'Indonesia';
+            locText = '<span style="color:#38bdf8; font-weight:700;"><i class="fas fa-map-marker-alt"></i> ' + cityName + ' ' + (loc.flag || '🇮🇩') + '</span>';
+            var mapsLink = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(cityName);
+            mapsBtn = '<a href="' + mapsLink + '" target="_blank" class="btn-action" style="background:rgba(56,189,248,0.12); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); font-size:0.65rem; padding:0.15rem 0.45rem; border-radius:5px; text-decoration:none; margin-left:0.35rem;"><i class="fas fa-map-marked-alt"></i> 🗺️ Peta</a>';
+          }
+
+          var ispText = (v.location && v.location.isp) ? (' • ' + v.location.isp) : '';
+
+          var breadcrumbs = '';
+          if (v.pageHistory && v.pageHistory.length > 1) {
+            breadcrumbs = '<div style="font-size:0.7rem; color:#64748b; margin-top:0.25rem; display:flex; align-items:center; gap:0.25rem; flex-wrap:wrap;">' +
+              '<i class="fas fa-route" style="color:#94a3b8;"></i> Alur: ' +
+              v.pageHistory.map(function(p, idx) {
+                return (idx === v.pageHistory.length - 1) ? ('<strong style="color:#38bdf8;">' + p + '</strong>') : ('<span>' + p + '</span>');
+              }).join(' ➔ ') +
+            '</div>';
+          }
+
+          html += '<div class="visitor-card ' + (isMe ? 'is-me' : '') + '">';
+          html += '  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:0.65rem; flex-wrap:wrap;">';
+          
+          html += '    <div style="display:flex; align-items:flex-start; gap:0.65rem; flex:1; min-width:200px;">';
+          html += '      <div style="width:34px; height:34px; border-radius:50%; background:' + (v.isUser ? 'linear-gradient(135deg, #00ff88, #00b8d9)' : 'rgba(255,255,255,0.08)') + '; color:#000; font-weight:900; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;">' + (v.name.charAt(0).toUpperCase()) + '</div>';
+          html += '      <div style="flex:1;">';
+          html += '        <div style="font-weight:800; font-size:0.86rem; color:#fff; display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">';
+          html += '          <span>' + v.name + (isMe ? ' (Kamu)' : '') + '</span> ' + roleBadge;
+          if (v.visitCount > 1) {
+            html += '          <span style="font-size:0.68rem; color:#fbbf24; font-weight:800; background:rgba(251,191,36,0.1); padding:0.1rem 0.35rem; border-radius:4px;"><i class="fas fa-redo-alt"></i> ' + v.visitCount + 'x Kunjungan</span>';
+          }
+          html += '          <button type="button" onclick="openSmartHistoryModal(\'' + v.id + '\', ' + (v.isUser ? 'true' : 'false') + ')" class="btn-action" style="background:rgba(255,255,255,0.08); font-size:0.65rem; padding:0.1rem 0.4rem; border-radius:4px; color:#cbd5e1;"><i class="fas fa-history"></i> Riwayat</button>';
+          html += '        </div>';
+          if (v.email) {
+            html += '        <div style="font-size:0.72rem; color:#94a3b8;">' + v.email + '</div>';
+          }
+          html += '        <div style="font-size:0.76rem; color:#38bdf8; font-weight:700; margin-top:0.15rem;"><i class="fas fa-eye" style="font-size:0.7rem; margin-right:0.25rem;"></i> Sedang di: <span style="color:#fff;">' + (v.pageTitle || v.currentPage) + '</span></div>';
+          html += breadcrumbs;
+          html += '      </div>';
+          html += '    </div>';
+
+          html += '    <div style="text-align:right; font-size:0.72rem; color:#94a3b8; min-width:140px;">';
+          html += '      <div style="display:flex; align-items:center; justify-content:flex-end; gap:0.25rem; flex-wrap:wrap;">' + locText + mapsBtn + '</div>';
+          html += '      <div style="color:#cbd5e1; font-size:0.7rem; margin-top:0.1rem;">🌐 IP: <strong style="color:#38bdf8;">' + (v.ip || '-') + '</strong>' + ispText + '</div>';
+          html += '      <div style="margin-top:0.15rem;"><i class="fas fa-mobile-alt"></i> ' + (v.device || 'Mobile') + ' • ' + (v.browser || 'Browser') + '</div>';
+          html += '      <div style="color:#00ff88; font-weight:700; margin-top:0.2rem;">● ' + timeAgo + ' (' + v.totalPagesViewed + ' Halaman)</div>';
+          html += '    </div>';
+
+          html += '  </div>';
+          html += '</div>';
+        });
+        container.innerHTML = html;
+      }
+    }
+
+    // 2. Render Users Status Tab (Offline & Online Users)
+    if (data.usersStatusList) {
+      globalUsersCache = data.usersStatusList;
+      renderOfflineUsersList(globalUsersCache);
+    }
+
+  } catch (e) {}
+}
+
+function renderOfflineUsersList(users) {
+  var container = document.getElementById('offlineUsersContainer');
+  if (!container) return;
+
+  var q = (document.getElementById('offlineUserSearchInput')?.value || '').toLowerCase().trim();
+  var filtered = users.filter(function(u) {
+    if (!q) return true;
+    var str = (u.name + ' ' + u.email + ' ' + (u.phone || '') + ' ' + (u.lastLocation || '') + ' ' + (u.lastIp || '')).toLowerCase();
+    return str.indexOf(q) !== -1;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:1.5rem; color:#94a3b8; font-size:0.82rem;">Tidak ada user yang cocok dengan pencarian.</div>';
+    return;
+  }
+
+  var html = '';
+  filtered.forEach(function(u) {
+    var isOnline = u.isOnline;
+    var statusDot = isOnline ? '<span style="color:#00ff88; font-weight:800; font-size:0.72rem; background:rgba(0,255,136,0.15); padding:0.12rem 0.45rem; border-radius:50px;">● ONLINE</span>' :
+                               '<span style="color:#94a3b8; font-size:0.72rem; background:rgba(255,255,255,0.06); padding:0.12rem 0.45rem; border-radius:50px;">○ Offline</span>';
+    var lastSeenText = formatTimeAgo(u.lastSeenAt);
+
+    var offlineMapsUrl = (u.lastGps && u.lastGps.lat) ? ('https://www.google.com/maps?q=' + u.lastGps.lat + ',' + u.lastGps.lng) : ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(u.lastLocation || 'Indonesia'));
+    var gpsMapsLink = '<a href="' + offlineMapsUrl + '" target="_blank" class="btn-action" style="background:rgba(0,255,136,0.12); color:#00ff88; border:1px solid rgba(0,255,136,0.3); font-size:0.65rem; padding:0.15rem 0.45rem; border-radius:4px; text-decoration:none; margin-left:0.25rem; font-weight:700;"><i class="fas fa-map-marked-alt"></i> 🗺️ Peta</a>';
+
+    html += '<div class="offline-user-card">';
+    html += '  <div style="display:flex; align-items:center; gap:0.65rem; flex:1; min-width:200px;">';
+    html += '    <div style="width:34px; height:34px; border-radius:50%; background:' + (isOnline ? '#00ff88' : 'rgba(255,255,255,0.08)') + '; color:#000; font-weight:900; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">' + (u.name.charAt(0).toUpperCase()) + '</div>';
+    html += '    <div>';
+    html += '      <div style="font-weight:800; font-size:0.86rem; color:#fff; display:flex; align-items:center; gap:0.35rem;">';
+    html += '        <span>' + u.name + '</span> ' + (u.isRoyal ? '<i class="fas fa-crown" style="color:#fbbf24; font-size:0.75rem;" title="VIP"></i>' : '');
+    html += '        ' + statusDot;
+    if (u.isBanned) html += '<span class="status-badge status-rejected" style="font-size:0.62rem; padding:0.05rem 0.35rem;">BANNED</span>';
+    html += '      </div>';
+    html += '      <div style="font-size:0.72rem; color:#94a3b8;">' + u.email + (u.phone ? (' • ' + u.phone) : '') + '</div>';
+    html += '      <div style="font-size:0.72rem; color:#38bdf8; margin-top:0.1rem;"><i class="fas fa-history"></i> Terakhir buka: <span style="color:#cbd5e1;">' + (u.lastPage || 'Beranda') + '</span> (' + lastSeenText + ')</div>';
+    html += '    </div>';
+    html += '  </div>';
+
+    html += '  <div style="display:flex; align-items:center; gap:0.65rem; justify-content:space-between; min-width:170px;">';
+    html += '    <div style="text-align:right; font-size:0.72rem; color:#94a3b8;">';
+    html += '      <div style="color:#cbd5e1; font-weight:700; display:flex; align-items:center; justify-content:flex-end;"><i class="fas fa-map-marker-alt" style="color:#00ff88; margin-right:0.25rem;"></i> ' + (u.lastLocation || 'Indonesia 🇮🇩') + gpsMapsLink + '</div>';
+    html += '      <div style="color:#64748b; font-size:0.68rem; margin-top:0.1rem;">IP: ' + (u.lastIp || '-') + ' • ' + (u.lastDevice || 'Mobile') + '</div>';
+    html += '    </div>';
+    html += '    <button type="button" onclick="openSmartHistoryModal(\'' + u.id + '\', true)" class="btn-action btn-detail" style="font-size:0.74rem; padding:0.35rem 0.7rem;">';
+    html += '      <i class="fas fa-sliders-h"></i> Kelola';
+    html += '    </button>';
+    html += '  </div>';
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function filterOfflineUserList() {
+  renderOfflineUsersList(globalUsersCache);
+}
+
+// Start Polling immediately and interval every 2.5 seconds
+fetchLiveVisitors();
+setInterval(fetchLiveVisitors, 2500);
+</script>
+
 <%- include('layout-footer') %>
+
+
+
+<!-- Leaflet CSS & JS for Live Admin Satellite Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+var adminLeafletMap = null;
+var adminMarkersLayer = null;
+
+function initAdminMapIfNeeded() {
+  if (adminLeafletMap) {
+    adminLeafletMap.invalidateSize();
+    return;
+  }
+  var container = document.getElementById('adminLiveMapContainer');
+  if (!container) return;
+
+  adminLeafletMap = L.map('adminLiveMapContainer').setView([-2.5489, 118.0149], 5);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 18
+  }).addTo(adminLeafletMap);
+
+  adminMarkersLayer = L.layerGroup().addTo(adminLeafletMap);
+  updateAdminMapMarkers();
+}
+
+function updateAdminMapMarkers() {
+  if (!adminLeafletMap || !adminMarkersLayer) return;
+  adminMarkersLayer.clearLayers();
+
+  var visitors = Array.from(globalLiveVisitorsMap.values());
+  visitors.forEach(function(v) {
+    var lat = null, lng = null, isGps = false;
+    if (v.gps && v.gps.lat && v.gps.lng) {
+      lat = v.gps.lat; lng = v.gps.lng; isGps = true;
+    }
+    if (lat && lng) {
+      var iconHtml = '<div style="width:16px; height:16px; border-radius:50%; background:' + (isGps ? '#00ff88' : '#38bdf8') + '; box-shadow:0 0 12px ' + (isGps ? '#00ff88' : '#38bdf8') + '; border:2px solid #fff;"></div>';
+      var customIcon = L.divIcon({ html: iconHtml, className: 'radar-leaflet-pin', iconSize: [16, 16] });
+      var marker = L.marker([lat, lng], { icon: customIcon }).addTo(adminMarkersLayer);
+      
+      var popupContent = 
+        '<div style="font-family:sans-serif; color:#000; font-size:12px; min-width:160px;">' +
+        '  <strong style="font-size:13px;">' + v.name + '</strong><br>' +
+        '  <span>' + (isGps ? '🎯 GPS Presisi' : '📍 Lokasi IP') + '</span><br>' +
+        '  <span style="color:#555;">' + (v.gps?.address || v.location?.city || 'Indonesia') + '</span><br>' +
+        '  <a href="' + (v.gps?.mapsUrl || '#') + '" target="_blank" style="display:inline-block; margin-top:4px; color:#0066cc; font-weight:bold;">🗺️ Buka Google Maps</a>' +
+        '</div>';
+      marker.bindPopup(popupContent);
+    }
+  });
+}
+</script>

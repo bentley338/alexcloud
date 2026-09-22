@@ -578,6 +578,89 @@ Instruksi Laporan (Tulis dalam Bahasa Indonesia):
   }
 }
 
+
+// ─── Pakasir Payment Gateway Helper (https://app.pakasir.com) ────────────────
+async function pakasirRequest(method, endpoint, payload, timeoutMs = 12000) {
+  const BASE = 'https://app.pakasir.com';
+  const url = `${BASE}${endpoint}`;
+  
+  const options = {
+    method: method.toUpperCase(),
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': BROWSER_UA
+    },
+    agent: sharedHttpsAgent,
+    timeout: timeoutMs
+  };
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(url, options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(body);
+          resolve(json);
+        } catch (e) {
+          resolve({ raw: body });
+        }
+      });
+    });
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Pakasir request timeout'));
+    });
+    if (payload && (method === 'POST' || method === 'PUT')) {
+      req.write(JSON.stringify(payload));
+    }
+    req.end();
+  });
+}
+
+// ─── AutoGoPay Payment Gateway Helper (https://autogopay.site / https://v1-gateway.autogopay.site) ──
+async function autogopayRequest(method, endpoint, payload, customApiKey = null, timeoutMs = 12000) {
+  const BASE = 'https://v1-gateway.autogopay.site';
+  const url = `${BASE}${endpoint}`;
+  const apiKey = customApiKey || process.env.AUTOGOPAY_API_KEY || '';
+
+  const options = {
+    method: method.toUpperCase(),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'User-Agent': BROWSER_UA
+    },
+    agent: sharedHttpsAgent,
+    timeout: timeoutMs
+  };
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(url, options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(body);
+          resolve(json);
+        } catch (e) {
+          resolve({ raw: body });
+        }
+      });
+    });
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('AutoGoPay request timeout'));
+    });
+    if (payload && (method === 'POST' || method === 'PUT')) {
+      req.write(JSON.stringify(payload));
+    }
+    req.end();
+  });
+}
+
 module.exports = {
   sharedHttpsAgent,
   cleanEnvVar,
@@ -586,6 +669,8 @@ module.exports = {
   fr3Request,
   sayabayarRequest,
   mustikapayRequest,
+  pakasirRequest,
+  autogopayRequest,
   BROWSER_UA,
   isJunkTestimonial,
   normalizeTestimonial,

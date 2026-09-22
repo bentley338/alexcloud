@@ -1,11 +1,30 @@
+const fs = require('fs');
 const low = require('lowdb');
 const Memory = require('lowdb/adapters/Memory');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const session = require('express-session');
 
-// Use Memory adapter — data loaded from Postgres on startup
-const adapter = new Memory();
+// Use FileSync adapter — data persisted to database/db.json on disk
+const FileSync = require('lowdb/adapters/FileSync');
+const path = require('path');
+const dbFilePath = path.join(__dirname, 'db.json');
+let adapter;
+try {
+  if (fs.existsSync(dbFilePath)) {
+    const raw = fs.readFileSync(dbFilePath, 'utf-8');
+    if (raw && raw.trim()) {
+      JSON.parse(raw);
+    } else {
+      fs.writeFileSync(dbFilePath, '{}', 'utf-8');
+    }
+  }
+  adapter = new FileSync(dbFilePath);
+} catch (e) {
+  console.warn('[DB] db.json was malformed, resetting cleanly to restore from Postgres:', e.message);
+  fs.writeFileSync(dbFilePath, '{}', 'utf-8');
+  adapter = new FileSync(dbFilePath);
+}
 const db = low(adapter);
 
 db.defaults({
@@ -26,12 +45,54 @@ db.defaults({
 }).write();
 
 // ─── Custom Lowdb Session Store (automatically backed up to Postgres) ──────────
-class LowdbSessionStore extends session.Store {
+const sessionsFilePath = path.join(__dirname, 'sessions.json');
+
+class PersistentFastSessionStore extends session.Store {
+  constructor() {
+    super();
+    this.sessions = new Map();
+    this._saveTimer = null;
+    this.loadFromDisk();
+  }
+
+  loadFromDisk() {
+    if (fs.existsSync(sessionsFilePath)) {
+      try {
+        const raw = fs.readFileSync(sessionsFilePath, 'utf-8');
+        const obj = JSON.parse(raw);
+        for (const k in obj) {
+          this.sessions.set(k, obj[k]);
+        }
+        console.log(`[SESSION] Loaded ${this.sessions.size} active session(s) from disk.`);
+      } catch (err) {
+        console.error('[SESSION LOAD ERROR]', err.message);
+      }
+    }
+  }
+
+  scheduleSave() {
+    if (this._saveTimer) clearTimeout(this._saveTimer);
+    this._saveTimer = setTimeout(() => {
+      try {
+        const obj = {};
+        for (const [k, v] of this.sessions.entries()) {
+          obj[k] = v;
+        }
+        fs.writeFile(sessionsFilePath, JSON.stringify(obj), 'utf-8', (err) => {
+          if (err) console.error('[SESSION SAVE ERROR]', err.message);
+        });
+      } catch (e) {
+        console.error('[SESSION DUMP ERROR]', e.message);
+      }
+    }, 1000);
+    if (this._saveTimer.unref) this._saveTimer.unref();
+  }
+
   get(sid, cb) {
     try {
-      const record = db.get('sessions').find({ id: sid }).value();
-      if (!record) return cb(null, null);
-      cb(null, JSON.parse(record.data));
+      const sess = this.sessions.get(sid);
+      if (!sess) return cb(null, null);
+      cb(null, JSON.parse(sess));
     } catch (err) {
       cb(err);
     }
@@ -39,17 +100,8 @@ class LowdbSessionStore extends session.Store {
 
   set(sid, sess, cb) {
     try {
-      const dataStr = JSON.stringify(sess);
-      const existing = db.get('sessions').find({ id: sid }).value();
-      if (existing) {
-        db.get('sessions').find({ id: sid }).assign({ data: dataStr, updatedAt: new Date().toISOString() }).write();
-      } else {
-        db.get('sessions').push({
-          id: sid,
-          data: dataStr,
-          updatedAt: new Date().toISOString()
-        }).write();
-      }
+      this.sessions.set(sid, JSON.stringify(sess));
+      this.scheduleSave();
       cb(null);
     } catch (err) {
       cb(err);
@@ -58,7 +110,8 @@ class LowdbSessionStore extends session.Store {
 
   destroy(sid, cb) {
     try {
-      db.get('sessions').remove({ id: sid }).write();
+      this.sessions.delete(sid);
+      this.scheduleSave();
       cb(null);
     } catch (err) {
       cb(err);
@@ -70,7 +123,7 @@ class LowdbSessionStore extends session.Store {
   }
 }
 
-const sessionStore = new LowdbSessionStore();
+const sessionStore = new PersistentFastSessionStore();
 
 // ─── PostgreSQL Backup (Railway internal — no SSL issues) ──────────────────────
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -111,7 +164,10 @@ async function restoreFromDB() {
     if (result.rows.length > 0) {
       const savedData = result.rows[0].value;
       const state = db.getState();
-      Object.keys(savedData).forEach(k => { state[k] = savedData[k]; });
+      delete savedData.sessions;
+delete savedData.botSession;
+savedData.sessions = [];
+Object.keys(savedData).forEach(k => { state[k] = savedData[k]; });
       
       // Migration: Ensure all orders have a price field to prevent admin dashboard crashes
       if (state.orders && Array.isArray(state.orders)) {
@@ -172,7 +228,7 @@ let _plansCache = null;
 let _plansCacheTs = 0;
 let _gamesCache = null;
 let _gamesCacheTs = 0;
-const DATA_TTL = 5000; // 5s cache
+const DATA_TTL = 10 * 60 * 1000; // 10 minutes cache
 
 function getPlans() {
   const now = Date.now();
@@ -517,13 +573,60 @@ function seedReferral() {
   }
 }
 
+function seedWhatsAppSettings() {
+  const settings = db.get('settings').value() || {};
+  db.get('settings').assign({
+    whatsappProvider: 'botwa',
+    botWaUrl: 'http://localhost:3001',
+    botSharedSecret: '76e9491b52202d3e8028851d6c62b953a8fad7112f1ff1e23d223c755f602cdb',
+    ...settings,
+    whatsappPhone: '6285810073341',
+    whatsappEnabled: true
+  }).write();
+}
+
+function seedPromoCodes() {
+  const strategic = [
+    // 1. PUBLIC VOUCHER (Semua Orang Boleh Pakai, Min. Belanja Rp 100.000, Diskon 10%)
+    { id: 'promo_alex10', code: 'ALEX10', title: '🎉 Promo Diskon 10% (Min. Rp 100K)', discountType: 'percent', discountValue: 10, minPurchase: 100000, maxDiscount: 15000, maxUses: 1000, usedCount: 0, royalOnly: false, isActive: true, expiresAt: '2027-12-31T23:59:59.000Z', createdAt: new Date().toISOString() },
+    
+    // 2. KHUSUS ROYAL VIP ACCESS (Semua Voucher Hemat Lainnya)
+    { id: 'promo_mingguan', code: 'HEMATMINGGUAN', title: '⚡ [Royal VIP] Potongan Rp 5.000 Paket 7 Hari', discountType: 'fixed', discountValue: 5000, minPurchase: 40000, maxDiscount: 5000, maxUses: 1000, usedCount: 0, royalOnly: true, isActive: true, expiresAt: '2027-12-31T23:59:59.000Z', createdAt: new Date().toISOString() },
+    { id: 'promo_bulanan', code: 'SULTANBULANAN', title: '👑 [Royal VIP] Potongan Sultan Rp 15.000 Paket 30 Hari', discountType: 'fixed', discountValue: 15000, minPurchase: 100000, maxDiscount: 15000, maxUses: 500, usedCount: 0, royalOnly: true, isActive: true, expiresAt: '2027-12-31T23:59:59.000Z', createdAt: new Date().toISOString() },
+    { id: 'promo_weekend', code: 'WEEKENDGAMER', title: '🎮 [Royal VIP] Flash Weekend Diskon 5%', discountType: 'percent', discountValue: 5, minPurchase: 35000, maxDiscount: 4000, maxUses: 1000, usedCount: 0, royalOnly: true, isActive: true, expiresAt: '2027-12-31T23:59:59.000Z', createdAt: new Date().toISOString() },
+    { id: 'promo_royalvip', code: 'ROYALVIP25K', title: '💎 [Royal VIP] Potongan Spesial Rp 25.000', discountType: 'fixed', discountValue: 25000, minPurchase: 200000, maxDiscount: 25000, maxUses: 200, usedCount: 0, royalOnly: true, isActive: true, expiresAt: '2027-12-31T23:59:59.000Z', createdAt: new Date().toISOString() },
+    { id: 'promo_begadang', code: 'BEGADANG3K', title: '🌙 [Royal VIP] Midnight Play Potongan Rp 3.000', discountType: 'fixed', discountValue: 3000, minPurchase: 38000, maxDiscount: 3000, maxUses: 500, usedCount: 0, royalOnly: true, isActive: true, expiresAt: '2027-12-31T23:59:59.000Z', createdAt: new Date().toISOString() },
+    { id: 'promo_gamers5', code: 'GAMERS5', title: '🔥 [Royal VIP] Komunitas Gamers Diskon 5%', discountType: 'percent', discountValue: 5, minPurchase: 35000, maxDiscount: 5000, maxUses: 1000, usedCount: 0, royalOnly: true, isActive: true, expiresAt: '2027-12-31T23:59:59.000Z', createdAt: new Date().toISOString() }
+  ];
+
+  let existing = db.get('promoCodes').value() || [];
+  let updated = false;
+  strategic.forEach(v => {
+    const found = existing.find(e => e.code === v.code);
+    if (!found) {
+      existing.push(v);
+      updated = true;
+    } else {
+      Object.assign(found, v);
+      updated = true;
+    }
+  });
+
+  if (updated) {
+    db.set('promoCodes', existing).write();
+    console.log('[DB] Strategic profitable vouchers seeded (' + existing.length + ' vouchers total)');
+  }
+}
+
 function initDB() {
+  seedWhatsAppSettings();
   seedAdmin();
   seedPlans();
   seedGames();
   seedTestimonials();
   seedReferral();
   seedWallet();
+  seedPromoCodes();
   updateGameImages();
   cleanOldSessions();
 

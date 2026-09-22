@@ -14,9 +14,22 @@ const crypto = require('crypto');
 const CSRF_EXEMPT = [
   '/api/testimonials', // dipanggil WA Bot eksternal, diautentikasi via header x-api-key
   '/api/chat',         // chatbot publik untuk pengunjung anonim (belum tentu punya session)
-  '/api/bot/mustikapay', // dipanggil WA Bot eksternal untuk integrasi payment
+  '/api/bot/mustikapay',
+  '/api/autogopay/webhook',
+  '/api/payment/autogopay/webhook',
+  '/api/pakasir/webhook',
+  '/api/payment/pakasir/webhook', // dipanggil WA Bot eksternal untuk integrasi payment
   '/api/bot/testimonials', // dipanggil WA Bot untuk ambil testi
-  '/api/bot'           // Whitelist semua endpoint botwa (/api/bot/*) dari proteksi CSRF
+  '/api/bot',          // Whitelist semua endpoint botwa (/api/bot/*) dari proteksi CSRF
+  '/api/tiktok',       // Whitelist TikTok Webhooks & API
+  '/api/auth/tiktok',  // Whitelist TikTok OAuth Callbacks
+  '/api/track',        // Whitelist tracking beacon & GPS location updates
+  '/api/payment/create',
+  '/api/payment/cancel',
+  '/api/payment/status',
+  '/api/payment/apply-voucher',
+  '/api/promo/validate',
+  '/api/spin-wheel'
 ];
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);

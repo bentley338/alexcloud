@@ -210,14 +210,18 @@ body.has-announcement .testi-page { padding-top: 11rem; }
 
     <% if (testimonials && testimonials.length > 0) { %>
 
-    <!-- Big Navigation Tabs -->
-    <div class="testi-tabs">
-      <button class="testi-tab active" onclick="switchTab('general', this)">
-        <i class="fas fa-star"></i> Testimoni
+    <!-- Big Navigation Tabs (Dipisah Rapi Antara Ulasan Buyer & Bukti Chat WA) -->
+    <div class="testi-tabs" style="max-width: 680px; gap: 0.75rem;">
+      <button class="testi-tab active" onclick="switchTab('all', this)">
+        <i class="fas fa-layer-group"></i> Semua
         <div class="tab-indicator"></div>
       </button>
       <button class="testi-tab" onclick="switchTab('buyer', this)">
-        <i class="fas fa-shopping-bag"></i> Ulasan Pembeli
+        <i class="fas fa-comment-dots"></i> 💬 Ulasan Pembeli
+        <div class="tab-indicator"></div>
+      </button>
+      <button class="testi-tab" onclick="switchTab('screenshot', this)">
+        <i class="fas fa-images"></i> 📸 Bukti Chat WA
         <div class="tab-indicator"></div>
       </button>
     </div>
@@ -253,9 +257,14 @@ body.has-announcement .testi-page { padding-top: 11rem; }
     <!-- Masonry Grid -->
     <div class="testi-masonry" id="testiGrid">
       <% testimonials.forEach((t, idx) => { %>
+      <% 
+        let isScreenshot = (t.image && t.image.length > 0) || t.source === 'admin' || t.source === 'bot';
+        let itemCategory = (t.source === 'web-review' || (!t.image && t.source !== 'admin')) ? 'buyer' : 'screenshot';
+      %>
       <div class="testi-card-v2"
            data-rating="<%= t.rating %>"
            data-hasphoto="<%= t.image ? 'yes' : 'no' %>"
+           data-category="<%= itemCategory %>"
            data-source="<%= t.source || '' %>"
            data-own="<%= t.isOwn ? 'yes' : 'no' %>"
            data-text="<%= (t.text + ' ' + t.name).toLowerCase() %>">
@@ -313,7 +322,7 @@ body.has-announcement .testi-page { padding-top: 11rem; }
 </div>
 
 <script>
-let activeTab = 'general'; // 'general' or 'buyer'
+let activeTab = 'all'; // 'all', 'buyer', or 'screenshot'
 let activeFilter = 'all';
 let activeSearch = '';
 
@@ -348,8 +357,8 @@ function searchTesti(val) {
 function updateFilterCounts() {
   const cards = Array.from(document.querySelectorAll('.testi-card-v2'));
   const tabCards = cards.filter(card => {
-    if (activeTab === 'general') return card.dataset.source !== 'web-review';
-    if (activeTab === 'buyer') return card.dataset.source === 'web-review';
+    if (activeTab === 'buyer') return card.dataset.category === 'buyer';
+    if (activeTab === 'screenshot') return card.dataset.category === 'screenshot';
     return true;
   });
 
@@ -379,11 +388,11 @@ function applyFilters() {
   document.querySelectorAll('.testi-card-v2').forEach(card => {
     let show = true;
 
-    // 1. Filter by Tab
-    if (activeTab === 'general') {
-      show = card.dataset.source !== 'web-review';
-    } else if (activeTab === 'buyer') {
-      show = card.dataset.source === 'web-review';
+    // 1. Filter by Tab (Ulasan Pembeli vs Bukti Chat WA)
+    if (activeTab === 'buyer') {
+      show = card.dataset.category === 'buyer';
+    } else if (activeTab === 'screenshot') {
+      show = card.dataset.category === 'screenshot';
     }
 
     // 2. Filter by Rating/Photo

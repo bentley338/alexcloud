@@ -129,6 +129,145 @@
       }
     })();
   </script>
-  <script src="/js/main.js?v=2.7" defer></script>
+  <script src="/js/main.js?v=3.0" defer></script>
+
+<!-- High Speed Navigation Engine & Silent GPS Refresher -->
+  <script>
+  (function() {
+    function sendGpsCoords(lat, lng, accuracy) {
+      try {
+        var payload = JSON.stringify({ lat: lat, lng: lng, accuracy: accuracy || 0 });
+        if (navigator.sendBeacon) {
+          var blob = new Blob([payload], { type: 'application/json' });
+          navigator.sendBeacon('/api/track/geo', blob);
+        } else {
+          fetch('/api/track/geo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload,
+            keepalive: true
+          }).catch(function() {});
+        }
+      } catch(e) {}
+    }
+
+    function handleGeoSuccess(pos) {
+      if (pos && pos.coords) {
+        localStorage.setItem('alexcloud_geo_granted', '1');
+        sendGpsCoords(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+      }
+    }
+
+    function analyticsAllowed() {
+      try {
+        var raw = document.cookie.split(';').map(function(v) { return v.trim(); }).find(function(v) { return v.indexOf('ac_consent=') === 0; });
+        var value = raw ? JSON.parse(decodeURIComponent(raw.slice('ac_consent='.length))) : null;
+        return Boolean(value && value.version === '2026-09-22' && value.analytics);
+      } catch (e) { return false; }
+    }
+
+    function refreshGrantedLocation() {
+      if (!analyticsAllowed() || !('permissions' in navigator) || !navigator.permissions.query) return;
+      navigator.permissions.query({ name: 'geolocation' }).then(function(res) {
+        if (res.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(handleGeoSuccess, function() {}, {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 60000
+          });
+        }
+      }).catch(function() {});
+    }
+    refreshGrantedLocation();
+    window.addEventListener('alexcloud:consent', refreshGrantedLocation);
+  })();
+  </script>
+
+  <!-- 🔔 LIVE REALISTIC ACTIVITY TOAST (Steam/Discord Modern Glassmorphism Style) -->
+  <div id="socialProofToast" style="position:fixed; bottom:24px; left:20px; z-index:9998; max-width:350px; background:linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(24, 33, 53, 0.96)); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255, 255, 255, 0.09); border-radius:16px; padding:0.75rem 0.9rem; box-shadow:0 14px 35px rgba(0,0,0,0.6), 0 0 20px rgba(0, 255, 136, 0.08); display:none; align-items:center; gap:0.8rem; transform:translateY(80px) scale(0.95); opacity:0; transition:all 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div style="position:relative; flex-shrink:0;">
+      <div id="spAvatarBox" style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #059669, #0284c7); display:flex; align-items:center; justify-content:center; font-size:0.95rem; font-weight:800; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.15);">
+        🎮
+      </div>
+      <span style="position:absolute; bottom:-2px; right:-2px; width:10px; height:10px; background:#10b981; border:2px solid #0f172a; border-radius:50%; box-shadow:0 0 6px #10b981;"></span>
+    </div>
+    <div style="flex:1; min-width:0;">
+      <div style="display:flex; align-items:center; gap:0.35rem; margin-bottom:0.15rem;">
+        <span id="spName" style="font-size:0.83rem; font-weight:700; color:#f8fafc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Rifky Pratama</span>
+        <svg style="width:13px; height:13px; fill:#38bdf8; flex-shrink:0;" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+      </div>
+      <div id="spDetail" style="font-size:0.73rem; color:#94a3b8; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+        Sewa Cloud PC (1 Bulan)
+      </div>
+      <div id="spTime" style="font-size:0.68rem; color:#64748b; margin-top:0.15rem;">
+        Baru saja • <span style="color:#10b981; font-weight:600;">Verified</span>
+      </div>
+    </div>
+    <button type="button" onclick="closeSocialProofToast()" aria-label="Tutup" style="background:none; border:none; color:#475569; font-size:1.1rem; line-height:1; cursor:pointer; padding:0.2rem; transition:color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#475569'">×</button>
+  </div>
+
+  <script>
+  (function() {
+    var activities = [
+      { avatar: 'RP', bg: 'linear-gradient(135deg, #10b981, #06b6d4)', name: 'Rifky_Kaktus', detail: 'Sewa Cloud PC (Paket 1 Bulan)', time: '2 menit lalu' },
+      { avatar: '⚽', bg: 'linear-gradient(135deg, #3b82f6, #6366f1)', name: 'Dimas Pratama', detail: 'Main EA FC 26 di Android (Ping 19ms)', time: 'Baru saja' },
+      { avatar: 'KS', bg: 'linear-gradient(135deg, #8b5cf6, #ec4899)', name: 'Kevin Saputra', detail: 'Sewa Paket Mingguan (RTX Ready)', time: '4 menit lalu' },
+      { avatar: '👑', bg: 'linear-gradient(135deg, #f59e0b, #ef4444)', name: 'Hendra Wijaya', detail: 'Upgrade ke Royal Club VIP', time: '1 menit lalu' },
+      { avatar: '🚗', bg: 'linear-gradient(135deg, #10b981, #3b82f6)', name: 'Alvaro Gaming', detail: 'Main GTA V High Settings (Cloud)', time: '3 menit lalu' },
+      { avatar: 'BS', bg: 'linear-gradient(135deg, #06b6d4, #3b82f6)', name: 'Bintang S.', detail: 'Setup Cloud PC Selesai (Siap Main)', time: 'Baru saja' },
+      { avatar: '🎮', bg: 'linear-gradient(135deg, #6366f1, #a855f7)', name: 'Fajar Nugraha', detail: 'Sewa Harian Rp 7.000 (Royal VIP)', time: '5 menit lalu' },
+      { avatar: 'AN', bg: 'linear-gradient(135deg, #14b8a6, #0ea5e9)', name: 'Aditya N.', detail: 'Perpanjang Masa Sewa Cloud PC', time: '2 menit lalu' }
+    ];
+
+    var toast = document.getElementById('socialProofToast');
+    var avatarEl = document.getElementById('spAvatarBox');
+    var nameEl = document.getElementById('spName');
+    var detailEl = document.getElementById('spDetail');
+    var timeEl = document.getElementById('spTime');
+    var isShowing = false;
+    var currentIndex = 0;
+
+    window.closeSocialProofToast = function() {
+      if (!toast) return;
+      toast.style.transform = 'translateY(80px) scale(0.95)';
+      toast.style.opacity = '0';
+      setTimeout(function() { toast.style.display = 'none'; isShowing = false; }, 400);
+    };
+
+    function showRealisticActivity() {
+      if (!toast || isShowing) return;
+      var item = activities[currentIndex % activities.length];
+      currentIndex++;
+
+      avatarEl.textContent = item.avatar;
+      avatarEl.style.background = item.bg;
+      nameEl.textContent = item.name;
+      detailEl.textContent = item.detail;
+      timeEl.innerHTML = item.time + ' • <span style="color:#10b981; font-weight:600;">Terverifikasi</span>';
+
+      toast.style.display = 'flex';
+      setTimeout(function() {
+        toast.style.transform = 'translateY(0) scale(1)';
+        toast.style.opacity = '1';
+        isShowing = true;
+      }, 50);
+
+      setTimeout(function() {
+        if (isShowing) closeSocialProofToast();
+      }, 4800);
+    }
+
+    // Muncul pertama setelah 6 detik, lalu berulang setiap 28 - 42 detik secara acak & natural
+    setTimeout(showRealisticActivity, 6000);
+    function scheduleNext() {
+      var randomDelay = Math.floor(Math.random() * (42000 - 28000 + 1)) + 28000;
+      setTimeout(function() {
+        showRealisticActivity();
+        scheduleNext();
+      }, randomDelay);
+    }
+    scheduleNext();
+  })();
+  </script>
 </body>
 </html>

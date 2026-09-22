@@ -1,7 +1,12 @@
 <% currentPage = 'settings-whatsapp'; %>
 <%- include('layout-header') %>
 
-<h1 class="admin-page-title"><i class="fas fa-bell"></i> Setelan Notifikasi Admin</h1>
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+  <div>
+    <h1 class="admin-page-title" style="margin-bottom:0.25rem;"><i class="fab fa-whatsapp" style="color:#25d366;"></i> WhatsApp Bot & Notifikasi</h1>
+    <p style="color:var(--text-muted); font-size:0.88rem; margin:0;">Kelola Bot WhatsApp Customer Service, Proteksi Anti-Spam, dan Gateway Notifikasi Transaksi.</p>
+  </div>
+</div>
 
 <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
 <% success.forEach(s => { %><div class="alert alert-success" style="margin-bottom:1rem;"><i class="fas fa-check-circle"></i> <%= s %></div><% }) %>
@@ -10,20 +15,309 @@
 <% error.forEach(e => { %><div class="alert alert-error" style="margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> <%= e %></div><% }) %>
 <% } %>
 
-<!-- Tab Headers -->
-<div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
-  <button onclick="switchTab('telegram')" id="tab-btn-telegram" class="tab-btn active" style="padding:0.6rem 1.2rem; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:white; font-family:var(--font-ui); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:0.2s;">
-    <i class="fab fa-telegram" style="color:#0088cc; font-size:1.1rem;"></i> Notifikasi Telegram (Rekomendasi - Instan & Stabil)
+<!-- Tab Navigation -->
+<div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem; overflow-x:auto;">
+  <button onclick="switchTab('bot')" id="tab-btn-bot" class="tab-btn <%= (typeof activeTab === 'undefined' || activeTab === 'bot') ? 'active' : '' %>" style="padding:0.65rem 1.25rem; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:white; font-family:var(--font-ui); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:0.2s; white-space:nowrap;">
+    <i class="fas fa-robot" style="color:#25d366; font-size:1.1rem;"></i> 🤖 WhatsApp Bot &amp; Anti-Spam (CS Otomatis)
   </button>
-  <button onclick="switchTab('whatsapp')" id="tab-btn-whatsapp" class="tab-btn" style="padding:0.6rem 1.2rem; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-muted); font-family:var(--font-ui); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:0.2s;">
-    <i class="fab fa-whatsapp" style="color:#25d366; font-size:1.1rem;"></i> Notifikasi WhatsApp
+  <button onclick="switchTab('whatsapp')" id="tab-btn-whatsapp" class="tab-btn <%= (typeof activeTab !== 'undefined' && activeTab === 'whatsapp') ? 'active' : '' %>" style="padding:0.65rem 1.25rem; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-muted); font-family:var(--font-ui); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:0.2s; white-space:nowrap;">
+    <i class="fab fa-whatsapp" style="color:#25d366; font-size:1.1rem;"></i> 📱 Gateway Notifikasi Transaksi
+  </button>
+  <button onclick="switchTab('telegram')" id="tab-btn-telegram" class="tab-btn <%= (typeof activeTab !== 'undefined' && activeTab === 'telegram') ? 'active' : '' %>" style="padding:0.65rem 1.25rem; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-muted); font-family:var(--font-ui); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:0.2s; white-space:nowrap;">
+    <i class="fab fa-telegram" style="color:#0088cc; font-size:1.1rem;"></i> ✈️ Notifikasi Telegram
   </button>
 </div>
 
-<!-- TELEGRAM SECTION -->
-<div id="section-telegram" class="tab-content">
+<!-- ============================================================= -->
+<!-- TAB 1: 🤖 WHATSAPP BOT & ANTI-SPAM & AI CS (DEFAULT ACTIVE) -->
+<!-- ============================================================= -->
+<div id="section-bot" class="tab-content" style="<%= (typeof activeTab === 'undefined' || activeTab === 'bot') ? 'display:block;' : 'display:none;' %>">
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+    
+    <!-- CARD 1: LIVE STATUS & QR SCANNER -->
+    <div class="card" style="border-color: rgba(37, 211, 102, 0.3); background: linear-gradient(180deg, rgba(37, 211, 102, 0.04) 0%, rgba(18, 19, 25, 0.98) 100%);">
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
+        <div class="card-title" style="color:#25d366; display:flex; align-items:center; gap:0.5rem;">
+          <i class="fas fa-qrcode"></i> Status Sesi &amp; Scan QR Bot
+        </div>
+        <span id="liveStatusBadge" style="padding:0.25rem 0.75rem; border-radius:100px; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; background: <%= botData.status === 'connected' ? 'rgba(16, 185, 129, 0.2)' : (botData.status === 'qr_ready' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(239, 68, 68, 0.2)') %>; color: <%= botData.status === 'connected' ? '#10b981' : (botData.status === 'qr_ready' ? '#f59e0b' : '#ef4444') %>; border: 1px solid <%= botData.status === 'connected' ? 'rgba(16, 185, 129, 0.4)' : (botData.status === 'qr_ready' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(239, 68, 68, 0.4)') %>;">
+          <%= botData.status === 'connected' ? '🟢 Terhubung' : (botData.status === 'qr_ready' ? '🟡 Menunggu Scan' : '🔴 ' + botData.status) %>
+        </span>
+      </div>
+
+      <div style="padding:1.5rem; text-align:center;">
+        <!-- Connected Box -->
+        <div id="boxConnected" style="<%= botData.status === 'connected' ? 'display:block;' : 'display:none;' %>">
+          <div style="width:70px; height:70px; border-radius:50%; background:rgba(37,211,102,0.15); border:2px solid #25d366; color:#25d366; font-size:2rem; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; box-shadow:0 0 20px rgba(37,211,102,0.3);">
+            <i class="fas fa-check"></i>
+          </div>
+          <h3 style="font-size:1.15rem; font-weight:800; color:#fff; margin-bottom:0.35rem;">WhatsApp Bot Terhubung!</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
+            Akun aktif: <strong id="connectedUserText" style="color:#25d366;"><%= botData.user %></strong><br>
+            Bot siap membalas pesan pelanggan &amp; memblokir spammer 24/7.
+          </p>
+        </div>
+
+        <!-- QR Code Ready Box -->
+        <div id="boxQrReady" style="<%= botData.status === 'qr_ready' ? 'display:block;' : 'display:none;' %>">
+          <div style="font-family:var(--font-ui); font-size:0.9rem; color:#f59e0b; font-weight:700; margin-bottom:0.75rem;">
+            <i class="fas fa-camera"></i> Silakan Scan QR Code di Bawah via WhatsApp HP Anda:
+          </div>
+          <div style="background:white; padding:0.85rem; border-radius:14px; display:inline-block; box-shadow:0 8px 30px rgba(0,0,0,0.5); margin-bottom:1rem;">
+            <img id="liveQrImg" src="<%= botData.qrDataUrl || '' %>" alt="QR Code" style="display:block; width:220px; height:220px; object-fit:contain;" />
+          </div>
+          <p style="color:var(--text-muted); font-size:0.8rem; line-height:1.5; margin:0 auto 1rem; max-width:320px;">
+            Buka WhatsApp &gt; Titik Tiga (atau Pengaturan) &gt; <strong>Perangkat Tertaut</strong> &gt; <strong>Tautkan Perangkat</strong> &gt; Arahkan kamera ke QR ini.
+          </p>
+        </div>
+
+        <!-- Initializing Box -->
+        <div id="boxInitializing" style="<%= (botData.status !== 'connected' && botData.status !== 'qr_ready') ? 'display:block;' : 'display:none;' %>">
+          <div style="padding:2rem 1rem;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size:2.5rem; color:#38bdf8; margin-bottom:1rem;"></i>
+            <h4 style="font-weight:700; color:#fff; margin-bottom:0.25rem;">Menyiapkan Sesi Bot...</h4>
+            <p style="color:var(--text-muted); font-size:0.82rem;">QR Code akan otomatis muncul dalam beberapa detik.</p>
+          </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div style="margin-top:1.25rem; padding-top:1.25rem; border-top:1px dashed var(--border); display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <form action="/admin/settings/whatsapp/reset-session" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mereset sesi WhatsApp?\n\nSesi lama akan dihapus dan QR Code baru akan dibuat untuk di-scan ulang.')">
+            <button type="submit" class="btn-secondary" style="background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.3); color:#ef4444; font-weight:700; padding:0.6rem 1.2rem; border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;">
+              <i class="fas fa-sync-alt"></i> Buat Sesi Baru / Scan Ulang QR
+            </button>
+          </form>
+          <div style="display:inline-flex; align-items:center; gap:0.35rem; color:var(--text-muted); font-size:0.75rem;">
+            <i class="fas fa-circle" style="color:#10b981; font-size:0.5rem;"></i> Auto-sync 3s
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: SETELAN AUTO-REPLY & ANTI-SPAM FORM -->
+    <div class="card" style="border-color: rgba(56, 189, 248, 0.3);">
+      <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(56,189,248,0.02);">
+        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-sliders-h"></i> Pengaturan Auto-Reply &amp; Anti-Spam</div>
+      </div>
+      <div style="padding:1.5rem;">
+        <form action="/admin/settings/whatsapp/bot-settings" method="POST">
+          
+          <!-- Section 1: Auto-Reply Chat Pelanggan -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:12px; padding:1.1rem; margin-bottom:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+              <label class="form-label" style="margin:0; font-weight:800; font-size:0.95rem; color:#fff; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fas fa-comment-dots" style="color:#25d366;"></i> Auto-Reply Chat Pelanggan
+              </label>
+              <input type="checkbox" name="autoReplyEnabled" value="true" <%= (botData.settings && botData.settings.autoReplyEnabled !== false) ? 'checked' : '' %> style="width:1.2rem; height:1.2rem; accent-color:#25d366; cursor:pointer;">
+            </div>
+            <p style="color:var(--text-muted); font-size:0.8rem; line-height:1.5; margin:0 0 0.75rem;">
+              Bot AI (Gemini 2.5 Flash) otomatis menjawab pertanyaan pelanggan tentang harga paket sewa harian (Rp 7k/hari Royal Member), 1 Minggu (Rp 40k), 1 Bulan (Rp 60k), katalog game 100+, QRIS AutoGoPay, dan tautan resmi website.
+            </p>
+            <div style="display:inline-flex; align-items:center; gap:0.4rem; background:rgba(37,211,102,0.1); border:1px solid rgba(37,211,102,0.25); color:#25d366; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:6px;">
+              ⚡ Model AI: Gemini 2.5 Flash (Super Cepat &amp; Sopan)
+            </div>
+          </div>
+
+          <!-- Section 2: Anti-Spam & Auto-Block -->
+          <div style="background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:1.1rem; margin-bottom:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+              <label class="form-label" style="margin:0; font-weight:800; font-size:0.95rem; color:#fff; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fas fa-shield-alt" style="color:#ef4444;"></i> Proteksi Anti-Spam &amp; Auto-Blockir
+              </label>
+              <input type="checkbox" name="antiSpamEnabled" value="true" <%= (botData.settings && botData.settings.antiSpamEnabled !== false) ? 'checked' : '' %> style="width:1.2rem; height:1.2rem; accent-color:#ef4444; cursor:pointer;">
+            </div>
+            <p style="color:var(--text-muted); font-size:0.8rem; line-height:1.5; margin:0 0 1rem;">
+              Otomatis mendeteksi nomor yang mengirimkan pesan bertubi-tubi (spam). Sebelum diblokir permanen, bot akan mengirimkan pesan alasan resmi terlebih dahulu.
+            </p>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+              <div>
+                <label class="form-label" style="font-size:0.78rem; margin-bottom:0.25rem;">Maksimal Pesan Spam</label>
+                <input type="number" name="maxSpamCount" class="form-input" value="<%= (botData.settings && botData.settings.maxSpamCount) || 10 %>" min="3" max="50" style="padding:0.5rem 0.75rem; font-weight:700;">
+                <small style="color:var(--text-muted); font-size:0.7rem;">Default: 10 pesan beruntun</small>
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.78rem; margin-bottom:0.25rem;">Jeda Deteksi (Detik)</label>
+                <input type="number" name="spamWindowSec" class="form-input" value="<%= (botData.settings && botData.settings.spamWindowSec) || 30 %>" min="5" max="120" style="padding:0.5rem 0.75rem; font-weight:700;">
+                <small style="color:var(--text-muted); font-size:0.7rem;">Default: dalam 30 detik</small>
+              </div>
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem; margin-bottom:0.35rem; display:flex; justify-content:space-between;">
+                <span>Isi Pesan Peringatan Sebelum Diblokir:</span>
+                <span style="color:#ef4444; font-weight:700;">(Dikirim 1x sebelum blokir)</span>
+              </label>
+              <textarea name="blockWarningMsg" class="form-input" rows="6" style="resize:vertical; font-family:monospace; font-size:0.78rem; line-height:1.45; background:#0f1117;"><%= (botData.settings && botData.settings.blockWarningMsg) || `⚠️ *PERINGATAN SISTEM KEAMANAN ALEXCLOUD* ⚠️\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nHalo Kak, nomor Anda terdeteksi mengirimkan lebih dari 10 pesan secara beruntun dalam waktu singkat (Aktivitas Spam Terdeteksi).\n\nDemi menjaga stabilitas server dan kenyamanan antrean layanan pelanggan, nomor Anda telah *DIBLOKIR OTOMATIS* oleh sistem keamanan kami.\n\nJika ini merupakan kekeliruan atau Anda membutuhkan bantuan resmi, silakan hubungi tim kami melalui website resmi:\n🌐 *https://alexcloud.my.id/*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n_Terima kasih atas pengertian dan kerjasamanya._` %></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:0.75rem; font-weight:800; border-radius:10px; background:linear-gradient(135deg, #38bdf8, #0284c7); border-color:#38bdf8; box-shadow:0 4px 15px rgba(56,189,248,0.3);">
+            <i class="fas fa-save"></i> Simpan Setelan Bot &amp; Anti-Spam
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CARD 3: DAFTAR NOMOR TERBLOKIR -->
+  <div class="card" style="border-color: rgba(239, 68, 68, 0.25);">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="card-title" style="color:#ef4444; display:flex; align-items:center; gap:0.5rem;">
+        <i class="fas fa-ban"></i> Daftar Nomor WhatsApp Terblokir Otomatis (Spammer)
+      </div>
+      <span style="font-size:0.8rem; color:var(--text-muted);">
+        Total: <strong><%= (botData.blockedUsers && botData.blockedUsers.length) || 0 %></strong> Nomor
+      </span>
+    </div>
+    <div style="padding:1.25rem; overflow-x:auto;">
+      <% if (botData.blockedUsers && botData.blockedUsers.length > 0) { %>
+        <table class="table" style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted);">
+              <th style="padding:0.75rem;">No</th>
+              <th style="padding:0.75rem;">Nomor WhatsApp</th>
+              <th style="padding:0.75rem;">Alasan Pemblokiran</th>
+              <th style="padding:0.75rem;">Waktu Diblokir</th>
+              <th style="padding:0.75rem; text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% botData.blockedUsers.forEach((b, idx) => { %>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                <td style="padding:0.75rem; color:var(--text-muted);"><%= idx + 1 %></td>
+                <td style="padding:0.75rem; font-weight:700; color:#fff; font-family:monospace;">
+                  +<%= b.phone %>
+                </td>
+                <td style="padding:0.75rem; color:#f87171;">
+                  <i class="fas fa-exclamation-triangle" style="font-size:0.75rem;"></i> <%= b.reason %>
+                </td>
+                <td style="padding:0.75rem; color:var(--text-muted); font-size:0.8rem;">
+                  <%= new Date(b.blockedAt).toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'short' }) %>
+                </td>
+                <td style="padding:0.75rem; text-align:center;">
+                  <form action="/admin/settings/whatsapp/unblock" method="POST" style="display:inline;" onsubmit="return confirm('Buka blokir untuk nomor +<%= b.phone %>?')">
+                    <input type="hidden" name="target" value="<%= b.phone %>">
+                    <button type="submit" class="btn-secondary" style="padding:0.35rem 0.75rem; font-size:0.75rem; border-radius:6px; background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.3); color:#10b981; font-weight:700; cursor:pointer;">
+                      <i class="fas fa-unlock"></i> Buka Blokir
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <div style="text-align:center; padding:2rem 1rem; color:var(--text-muted);">
+          <div style="font-size:2rem; color:rgba(255,255,255,0.1); margin-bottom:0.5rem;"><i class="fas fa-shield-check"></i></div>
+          <p style="margin:0; font-size:0.88rem;">Belum ada nomor yang terblokir karena spam. Server aman dan bersih! ✨</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- TAB 2: 📱 GATEWAY NOTIFIKASI TRANSAKSI (WHATSAPP) -->
+<!-- ============================================================= -->
+<div id="section-whatsapp" class="tab-content" style="<%= (typeof activeTab !== 'undefined' && activeTab === 'whatsapp') ? 'display:block;' : 'display:none;' %>">
   <div class="admin-edit-grid" style="margin-bottom: 2rem;">
-    <!-- Form Telegram -->
+    <!-- Form WA -->
+    <div class="card" style="border-color: rgba(37, 211, 102, 0.25); overflow:hidden;">
+      <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(37, 211, 102,0.02);">
+        <div class="card-title"><i class="fab fa-whatsapp"></i> Konfigurasi WhatsApp Notifikasi Admin</div>
+      </div>
+      <div style="padding:1.5rem;">
+        <form action="/admin/settings/whatsapp" method="POST">
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:700;">
+              <input type="checkbox" name="whatsappEnabled" value="true" <%= settings.whatsappEnabled === true || settings.whatsappEnabled === 'true' ? 'checked' : '' %>>
+              Aktifkan Pengiriman Notifikasi WhatsApp ke Owner
+            </label>
+            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Setiap ada transaksi baru / pembayaran QRIS lunas, notifikasi akan otomatis dikirimkan ke WhatsApp Anda.</small>
+          </div>
+          
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Provider WhatsApp Gateway</label>
+            <select name="whatsappProvider" id="whatsappProviderSelect" class="form-input" onchange="toggleWaProvider(this.value)" style="background:var(--bg-input); color:white; outline:none; border:1px solid var(--border); border-radius:10px; padding:0.75rem 1rem;">
+              <option value="botwa" <%= settings.whatsappProvider === 'botwa' || !settings.whatsappProvider ? 'selected' : '' %>>WhatsApp Bot Pribadi (VPS Internal - Rekomendasi 100% Cepat)</option>
+              <option value="callmebot" <%= settings.whatsappProvider === 'callmebot' ? 'selected' : '' %>>CallMeBot (WhatsApp Bot Gratisan)</option>
+              <option value="twilio" <%= settings.whatsappProvider === 'twilio' ? 'selected' : '' %>>Twilio Sandbox (Resmi &amp; Global)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Nomor WhatsApp Owner (Format: 628xxxxxx)</label>
+            <input type="text" name="whatsappPhone" class="form-input" placeholder="Contoh: 6285810073341" value="<%= settings.whatsappPhone || '6285810073341' %>" required>
+            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan tanpa menggunakan spasi atau tanda tambah (+).</small>
+          </div>
+
+          <!-- FIELDS FOR BOTWA -->
+          <div id="wa-fields-botwa" class="provider-fields">
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-label">URL WhatsApp Bot Engine (BOT_WA_URL)</label>
+              <input type="text" name="botWaUrl" class="form-input" placeholder="http://127.0.0.1:3001" value="<%= settings.botWaUrl || 'http://127.0.0.1:3001' %>">
+              <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Gunakan <code style="color:#25d366;">http://127.0.0.1:3001</code> untuk komunikasi internal super cepat tanpa jeda.</small>
+            </div>
+          </div>
+          
+          <!-- FIELDS FOR CALLMEBOT -->
+          <div id="wa-fields-callmebot" class="provider-fields" style="display:none;">
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-label">CallMeBot API Key</label>
+              <input type="text" name="whatsappApiKey" class="form-input" placeholder="Masukkan API Key CallMeBot" value="<%= settings.whatsappApiKey || '' %>">
+            </div>
+          </div>
+
+          <!-- FIELDS FOR TWILIO -->
+          <div id="wa-fields-twilio" class="provider-fields" style="display:none;">
+            <div class="form-group" style="margin-bottom:1.25rem;">
+              <label class="form-label">Twilio Account SID</label>
+              <input type="text" name="twilioAccountSid" class="form-input" placeholder="Contoh: ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" value="<%= settings.twilioAccountSid || '' %>" style="font-family:monospace;">
+            </div>
+            <div class="form-group" style="margin-bottom:1.25rem;">
+              <label class="form-label">Twilio Auth Token</label>
+              <input type="password" name="twilioAuthToken" class="form-input" placeholder="Masukkan Auth Token Twilio Anda" value="<%= settings.twilioAuthToken || '' %>" style="font-family:monospace;">
+            </div>
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-label">Twilio Sandbox Number</label>
+              <input type="text" name="twilioSandboxNumber" class="form-input" placeholder="Contoh: +14155238886" value="<%= settings.twilioSandboxNumber || '+14155238886' %>">
+            </div>
+          </div>
+          
+          <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
+            <i class="fas fa-save"></i> Simpan Setelan Gateway WhatsApp
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Test WA Card -->
+    <div class="card" style="max-width: 600px;">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes Notifikasi WhatsApp</div>
+      </div>
+      <div style="padding:1.5rem;">
+        <form action="/admin/settings/test-whatsapp" method="POST">
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Isi Pesan Tes</label>
+            <textarea name="testMessage" class="form-input" rows="3" required style="resize:vertical; font-family:var(--font-ui);">Halo Bos Bentley! ⚡ Notifikasi WhatsApp AlexCloud telah berhasil terhubung dan siap memantau transaksi Anda secara real-time! 🎮</textarea>
+          </div>
+          <button type="submit" class="btn-secondary" style="border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.2rem;">
+            <i class="fas fa-paper-plane"></i> Kirim Pesan Tes Sekarang
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- TAB 3: ✈️ NOTIFIKASI TELEGRAM -->
+<!-- ============================================================= -->
+<div id="section-telegram" class="tab-content" style="<%= (typeof activeTab !== 'undefined' && activeTab === 'telegram') ? 'display:block;' : 'display:none;' %>">
+  <div class="admin-edit-grid" style="margin-bottom: 2rem;">
     <div class="card" style="border-color: rgba(0, 136, 204, 0.25); overflow:hidden;">
       <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(0,136,204,0.02);">
         <div class="card-title"><i class="fab fa-telegram"></i> Setelan Telegram Bot</div>
@@ -58,204 +352,25 @@
     <!-- Panduan Telegram -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Membuat Bot Telegram Sendiri (Hanya 1 Menit & 100% Stabil)</div>
+        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Membuat Bot Telegram</div>
       </div>
       <div style="padding:1.5rem; font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
-        <p style="margin-bottom:0.75rem;">Notifikasi Telegram jauh lebih **stabil, instan, dan gratis selamanya** dibanding WhatsApp gratisan yang sering terhambat server. Cara buatnya sangat mudah:</p>
-        
         <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
-          <li>Buka Telegram di HP/PC Anda, cari bot resmi **`@BotFather`** lalu ketik **`/newbot`**.</li>
-          <li>Ikuti panduan: masukkan **Nama Bot** bebas, lalu masukkan **Username Bot** (wajib diakhiri kata `bot`, contoh: `alexcloud_notif_bot`).</li>
-          <li>Anda akan langsung dikirimi pesan berisi **HTTP API Token** (salin kode ini dan masukkan ke input **Telegram Bot Token** di kiri).</li>
-          <li>Cari bot bernama **`@userinfobot`** di Telegram Anda, lalu klik Start. Bot tersebut akan memberikan nomor ID Anda (salin nomor ini dan masukkan ke input **Telegram Chat ID** di kiri).</li>
-          <li>Buka bot yang baru saja Anda buat di langkah 2, lalu klik **Start** (agar bot diizinkan mengirim pesan ke Anda).</li>
+          <li>Buka Telegram, cari bot <strong>@BotFather</strong> lalu ketik <code>/newbot</code>.</li>
+          <li>Salin <strong>HTTP API Token</strong> dan masukkan ke form sebelah kiri.</li>
+          <li>Cari bot <strong>@userinfobot</strong> di Telegram, klik Start untuk melihat Chat ID Anda.</li>
+          <li>Buka bot Anda dan klik <strong>Start</strong> agar diizinkan mengirim pesan.</li>
         </ol>
       </div>
     </div>
   </div>
-  
-  <!-- Uji Coba Telegram -->
-  <% if (settings.telegramBotToken && settings.telegramChatId) { %>
-  <div class="card" style="max-width: 600px; border-color: rgba(0, 136, 204, 0.25);">
-    <div class="card-header">
-      <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes Telegram</div>
-    </div>
-    <div style="padding:1.5rem;">
-      <form action="/admin/settings/test-telegram" method="POST">
-        <div class="form-group" style="margin-bottom:1.25rem;">
-          <label class="form-label">Isi Pesan Tes</label>
-          <textarea name="testMessage" class="form-input" rows="3" required style="resize:vertical; font-family:var(--font-ui);">⚡ *AlexCloud Telegram Notif Terhubung!* ⚡
-
-Notifikasi otomatis pembayaran siap memantau transaksi Anda secara real-time! 🎮</textarea>
-        </div>
-        <button type="submit" class="btn-secondary" style="border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.2rem;">
-          <i class="fas fa-paper-plane"></i> Kirim Pesan Tes Telegram
-        </button>
-      </form>
-    </div>
-  </div>
-  <% } %>
-</div>
-
-<!-- WHATSAPP SECTION (HIDDEN BY DEFAULT) -->
-<div id="section-whatsapp" class="tab-content" style="display:none;">
-  <div class="admin-edit-grid" style="margin-bottom: 2rem;">
-    <!-- Form WA -->
-    <div class="card" style="border-color: rgba(244,63,94, 0.25); overflow:hidden;">
-      <div class="card-header" style="border-bottom:1px solid var(--border); background:rgba(244,63,94,0.02);">
-        <div class="card-title"><i class="fab fa-whatsapp"></i> Konfigurasi WhatsApp API</div>
-      </div>
-      <div style="padding:1.5rem;">
-        <form action="/admin/settings/whatsapp" method="POST">
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:700;">
-              <input type="checkbox" name="whatsappEnabled" value="true" <%= settings.whatsappEnabled === true || settings.whatsappEnabled === 'true' ? 'checked' : '' %>>
-              Aktifkan Notifikasi WhatsApp
-            </label>
-            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Centang ini untuk mengaktifkan notifikasi via WhatsApp.</small>
-          </div>
-          
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label class="form-label">Provider WhatsApp Gateway</label>
-            <select name="whatsappProvider" id="whatsappProviderSelect" class="form-input" onchange="toggleWaProvider(this.value)" style="background:var(--bg-input); color:white; outline:none; border:1px solid var(--border); border-radius:10px; padding:0.75rem 1rem;">
-              <option value="botwa" <%= settings.whatsappProvider === 'botwa' ? 'selected' : '' %>>WhatsApp Bot Pribadi (Railway - Rekomendasi)</option>
-              <option value="callmebot" <%= settings.whatsappProvider === 'callmebot' || !settings.whatsappProvider ? 'selected' : '' %>>CallMeBot (WhatsApp Bot Gratisan)</option>
-              <option value="twilio" <%= settings.whatsappProvider === 'twilio' ? 'selected' : '' %>>Twilio Sandbox (Gratis, Resmi, 100% Stabil & Cepat)</option>
-            </select>
-          </div>
-
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label class="form-label">Nomor WhatsApp Anda (Gunakan kode negara, contoh: 628xxxxxx)</label>
-            <input type="text" name="whatsappPhone" class="form-input" placeholder="Contoh: 6282328437656" value="<%= settings.whatsappPhone || '' %>" required>
-            <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan tanpa menggunakan tanda tambah (+).</small>
-          </div>
-
-          <!-- FIELDS FOR BOTWA -->
-          <div id="wa-fields-botwa" class="provider-fields" style="display:none;">
-            <div class="form-group" style="margin-bottom:1.5rem;">
-              <label class="form-label">URL WhatsApp Bot Railway (BOT_WA_URL)</label>
-              <input type="text" name="botWaUrl" class="form-input" placeholder="Contoh: https://botwa-production.up.railway.app" value="<%= settings.botWaUrl || '' %>">
-              <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Masukkan URL Railway publik tempat WhatsApp bot Anda di-deploy.</small>
-            </div>
-          </div>
-          
-          <!-- FIELDS FOR CALLMEBOT -->
-          <div id="wa-fields-callmebot" class="provider-fields">
-            <div class="form-group" style="margin-bottom:1.5rem;">
-              <label class="form-label">CallMeBot API Key</label>
-              <input type="text" name="whatsappApiKey" class="form-input" placeholder="Masukkan API Key CallMeBot" value="<%= settings.whatsappApiKey || '' %>">
-            </div>
-          </div>
-
-          <!-- FIELDS FOR TWILIO -->
-          <div id="wa-fields-twilio" class="provider-fields" style="display:none;">
-            <div class="form-group" style="margin-bottom:1.25rem;">
-              <label class="form-label">Twilio Account SID</label>
-              <input type="text" name="twilioAccountSid" class="form-input" placeholder="Contoh: ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" value="<%= settings.twilioAccountSid || '' %>" style="font-family:monospace;">
-            </div>
-            <div class="form-group" style="margin-bottom:1.25rem;">
-              <label class="form-label">Twilio Auth Token</label>
-              <input type="password" name="twilioAuthToken" class="form-input" placeholder="Masukkan Auth Token Twilio Anda" value="<%= settings.twilioAuthToken || '' %>" style="font-family:monospace;">
-            </div>
-            <div class="form-group" style="margin-bottom:1.5rem;">
-              <label class="form-label">Twilio Sandbox Number (Nomor Pengirim)</label>
-              <input type="text" name="twilioSandboxNumber" class="form-input" placeholder="Contoh: +14155238886" value="<%= settings.twilioSandboxNumber || '+14155238886' %>">
-              <small style="color:var(--text-muted); display:block; margin-top:0.25rem; font-size:0.75rem;">Gunakan format internasional lengkap (+1...).</small>
-            </div>
-          </div>
-          
-          <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
-            <i class="fas fa-save"></i> Simpan Setelan WhatsApp
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Panduan WA Botwa -->
-    <div id="wa-guide-botwa" class="provider-guide card" style="display:none;">
-      <div class="card-header">
-        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-robot"></i> Cara Setup WhatsApp Bot Pribadi (Railway)</div>
-      </div>
-      <div style="padding:1.5rem; font-size:0.85rem; line-height:1.6; color:var(--text-secondary);">
-        <p style="margin-bottom:1rem;">Dengan menggunakan WhatsApp Bot pribadi di Railway, Anda memiliki **kontrol penuh tanpa limit pihak ketiga dan bisa menggunakan fitur AI Agent.**</p>
-        
-        <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
-          <li>Deploy project **botwa** ke Railway dari repository GitHub Anda.</li>
-          <li>Salin **Public Domain URL** yang diberikan Railway (contoh: <code style="font-family:monospace; color:white;">https://botwa-production.up.railway.app</code>).</li>
-          <li>Tempel URL tersebut ke kolom **URL WhatsApp Bot Railway (BOT_WA_URL)** di atas.</li>
-          <li>Simpan pengaturan. Sekarang notifikasi pendaftaran dan pembayaran akan otomatis terkirim lewat bot Anda!</li>
-        </ol>
-      </div>
-    </div>
-
-    <!-- Panduan WA CallMeBot -->
-    <div id="wa-guide-callmebot" class="provider-guide card">
-      <div class="card-header">
-        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-info-circle"></i> Cara Mendapatkan API Key CallMeBot</div>
-      </div>
-      <div style="padding:1.5rem; font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
-        <p style="margin-bottom:1rem;">Untuk mengirim pesan WhatsApp pribadi secara gratis, kita menggunakan API dari **CallMeBot**:</p>
-        
-        <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.6rem;">
-          <li>Buka website resmi CallMeBot berikut:  
-            <a href="https://www.callmebot.com/blog/free-api-whatsapp-messages/" target="_blank" style="color:var(--accent-blue); font-weight:700; text-decoration:underline;">
-              Cek Nomor Bot Aktif di CallMeBot.com <i class="fas fa-external-link-alt"></i>
-            </a>
-          </li>
-          <li>Simpan nomor bot WhatsApp yang tertera di sana ke kontak HP Anda (misal beri nama "CallMeBot").</li>
-          <li>Kirim pesan berikut via WhatsApp ke bot tersebut:  
-            <code style="display:block; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:6px; margin-top:0.25rem; color:#fff; font-family:monospace; border:1px solid var(--border);">I allow callmebot to send me messages</code>
-          </li>
-          <li>Tunggu beberapa saat, bot tersebut akan mengirimkan **API Key** khusus untuk nomor WhatsApp Anda.</li>
-        </ol>
-      </div>
-    </div>
-
-    <!-- Panduan WA Twilio -->
-    <div id="wa-guide-twilio" class="provider-guide card" style="display:none;">
-      <div class="card-header">
-        <div class="card-title" style="color:var(--accent-blue);"><i class="fas fa-shield-alt"></i> Cara Setup WhatsApp Twilio Sandbox (100% Instan & Stabil)</div>
-      </div>
-      <div style="padding:1.5rem; font-size:0.85rem; line-height:1.6; color:var(--text-secondary);">
-        <p style="margin-bottom:1rem;">Twilio adalah provider global yang **100% stabil, resmi, gratis untuk testing/personal, dan tidak pernah pending.**</p>
-        
-        <ol style="padding-left:1.2rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
-          <li>Daftar akun gratis di **[Twilio.com](https://www.twilio.com/try-twilio)**.</li>
-          <li>Buka **Twilio Console**, lalu cari menu **Messaging -> Try it out -> Send a WhatsApp Message**.</li>
-          <li>Ikuti instruksi: Simpan nomor WhatsApp Sandbox Twilio yang tertera ke HP Anda, lalu kirimkan kode verifikasi di sana (contoh: `join [keyword]`).</li>
-          <li>Salin **Account SID** dan **Auth Token** dari dashboard Twilio, lalu tempelkan di form sebelah kiri.</li>
-          <li>Simpan, lalu coba kirim pesan tes di bawah!</li>
-        </ol>
-      </div>
-    </div>
-  </div>
-
-  <!-- Uji Coba WA -->
-  <% if (settings.whatsappPhone && (settings.whatsappApiKey || settings.twilioAuthToken)) { %>
-  <div class="card" style="max-width: 600px;">
-    <div class="card-header">
-      <div class="card-title"><i class="fas fa-paper-plane"></i> Kirim Pesan Tes WhatsApp</div>
-    </div>
-    <div style="padding:1.5rem;">
-      <form action="/admin/settings/test-whatsapp" method="POST">
-        <div class="form-group" style="margin-bottom:1.25rem;">
-          <label class="form-label">Isi Pesan Tes</label>
-          <textarea name="testMessage" class="form-input" rows="3" required style="resize:vertical; font-family:var(--font-ui);">Halo Admin! ⚡ Notifikasi WhatsApp dari AlexCloud telah berhasil terhubung dan siap memantau transaksi Anda! 🎮</textarea>
-        </div>
-        <button type="submit" class="btn-secondary" style="border-radius:10px; display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.2rem;">
-          <i class="fas fa-paper-plane"></i> Kirim Pesan Tes WhatsApp
-        </button>
-      </form>
-    </div>
-  </div>
-  <% } %>
 </div>
 
 <style>
 .tab-btn.active {
-  background: rgba(244,63,94, 0.1) !important;
-  border-color: var(--accent-blue) !important;
-  color: white !important;
+  background: rgba(37, 211, 102, 0.12) !important;
+  border-color: #25d366 !important;
+  color: #25d366 !important;
 }
 </style>
 
@@ -270,23 +385,65 @@ function switchTab(tab) {
   document.getElementById('section-' + tab).style.display = 'block';
   const activeBtn = document.getElementById('tab-btn-' + tab);
   activeBtn.classList.add('active');
-  activeBtn.style.color = 'white';
+  activeBtn.style.color = '#25d366';
 }
 
 function toggleWaProvider(provider) {
-  // Hide all provider fields and guides
   document.querySelectorAll('.provider-fields').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.provider-guide').forEach(el => el.style.display = 'none');
-  
-  // Show target
-  document.getElementById('wa-fields-' + provider).style.display = 'block';
-  document.getElementById('wa-guide-' + provider).style.display = 'block';
+  if (document.getElementById('wa-fields-' + provider)) {
+    document.getElementById('wa-fields-' + provider).style.display = 'block';
+  }
 }
 
-// Run on load
+// Live polling for QR code & connection status every 3 seconds
+let pollInterval = null;
+function startBotPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    try {
+      const res = await fetch('/admin/settings/whatsapp/bot-poll');
+      const data = await res.json();
+      if (!data) return;
+
+      const badge = document.getElementById('liveStatusBadge');
+      const boxConnected = document.getElementById('boxConnected');
+      const boxQrReady = document.getElementById('boxQrReady');
+      const boxInit = document.getElementById('boxInitializing');
+      const userText = document.getElementById('connectedUserText');
+      const qrImg = document.getElementById('liveQrImg');
+
+      if (data.status === 'connected') {
+        badge.innerHTML = '🟢 Terhubung';
+        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+        badge.style.color = '#10b981';
+        badge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        boxConnected.style.display = 'block';
+        boxQrReady.style.display = 'none';
+        boxInit.style.display = 'none';
+        if (userText && data.user) userText.innerText = data.user;
+      } else if (data.status === 'qr_ready') {
+        badge.innerHTML = '🟡 Menunggu Scan';
+        badge.style.background = 'rgba(245, 158, 11, 0.2)';
+        badge.style.color = '#f59e0b';
+        badge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        boxConnected.style.display = 'none';
+        boxQrReady.style.display = 'block';
+        boxInit.style.display = 'none';
+        if (qrImg && data.qrDataUrl) qrImg.src = data.qrDataUrl;
+      } else {
+        badge.innerHTML = '🔵 Menyiapkan...';
+        boxConnected.style.display = 'none';
+        boxQrReady.style.display = 'none';
+        boxInit.style.display = 'block';
+      }
+    } catch(e) {}
+  }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-  const provider = document.getElementById('whatsappProviderSelect').value;
-  toggleWaProvider(provider);
+  const providerSelect = document.getElementById('whatsappProviderSelect');
+  if (providerSelect) toggleWaProvider(providerSelect.value);
+  startBotPolling();
 });
 </script>
 

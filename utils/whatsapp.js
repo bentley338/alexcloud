@@ -101,7 +101,7 @@ async function sendWhatsAppNotification(messageText, isTest = false) {
     }
   }
 
-  const isEnabled = settings.whatsappEnabled === true || settings.whatsappEnabled === 'true';
+  const isEnabled = settings.whatsappEnabled !== false && settings.whatsappEnabled !== 'false';
   
   if (!isEnabled && !isTest) {
     console.log('[WA NOTIF] WhatsApp notifications are disabled.');

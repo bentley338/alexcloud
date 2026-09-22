@@ -67,34 +67,561 @@
     };
   })();
   </script>
+
+  <style>
+    :root {
+      --admin-sidebar-w: 260px;
+      --admin-bg: #07080d;
+      --admin-card-bg: rgba(15, 17, 28, 0.95);
+      --admin-border: rgba(255, 255, 255, 0.08);
+      --admin-border-hover: rgba(255, 255, 255, 0.16);
+      --admin-gold: #fbbf24;
+      --admin-gold-glow: rgba(251, 191, 36, 0.3);
+    }
+
+    body {
+      background: var(--admin-bg) !important;
+      color: #e2e8f0;
+      font-family: var(--font-body, 'Rajdhani', sans-serif);
+      margin: 0; padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* Fixed Top Navbar */
+    .admin-navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(9, 10, 16, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--admin-border);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+    }
+
+    .admin-nav-inner {
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .admin-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .admin-menu-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--admin-border);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .admin-menu-toggle:hover, .admin-menu-toggle.open {
+      background: rgba(251, 191, 36, 0.15);
+      border-color: var(--admin-gold);
+      color: var(--admin-gold);
+    }
+    .admin-menu-toggle span {
+      display: block;
+      width: 16px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+    .admin-menu-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .admin-menu-toggle.open span:nth-child(2) { opacity: 0; }
+    .admin-menu-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: var(--font-display, 'Orbitron', sans-serif);
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+    .admin-logo .badge-admin-tag {
+      font-size: 0.62rem;
+      font-weight: 900;
+      padding: 0.15rem 0.45rem;
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #000;
+      border-radius: 5px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 8px rgba(251, 191, 36, 0.35);
+    }
+
+    .admin-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .admin-site-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.38rem 0.65rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--admin-border);
+      color: #94a3b8;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .admin-site-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Layout */
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 60px;
+      position: relative;
+    }
+
+    /* Left Sidebar */
+    .admin-sidebar {
+      width: var(--admin-sidebar-w);
+      background: #090a10;
+      border-right: 1px solid var(--admin-border);
+      position: fixed;
+      top: 60px; bottom: 0; left: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 1.25rem 0.75rem 6rem;
+      z-index: 990;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+    .admin-sidebar::-webkit-scrollbar { width: 4px; }
+    .admin-sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+
+    .sidebar-mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.25rem 0.35rem 1rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .sidebar-user-info { display: flex; align-items: center; gap: 0.6rem; }
+    .sidebar-user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      color: #000;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.95rem;
+      border: 2px solid #fbbf24;
+      flex-shrink: 0;
+    }
+    .sidebar-user-name { font-weight: 800; font-size: 0.9rem; color: #fff; line-height: 1.2; }
+    .sidebar-user-role { font-size: 0.7rem; color: #fbbf24; font-weight: 700; }
+    .sidebar-close-btn {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--admin-border);
+      color: #cbd5e1;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+
+    .sidebar-section { margin-bottom: 1.15rem; }
+    .sidebar-section-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+      color: #64748b;
+      padding: 0 0.65rem 0.35rem;
+      font-family: var(--font-ui, sans-serif);
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 9px;
+      margin-bottom: 0.2rem;
+      transition: all 0.2s ease;
+    }
+    .sidebar-link i, .sidebar-link svg {
+      width: 16px;
+      text-align: center;
+      font-size: 0.92rem;
+      color: #64748b;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .sidebar-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .sidebar-link:hover i, .sidebar-link:hover svg { color: var(--admin-gold); }
+    .sidebar-link.active {
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(90deg, rgba(251, 191, 36, 0.18) 0%, rgba(251, 191, 36, 0.03) 100%);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.1);
+    }
+    .sidebar-link.active i, .sidebar-link.active svg { color: var(--admin-gold); }
+
+    /* Admin Main Content */
+    .admin-content {
+      flex: 1;
+      margin-left: var(--admin-sidebar-w);
+      padding: 1.25rem 1.5rem 6.5rem;
+      width: calc(100% - var(--admin-sidebar-w));
+      max-width: 1320px;
+      box-sizing: border-box;
+    }
+
+    /* Horizontal Mobile Quick Pill Navigation Strip */
+    .admin-mobile-pills-bar {
+      display: none;
+      width: 100%;
+      background: #0d0f1a;
+      border: 1px solid var(--admin-border);
+      padding: 0.5rem 0.65rem;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin-bottom: 1.15rem;
+      border-radius: 12px;
+      box-sizing: border-box;
+    }
+    .admin-mobile-pills-bar::-webkit-scrollbar { display: none; }
+    .admin-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.42rem 0.75rem;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--admin-border);
+      color: #cbd5e1;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      margin-right: 0.35rem;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .admin-pill i, .admin-pill svg { font-size: 0.8rem; color: #94a3b8; }
+    .admin-pill.active {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #000;
+      border-color: #fbbf24;
+      box-shadow: 0 2px 8px rgba(251, 191, 36, 0.35);
+    }
+    .admin-pill.active i, .admin-pill.active svg { color: #000; }
+
+    /* Floating Mobile Admin Menu Button */
+    .admin-floating-menu-btn {
+      display: none;
+      position: fixed;
+      bottom: 22px;
+      right: 18px;
+      height: 44px;
+      padding: 0 1.15rem;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #000;
+      font-weight: 900;
+      font-size: 0.82rem;
+      box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      z-index: 995;
+      cursor: pointer;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-ui, sans-serif);
+      transition: transform 0.2s;
+    }
+    .admin-floating-menu-btn:active { transform: scale(0.95); }
+
+    /* Overlay */
+    .admin-sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 985;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .admin-sidebar-overlay.active { display: block; opacity: 1; }
+
+    /* Admin Shared Styles */
+    .admin-page-title {
+      font-family: var(--font-display, 'Orbitron', sans-serif);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .admin-stat-card {
+      background: var(--admin-card-bg);
+      border: 1px solid var(--admin-border);
+      border-radius: 14px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    .admin-stat-value {
+      font-family: var(--font-display, 'Orbitron', sans-serif);
+      font-size: 1.5rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+    .admin-stat-label {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .card {
+      background: var(--admin-card-bg);
+      border: 1px solid var(--admin-border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+    .card-header {
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid var(--admin-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .card-title {
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.84rem;
+    }
+    .table-wrap th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.75rem 0.9rem;
+      font-weight: 700;
+      color: #94a3b8;
+      border-bottom: 1px solid var(--admin-border);
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.5px;
+    }
+    .table-wrap td {
+      padding: 0.75rem 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+    .table-wrap tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .btn-action {
+      padding: 0.35rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: 0.15s;
+      white-space: nowrap;
+    }
+    .btn-action.btn-confirm { background: #00ff88; color: #000; font-weight: 800; }
+    .btn-action.btn-reject { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+    .btn-action.btn-detail { background: rgba(255, 255, 255, 0.08); color: #fff; border-color: var(--admin-border); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .status-pending { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+    .status-confirmed, .status-active { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); }
+    .status-rejected, .status-expired { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Custom Modal for Quick Actions */
+    .admin-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .admin-modal-box {
+      width: 100%;
+      max-width: 440px;
+      background: #111320;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+    .admin-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .admin-modal-title { font-size: 1.05rem; font-weight: 800; color: #fff; }
+    .admin-modal-close {
+      background: none; border: none; color: #94a3b8; font-size: 1.25rem; cursor: pointer;
+    }
+    .admin-modal-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--admin-border);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+    }
+    .admin-modal-input:focus { outline: none; border-color: var(--admin-gold); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .admin-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        max-width: 85vw;
+        background: #090a10;
+        box-shadow: 10px 0 35px rgba(0, 0, 0, 0.85);
+        border-right: 1px solid rgba(255, 255, 255, 0.15);
+        padding-top: 1rem;
+        top: 0;
+      }
+      .admin-sidebar.open { transform: translateX(0); }
+      .sidebar-mobile-header { display: flex; }
+      .admin-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 0.85rem 0.75rem 6.5rem;
+      }
+      .admin-mobile-pills-bar { display: flex; }
+      .admin-floating-menu-btn { display: inline-flex; }
+      .admin-page-title { font-size: 1.15rem; margin-bottom: 0.85rem; }
+      .admin-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.55rem; }
+      .admin-stat-card { padding: 0.85rem 0.75rem; border-radius: 12px; }
+      .admin-stat-value { font-size: 1.25rem; }
+      .admin-stat-label { font-size: 0.72rem; }
+    }
+  </style>
 </head>
 <body class="admin-body admin-page-<%= typeof currentPage !== 'undefined' && currentPage ? currentPage : 'default' %>">
-  <nav class="navbar" id="navbar">
-    <div class="nav-container">
-      <!-- Toggle button for mobile admin sidebar -->
-      <button class="nav-toggle admin-sidebar-toggle" type="button" aria-label="Buka menu admin" id="adminSidebarToggleBtn" style="margin-left: 0; margin-right: 1rem;">
-        <span></span><span></span><span></span>
-      </button>
+  <!-- Top Fixed Admin Navbar -->
+  <nav class="admin-navbar" id="adminNavbar">
+    <div class="admin-nav-inner">
+      <div class="admin-nav-left">
+        <button class="admin-menu-toggle" type="button" aria-label="Buka Menu Admin" id="adminSidebarToggleBtn">
+          <span></span><span></span><span></span>
+        </button>
+        <a href="/admin" class="admin-logo">
+          <img src="/images/logo-icon.png" alt="AlexCloud Logo" width="24" height="24" style="object-fit: contain; flex-shrink:0;">
+          <span>ALEX<span style="color:#00e5ff">CLOUD</span></span>
+          <span class="badge-admin-tag">ADMIN</span>
+        </a>
+      </div>
 
-      <a href="/" class="nav-logo">
-        <img src="/images/logo-icon.png" class="logo-icon-img" alt="AlexCloud Logo" width="28" height="28" style="object-fit: contain; flex-shrink:0;">
-        <span class="logo-text">ALEX<span class="logo-accent">CLOUD</span></span>
-      </a>
-      <div style="margin-left:auto; display:flex; align-items:center; gap:1rem;">
-        <span class="admin-badge" style="font-family:var(--font-ui); font-size:0.85rem; color:var(--accent-orange); background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.3); padding:0.3rem 0.8rem; border-radius:50px;">
-          ⚙ Admin Panel
-        </span>
-        <div class="nav-user-menu">
-          <button class="nav-user-btn" onclick="toggleUserMenu()">
-            <div class="nav-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
-            <span class="nav-user-name"><%= user.name.split(' ')[0] %></span>
-            <i class="fas fa-chevron-down nav-user-arrow"></i>
+      <div class="admin-nav-right">
+        <a href="/" target="_blank" class="admin-site-link" title="Lihat Website Utama">
+          <i class="fas fa-globe"></i> <span>Web Utama</span>
+        </a>
+        <div class="nav-user-menu" style="position:relative;">
+          <button class="admin-site-link" onclick="toggleAdminUserMenu()" style="border-radius:50px; padding:0.32rem 0.6rem; color:#fff; background:rgba(251,191,36,0.1); border-color:rgba(251,191,36,0.3);">
+            <i class="fas fa-crown" style="color:#fbbf24;"></i>
+            <span><%= user.name.split(' ')[0] %></span>
+            <i class="fas fa-chevron-down" style="font-size:0.6rem; margin-left:0.15rem;"></i>
           </button>
-          <div class="user-dropdown" id="userDropdown">
-            <a href="/dashboard"><i class="fas fa-chart-line"></i> Dashboard User</a>
-            <a href="/profile"><i class="fas fa-user"></i> Profil</a>
-            <hr>
-            <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          <div class="user-dropdown" id="adminUserDropdown" style="display:none; position:absolute; top:calc(100% + 8px); right:0; width:180px; background:#11131f; border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:0.5rem; box-shadow:0 10px 30px rgba(0,0,0,0.8); z-index:1001;">
+            <a href="/dashboard" style="display:flex; align-items:center; gap:0.5rem; padding:0.45rem 0.65rem; color:#cbd5e1; text-decoration:none; font-size:0.82rem; border-radius:6px;"><i class="fas fa-chart-line"></i> Dashboard User</a>
+            <a href="/profile" style="display:flex; align-items:center; gap:0.5rem; padding:0.45rem 0.65rem; color:#cbd5e1; text-decoration:none; font-size:0.82rem; border-radius:6px;"><i class="fas fa-user"></i> Profil</a>
+            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:0.3rem 0;">
+            <a href="/logout" style="display:flex; align-items:center; gap:0.5rem; padding:0.45rem 0.65rem; color:#f87171; text-decoration:none; font-size:0.82rem; border-radius:6px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
           </div>
         </div>
       </div>
@@ -102,110 +629,184 @@
   </nav>
 
   <div class="admin-layout">
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
+    <!-- Left Sidebar / Mobile Slide Drawer -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <!-- Mobile Drawer User Card -->
+      <div class="sidebar-mobile-header">
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+          <div>
+            <div class="sidebar-user-name"><%= user.name %></div>
+            <div class="sidebar-user-role"><i class="fas fa-crown"></i> Super Administrator</div>
+          </div>
+        </div>
+        <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Tutup Menu">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
       <div class="sidebar-section">
         <div class="sidebar-section-label">Overview</div>
         <a href="/admin" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
-          <i class="fas fa-tachometer-alt"></i> Dashboard
+          <i class="fas fa-tachometer-alt"></i> <span>Dashboard Utama</span>
         </a>
       </div>
+
       <div class="sidebar-section">
-        <div class="sidebar-section-label">Management</div>
+        <div class="sidebar-section-label">Transaksi & Pengguna</div>
         <a href="/admin/orders" class="sidebar-link <%= currentPage === 'orders' ? 'active' : '' %>">
-          <i class="fas fa-shopping-cart"></i> Kelola Order
+          <i class="fas fa-shopping-cart"></i> <span>Kelola Order</span>
         </a>
         <a href="/admin/wallet" class="sidebar-link <%= currentPage === 'wallet' ? 'active' : '' %>">
-          <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 0.2rem;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg> Kelola Saldo
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5.3 7.7 2 2 0 0 1-2.7-1.4l-1-4.2a2 2 0 0 0-1.7-1.5L5 16a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14"></path><path d="M21 11v4h-3a2 2 0 0 1 0-4h3z"></path></svg>
+          <span>Kelola Saldo</span>
         </a>
         <a href="/admin/subscriptions" class="sidebar-link <%= currentPage === 'subscriptions' ? 'active' : '' %>">
-          <i class="fas fa-id-card"></i> Subscriptions
+          <i class="fas fa-id-card"></i> <span>Subscriptions</span>
         </a>
         <a href="/admin/users" class="sidebar-link <%= currentPage === 'users' ? 'active' : '' %>">
-          <i class="fas fa-users"></i> Kelola User
+          <i class="fas fa-users"></i> <span>Kelola User</span>
         </a>
         <a href="/admin/royal" class="sidebar-link <%= currentPage === 'royal' ? 'active' : '' %>">
-          <i class="fas fa-crown" style="color:#fbbf24;"></i> Royal Club
-        </a>
-        <a href="/admin/games" class="sidebar-link <%= currentPage === 'games' ? 'active' : '' %>">
-          <i class="fas fa-gamepad"></i> Kelola Game
+          <i class="fas fa-crown" style="color:#fbbf24;"></i> <span>Royal Club VIP</span>
         </a>
       </div>
+
       <div class="sidebar-section">
-        <div class="sidebar-section-label">Marketing</div>
-        <a href="/admin/marketing" class="sidebar-link <%= currentPage === 'marketing' ? 'active' : '' %>">
-          <i class="fas fa-bullhorn"></i> Marketing & Campaign
-        </a>
-        <a href="/admin/promo" class="sidebar-link <%= currentPage === 'promo' ? 'active' : '' %>">
-          <i class="fas fa-tag"></i> Kode Promo
-        </a>
-        <a href="/admin/referrals" class="sidebar-link <%= currentPage === 'referrals' ? 'active' : '' %>">
-          <i class="fas fa-user-plus"></i> Referral
+        <div class="sidebar-section-label">Katalog & Game</div>
+        <a href="/admin/games" class="sidebar-link <%= currentPage === 'games' ? 'active' : '' %>">
+          <i class="fas fa-gamepad"></i> <span>Kelola Game (100+)</span>
         </a>
         <a href="/admin/plans" class="sidebar-link <%= currentPage === 'plans' ? 'active' : '' %>">
-          <i class="fas fa-dollar-sign"></i> Edit Harga Paket
+          <i class="fas fa-dollar-sign"></i> <span>Edit Harga Paket</span>
+        </a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Marketing & Promo</div>
+        <a href="/admin/marketing" class="sidebar-link <%= currentPage === 'marketing' ? 'active' : '' %>">
+          <i class="fas fa-bullhorn"></i> <span>Marketing AI & Broadcast</span>
+        </a>
+        <a href="/admin/promo" class="sidebar-link <%= currentPage === 'promo' ? 'active' : '' %>">
+          <i class="fas fa-tag"></i> <span>Kode Promo</span>
+        </a>
+        <a href="/admin/referrals" class="sidebar-link <%= currentPage === 'referrals' ? 'active' : '' %>">
+          <i class="fas fa-user-plus"></i> <span>Sistem Referral</span>
         </a>
         <a href="/admin/testimonials" class="sidebar-link <%= currentPage === 'testimonials' ? 'active' : '' %>">
-          <i class="fas fa-star"></i> Kelola Testimoni
+          <i class="fas fa-star"></i> <span>Kelola Testimoni</span>
         </a>
         <a href="/admin/reviews" class="sidebar-link <%= currentPage === 'reviews' ? 'active' : '' %>">
-          <i class="fas fa-pen-to-square"></i> Izinkan Ulasan
+          <i class="fas fa-pen-to-square"></i> <span>Izinkan Ulasan</span>
         </a>
       </div>
+
       <div class="sidebar-section">
-        <div class="sidebar-section-label">Community</div>
+        <div class="sidebar-section-label">Komunitas & Sistem</div>
         <a href="/admin/community" class="sidebar-link <%= currentPage === 'community' ? 'active' : '' %>">
-          <i class="fas fa-comments"></i> Moderasi Chat
+          <i class="fas fa-comments"></i> <span>Moderasi Chat</span>
         </a>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">Site</div>
         <a href="/admin/announcement" class="sidebar-link <%= currentPage === 'announcement' ? 'active' : '' %>">
-          <i class="fas fa-bullhorn"></i> Pengumuman
+          <i class="fas fa-bullhorn"></i> <span>Pengumuman Web</span>
         </a>
         <a href="/admin/settings/whatsapp" class="sidebar-link <%= currentPage === 'settings-whatsapp' ? 'active' : '' %>">
-          <i class="fab fa-whatsapp"></i> Setelan WhatsApp
+          <i class="fab fa-whatsapp"></i> <span>Setelan WhatsApp</span>
+        </a>
+        <a href="/admin/backup-db" class="sidebar-link" style="color:var(--admin-gold);">
+          <i class="fas fa-database" style="color:var(--admin-gold);"></i> <span>Backup Database JSON</span>
         </a>
         <a href="/" class="sidebar-link" target="_blank">
-          <i class="fas fa-external-link-alt"></i> Lihat Website
+          <i class="fas fa-external-link-alt"></i> <span>Lihat Website</span>
         </a>
         <a href="/logout" class="sidebar-link" style="color:#ff6666;">
-          <i class="fas fa-sign-out-alt"></i> Logout
+          <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
         </a>
       </div>
     </aside>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        var toggleBtn = document.getElementById('adminSidebarToggleBtn');
-        var sidebar = document.querySelector('.admin-sidebar');
-        
-        // Create overlay element
-        var overlay = document.createElement('div');
-        overlay.className = 'admin-sidebar-overlay';
-        document.body.appendChild(overlay);
-        
-        if (toggleBtn && sidebar) {
-          toggleBtn.addEventListener('click', function() {
-            var isOpen = sidebar.classList.toggle('open');
-            toggleBtn.classList.toggle('open', isOpen);
-            overlay.classList.toggle('active', isOpen);
-            if (isOpen) {
-              document.body.style.overflow = 'hidden';
-            } else {
-              document.body.style.overflow = '';
-            }
-          });
-          
-          overlay.addEventListener('click', function() {
-            sidebar.classList.remove('open');
-            toggleBtn.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-          });
-        }
-      });
-    </script>
+    <!-- Overlay backdrop for mobile drawer -->
+    <div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>
 
-    <!-- Main Content -->
+    <!-- Floating Action Button for Mobile -->
+    <button class="admin-floating-menu-btn" id="adminFloatingMenuBtn" type="button" aria-label="Buka Menu Admin">
+      <i class="fas fa-bolt"></i> Menu Admin
+    </button>
+
+    <!-- Main Content Area -->
     <main class="admin-content">
+      <!-- Horizontal Scrollable Quick Pills for Mobile (HP) -->
+      <div class="admin-mobile-pills-bar">
+        <a href="/admin" class="admin-pill <%= currentPage === 'dashboard' ? 'active' : '' %>"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/orders" class="admin-pill <%= currentPage === 'orders' ? 'active' : '' %>"><i class="fas fa-shopping-cart"></i> Order</a>
+        <a href="/admin/wallet" class="admin-pill <%= currentPage === 'wallet' ? 'active' : '' %>"><i class="fas fa-wallet"></i> Saldo</a>
+        <a href="/admin/users" class="admin-pill <%= currentPage === 'users' ? 'active' : '' %>"><i class="fas fa-users"></i> Users</a>
+        <a href="/admin/subscriptions" class="admin-pill <%= currentPage === 'subscriptions' ? 'active' : '' %>"><i class="fas fa-id-card"></i> Subs</a>
+        <a href="/admin/royal" class="admin-pill <%= currentPage === 'royal' ? 'active' : '' %>"><i class="fas fa-crown"></i> Royal</a>
+        <a href="/admin/games" class="admin-pill <%= currentPage === 'games' ? 'active' : '' %>"><i class="fas fa-gamepad"></i> Game</a>
+        <a href="/admin/marketing" class="admin-pill <%= currentPage === 'marketing' ? 'active' : '' %>"><i class="fas fa-bullhorn"></i> Marketing</a>
+        <a href="/admin/promo" class="admin-pill <%= currentPage === 'promo' ? 'active' : '' %>"><i class="fas fa-tag"></i> Promo</a>
+        <a href="/admin/referrals" class="admin-pill <%= currentPage === 'referrals' ? 'active' : '' %>"><i class="fas fa-user-plus"></i> Referral</a>
+        <a href="/admin/plans" class="admin-pill <%= currentPage === 'plans' ? 'active' : '' %>"><i class="fas fa-dollar-sign"></i> Harga</a>
+        <a href="/admin/testimonials" class="admin-pill <%= currentPage === 'testimonials' ? 'active' : '' %>"><i class="fas fa-star"></i> Testi</a>
+        <a href="/admin/community" class="admin-pill <%= currentPage === 'community' ? 'active' : '' %>"><i class="fas fa-comments"></i> Chat</a>
+        <a href="/admin/announcement" class="admin-pill <%= currentPage === 'announcement' ? 'active' : '' %>"><i class="fas fa-bullhorn"></i> Pengumuman</a>
+        <a href="/admin/settings/whatsapp" class="admin-pill <%= currentPage === 'settings-whatsapp' ? 'active' : '' %>"><i class="fab fa-whatsapp"></i> WA Bot</a>
+      </div>
+
+  <script>
+    function toggleAdminUserMenu() {
+      var dropdown = document.getElementById('adminUserDropdown');
+      if (dropdown) {
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+      }
+    }
+    document.addEventListener('click', function(e) {
+      var menu = document.getElementById('adminUserDropdown');
+      if (menu && !e.target.closest('.nav-user-menu')) {
+        menu.style.display = 'none';
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var toggleBtn = document.getElementById('adminSidebarToggleBtn');
+      var floatingBtn = document.getElementById('adminFloatingMenuBtn');
+      var closeBtn = document.getElementById('sidebarCloseBtn');
+      var sidebar = document.getElementById('adminSidebar');
+      var overlay = document.getElementById('adminSidebarOverlay');
+
+      function openDrawer() {
+        if (!sidebar) return;
+        sidebar.classList.add('open');
+        if (toggleBtn) toggleBtn.classList.add('open');
+        if (overlay) overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeDrawer() {
+        if (!sidebar) return;
+        sidebar.classList.remove('open');
+        if (toggleBtn) toggleBtn.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          if (sidebar.classList.contains('open')) closeDrawer();
+          else openDrawer();
+        });
+      }
+      if (floatingBtn) floatingBtn.addEventListener('click', openDrawer);
+      if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+      if (overlay) overlay.addEventListener('click', closeDrawer);
+
+      var activePill = document.querySelector('.admin-pill.active');
+      var pillBar = document.querySelector('.admin-mobile-pills-bar');
+      if (activePill && pillBar) {
+        setTimeout(function() {
+          var pillLeft = activePill.offsetLeft - 16;
+          pillBar.scrollTo({ left: pillLeft, behavior: 'smooth' });
+        }, 100);
+      }
+    });
+  </script>

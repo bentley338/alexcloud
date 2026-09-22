@@ -1,4 +1,5 @@
 process.env.TZ = 'Asia/Jakarta';
+process.env.NODE_ENV = 'production';
 // Muat .env dari folder file ini (bukan CWD) agar tetap terbaca walau server
 // dijalankan dari direktori lain (pm2/systemd/cron) — penyebab umum env kosong.
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
@@ -38,9 +39,11 @@ const compression = require('compression');
 const { runMinifier } = require('./utils/minifier');
 
 // Jalankan minifier aset statis otomatis
-runMinifier();
+// runMinifier(); // Assets are pre-minified for maximum startup speed
 
 const app = express();
+app.use(compression());
+app.set('view cache', true);
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
@@ -60,9 +63,11 @@ async function autoConvertGameImagesToWebP() {
   const imagesDir = path.join(__dirname, 'public', 'images', 'games');
   if (!fs.existsSync(imagesDir)) return;
 
-  const legacyFiles = fs.readdirSync(imagesDir).filter(f =>
-    /\.(png|jpg|jpeg)$/i.test(f) && !f.endsWith('.webp')
-  );
+  const legacyFiles = fs.readdirSync(imagesDir).filter(f => {
+    if (!/\.(png|jpg|jpeg)$/i.test(f) || f.endsWith('.webp')) return false;
+    const baseName = path.basename(f, path.extname(f));
+    return !fs.existsSync(path.join(imagesDir, `${baseName}.webp`));
+  });
   if (legacyFiles.length === 0) return;
 
   console.log(`[WEBP] Converting ${legacyFiles.length} game image(s) to WebP...`);
@@ -79,7 +84,7 @@ async function autoConvertGameImagesToWebP() {
     }
   }
 }
-autoConvertGameImagesToWebP();
+// autoConvertGameImagesToWebP skipped — all WebP images already pre-converted
 
 // ── Gzip/Brotli Compression (reduces transfer size ~70%) ──────────────────────
 app.use(compression({ level: 6 }));
@@ -90,7 +95,7 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
   next();
 });
 
@@ -173,11 +178,13 @@ app.use(passport.session());
 // CSRF protection — sesudah session+passport (butuh req.session), sebelum route.
 // Menyetel res.locals.csrfToken & memvalidasi semua request yang mengubah state.
 const { csrfProtection } = require('./middleware/csrf');
+const { trackRequest } = require('./utils/activityTracker');
 app.use(csrfProtection);
 app.use(require('./middleware/product-context'));
 
 // Global locals and tracking
 app.use((req, res, next) => {
+  trackRequest(req);
   // 1. Recover tracking data from cookie if session is fresh
   if (!req.session.tracking && req.headers.cookie) {
     const rawCookies = req.headers.cookie.split(';');
@@ -357,9 +364,24 @@ function startPendingOrderFollowUp() {
   }, 5 * 60 * 1000);
 }
 
+// Scheduler Auto-Cancel / Auto-Expire Unpaid Orders after 6 hours (jalan setiap 5 menit)
+function startAutoExpireOrders() {
+  console.log('[AUTO-EXPIRE] Order expiration scheduler initialized (checking every 5 minutes, 6h limit)...');
+  const { expireUnpaidOrders } = require('./utils/orderExpiry');
+  
+  // Run once at start
+  expireUnpaidOrders().catch(err => console.error('[AUTO-EXPIRE INIT ERROR]', err.message));
+  
+  // Run every 5 minutes
+  setInterval(() => {
+    expireUnpaidOrders().catch(err => console.error('[AUTO-EXPIRE CRON ERROR]', err.message));
+  }, 5 * 60 * 1000);
+}
+
 startServer().then(() => {
   startProactiveAIAnalyst();
   startPendingOrderFollowUp();
+  startAutoExpireOrders();
 }).catch(err => {
   console.error('[FATAL]', err);
   process.exit(1);

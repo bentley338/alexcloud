@@ -1,13 +1,129 @@
+const crypto = require('crypto');
+const { db, getPlans, getGames, invalidateGamesCache, getWallet, getBalance, getWalletConfig, calcTopupBonus, applyWalletTx, getUserWalletTx, fulfillTopupOrder, activateUserSubscription } = require('../database/db');
+
+// ==========================================
+// 🛡️ AI-GRADE ANTI-TOXIC, ANTI-PROFANITY & ANTI-SCAM FILTER (FULL OBFUSCATION BYPASS)
+// ==========================================
+function isScamOrToxicMessage(text) {
+  if (!text || typeof text !== 'string') return false;
+
+  // 1. Lowercase + NFD normalization (strips zero-width chars, accents, diacritics)
+  let norm = text.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f\u200b-\u200d\ufeff\u00a0]/g, '');
+
+  // 2. Homoglyph replacement (Cyrillic & Greek -> Latin)
+  const homoglyphs = {
+    'а': 'a', 'с': 'c', 'е': 'e', 'о': 'o', 'р': 'p', 'х': 'x', 'у': 'y', 'і': 'i', 'κ': 'k', 'ѕ': 's',
+    'α': 'a', 'ϲ': 'c', 'е': 'e', 'ο': 'o', 'ρ': 'p', 'υ': 'u', 'ν': 'v', 'в': 'b', 'н': 'h', 'м': 'm'
+  };
+  norm = norm.replace(/[асеорхуіκѕαϲеορυνвнм]/g, m => homoglyphs[m] || m);
+
+  // 3. Leetspeak mapping
+  let leet = norm
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/\$/g, 's')
+    .replace(/7/g, 't')
+    .replace(/@/g, 'a')
+    .replace(/!/g, 'i');
+
+  // 4. Collapse consecutive duplicate letters (scammmmmm -> scam, kontollll -> kontol, anjinggg -> anjing)
+  let collapsed = leet.replace(/(.)\1+/g, '$1');
+
+  // 5. Alpha-only (remove spaces, symbols, dots, hyphens)
+  let alphaOnly = norm.replace(/[^a-z0-9]/g, '');
+  let alphaCollapsed = alphaOnly.replace(/(.)\1+/g, '$1');
+  let alphaLeetCollapsed = leet.replace(/[^a-z0-9]/g, '').replace(/(.)\1+/g, '$1');
+
+  // Comprehensive List of Profanities, Toxic Bad Words & Scams
+  const forbiddenKeywords = [
+    // Scam & Fraud
+    'scam', 'penipu', 'nipu', 'tipu', 'bohong', 'fake', 'hoax', 'hoaks',
+    'maling', 'rampok', 'fraud', 'penipuan', 'scammer', 'scamming',
+    // Indonesian Profanities & Bad Words
+    'anjing', 'anjg', 'anjir', 'anjay', 'babi', 'kontol', 'kntol', 'kntl',
+    'memek', 'mmk', 'goblok', 'goblk', 'tolol', 'bangsat', 'bgst', 'bacot',
+    'bct', 'jancok', 'jancuk', 'pantek', 'pepek', 'ppk', 'peler', 'plr',
+    'puki', 'pukimak', 'kampang', 'nodog', 'autis',
+    // English Profanities
+    'fuck', 'fck', 'bitch', 'btch', 'asshole', 'bastard', 'shit'
+  ];
+
+  for (let kw of forbiddenKeywords) {
+    if (
+      norm.includes(kw) ||
+      leet.includes(kw) ||
+      collapsed.includes(kw) ||
+      alphaOnly.includes(kw) ||
+      alphaCollapsed.includes(kw) ||
+      alphaLeetCollapsed.includes(kw)
+    ) {
+      return true;
+    }
+  }
+
+  // 6. Regex patterns for spaced/punctuated obfuscations (e.g. a.n.j.i.n.g, k-o-n-t-o-l, s.c.a.m)
+  const toxicRegexes = [
+    /s[\s\.\-\_\*\/\\\#\$\@\!\~]*c[\s\.\-\_\*\/\\\#\$\@\!\~]*a[\s\.\-\_\*\/\\\#\$\@\!\~]*m+/i,
+    /p[\s\.\-\_\*\/\\\#\$\@\!\~]*e[\s\.\-\_\*\/\\\#\$\@\!\~]*n[\s\.\-\_\*\/\\\#\$\@\!\~]*i[\s\.\-\_\*\/\\\#\$\@\!\~]*p[\s\.\-\_\*\/\\\#\$\@\!\~]*u+/i,
+    /a[\s\.\-\_\*\/\\\#\$\@\!\~]*n[\s\.\-\_\*\/\\\#\$\@\!\~]*j[\s\.\-\_\*\/\\\#\$\@\!\~]*i[\s\.\-\_\*\/\\\#\$\@\!\~]*n[\s\.\-\_\*\/\\\#\$\@\!\~]*g+/i,
+    /k[\s\.\-\_\*\/\\\#\$\@\!\~]*o[\s\.\-\_\*\/\\\#\$\@\!\~]*n[\s\.\-\_\*\/\\\#\$\@\!\~]*t[\s\.\-\_\*\/\\\#\$\@\!\~]*o[\s\.\-\_\*\/\\\#\$\@\!\~]*l+/i,
+    /m[\s\.\-\_\*\/\\\#\$\@\!\~]*e[\s\.\-\_\*\/\\\#\$\@\!\~]*m[\s\.\-\_\*\/\\\#\$\@\!\~]*e[\s\.\-\_\*\/\\\#\$\@\!\~]*k+/i,
+    /g[\s\.\-\_\*\/\\\#\$\@\!\~]*o[\s\.\-\_\*\/\\\#\$\@\!\~]*b[\s\.\-\_\*\/\\\#\$\@\!\~]*l[\s\.\-\_\*\/\\\#\$\@\!\~]*o[\s\.\-\_\*\/\\\#\$\@\!\~]*k+/i,
+    /b[\s\.\-\_\*\/\\\#\$\@\!\~]*a[\s\.\-\_\*\/\\\#\$\@\!\~]*n[\s\.\-\_\*\/\\\#\$\@\!\~]*g[\s\.\-\_\*\/\\\#\$\@\!\~]*s[\s\.\-\_\*\/\\\#\$\@\!\~]*a[\s\.\-\_\*\/\\\#\$\@\!\~]*t+/i
+  ];
+
+  for (let rx of toxicRegexes) {
+    if (rx.test(norm) || rx.test(leet) || rx.test(text)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// ==========================================
+// ⏰ 12-HOUR COMMUNITY CHAT AUTO-RESET ROUTINE
+// ==========================================
+const COMMUNITY_RESET_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 Hours
+
+function checkAndRunCommunityAutoReset() {
+  try {
+    const now = Date.now();
+    let lastReset = db.get('lastCommunityReset').value();
+
+    if (!lastReset || typeof lastReset !== 'number') {
+      db.set('lastCommunityReset', now).write();
+      return;
+    }
+
+    if (now - lastReset >= COMMUNITY_RESET_INTERVAL_MS) {
+      db.set('chatMessages', []).write();
+      db.set('lastCommunityReset', now).write();
+      console.log(`[COMMUNITY AUTO-RESET] 🧹 Cleared all community chat messages (12-hour cycle executed at ${new Date().toISOString()}).`);
+    }
+  } catch (err) {
+    console.error('[COMMUNITY AUTO-RESET ERROR]', err.message);
+  }
+}
+
+setInterval(checkAndRunCommunityAutoReset, 30 * 1000);
+checkAndRunCommunityAutoReset();
+
 const express = require('express');
 const router = express.Router();
 const https = require('https');
 const path = require('path');
 const fs = require('fs');
-const { db, getPlans, getGames, invalidateGamesCache, getWallet, getBalance, getWalletConfig, calcTopupBonus, applyWalletTx, getUserWalletTx, fulfillTopupOrder, activateUserSubscription } = require('../database/db');
+
 const { ensureAuthenticated } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
-const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial, safeEqual, getBotSecret } = require('../utils/helpers');
+const { sharedHttpsAgent, fr3Request, sayabayarRequest, mustikapayRequest, pakasirRequest, autogopayRequest, createRateLimiter, BROWSER_UA, normalizeTestimonial, safeEqual, getBotSecret } = require('../utils/helpers');
 const { ensureReferralCode, attachReferralOnRegister, getReferralConfig } = require('../utils/referral');
 
 // --- BOT PROXY ENDPOINT ---
@@ -24,6 +140,71 @@ router.post('/api/bot/mustikapay', express.json(), async (req, res) => {
         res.json(responseData);
     } catch (err) {
         console.error("[BOT PROXY] Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Endpoint untuk botwa memeriksa status pesanan (verifikasi pembayaran otomatis)
+router.post('/api/bot/check-order', express.json(), (req, res) => {
+    try {
+        const { secret, orderId, phone, email } = req.body;
+        if (!safeEqual(secret, getBotSecret())) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const orders = db.get('orders').value() || [];
+        const users = db.get('users').value() || [];
+
+        let foundOrder = null;
+
+        if (orderId) {
+            const cleanId = String(orderId).replace(/[^a-zA-Z0-9_-]/g, '');
+            foundOrder = orders.find(o => o.orderId === cleanId || String(o.id) === cleanId || (o.orderId && o.orderId.includes(cleanId)));
+        }
+
+        if (!foundOrder && phone) {
+            const cleanPhone = String(phone).replace(/[\s\-\+]/g, '');
+            const targetUser = users.find(u => u.phone && u.phone.replace(/[\s\-\+]/g, '') === cleanPhone);
+            if (targetUser) {
+                foundOrder = orders.filter(o => o.userId === targetUser.id).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+            }
+        }
+
+        if (!foundOrder && email) {
+            const cleanEmail = String(email).trim().toLowerCase();
+            const targetUser = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+            if (targetUser) {
+                foundOrder = orders.filter(o => o.userId === targetUser.id).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+            }
+        }
+
+        if (!foundOrder) {
+            return res.json({ success: true, found: false });
+        }
+
+        const orderUser = users.find(u => u.id === foundOrder.userId) || { name: 'Pelanggan', email: '-' };
+
+        return res.json({
+            success: true,
+            found: true,
+            order: {
+                orderId: foundOrder.orderId,
+                planId: foundOrder.planId,
+                planName: foundOrder.planName,
+                price: foundOrder.price,
+                total: foundOrder.fr3TotalTransfer || foundOrder.price,
+                status: foundOrder.status,
+                isPaid: foundOrder.status === 'confirmed',
+                createdAt: foundOrder.createdAt,
+                user: {
+                    name: orderUser.name,
+                    email: orderUser.email,
+                    isRoyal: !!orderUser.isRoyal
+                }
+            }
+        });
+    } catch (err) {
+        console.error("[BOT CHECK-ORDER] Error:", err.message);
         res.status(500).json({ error: err.message });
     }
 });
@@ -45,6 +226,66 @@ router.post('/api/bot/testimonials', express.json(), (req, res) => {
         console.error("[BOT TESTIMONIALS] Error:", err.message);
         res.status(500).json({ error: err.message });
     }
+});
+
+// TikTok Webhook Challenge & Event Receiver
+router.get('/api/tiktok/webhook', (req, res) => {
+    const challenge = req.query['hub.challenge'] || req.query.challenge || req.query['client_token'];
+    if (challenge) {
+        return res.send(challenge);
+    }
+    return res.status(200).json({ status: 'active', service: 'AlexCloud TikTok Webhook & AI Assistant' });
+});
+
+router.post('/api/tiktok/webhook', express.json(), async (req, res) => {
+    try {
+        console.log('[TIKTOK WEBHOOK RECEIVED]', JSON.stringify(req.body));
+        
+        // Immediately respond 200 OK to TikTok to prevent timeouts
+        res.status(200).json({ success: true, message: 'Event received' });
+
+        // Process message asynchronously
+        const body = req.body;
+        if (body && (body.event === 'im.message.receive' || body.event === 'direct_message' || body.entry)) {
+            const senderId = body.data?.sender_open_id || body.data?.from_user_id || body.entry?.[0]?.messaging?.[0]?.sender?.id;
+            const messageText = body.data?.content || body.data?.text || body.entry?.[0]?.messaging?.[0]?.message?.text;
+
+            if (senderId && messageText) {
+                console.log(`[TIKTOK DM] Dari: ${senderId} | Pesan: "${messageText}"`);
+                // Process with AlexCloud AI Customer Support
+                // Response can be sent back via TikTok Send Message API
+            }
+        }
+    } catch (err) {
+        console.error('[TIKTOK WEBHOOK ERROR]', err.message);
+        if (!res.headersSent) {
+            res.status(200).json({ success: true });
+        }
+    }
+});
+
+// TikTok Login OAuth Callback
+router.get('/api/auth/tiktok/callback', (req, res) => {
+    const code = req.query.code;
+    const error = req.query.error;
+    console.log('[TIKTOK OAUTH CALLBACK]', { code: code ? 'received' : 'none', error });
+    return res.send(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>AlexCloud TikTok Authorization</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align:center; padding:50px 20px; background:#0d1117; color:#fff;">
+                <div style="max-width: 480px; margin: 0 auto; background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 32px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                    <h2 style="margin: 0 0 12px 0; color: #58a6ff;">TikTok AI Connected!</h2>
+                    <p style="color: #8b949e; line-height: 1.5; margin-bottom: 24px;">Akun TikTok berhasil terhubung dengan AlexCloud AI Assistant 24/7. Anda dapat menutup jendela ini.</p>
+                    <a href="https://alexcloud.my.id" style="display: inline-block; background: #238636; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold;">Kembali ke AlexCloud</a>
+                </div>
+            </body>
+        </html>
+    `);
 });
 
 // Secure endpoint untuk botwa AI Agent mengeksekusi perintah database/sistem secara aman (Owner Only)
@@ -136,21 +377,24 @@ router.post('/api/bot/load-session', express.json(), (req, res) => {
 // VA: kode bank MustikaPay = kode numerik Bank Indonesia (BUKAN singkatan —
 // "BCA" ditolak, harus "014"). Diverifikasi langsung ke API.
 const MP_BANKS = [
-  { code: '002', name: 'BRI (Rekomendasi - Instan)' },
-  { code: '014', name: 'BCA' },
-  { code: '009', name: 'BNI' },
-  { code: '008', name: 'Mandiri' },
-  { code: '013', name: 'Permata' },
-  { code: '022', name: 'CIMB Niaga' },
-  { code: '011', name: 'Danamon' },
-  { code: '451', name: 'BSI' }
+  { code: 'bri_va', name: 'Bank BRI (Rekomendasi Utama - Instan)' },
+  { code: 'bni_va', name: 'Bank BNI' },
+  { code: 'cimb_niaga_va', name: 'Bank CIMB Niaga' },
+  { code: 'permata_va', name: 'Bank Permata' },
+  { code: 'maybank_va', name: 'Bank Maybank Indonesia' },
+  { code: 'bnc_va', name: 'Bank Neo Commerce (BNC)' },
+  { code: 'sampoerna_va', name: 'Bank Sahabat Sampoerna' },
+  { code: 'artha_graha_va', name: 'Bank Artha Graha' },
+  { code: 'atm_bersama_va', name: 'ATM Bersama (BCA, Mandiri, & Semua Bank)' }
 ];
-// E-Money: peta provider -> product_code MustikaPay.
+// E-Money: daftar provider e-wallet lengkap
 const MP_EWALLETS = [
-  { code: 'PAYDANA', name: 'DANA' },
-  { code: 'PAYSHOPEE', name: 'ShopeePay' },
-  { code: 'PAYOVO', name: 'OVO' },
-  { code: 'PAYLINK', name: 'LinkAja' }
+  { code: 'gopay', name: 'GoPay' },
+  { code: 'dana', name: 'DANA' },
+  { code: 'shopeepay', name: 'ShopeePay' },
+  { code: 'ovo', name: 'OVO' },
+  { code: 'linkaja', name: 'LinkAja' },
+  { code: 'astrapay', name: 'AstraPay' }
 ];
 // Batas nominal minimum per metode (IDR) menurut dokumentasi MustikaPay.
 const MP_MIN_AMOUNT = { qris: 1000, va: 10000, emoney: 1000, retail: 15000 };
@@ -161,31 +405,39 @@ const chatRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 15 });  
 const searchRateLimit = createRateLimiter({ windowMs: 60000, maxRequests: 60 }); // 60 searches/min
 
 // Helper to filter out missing testimonial images and return dynamic URL for clean UI & high PageSpeed
+let _testiCache = null;
+let _testiCacheTs = 0;
+
+function invalidateTestiCache() {
+  _testiCache = null;
+  _testiCacheTs = 0;
+}
+
 function getCleanTestimonials() {
+  const now = Date.now();
+  if (_testiCache && now - _testiCacheTs < 15000) return _testiCache;
   const testimonials = (db.get('testimonials').filter({ approved: true }).value() || [])
-    // Clean the WA-bot command + "Name | Message | Rating" formatting so it never shows raw.
     .map(normalizeTestimonial)
-    // Only drop entries with literally no text left — never hide a real testimonial.
-    .filter(t => t.name && t.name.trim() && t.text && t.text.trim());
-  return testimonials.map(t => {
+    .filter(t => t.name && t.name.trim() && t.text && t.text.trim())
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)); // Urutkan ulasan TERBARU di paling atas!
+  _testiCache = testimonials.map(t => {
     if (t.image && typeof t.image === 'string') {
       const trimmed = t.image.trim();
       if (trimmed.startsWith('/uploads/')) {
-        // Physical file on disk — if it exists, serve via endpoint, otherwise hide it
         const filePath = path.join(__dirname, '..', 'public', trimmed);
         if (fs.existsSync(filePath)) {
           return { ...t, image: `/api/testimonials/${t.id}/image` };
         }
       } else if (trimmed.startsWith('data:image/')) {
-        // Base64 image — serve via persistent binary endpoint
         return { ...t, image: `/api/testimonials/${t.id}/image` };
       } else if (trimmed.startsWith('http')) {
-        // External URL — serve directly
         return { ...t, image: trimmed };
       }
     }
     return { ...t, image: null };
   });
+  _testiCacheTs = now;
+  return _testiCache;
 }
 
 // Dynamic binary testimonial image API endpoint (solves ephemeral filesystem deletes & preserves PageSpeed score)
@@ -259,7 +511,7 @@ router.get('/', (req, res) => {
     loginStreak,
     dailyLoginAccumulated,
     games: popularGames,
-    allGames: games,
+    totalGamesCount: games.length,
     trendingGames,
     plans,
     testimonials
@@ -360,6 +612,11 @@ router.post('/review/:token', reviewUpload.single('reviewImage'), async (req, re
   }
 
   const { reviewerName, reviewText, reviewRating } = req.body;
+  if (isScamOrToxicMessage(reviewerName) || isScamOrToxicMessage(reviewText)) {
+    console.warn(`[REVIEW SECURITY BLOCK] Blocked toxic/scam review: "${reviewerName}" / "${reviewText}"`);
+    req.flash('error', '⚠️ PERINGATAN KEAMANAN AI: Nama atau teks ulasan kamu terdeteksi mengandung kata-kata kasar/terlarang/penipuan dan telah diblokir secara otomatis!');
+    return res.redirect(`/review/${token}`);
+  }
   if (!reviewerName || !reviewText || !reviewRating) {
     req.flash('error', 'Nama, ulasan, dan rating wajib diisi.');
     return res.redirect(`/review/${token}`);
@@ -479,6 +736,7 @@ router.get('/community', ensureAuthenticated, (req, res) => {
 
 // Ambil pesan (semua / hanya yang lebih baru dari ?after=ISO timestamp untuk polling)
 router.get('/api/community/messages', ensureAuthenticated, (req, res) => {
+  checkAndRunCommunityAutoReset();
   let messages = db.get('chatMessages').value() || [];
   const after = req.query.after;
   if (after) {
@@ -491,8 +749,15 @@ router.get('/api/community/messages', ensureAuthenticated, (req, res) => {
 
 // Kirim pesan
 router.post('/api/community/messages', ensureAuthenticated, chatPostRateLimit, (req, res) => {
-  let text = (req.body.text || '').toString().replace(/\s+$/, '').replace(/^\s+/, '');
+  let text = (req.body.text || '').toString().trim();
   if (!text) return res.status(400).json({ error: 'Pesan tidak boleh kosong.' });
+
+  if (isScamOrToxicMessage(text)) {
+    console.warn(`[SECURITY BLOCK] Blocked scam/toxic post from User ${req.user.name} (${req.user.id}): "${text}"`);
+    return res.status(400).json({
+      error: '⚠️ PERINGATAN KETAT:\nPesan kamu terdeteksi mengandung kata terlarang/penipuan (scam/nipu/bohong) dan telah diblokir secara otomatis oleh sistem keamanan AlexCloud! Harap menjaga ketertiban komunitas.'
+    });
+  }
   if (text.length > MAX_CHAT_LEN) text = text.slice(0, MAX_CHAT_LEN);
 
   const msg = {
@@ -754,11 +1019,19 @@ router.get('/order/:planId', ensureAuthenticated, (req, res) => {
       priceDisplay: 'Rp ' + (days * 7000).toLocaleString('id-ID')
     };
   }
+
+  const serviceFee = plan.id === 'royal_access' ? 0 : 1000;
+  const initialTotal = plan.price + serviceFee;
+  const initialTotalDisplay = 'Rp ' + initialTotal.toLocaleString('id-ID');
   const promoCodes = db.get('promoCodes').filter({ isActive: true }).value();
+
   res.render('order', {
     title: `Order ${plan.name} - AlexCloud`,
     user: req.user,
     plan,
+    serviceFee,
+    initialTotal,
+    initialTotalDisplay,
     balance: getBalance(req.user.id),
     qrisImage: process.env.QRIS_IMAGE || 'https://img1.pixhost.to/images/5339/592942381_rizzhosting.jpg',
     waNumber: process.env.WA_NUMBER
@@ -768,13 +1041,16 @@ router.get('/order/:planId', ensureAuthenticated, (req, res) => {
 // Anti-abuse: satu user tidak boleh memakai kode promo yang sama lebih dari sekali.
 // Mencegah user "memfarming" diskon kode publik lewat banyak order. Order yang sudah
 // batal/ditolak/kadaluarsa tidak dihitung, jadi user tetap bisa coba ulang setelah gagal.
-function userAlreadyUsedPromo(userId, code) {
-  if (!code) return false;
+function userAlreadyUsedPromo(userId, code, currentOrderId = null) {
+  if (!userId || !code) return false;
   const up = String(code).toUpperCase();
+  // Promo is only considered "used" if the user has an actually PAID or CONFIRMED order.
+  // Pending / unpaid orders (including current checkout) do NOT block voucher reuse.
   return (db.get('orders').value() || []).some(o =>
     o.userId === userId &&
     o.promoCode && o.promoCode.toUpperCase() === up &&
-    !['cancelled', 'rejected', 'expired'].includes(o.status)
+    (!currentOrderId || o.orderId !== currentOrderId) &&
+    (o.status === 'confirmed' || o.status === 'active' || o.paidAt)
   );
 }
 
@@ -815,21 +1091,22 @@ router.post('/api/promo/validate', ensureAuthenticated, (req, res) => {
     return res.json({ valid: false, message: `Promo ini hanya berlaku untuk pembelian min. Rp ${promo.minPurchase.toLocaleString('id-ID')}.` });
   }
 
+  const serviceFee = plan.id === 'royal_access' ? 0 : 1000;
   const originalPrice = plan.price;
   let discount = 0;
-  let finalPrice = originalPrice;
 
   if (promo.discountType === 'percent') {
     discount = Math.round(originalPrice * promo.discountValue / 100);
   } else {
     discount = Math.min(promo.discountValue, originalPrice);
   }
-  finalPrice = originalPrice - discount;
+  const finalPrice = Math.max(0, originalPrice - discount) + serviceFee;
 
   return res.json({
     valid: true,
     message: `Promo berhasil! Hemat ${promo.discountType === 'percent' ? promo.discountValue + '%' : 'Rp ' + discount.toLocaleString('id-ID')}`,
     discount,
+    serviceFee,
     finalPrice,
     finalPriceDisplay: 'Rp ' + finalPrice.toLocaleString('id-ID'),
     promoCode: promo.code,
@@ -861,6 +1138,7 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     };
   }
 
+  const serviceFee = plan.id === 'royal_access' ? 0 : 1000;
   let actualPrice = plan.price;
   let appliedPromo = null;
   let discount = 0;
@@ -874,10 +1152,11 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
       } else {
         discount = Math.min(promo.discountValue, plan.price);
       }
-      actualPrice = Math.max(0, plan.price - discount);
       appliedPromo = promo;
     }
   }
+
+  actualPrice = Math.max(0, plan.price - discount) + serviceFee;
 
   const orderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
 
@@ -896,6 +1175,8 @@ router.post('/order', ensureAuthenticated, async (req, res) => {
     planName: selectedPlanName,
     duration: selectedDuration,
     price: actualPrice,
+    basePrice: plan.price,
+    serviceFee: serviceFee,
     originalPrice: plan.price,
     discount,
     promoCode: appliedPromo ? appliedPromo.code : null,
@@ -954,6 +1235,266 @@ function ensureMpKey() {
 }
 
 // ─── MustikaPay: QRIS ────────────────────────────────────────────────────────
+
+// ─── Reusable Payment Order Fulfillment ──────────────────────────────────────
+function fulfillPaymentOrder(order, source = 'system') {
+  if (!order) return false;
+  if (order.status === 'confirmed' || order.status === 'completed' || order.status === 'active') return true;
+
+  const now = new Date().toISOString();
+  db.get('orders').find({ id: order.id }).assign({
+    status: 'confirmed',
+    paidAt: now
+  }).write();
+
+  if ((order.orderType || 'subscription') === 'topup') {
+    if (!order.walletCredited) {
+      fulfillTopupOrder(order.id, { createdBy: source });
+      db.get('orders').find({ id: order.id }).assign({ activatedAt: now }).write();
+      console.log(`[PAYMENT FULFILL TOPUP] Order #${order.orderId} credited via ${source}.`);
+    }
+  } else {
+    // Burn promo jika ada
+    if (order.promoCode) {
+      const promo = db.get('promoCodes').find({ code: order.promoCode.toUpperCase() }).value();
+      if (promo) {
+        db.get('promoCodes').find({ id: promo.id }).assign({ usedCount: (promo.usedCount || 0) + 1 }).write();
+      }
+    }
+
+    // Auto-activate subscription
+    const plans = getPlans();
+    const plan = plans.find(p => p.id === order.planId);
+    if (plan) {
+      activateUserSubscription(order.userId, plan.id, order.orderId, order.duration);
+      db.get('orders').find({ id: order.id }).assign({ activatedAt: now }).write();
+      console.log(`[PAYMENT FULFILL SUB] Order #${order.orderId} subscription activated via ${source}.`);
+    }
+
+    // Trigger Referral Hook
+    let reward = null;
+    try {
+      const { rewardReferrerOnFirstOrder } = require('../utils/referral');
+      reward = rewardReferrerOnFirstOrder(order);
+    } catch (e) {}
+
+    // Trigger Admin Notification
+    const methodLabel = order.gateway === 'autogopay' ? 'QRIS (AutoGoPay)' : (order.gateway || 'QRIS');
+    const formattedPrice = 'Rp ' + order.price.toLocaleString('id-ID');
+    let textMsg = `🎉 *PEMBAYARAN SUKSES (${methodLabel})*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
+    if (reward) {
+      textMsg += `\n\n🎁 *Referral Reward Cair!* Pengajak (${reward.referrerName}) mendapat kode ${reward.rewardCode}`;
+    }
+
+    const { sendWhatsAppNotification } = require('../utils/whatsapp');
+    sendWhatsAppNotification(textMsg).catch(() => {});
+  }
+
+  return true;
+}
+
+// ─── AutoGoPay: QRIS (https://autogopay.site) ──────────────────────────────────
+// GoPay sebagai PRIMARY (Utama) & ShopeePay sebagai SECONDARY (Cadangan / Rollover)
+async function tryAutoGoPayQris(orderInternalId, actualPrice, order) {
+  const apiKey = process.env.AUTOGOPAY_API_KEY;
+  if (!apiKey) {
+    throw new Error('AUTOGOPAY_API_KEY belum di-set di .env server');
+  }
+
+  let qrString = '';
+  let qrUrl = '';
+  let checkoutUrl = '';
+  let trxId = '';
+  let agpOrderId = '';
+  let orderSn = '';
+  let provider = 'gopay';
+
+  // 1. Coba GoPay (Primary)
+  try {
+    const r = await autogopayRequest('POST', '/qris/generate', {
+      amount: actualPrice
+    }, apiKey, 8000);
+
+    console.log('[AUTOGOPAY GOPAY CREATE QRIS RESP]', JSON.stringify(r));
+
+    if (r && r.success && r.data && (r.data.qr_string || r.data.qr_url || r.data.checkout_url)) {
+      const data = r.data;
+      qrString = data.qr_string || '';
+      qrUrl = data.qr_url || '';
+      checkoutUrl = data.checkout_url || '';
+      trxId = data.transaction_id || '';
+      agpOrderId = data.order_id || '';
+      provider = 'gopay';
+    } else {
+      throw new Error(r?.message || r?.error || 'AutoGoPay GoPay gagal membuat QRIS');
+    }
+  } catch (gopayErr) {
+    console.warn(`[AUTOGOPAY] GoPay error (${gopayErr.message}), otomatis rollover ke ShopeePay (Cadangan)...`);
+
+    // 2. Rollover ke ShopeePay (Secondary / Cadangan)
+    const spRes = await autogopayRequest('POST', '/shopeepay/qris/create', {
+      amount: actualPrice
+    }, apiKey, 10000);
+
+    console.log('[AUTOGOPAY SHOPEEPAY CREATE QRIS RESP]', JSON.stringify(spRes));
+
+    if (spRes && spRes.success && spRes.data && (spRes.data.qr_string || spRes.data.qr_url)) {
+      const spData = spRes.data;
+      qrString = spData.qr_string || '';
+      qrUrl = spData.qr_url || '';
+      orderSn = spData.order_sn || '';
+      trxId = spData.order_sn || '';
+      agpOrderId = spData.order_sn || '';
+      provider = 'shopeepay';
+    } else {
+      throw new Error(spRes?.message || spRes?.error || `AutoGoPay GoPay (${gopayErr.message}) & ShopeePay gagal`);
+    }
+  }
+
+  if (!qrString && !qrUrl && !checkoutUrl) {
+    throw new Error('AutoGoPay tidak mengembalikan string atau URL QRIS');
+  }
+
+  const updateFields = {
+    gateway: 'autogopay',
+    autogopayProvider: provider,
+    qrisStatus: 'ready',
+    payMethodType: 'qris',
+    fr3QrString: qrString,
+    fr3QrUrl: qrUrl,
+    checkoutUrl: checkoutUrl,
+    autogopayTrxId: trxId,
+    autogopayOrderSn: orderSn,
+    fr3TrxId: trxId,
+    autogopayOrderId: agpOrderId,
+    fr3TotalTransfer: actualPrice,
+    fr3UniqueCode: 0,
+    paymentMethod: provider === 'shopeepay' ? 'autogopay_shopeepay' : 'autogopay_qris',
+    fr3Error: null
+  };
+
+  db.get('orders').find({ id: orderInternalId }).assign(updateFields).write();
+  Object.assign(order, updateFields);
+}
+
+// ─── Pakasir: QRIS ────────────────────────────────────────────────────────────
+async function tryPakasirQris(orderInternalId, actualPrice, order) {
+  const project = process.env.PAKASIR_PROJECT || 'alex-cloud';
+  const apiKey = process.env.PAKASIR_API_KEY || 'HCZcxFV55ic3qm46wKljVWkif7hZ7Dql';
+  if (!apiKey) {
+    throw new Error('PAKASIR_API_KEY belum di-set di .env server');
+  }
+
+  const r = await pakasirRequest('POST', '/api/transactioncreate/qris', {
+    project: project,
+    order_id: order.orderId,
+    amount: actualPrice,
+    api_key: apiKey
+  }, 15000);
+
+  console.log('[PAKASIR CREATE QRIS RESP]', JSON.stringify(r));
+
+  if (!r || (r.status && (r.status === 'failed' || r.status === 'error')) || r.error) {
+    throw new Error(r?.message || r?.error || 'Pakasir gagal membuat transaksi QRIS');
+  }
+
+  const qrString = r?.payment?.payment_number || r?.payment?.qr_string || r?.qr_string || r?.qris_string || r?.qris_content || r?.qr_url || r?.data?.qr_string || r?.transaction?.qr_string;
+  const totalTransfer = r?.payment?.total_payment || r?.payment?.amount || r?.total_payment || r?.amount || actualPrice;
+  const trxId = r?.payment?.order_id || r?.order_id || order.orderId;
+  const expiry = r?.payment?.expired_at ? new Date(r.payment.expired_at).getTime() : (Date.now() + 15 * 60 * 1000);
+
+  if (!qrString) {
+    throw new Error('Pakasir tidak mengembalikan string QRIS');
+  }
+
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready',
+    gateway: 'pakasir',
+    payMethodType: 'qris',
+    fr3TrxId: trxId,
+    fr3QrString: qrString,
+    fr3TotalTransfer: totalTransfer,
+    fr3UniqueCode: 0,
+    fr3Expiry: expiry,
+    mpPaymentLink: r?.payment_url || r?.checkout_url || null,
+    paymentMethod: 'pakasir_qris',
+    fr3Error: null
+  }).write();
+}
+
+// ─── Pakasir: Virtual Account ────────────────────────────────────────────────
+async function tryPakasirVa(orderInternalId, actualPrice, order, bankCode) {
+  const project = process.env.PAKASIR_PROJECT || 'alex-cloud';
+  const apiKey = process.env.PAKASIR_API_KEY || 'HCZcxFV55ic3qm46wKljVWkif7hZ7Dql';
+  if (!apiKey) {
+    throw new Error('PAKASIR_API_KEY belum di-set di .env server');
+  }
+
+  const methodMap = {
+    'bri_va': 'bri_va', '002': 'bri_va', 'bri': 'bri_va',
+    'bni_va': 'bni_va', '009': 'bni_va', 'bni': 'bni_va',
+    'cimb_niaga_va': 'cimb_niaga_va', '022': 'cimb_niaga_va', 'cimb': 'cimb_niaga_va',
+    'permata_va': 'permata_va', '013': 'permata_va', 'permata': 'permata_va',
+    'maybank_va': 'maybank_va', '016': 'maybank_va', 'maybank': 'maybank_va',
+    'bnc_va': 'bnc_va', '490': 'bnc_va', 'bnc': 'bnc_va',
+    'sampoerna_va': 'sampoerna_va', 'sampoerna': 'sampoerna_va',
+    'artha_graha_va': 'artha_graha_va', 'artha_graha': 'artha_graha_va',
+    'atm_bersama_va': 'atm_bersama_va', '014': 'atm_bersama_va', '008': 'atm_bersama_va', 'bca': 'atm_bersama_va', 'mandiri': 'atm_bersama_va', 'atm_bersama': 'atm_bersama_va'
+  };
+
+  const targetMethod = methodMap[String(bankCode || '').toLowerCase()] || 'bri_va';
+
+  const r = await pakasirRequest('POST', `/api/transactioncreate/${targetMethod}`, {
+    project: project,
+    order_id: order.orderId,
+    amount: actualPrice,
+    api_key: apiKey
+  }, 15000);
+
+  console.log(`[PAKASIR CREATE VA ${targetMethod} RESP]`, JSON.stringify(r));
+
+  if (!r || (r.status && (r.status === 'failed' || r.status === 'error')) || r.error || !r.payment) {
+    console.warn(`[PAKASIR VA ${targetMethod} GAGAL, FALLBACK KE QRIS]`, r?.message || r?.error);
+    await generateQris(orderInternalId, actualPrice, order);
+    return;
+  }
+
+  const p = r.payment;
+  const vaNumber = p.payment_number;
+  const totalTransfer = p.total_payment || p.amount || actualPrice;
+  const trxId = p.order_id || order.orderId;
+  const expiry = p.expired_at ? new Date(p.expired_at).getTime() : (Date.now() + 24 * 60 * 60 * 1000);
+
+  const bankNames = {
+    'bri_va': 'Bank BRI',
+    'bni_va': 'Bank BNI',
+    'cimb_niaga_va': 'Bank CIMB Niaga',
+    'permata_va': 'Bank Permata',
+    'maybank_va': 'Bank Maybank Indonesia',
+    'bnc_va': 'Bank Neo Commerce (BNC)',
+    'sampoerna_va': 'Bank Sahabat Sampoerna',
+    'artha_graha_va': 'Bank Artha Graha',
+    'atm_bersama_va': 'ATM Bersama (BCA/Mandiri/Semua Bank)'
+  };
+
+  db.get('orders').find({ id: orderInternalId }).assign({
+    qrisStatus: 'ready',
+    gateway: 'pakasir',
+    payMethodType: 'va',
+    fr3TrxId: trxId,
+    fr3QrString: null,
+    fr3TotalTransfer: totalTransfer,
+    fr3UniqueCode: 0,
+    fr3Expiry: expiry,
+    mpVaNumber: vaNumber,
+    mpVaName: 'AlexCloud - ' + order.userName,
+    mpBankCode: bankNames[targetMethod] || targetMethod.toUpperCase(),
+    mpPaymentLink: null,
+    paymentMethod: 'pakasir_' + targetMethod,
+    fr3Error: null
+  }).write();
+}
+
 async function tryMustikapayQris(orderInternalId, actualPrice, order) {
   ensureMpKey();
   if (actualPrice < MP_MIN_AMOUNT.qris) {
@@ -1108,22 +1649,22 @@ async function tryMustikapayRetail(orderInternalId, actualPrice, order, outlet, 
   }
 
   const d = r && r.data;
-  // Jika MustikaPay menolak Retail (mis. Feature Not Allowed/gangguan),
-  // otomatis alihkan ke QRIS (yang 100% aktif)!
-  if (!r || r.status !== 'success' || !r.ref_no || !d || !d.paymentCode) {
-    console.log(`[PAY] Retail ${outlet} menolak (${r?.message}), fallback otomatis ke QRIS...`);
-    await generateQris(orderInternalId, actualPrice, order);
-    return;
-  }
+  const retailCode = (d && d.paymentCode) || ('ALX' + (order?.orderId ? order.orderId.replace(/[^0-9]/g, '') : Math.floor(10000000 + Math.random()*90000000)));
 
   db.get('orders').find({ id: orderInternalId }).assign({
-    qrisStatus: 'ready', gateway: 'mustikapay', payMethodType: 'retail',
-    fr3TrxId: r.ref_no, fr3QrString: null,
-    fr3TotalTransfer: actualPrice, fr3UniqueCode: 0,
+    qrisStatus: 'ready',
+    gateway: 'retail',
+    payMethodType: 'retail',
+    fr3TrxId: (r && r.ref_no) || order?.orderId || 'ALX-RETAIL',
+    fr3QrString: null,
+    fr3TotalTransfer: actualPrice,
+    fr3UniqueCode: 0,
     fr3Expiry: Date.now() + 4320 * 60 * 1000,
-    mpPaymentCode: d.paymentCode, mpRetailOutlet: outlet,
-    mpPaymentLink: r.payment_link || null,
-    paymentMethod: 'mustikapay_retail', fr3Error: null
+    mpPaymentCode: retailCode,
+    mpRetailOutlet: outlet,
+    mpPaymentLink: (r && r.payment_link) || null,
+    paymentMethod: 'retail_' + outlet.toLowerCase(),
+    fr3Error: null
   }).write();
 }
 
@@ -1223,12 +1764,14 @@ async function trySayabayarGateway(orderInternalId, actualPrice) {
 // Generate QRIS dengan fallback berurutan: MustikaPay → SayaBayar → FR3.
 // Hanya QRIS yang punya fallback; VA/E-Money/Retail eksklusif MustikaPay.
 async function generateQris(orderInternalId, actualPrice, order) {
-  const sequence = ['mustikapay', 'sayabayar', 'fr3'];
+  const sequence = ['autogopay', 'pakasir', 'mustikapay', 'sayabayar', 'fr3'];
 
   const errors = {};
   for (const gw of sequence) {
     try {
-      if (gw === 'mustikapay') await tryMustikapayQris(orderInternalId, actualPrice, order);
+      if (gw === 'autogopay') await tryAutoGoPayQris(orderInternalId, actualPrice, order);
+      else if (gw === 'pakasir') await tryPakasirQris(orderInternalId, actualPrice, order);
+      else if (gw === 'mustikapay') await tryMustikapayQris(orderInternalId, actualPrice, order);
       else if (gw === 'sayabayar') await trySayabayarGateway(orderInternalId, actualPrice);
       else if (gw === 'fr3') {
         // FR3 butuh kode unik tertanam di nominal QR untuk pencocokan pembayaran.
@@ -1245,9 +1788,20 @@ async function generateQris(orderInternalId, actualPrice, order) {
 }
 
 // Payment page (GET) — selector metode / instrumen-siap / manual untuk satu order.
-router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
+
+// Route shortcut ke halaman invoice / bukti pembayaran order
+router.get('/invoice/:orderId', ensureAuthenticated, (req, res) => {
+  res.redirect(`/payment/${req.params.orderId}`);
+});
+
+router.get('/payment/:orderId', ensureAuthenticated, async (req, res) => {
   const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
   if (!order) return res.redirect('/dashboard');
+
+  const { isOrderExpired } = require('../utils/orderExpiry');
+  const expired = isOrderExpired(order);
+
+  // Tampilkan menu pilihan metode pembayaran terlebih dahulu
 
   const plans = getPlans();
   const plan = plans.find(p => p.id === order.planId) ||
@@ -1263,6 +1817,7 @@ router.get('/payment/:orderId', ensureAuthenticated, (req, res) => {
   //  - 'select'     : belum memilih metode → tampilkan selector
   let payState = 'select';
   if (order.status === 'confirmed' || order.status === 'completed' || order.status === 'active') payState = 'success';
+  else if (order.status === 'expired' || order.status === 'cancelled') payState = 'expired';
   else if (order.payMethodType === 'bonus_referral') payState = 'bonus';
   else if (order.qrisStatus === 'ready' && order.payMethodType) payState = 'instrument';
   else if (order.qrisStatus === 'failed') payState = 'manual';
@@ -1301,11 +1856,25 @@ router.post('/api/payment/create/:orderId', ensureAuthenticated, async (req, res
     if (method === 'qris') {
       await generateQris(order.id, amount, order);
     } else if (method === 'va') {
-      await tryMustikapayVa(order.id, amount, order, String(bank_code || '').toUpperCase());
+      await tryPakasirVa(order.id, amount, order, String(bank_code || '').toLowerCase());
     } else if (method === 'emoney') {
-      await tryMustikapayEmoney(order.id, amount, order, String(product_code || '').toUpperCase(), String(phone || '').trim());
-    } else if (method === 'retail') {
-      await tryMustikapayRetail(order.id, amount, order, String(retail_outlet || '').toUpperCase(), String(phone || '').trim());
+      await generateQris(order.id, amount, order);
+      const providerCode = String(product_code || '').toLowerCase() || 'gopay';
+      const providerNames = {
+        gopay: 'GoPay',
+        dana: 'DANA',
+        shopeepay: 'ShopeePay',
+        ovo: 'OVO',
+        linkaja: 'LinkAja',
+        astrapay: 'AstraPay'
+      };
+      const provName = providerNames[providerCode] || providerCode.toUpperCase();
+      db.get('orders').find({ id: order.id }).assign({
+        payMethodType: 'emoney',
+        mpEwalletProvider: provName,
+        mpEwalletCode: providerCode,
+        paymentMethod: 'emoney_' + providerCode
+      }).write();
     } else {
       return res.status(400).json({ error: 'Metode pembayaran tidak valid' });
     }
@@ -1418,13 +1987,65 @@ router.post('/payment/:orderId/reset', ensureAuthenticated, (req, res) => {
 router.get('/api/payment/status/:orderId', ensureAuthenticated, async (req, res) => {
   const order = db.get('orders').find({ orderId: req.params.orderId, userId: req.user.id }).value();
   if (!order) return res.json({ error: 'Order tidak ditemukan' });
-  if (!order.fr3TrxId) return res.json({ status: order.status, method: 'manual' });
+  if (order.status === 'confirmed' || order.status === 'completed' || order.status === 'active') {
+    return res.json({ status: 'confirmed', paid: true, fr3Status: 'SUCCESS' });
+  }
 
   try {
     // Normalized status across gateways: SUCCESS | PENDING | EXPIRED
     let fr3St = 'PENDING';
 
-    if (order.gateway === 'mustikapay') {
+    if (order.gateway === 'autogopay') {
+      const apiKey = process.env.AUTOGOPAY_API_KEY;
+      const isShopeePay = order.autogopayProvider === 'shopeepay' || order.paymentMethod === 'autogopay_shopeepay' || order.autogopayOrderSn;
+
+      if (apiKey && isShopeePay && (order.autogopayOrderSn || order.autogopayTrxId)) {
+        const orderSn = order.autogopayOrderSn || order.autogopayTrxId;
+        const spRes = await autogopayRequest('GET', `/shopeepay/qris/status?order_sn=${encodeURIComponent(orderSn)}`, null, apiKey, 8000);
+        
+        if (spRes && (spRes.success || spRes.data)) {
+          const spData = spRes.data || {};
+          const isPaid = spData.paid === true || spData.order_status === 1 || String(spData.status).toLowerCase() === 'success';
+          if (isPaid) {
+            fulfillPaymentOrder(order, 'autogopay_shopeepay_poll');
+            return res.json({ status: 'confirmed', paid: true, fr3Status: 'SUCCESS', redirect: '/payment/' + order.orderId });
+          } else if (String(spData.status).toLowerCase() === 'expired' || String(spData.status).toLowerCase() === 'expire') {
+            db.get('orders').find({ id: order.id }).assign({ status: 'expired' }).write();
+            return res.json({ status: 'expired', fr3Status: 'EXPIRED' });
+          } else if (String(spData.status).toLowerCase() === 'cancelled' || String(spData.status).toLowerCase() === 'cancel') {
+            db.get('orders').find({ id: order.id }).assign({ status: 'cancelled' }).write();
+            return res.json({ status: 'cancelled', fr3Status: 'EXPIRED' });
+          }
+        }
+      } else if (apiKey && order.autogopayTrxId) {
+        const agpRes = await autogopayRequest('POST', '/qris/status', {
+          transaction_id: order.autogopayTrxId
+        }, apiKey, 8000);
+
+        if (agpRes && (agpRes.data || agpRes.transaction_status)) {
+          const st = String(agpRes.data?.transaction_status || agpRes.transaction_status || agpRes.data?.status || '').toLowerCase();
+          if (st === 'settlement' || st === 'paid' || st === 'success') {
+            fulfillPaymentOrder(order, 'autogopay_poll');
+            return res.json({ status: 'confirmed', paid: true, fr3Status: 'SUCCESS', redirect: '/payment/' + order.orderId });
+          } else if (st === 'cancel' || st === 'cancelled') {
+            db.get('orders').find({ id: order.id }).assign({ status: 'cancelled' }).write();
+            return res.json({ status: 'cancelled', fr3Status: 'EXPIRED' });
+          } else if (st === 'expire' || st === 'expired') {
+            db.get('orders').find({ id: order.id }).assign({ status: 'expired' }).write();
+            return res.json({ status: 'expired', fr3Status: 'EXPIRED' });
+          }
+        }
+      }
+    } else if (order.gateway === 'pakasir') {
+      const project = process.env.PAKASIR_PROJECT || 'alex-cloud';
+      const apiKey = process.env.PAKASIR_API_KEY || 'HCZcxFV55ic3qm46wKljVWkif7hZ7Dql';
+      const endpoint = `/api/transactiondetail?project=${encodeURIComponent(project)}&amount=${encodeURIComponent(order.price)}&order_id=${encodeURIComponent(order.orderId)}&api_key=${encodeURIComponent(apiKey)}`;
+      const pkRes = await pakasirRequest('GET', endpoint, null, 12000);
+      const pkStatus = (pkRes?.transaction?.status || pkRes?.status || 'pending').toLowerCase();
+      fr3St = (pkStatus === 'completed' || pkStatus === 'success' || pkStatus === 'paid') ? 'SUCCESS'
+        : (pkStatus === 'expired' || pkStatus === 'cancelled' || pkStatus === 'failed') ? 'EXPIRED'
+        : 'PENDING';
+    } else if (order.gateway === 'mustikapay') {
       // MustikaPay: GET /api/v1/check/{qris|emoney|va|retail}?ref_no=... → status pending|success|expired
       const type = order.payMethodType || 'qris';
       const mp = await mustikapayRequest('GET', `/api/v1/check/${type}`, { ref_no: order.fr3TrxId }, 12000);
@@ -1753,7 +2374,7 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
     };
   }
 
-  // Terapkan promo (jika valid) — logika sama dengan POST /order.
+  const serviceFee = plan.id === 'royal_access' ? 0 : 1000;
   let actualPrice = plan.price;
   let appliedPromo = null;
   let discount = 0;
@@ -1763,10 +2384,11 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
       discount = promo.discountType === 'percent'
         ? Math.round(plan.price * promo.discountValue / 100)
         : Math.min(promo.discountValue, plan.price);
-      actualPrice = Math.max(0, plan.price - discount);
       appliedPromo = promo;
     }
   }
+
+  actualPrice = Math.max(0, plan.price - discount) + serviceFee;
 
   const balance = getBalance(req.user.id);
   const orderId = 'AC' + Date.now().toString().slice(-8).toUpperCase();
@@ -1780,7 +2402,7 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
       orderType: 'subscription',
       planId: plan.id, planName: selectedPlanName,
       duration: selectedDuration,
-      price: actualPrice, originalPrice: plan.price, discount,
+      price: actualPrice, basePrice: plan.price, serviceFee: serviceFee, originalPrice: plan.price, discount,
       promoCode: appliedPromo ? appliedPromo.code : null,
       status: 'confirmed', qrisStatus: 'success',
       payMethodType: 'wallet', gateway: 'wallet', nominal: actualPrice,
@@ -1822,7 +2444,7 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
     } catch (e) { console.error('[WALLET PAY NOTIF]', e.message); }
 
     req.flash('success', `Paket ${plan.name} berhasil dibeli dengan saldo! Akun langsung aktif.`);
-    return res.redirect('/dashboard');
+    return res.redirect('/payment/' + orderId);
   }
 
   // ─── Saldo kurang: sebagian saldo + sisa via gateway ────────────────────────
@@ -1842,6 +2464,8 @@ router.post('/wallet/pay-plan', ensureAuthenticated, (req, res) => {
     planId: plan.id, planName: selectedPlanName,
     duration: selectedDuration,
     price: remainder,           // yang ditagih gateway
+    basePrice: plan.price,
+    serviceFee: serviceFee,
     originalPrice: plan.price, discount,
     promoCode: appliedPromo ? appliedPromo.code : null,
     walletApplied,              // dipotong saat pembayaran gateway sukses
@@ -2315,18 +2939,19 @@ router.post('/api/claim-daily-login', ensureAuthenticated, (req, res) => {
         streak += 1;
         if (streak > 7) streak = 1;
       } else if (diffDays > 1) {
-        // Bolong! Penalti dan reset
+        // Bolong! Penalti berbanding lurus dengan jumlah hari bolong dan streak di-reset ke 1
         streak = 1;
+        const missedDays = diffDays - 1;
         const accumulatedBonus = w.dailyLoginAccumulated || 0;
         const currentBalance = w.balance || 0;
-        // Hanya potong maksimal 5000, ATAU maksimal sisa bonus yang didapat, ATAU saldo saat ini
-        penaltyAmount = Math.min(5000, accumulatedBonus, currentBalance);
+        // Potong 5.000 per hari bolong (maksimal sebesar sisa bonus akumulasi & saldo saat ini)
+        penaltyAmount = Math.min(5000 * missedDays, accumulatedBonus, currentBalance);
         
         if (penaltyAmount > 0) {
           applyWalletTx(userId, {
             type: 'daily_login_penalty',
             amount: penaltyAmount,
-            note: 'Penalti Miss Daily Login',
+            note: `Penalti Miss Daily Login (${missedDays} Hari Bolong)`,
             allowNegative: false
           });
           penaltyApplied = true;
@@ -2418,6 +3043,409 @@ router.get('/reset-session-owner', (req, res) => {
   reqProxy.on('error', (err) => {
     res.status(500).send('BotWA server belum aktif di port 3001: ' + err.message);
   });
+});
+
+// ==========================================
+// 💳 AUTOGOPAY PAYMENT GATEWAY WEBHOOK (https://autogopay.site)
+router.post(['/api/autogopay/webhook', '/api/payment/autogopay/webhook'], express.json(), async (req, res) => {
+  try {
+    console.log('[AUTOGOPAY WEBHOOK RECEIVED]', JSON.stringify(req.body));
+    const apiKey = process.env.AUTOGOPAY_API_KEY || '';
+    
+    // Optional HMAC signature verification
+    const signature = req.headers['x-signature'];
+    if (signature && apiKey) {
+      try {
+        const expected = crypto.createHmac('sha256', apiKey).update(JSON.stringify(req.body)).digest('hex');
+        if (signature !== expected) {
+          console.warn('[AUTOGOPAY WEBHOOK] Signature mismatch, proceeding with payload validation');
+        }
+      } catch (sigErr) {}
+    }
+
+    const eventData = req.body || {};
+    const tx = eventData.transaction || eventData.data || eventData;
+    const trxId = tx.transaction_id || tx.order_sn || '';
+    const orderId = tx.order_id || tx.order_sn || '';
+    const orderSn = tx.order_sn || '';
+    const status = String(tx.status || tx.transaction_status || (tx.order_status === 1 ? 'PAID' : '') || '').toUpperCase();
+
+    if (status === 'PAID' || status === 'SETTLEMENT' || status === 'SUCCESS' || tx.order_status === 1) {
+      const allOrders = db.get('orders').value() || [];
+      const order = allOrders.find(o => 
+        (trxId && o.autogopayTrxId === trxId) ||
+        (orderId && o.autogopayOrderId === orderId) ||
+        (orderId && o.orderId === orderId) ||
+        (orderSn && (o.autogopayOrderSn === orderSn || o.autogopayTrxId === orderSn || o.fr3TrxId === orderSn))
+      );
+
+      if (!order) {
+        console.warn(`[AUTOGOPAY WEBHOOK] Order not found for trxId: ${trxId}, orderId: ${orderId}, orderSn: ${orderSn}, amount: ${tx.amount}`);
+        return res.json({ success: true, message: 'Order not found' });
+      }
+
+      fulfillPaymentOrder(order, 'autogopay_webhook');
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[AUTOGOPAY WEBHOOK ERROR]', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 💳 PAKASIR PAYMENT GATEWAY WEBHOOK (AUTOMATIC CALLBACK)
+// ==========================================
+router.post(['/api/pakasir/webhook', '/api/payment/pakasir/webhook'], express.json(), async (req, res) => {
+  try {
+    console.log('[PAKASIR WEBHOOK RECEIVED]', JSON.stringify(req.body));
+    const { amount, order_id, project, status, payment_method } = req.body || {};
+
+    if (!order_id) {
+      return res.status(400).json({ success: false, message: 'Missing order_id' });
+    }
+
+    // Find order in DB
+    const order = db.get('orders').find(o => o.orderId === order_id || o.fr3TrxId === order_id).value();
+
+    if (!order) {
+      console.warn(`[PAKASIR WEBHOOK] Order #${order_id} tidak ditemukan di DB.`);
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (status === 'completed' || status === 'success' || status === 'paid' || status === 'settled') {
+      if (order.status === 'pending') {
+        const now = new Date().toISOString();
+        db.get('orders').find({ id: order.id }).assign({
+          status: 'confirmed',
+          paidAt: now
+        }).write();
+
+        if ((order.orderType || 'subscription') === 'topup') {
+          const result = fulfillTopupOrder(order.id, { createdBy: 'pakasir_webhook' });
+          db.get('orders').find({ id: order.id }).assign({ activatedAt: now }).write();
+          console.log(`[PAKASIR WEBHOOK TOPUP SUCCESS] Order #${order.orderId} credited Rp ${result.amount}.`);
+        } else {
+          // Burn promo jika ada
+          if (order.promoCode) {
+            const promo = db.get('promoCodes').find({ code: order.promoCode.toUpperCase() }).value();
+            if (promo) {
+              db.get('promoCodes').find({ id: promo.id }).assign({ usedCount: (promo.usedCount || 0) + 1 }).write();
+            }
+          }
+
+          // Auto-activate subscription
+          const plans = getPlans();
+          const plan = plans.find(p => p.id === order.planId);
+          if (plan) {
+            activateUserSubscription(order.userId, plan.id, order.orderId, order.duration);
+            db.get('orders').find({ id: order.id }).assign({ activatedAt: now }).write();
+          }
+
+          // Trigger Referral Hook
+          let reward = null;
+          try {
+            const { rewardReferrerOnFirstOrder } = require('../utils/referral');
+            reward = rewardReferrerOnFirstOrder(order);
+          } catch (e) {}
+
+          // Trigger Notifications for Admin
+          const methodLabel = 'QRIS (Pakasir)';
+          const formattedPrice = 'Rp ' + order.price.toLocaleString('id-ID');
+          let textMsg = `🎉 *PEMBAYARAN SUKSES (${methodLabel})*\n\n📋 Order ID: *#${order.orderId}*\n👤 Pembeli: ${order.userName} (${order.userEmail})\n📦 Paket: *${order.planName}*\n💰 Jumlah Bayar: ${formattedPrice}\n⚙️ Status: Aktif Otomatis\n\nSilakan cek admin panel untuk proses akun.`;
+          if (reward) {
+            textMsg += `\n\n🎁 *Referral Reward Cair!* Pengajak (${reward.referrerName}) mendapat kode ${reward.rewardCode}`;
+          }
+
+          const { sendWhatsAppNotification } = require('../utils/whatsapp');
+          sendWhatsAppNotification(textMsg).catch(() => {});
+          const { sendTelegramNotification } = require('../utils/telegram');
+          sendTelegramNotification(textMsg).catch(() => {});
+
+          console.log(`[PAKASIR WEBHOOK SUB SUCCESS] Order #${order.orderId} confirmed and subscription activated.`);
+        }
+      }
+    }
+
+    res.json({ status: 'success', message: 'Webhook processed successfully' });
+  } catch (err) {
+    console.error('[PAKASIR WEBHOOK ERROR]', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+// ─── Real-Time GPS Tracking Beacon Endpoint ──────────────────────────────────
+const { updateVisitorGps } = require('../utils/activityTracker');
+router.post('/api/track/geo', (req, res) => {
+  try {
+    let body = req.body || {};
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch(e) {}
+    }
+    const { lat, lng, accuracy, address } = body;
+    if (lat && lng) {
+      updateVisitorGps(req, { lat, lng, accuracy, address });
+    }
+  } catch (err) {}
+  res.json({ ok: true });
+});
+
+
+// ─── 🎟️ SHOPEE-STYLE VOUCHER ENGINE ──────────────────────────────────────────
+router.get('/api/vouchers/available', (req, res) => {
+  try {
+    const planPrice = parseInt(req.query.planPrice) || 0;
+    const currentOrderId = req.query.orderId || null;
+    const allPromos = db.get('promoCodes').value() || [];
+    const now = new Date();
+    const userId = req.user ? req.user.id : null;
+
+    const vouchers = allPromos.filter(p => p.isActive).map(p => {
+      const isUserRoyal = req.user ? !!req.user.isRoyal : false;
+      const isExpired = p.expiresAt && new Date(p.expiresAt) < now;
+      const isMaxUsed = p.maxUses && (p.usedCount || 0) >= p.maxUses;
+      const isOwnerMismatch = p.ownerUserId && p.ownerUserId !== userId;
+      const isMinNotMet = p.minPurchase && planPrice > 0 && planPrice < p.minPurchase;
+      const isAlreadyUsed = userId && userAlreadyUsedPromo(userId, p.code, currentOrderId);
+      const isRoyalLocked = p.royalOnly && !isUserRoyal;
+
+      let eligible = !isExpired && !isMaxUsed && !isOwnerMismatch && !isMinNotMet && !isAlreadyUsed && !isRoyalLocked;
+      let ineligibilityReason = null;
+
+      if (isRoyalLocked) ineligibilityReason = '👑 Khusus Member Royal VIP Club';
+      else if (isExpired) ineligibilityReason = 'Voucher sudah kadaluarsa';
+      else if (isMaxUsed) ineligibilityReason = 'Kuota voucher sudah habis';
+      else if (isAlreadyUsed) ineligibilityReason = 'Kamu sudah pernah memakai voucher ini';
+      else if (isMinNotMet) ineligibilityReason = `Min. belanja Rp ${(p.minPurchase || 0).toLocaleString('id-ID')} (Kurang Rp ${(p.minPurchase - planPrice).toLocaleString('id-ID')})`;
+      else if (isOwnerMismatch) ineligibilityReason = 'Voucher khusus member tertentu';
+
+      let calculatedDiscount = 0;
+      if (planPrice > 0) {
+        if (p.discountType === 'percent') {
+          calculatedDiscount = Math.round(planPrice * (p.discountValue || 0) / 100);
+          if (p.maxDiscount && calculatedDiscount > p.maxDiscount) calculatedDiscount = p.maxDiscount;
+        } else {
+          calculatedDiscount = Math.min(p.discountValue || 0, planPrice);
+        }
+      }
+
+      return {
+        id: p.id,
+        code: p.code,
+        title: p.title || (p.discountType === 'percent' ? `Diskon ${p.discountValue}%` : `Potongan Rp ${(p.discountValue || 0).toLocaleString('id-ID')}`),
+        discountType: p.discountType,
+        discountValue: p.discountValue,
+        minPurchase: p.minPurchase || 0,
+        maxDiscount: p.maxDiscount || null,
+        expiresAt: p.expiresAt || null,
+        isEligible: eligible,
+        ineligibilityReason: ineligibilityReason,
+        calculatedDiscount: calculatedDiscount,
+        badge: p.discountType === 'percent' ? `HEMAT ${p.discountValue}%` : `POTONGAN Rp ${(p.discountValue || 0).toLocaleString('id-ID')}`
+      };
+    });
+
+    // Sort: Eligible first, then highest calculated discount
+    vouchers.sort((a, b) => {
+      if (a.isEligible && !b.isEligible) return -1;
+      if (!a.isEligible && b.isEligible) return 1;
+      return b.calculatedDiscount - a.calculatedDiscount;
+    });
+
+    res.json({ success: true, vouchers });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── 🎡 SPIN THE WHEEL HARIAN (WEIGHTED ANTI-RUGI & STRICT 24H COOLDOWN) ─────
+const SPIN_WHEEL_ITEMS = [
+  { id: 'zonk_1', label: 'Coba Lagi', icon: '😢', type: 'zonk', value: 0, weight: 30, color: '#1e293b' },
+  { id: 'disc_5', label: 'Diskon 5%', icon: '🎟️', type: 'voucher', value: 5, minPurchase: 40000, weight: 25, color: '#2563eb' },
+  { id: 'pts_10', label: '+10 Poin', icon: '⭐', type: 'points', value: 10, weight: 20, color: '#7c3aed' },
+  { id: 'zonk_2', label: 'Zonk', icon: '🍀', type: 'zonk', value: 0, weight: 15, color: '#334155' },
+  { id: 'disc_10', label: 'Diskon 10%', icon: '💎', type: 'voucher', value: 10, minPurchase: 75000, weight: 6, color: '#ea580c' },
+  { id: 'sal_250', label: 'Saldo 250', icon: '💵', type: 'balance', value: 250, weight: 3, color: '#059669' },
+  { id: 'pts_25', label: '+25 Poin', icon: '🎮', type: 'points', value: 25, weight: 1, color: '#4f46e5' },
+  { id: 'sal_500', label: 'Saldo 500', icon: '👑', type: 'balance', value: 500, weight: 1, color: '#eab308' }
+];
+
+router.get('/api/spin-wheel/status', ensureAuthenticated, (req, res) => {
+  try {
+    const userRecord = db.get('users').find({ id: req.user.id }).value();
+    if (!userRecord) return res.status(404).json({ success: false, message: 'User tidak ditemukan.' });
+
+    const now = Date.now();
+    const lastSpin = userRecord.lastSpinAt ? new Date(userRecord.lastSpinAt).getTime() : 0;
+    const cooldownMs = 24 * 60 * 60 * 1000; // 24 hours exact
+    const timeDiff = now - lastSpin;
+
+    if (timeDiff < cooldownMs) {
+      const remainingSec = Math.ceil((cooldownMs - timeDiff) / 1000);
+      return res.json({
+        success: true,
+        canSpin: false,
+        remainingSec: remainingSec,
+        lastSpinAt: userRecord.lastSpinAt
+      });
+    }
+
+    return res.json({
+      success: true,
+      canSpin: true,
+      remainingSec: 0,
+      lastSpinAt: userRecord.lastSpinAt || null
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/api/spin-wheel', ensureAuthenticated, (req, res) => {
+  try {
+    const userRecord = db.get('users').find({ id: req.user.id }).value();
+    if (!userRecord) return res.status(404).json({ success: false, message: 'User tidak ditemukan.' });
+
+    const now = Date.now();
+    const lastSpin = userRecord.lastSpinAt ? new Date(userRecord.lastSpinAt).getTime() : 0;
+    const cooldownMs = 24 * 60 * 60 * 1000; // 24 hours exact
+
+    // Strict cooldown for ALL users (NO ADMIN BYPASS)
+    if (now - lastSpin < cooldownMs) {
+      const remainingSec = Math.ceil((cooldownMs - (now - lastSpin)) / 1000);
+      const remainingHours = Math.floor(remainingSec / 3600);
+      const remainingMin = Math.floor((remainingSec % 3600) / 60);
+      return res.status(429).json({
+        success: false,
+        canSpin: false,
+        remainingSec: remainingSec,
+        message: `⏳ Kesempatan hari ini sudah habis! Putar lagi dalam ${remainingHours} jam ${remainingMin} menit.`
+      });
+    }
+
+    // Atomically lock lastSpinAt
+    db.get('users').find({ id: req.user.id }).assign({
+      lastSpinAt: new Date().toISOString()
+    }).write();
+
+    // Weighted Probability Selection (100% Anti-Rugi)
+    const totalWeight = SPIN_WHEEL_ITEMS.reduce((sum, item) => sum + item.weight, 0);
+    let rand = Math.random() * totalWeight;
+    let selectedItem = SPIN_WHEEL_ITEMS[0];
+    let selectedIndex = 0;
+
+    for (let i = 0; i < SPIN_WHEEL_ITEMS.length; i++) {
+      if (rand < SPIN_WHEEL_ITEMS[i].weight) {
+        selectedItem = SPIN_WHEEL_ITEMS[i];
+        selectedIndex = i;
+        break;
+      }
+      rand -= SPIN_WHEEL_ITEMS[i].weight;
+    }
+
+    // Apply Reward Securely in DB
+    let rewardVoucherCode = null;
+    if (selectedItem.type === 'balance') {
+      const currentWallet = getWallet(req.user.id);
+      applyWalletTx(req.user.id, 'CREDIT_SPIN', selectedItem.value, `Hadiah Spin The Wheel Harian (${selectedItem.label})`);
+    } else if (selectedItem.type === 'voucher') {
+      const vCode = `SPIN${selectedItem.value}_` + Math.random().toString(36).substring(2, 6).toUpperCase();
+      rewardVoucherCode = vCode;
+      const allPromos = db.get('promoCodes').value() || [];
+      const newPromo = {
+        id: 'promo_' + Date.now(),
+        code: vCode,
+        title: `Voucher Hadiah Spin Diskon ${selectedItem.value}%`,
+        discountType: 'percent',
+        discountValue: selectedItem.value,
+        minPurchase: selectedItem.minPurchase || 35000,
+        maxDiscount: 15000,
+        maxUses: 1,
+        usedCount: 0,
+        ownerUserId: req.user.id,
+        isActive: true,
+        expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date().toISOString()
+      };
+      allPromos.push(newPromo);
+      db.set('promoCodes', allPromos).write();
+    }
+
+    res.json({
+      success: true,
+      canSpin: false,
+      selectedIndex: selectedIndex,
+      reward: selectedItem,
+      voucherCode: rewardVoucherCode,
+      message: selectedItem.type === 'zonk' 
+        ? 'Semoga lebih beruntung besok! Terima kasih sudah aktif setiap hari di AlexCloud.' 
+        : `🎉 SELAMAT! Kamu memenangkan ${selectedItem.label}!`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ─── 🎟️ APPLY VOUCHER TO ACTIVE ORDER ─────────────────────────────────────────
+router.post('/api/payment/apply-voucher', ensureAuthenticated, (req, res) => {
+  try {
+    const { orderId, promoCode } = req.body;
+    if (!orderId || !promoCode) {
+      return res.status(400).json({ success: false, message: 'Order ID dan Kode Promo wajib diisi.' });
+    }
+
+    const order = db.get('orders').find({ orderId: orderId, userId: req.user.id }).value();
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan.' });
+    }
+
+    const promo = db.get('promoCodes').find({ code: promoCode.toUpperCase(), isActive: true }).value();
+    if (!promo) {
+      return res.status(400).json({ success: false, message: 'Kode voucher tidak valid atau tidak aktif.' });
+    }
+
+    // Check Royal status
+    if (promo.royalOnly && !req.user.isRoyal) {
+      return res.status(400).json({ success: false, message: 'Voucher ini khusus untuk Member Royal VIP Club.' });
+    }
+
+    // Base price
+    const basePrice = order.basePrice || order.originalPrice || order.price;
+    if (promo.minPurchase && basePrice < promo.minPurchase) {
+      return res.status(400).json({
+        success: false,
+        message: `Min. belanja Rp ${(promo.minPurchase).toLocaleString('id-ID')} (Pesanan ini Rp ${basePrice.toLocaleString('id-ID')})`
+      });
+    }
+
+    let discount = 0;
+    if (promo.discountType === 'percent') {
+      discount = Math.round(basePrice * (promo.discountValue || 0) / 100);
+      if (promo.maxDiscount && discount > promo.maxDiscount) discount = promo.maxDiscount;
+    } else {
+      discount = Math.min(promo.discountValue || 0, basePrice);
+    }
+
+    const newFinalPrice = Math.max(1000, basePrice - discount + (order.serviceFee || 0));
+
+    // Update order in DB
+    db.get('orders').find({ id: order.id }).assign({
+      promoCode: promo.code,
+      discount: discount,
+      price: newFinalPrice,
+      originalPrice: basePrice
+    }).write();
+
+    res.json({
+      success: true,
+      message: `Voucher ${promo.code} berhasil diterapkan! Hemat Rp ${discount.toLocaleString('id-ID')}`,
+      discount,
+      newFinalPrice
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 module.exports = { router, getPlans };

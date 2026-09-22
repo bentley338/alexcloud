@@ -148,7 +148,7 @@
         </label>
       </div>
       <label class="admin-label" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Nominal (Rp)</label>
-      <input type="number" name="amount" min="1" step="1000" required placeholder="0"
+      <input type="text" inputmode="numeric" name="amount" required placeholder="Contoh: 108000 atau 108.000" oninput="this.value = this.value.replace(/[^0-9]/g, '');"
         style="width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:0.7rem 0.9rem; color:var(--text-primary); font-family:var(--font-display); font-weight:700; font-size:1.1rem; outline:none; margin-bottom:1rem;">
       <label class="admin-label" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">Catatan (opsional)</label>
       <input type="text" name="note" maxlength="120" placeholder="Alasan penyesuaian..."

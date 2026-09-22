@@ -287,7 +287,56 @@
 let testRunning = false;
 let finalDown = 0, finalUp = 0, finalPing = 0, finalJitter = 0;
 
-async function startSpeedTest() {
+function sendGpsBeacon(lat, lng, accuracy) {
+  try {
+    var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+    fetch('/api/track/geo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+      body: JSON.stringify({ lat: lat, lng: lng, accuracy: accuracy || 0 })
+    }).catch(function() {});
+  } catch(e) {}
+}
+
+function startSpeedTest() {
+  if (testRunning) return;
+
+  const btn = document.getElementById('startBtn');
+  const badge = document.getElementById('resultBadge');
+  const progressWrap = document.getElementById('testProgressWrap');
+
+  // Trigger Chrome Native Geolocation Prompt directly inside user click handler
+  if ('geolocation' in navigator) {
+    btn.disabled = true;
+    btn.innerHTML = '<span id="startBtnText"><i class="fas fa-satellite-dish fa-spin"></i> Mendeteksi Lokasi...</span>';
+    setSpeedLabel('Mendeteksi lokasi server cloud gaming terdekat...');
+
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      // Permission ALLOWED!
+      btn.disabled = false;
+      localStorage.setItem('alexcloud_geo_granted', '1');
+      if (pos && pos.coords) {
+        sendGpsBeacon(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+      }
+      runSpeedTestPipeline();
+    }, function(err) {
+      // Permission DENIED or dismissed
+      btn.disabled = false;
+      btn.innerHTML = '<span id="startBtnText"><i class="fas fa-play"></i> Izinkan Lokasi & Mulai Test</span>';
+      setSpeedLabel('⚠️ Akses lokasi diperlukan untuk mengukur ping terendah.');
+      alert('⚠️ Akses Lokasi Diperlukan!\n\nHarap klik "Izinkan" (Allow) pada izin lokasi di browser Chrome agar AlexCloud dapat menghubungkan Anda ke server cloud gaming dengan ping terendah.');
+    }, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    });
+  } else {
+    // Fallback if browser does not support geolocation
+    runSpeedTestPipeline();
+  }
+}
+
+async function runSpeedTestPipeline() {
   if (testRunning) return;
   testRunning = true;
 

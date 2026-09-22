@@ -1,83 +1,510 @@
 <%- include('partials/header') %>
 
-<main class="legal-page" id="main-content">
-  <div class="legal-wrap">
-    <div class="legal-hero">
-      <div class="legal-tag"><i class="fas fa-cloud"></i> Tentang Kami</div>
-      <h1>Kenalan dengan <span class="accent">AlexCloud</span></h1>
-      <p class="legal-updated">Platform cloud gaming yang dibuat gamer, untuk gamer Indonesia.</p>
+<style>
+/* ==========================================================================
+   ABOUT ALEXCLOUD OBSIDIAN GOLD DESIGN SYSTEM
+   ========================================================================== */
+.ax-about-page {
+  padding: 6.5rem 1rem 5rem;
+  background: var(--ax-bg-void, #06070c);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.ax-about-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Ambient glow */
+.ax-about-glow {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, rgba(0, 242, 254, 0.03) 50%, transparent 70%);
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Hero Header */
+.ax-about-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.ax-about-logo-wrap {
+  display: inline-block;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.ax-about-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 2.5px solid #fbbf24;
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.45), 0 10px 25px rgba(0, 0, 0, 0.8);
+  object-fit: contain;
+  background: #0f121c;
+  padding: 4px;
+}
+
+.ax-about-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 1rem;
+  border-radius: 100px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: #fbbf24;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.85rem;
+}
+
+.ax-about-title {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+}
+
+.ax-about-sub {
+  color: #94a3b8;
+  font-size: 1.05rem;
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Card Container */
+.ax-about-card {
+  background: rgba(15, 18, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+}
+
+.ax-about-intro {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #cbd5e1;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ax-about-intro strong {
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+/* Stats Counter Grid */
+.ax-about-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.75rem;
+}
+
+.ax-about-stat-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.25rem 0.85rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.ax-about-stat-item:hover {
+  border-color: rgba(251, 191, 36, 0.35);
+  transform: translateY(-3px);
+  background: rgba(251, 191, 36, 0.04);
+}
+
+.ax-about-stat-num {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: -0.02em;
+  display: block;
+}
+
+.ax-about-stat-lbl {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Section Headings */
+.ax-about-section {
+  margin-bottom: 2.75rem;
+}
+
+.ax-sec-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.ax-sec-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.1));
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+.ax-about-section p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* Values Grid */
+.ax-values-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.ax-value-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.35rem;
+  transition: all 0.3s ease;
+}
+
+.ax-value-card:hover {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-2px);
+}
+
+.ax-value-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  margin-bottom: 1rem;
+}
+
+.ax-value-card h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.ax-value-card p {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Feature Checklist */
+.ax-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ax-feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.ax-feature-list li svg {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  color: #10b981;
+}
+
+.ax-feature-list strong {
+  color: #ffffff;
+}
+
+/* Callout Box */
+.ax-about-callout {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 18, 28, 0.8) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-top: 2rem;
+}
+
+.ax-about-callout svg {
+  flex-shrink: 0;
+  color: #10b981;
+}
+
+/* CTA Box */
+.ax-about-cta {
+  text-align: center;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ax-about-cta p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.ax-about-btn-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 0.92rem;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  transition: all 0.25s ease;
+}
+
+.ax-about-btn-wa:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5);
+}
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+  .ax-about-page {
+    padding: 5rem 1rem 3.5rem;
+  }
+  .ax-about-card {
+    padding: 1.5rem 1.15rem;
+    border-radius: 18px;
+  }
+  .ax-about-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+  }
+  .ax-values-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .ax-about-logo {
+    width: 72px;
+    height: 72px;
+  }
+  .ax-about-btn-wa {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
+
+<main class="ax-about-page" id="main-content">
+  <div class="ax-about-glow"></div>
+  <div class="ax-about-wrap">
+    
+    <!-- Hero Header with Logo -->
+    <div class="ax-about-hero">
+      <div class="ax-about-logo-wrap">
+        <img src="/images/logo-circular.png" alt="AlexCloud Logo" class="ax-about-logo">
+      </div>
+      <div>
+        <div class="ax-about-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          Tentang AlexCloud
+        </div>
+      </div>
+      <h1 class="ax-about-title">
+        Kenalan dengan <span style="color:#fbbf24;">AlexCloud</span>
+      </h1>
+      <p class="ax-about-sub">
+        Platform cloud gaming tier-1 karya anak bangsa, dibuat dari gamer untuk gamer Indonesia.
+      </p>
     </div>
 
-    <div class="legal-card">
-      <p class="legal-intro">
-        <strong>AlexCloud</strong> adalah layanan cloud gaming premium asal Indonesia yang membuat siapa saja
-        bisa memainkan game AAA terbaru — seperti EA FC 26, GTA VI, dan Cyberpunk 2077 — langsung dari HP,
-        laptop, tablet, atau Smart TV tanpa harus membeli PC mahal. Cukup koneksi internet, semua game berat
-        berjalan dari server kami yang dioptimalkan untuk ping rendah di Indonesia.
+    <!-- Main Content Card -->
+    <div class="ax-about-card">
+      <p class="ax-about-intro">
+        <strong>AlexCloud</strong> adalah layanan cloud gaming untuk pengguna di Indonesia. Game diproses melalui cloud dan dapat diakses dari perangkat yang mendukung browser, seperti HP, laptop, PC, atau TV. Kualitas pengalaman bergantung pada perangkat, koneksi internet, dan ketersediaan server.
       </p>
 
-      <div class="about-stats-grid">
-        <div class="about-stat"><span class="about-stat-num">100+</span><div class="about-stat-label">Game Premium</div></div>
-        <div class="about-stat"><span class="about-stat-num">4K</span><div class="about-stat-label">Resolusi Maksimal</div></div>
-        <div class="about-stat"><span class="about-stat-num">&lt;30ms</span><div class="about-stat-label">Latensi Server Lokal</div></div>
-        <div class="about-stat"><span class="about-stat-num">24/7</span><div class="about-stat-label">Dukungan Admin</div></div>
+      <!-- Stats Grid -->
+      <div class="ax-about-stats">
+        <div class="ax-about-stat-item">
+          <span class="ax-about-stat-num"><%= gameCount %></span>
+          <div class="ax-about-stat-lbl">Game di Katalog</div>
+        </div>
+        <div class="ax-about-stat-item">
+          <span class="ax-about-stat-num">QRIS</span>
+          <div class="ax-about-stat-lbl">Pembayaran</div>
+        </div>
+        <div class="ax-about-stat-item">
+          <span class="ax-about-stat-num">Multi</span>
+          <div class="ax-about-stat-lbl">Perangkat</div>
+        </div>
+        <div class="ax-about-stat-item">
+          <span class="ax-about-stat-num">Admin</span>
+          <div class="ax-about-stat-lbl">Pusat Bantuan</div>
+        </div>
       </div>
 
-      <div class="legal-section">
-        <h2><span class="legal-num"><i class="fas fa-bullseye" style="font-size:0.8rem;"></i></span> Misi Kami</h2>
+      <!-- Misi Kami -->
+      <div class="ax-about-section">
+        <div class="ax-sec-heading">
+          <div class="ax-sec-icon-box">
+            <!-- Target / Bullseye SVG -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <span>Misi Kami</span>
+        </div>
         <p>
-          Kami percaya gaming berkualitas tinggi tidak seharusnya hanya milik mereka yang sanggup membeli PC
-          puluhan juta rupiah. Misi AlexCloud adalah <strong>mendemokratisasi akses gaming AAA</strong> di
-          Indonesia — dengan harga mulai Rp 40.000 saja, kamu bisa merasakan pengalaman gaming yang biasanya
-          butuh hardware mahal.
+          Kami ingin membuat akses game PC melalui cloud lebih mudah dipahami dan digunakan. Karena itu, AlexCloud berfokus pada katalog yang jelas, pilihan paket yang transparan, proses pembayaran yang ringkas, serta bantuan yang mudah ditemukan.
         </p>
       </div>
 
-      <div class="legal-section">
-        <h2><span class="legal-num"><i class="fas fa-heart" style="font-size:0.8rem;"></i></span> Nilai yang Kami Pegang</h2>
-        <div class="about-values-grid">
-          <div class="about-value-card">
-            <div class="about-value-icon"><i class="fas fa-shield-halved"></i></div>
-            <h3>Transaksi Aman</h3>
-            <p>Pembayaran lewat QRIS resmi (DANA, GoPay, OVO, ShopeePay, m-banking) dengan konfirmasi otomatis. Tidak ada biaya tersembunyi.</p>
+      <!-- Nilai yang Kami Pegang -->
+      <div class="ax-about-section">
+        <div class="ax-sec-heading">
+          <div class="ax-sec-icon-box">
+            <!-- Heart / Values SVG -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
           </div>
-          <div class="about-value-card">
-            <div class="about-value-icon"><i class="fas fa-bolt"></i></div>
-            <h3>Performa Nyata</h3>
-            <p>Server lokal dengan latensi di bawah 30ms. Bukan janji — bisa kamu buktikan sendiri lewat halaman Speed Test kami.</p>
+          <span>Nilai yang Kami Pegang</span>
+        </div>
+
+        <div class="ax-values-grid">
+          <!-- 1. Transaksi Aman -->
+          <div class="ax-value-card">
+            <div class="ax-value-icon">
+              <!-- Shield Check SVG -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3>Transaksi Aman &amp; Instan</h3>
+            <p>Pembayaran resmi QRIS otomatis (DANA, GoPay, OVO, ShopeePay, m-Banking) aktif detik itu juga tanpa biaya tersembunyi.</p>
           </div>
-          <div class="about-value-card">
-            <div class="about-value-icon"><i class="fas fa-headset"></i></div>
-            <h3>Support Responsif</h3>
-            <p>Tim kami siap membantu lewat WhatsApp, Telegram, dan live chat AI 24/7. Masalah kamu, prioritas kami.</p>
+
+          <!-- 2. Performa Nyata -->
+          <div class="ax-value-card">
+            <div class="ax-value-icon" style="background:rgba(0,242,254,0.12); border-color:rgba(0,242,254,0.3); color:#00f2fe;">
+              <!-- Bolt SVG -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3>Performa Nyata RTX 4090</h3>
+            <p>Streaming game menyesuaikan kondisi jaringan, perangkat, dan ketersediaan server agar pengguna dapat memilih pengalaman yang sesuai.</p>
           </div>
-          <div class="about-value-card">
-            <div class="about-value-icon"><i class="fas fa-handshake-angle"></i></div>
-            <h3>Jujur &amp; Transparan</h3>
-            <p>Kami berani memberi garansi: kalau gangguan murni dari pihak kami, dana kamu kami kembalikan. Selengkapnya di <a href="/refund">Kebijakan Refund</a>.</p>
+
+          <!-- 3. Support Responsif -->
+          <div class="ax-value-card">
+            <div class="ax-value-icon" style="background:rgba(16,185,129,0.12); border-color:rgba(16,185,129,0.3); color:#10b981;">
+              <!-- Headset SVG -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+            </div>
+            <h3>Pusat Bantuan Terpadu</h3>
+            <p>Tim admin WhatsApp CS dan asisten AlexBot AI kami siap membantu kendala bermain Anda kapan pun tanpa libur.</p>
+          </div>
+
+          <!-- 4. Jujur & Transparan -->
+          <div class="ax-value-card">
+            <div class="ax-value-icon" style="background:rgba(245,158,11,0.12); border-color:rgba(245,158,11,0.3); color:#f59e0b;">
+              <!-- Handshake / Shield SVG -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.77L12 20.66l7.65-7.66.77-.77a5.4 5.4 0 0 0 0-7.65z"/></svg>
+            </div>
+            <h3>Jujur &amp; Bergaransi</h3>
+            <p>Kami menjamin garansi uang kembali jika ada kendala server dari pihak kami sesuai dengan kebijakan transparansi penuh.</p>
           </div>
         </div>
       </div>
 
-      <div class="legal-section">
-        <h2><span class="legal-num"><i class="fas fa-rocket" style="font-size:0.8rem;"></i></span> Kenapa Memilih AlexCloud?</h2>
-        <ul>
-          <li><strong>Hemat hingga 10x lipat</strong> — Rp 60.000/bulan vs PC gaming Rp 15-50 juta.</li>
-          <li><strong>Tanpa ribet</strong> — tidak perlu install, update driver, atau upgrade hardware.</li>
-          <li><strong>Main di mana saja</strong> — progress tersimpan di cloud, lanjut di perangkat lain kapan pun.</li>
-          <li><strong>Selalu update</strong> — koleksi game terus bertambah mengikuti rilis terbaru.</li>
+      <!-- Kenapa Memilih AlexCloud -->
+      <div class="ax-about-section">
+        <div class="ax-sec-heading">
+          <div class="ax-sec-icon-box">
+            <!-- Rocket SVG -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+          </div>
+          <span>Kenapa Memilih AlexCloud?</span>
+        </div>
+
+        <ul class="ax-feature-list">
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Hemat hingga 10x Lipat</strong> — Mulai Rp 60.000/bulan dibanding rakit PC gaming Rp 15 - 40 juta.</div>
+          </li>
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Tanpa download file game</strong> — jelajahi <%= gameCount %> game yang tercatat di katalog aktif tanpa memenuhi penyimpanan lokal.</div>
+          </li>
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Main di Mana Saja (Multi-Device)</strong> — Progress cloud save tersinkronisasi otomatis di HP, Laptop, dan Smart TV.</div>
+          </li>
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Selalu Up-to-Date</strong> — Game baru selalu diupdate secara rutin mengikuti rilisan global terkini.</div>
+          </li>
         </ul>
       </div>
 
-      <div class="legal-callout good">
-        <i class="fas fa-circle-check"></i>
-        <div>AlexCloud dikelola langsung oleh tim lokal yang juga seorang gamer. Setiap masukan dari kamu kami dengarkan untuk membuat layanan ini makin baik.</div>
+      <!-- Verified Callout -->
+      <div class="ax-about-callout">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <div>AlexCloud dikelola untuk menghadirkan pengalaman cloud gaming yang jelas, mudah digunakan, dan relevan bagi pengguna di Indonesia.</div>
       </div>
 
-      <div class="legal-contact-box">
-        <p>Punya pertanyaan atau ingin tahu lebih banyak? Kami senang ngobrol denganmu.</p>
-        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '85810073341' %>" target="_blank" rel="noopener noreferrer" class="btn-primary">
-          <i class="fab fa-whatsapp"></i> Hubungi Kami
+      <!-- Contact CTA -->
+      <div class="ax-about-cta">
+        <p>Punya pertanyaan, kendala, atau ingin request game favorit? Tim CS kami senang mengobrol dengan Anda.</p>
+        <a href="https://wa.me/62<%= process.env.WA_NUMBER ? process.env.WA_NUMBER.replace(/^0/, '') : '85810073341' %>" target="_blank" rel="noopener noreferrer" class="ax-about-btn-wa">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.781-.879-2.057-.98-.276-.1-.477-.15-.678.15-.2.3-.778.98-.954 1.18-.175.2-.351.225-.652.075-.3-.15-1.268-.468-2.416-1.492-.894-.798-1.498-1.784-1.674-2.085-.175-.3-.019-.463.132-.612.136-.135.301-.35.452-.525.15-.176.2-.3.301-.5.101-.2.05-.376-.025-.526-.075-.15-.678-1.634-.929-2.239-.244-.59-.492-.51-.678-.52-.176-.008-.377-.01-.578-.01-.2 0-.527.075-.803.376s-1.054 1.03-1.054 2.511 1.079 2.912 1.23 3.113c.15.2 2.122 3.24 5.141 4.544.718.31 1.278.496 1.716.635.722.23 1.378.197 1.897.12.578-.087 1.781-.728 2.032-1.431.25-.704.25-1.307.175-1.431-.075-.125-.276-.2-.577-.35zM12.042 21.75c-1.802 0-3.535-.487-5.06-1.344l-.363-.205-3.757.986 1.003-3.663-.225-.371c-.961-1.583-1.468-3.4-1.468-5.263 0-5.448 4.432-9.88 9.88-9.88 2.64 0 5.122 1.028 6.985 2.894A9.82 9.82 0 0 1 21.92 11.89c0 5.449-4.432 9.86-9.878 9.86zm8.406-18.286A11.815 11.815 0 0 0 12.042 0C5.402 0 .002 5.4 0 12.04a11.97 11.97 0 0 0 1.637 6.075L0 24l6.059-1.588a11.96 11.96 0 0 0 5.983 1.588h.005c6.64 0 12.04-5.4 12.042-12.042 0-3.217-1.253-6.242-3.641-8.544z"/></svg>
+          Hubungi Admin CS WhatsApp
         </a>
       </div>
     </div>
