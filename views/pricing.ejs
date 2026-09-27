@@ -2,22 +2,14 @@
 <style>
 @media (max-width: 900px) {
   .sub-plans-grid {
-    display: flex !important;
-    overflow-x: auto !important;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 1.5rem;
-    gap: 1rem !important;
-    margin: 0 -1.25rem 2rem;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    scrollbar-width: none;
-    justify-content: flex-start !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
   }
-  .sub-plans-grid::-webkit-scrollbar { display: none; }
-  .sub-plans-grid > div {
-    min-width: 85%;
-    scroll-snap-align: center;
-    flex-shrink: 0;
+  .sub-plans-grid .plan-card {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 auto;
   }
 }
 @media (min-width: 901px) {
@@ -133,6 +125,21 @@
             <% } %>
           </div>
         <% }) %>
+      </div>
+
+      
+      <div style="max-width: 800px; margin: 3rem auto 2rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 1rem; text-align: center;"><i class="fas fa-info-circle" style="color: #00f2fe;"></i> Info Perbedaan Paket</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+          <div style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); padding: 1.25rem; border-radius: 12px;">
+            <h4 style="color: #10b981; font-weight: 800; font-size: 1.05rem; margin-bottom: 0.5rem;">🔥 Paket Regular</h4>
+            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; margin: 0;">Akses ke katalog standar dengan ratusan pilihan game cloud populer. Cocok untuk gamer kasual dengan kualitas HD 60fps yang lancar dan stabil.</p>
+          </div>
+          <div style="background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.2); padding: 1.25rem; border-radius: 12px;">
+            <h4 style="color: #fbbf24; font-weight: 800; font-size: 1.05rem; margin-bottom: 0.5rem;">👑 Paket Ultimate</h4>
+            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; margin: 0;">Akses eksklusif tak terbatas ke <strong>600+ game lengkap & premium</strong> (termasuk AAA titles). Dilengkapi performa maksimal, grafik Ultra 4K, dan akses masuk prioritas (VIP).</p>
+          </div>
+        </div>
       </div>
 
       <!-- FAQ / Info Grid -->
