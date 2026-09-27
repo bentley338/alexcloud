@@ -2624,8 +2624,10 @@ input:focus-visible {
   .feature-card,
   .trust-card,
   .how-step { padding: 1.25rem !important; }
-  .ax-pricing-grid,
   .ax-royal-vip-grid { grid-template-columns: 1fr !important; gap: 0.85rem !important; }
+  .ax-pricing-grid { display: flex !important; overflow-x: auto !important; scroll-snap-type: x mandatory; padding-bottom: 1.5rem; gap: 1rem !important; margin: 0 -1.25rem 2rem; padding-left: 1.25rem; padding-right: 1.25rem; scrollbar-width: none; }
+  .ax-pricing-grid::-webkit-scrollbar { display: none; }
+  .ax-pricing-grid > div { min-width: 85%; scroll-snap-align: center; flex-shrink: 0; }
   .ax-plan-card { padding: 1.3rem !important; }
   .ax-game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.65rem !important; }
   .ax-card-poster { height: clamp(145px, 48vw, 205px) !important; }
