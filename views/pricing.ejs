@@ -11,12 +11,21 @@
     padding-left: 1.25rem;
     padding-right: 1.25rem;
     scrollbar-width: none;
+    justify-content: flex-start !important;
   }
   .sub-plans-grid::-webkit-scrollbar { display: none; }
   .sub-plans-grid > div {
     min-width: 85%;
     scroll-snap-align: center;
     flex-shrink: 0;
+  }
+}
+@media (min-width: 901px) {
+  .sub-plans-grid {
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 1.25rem !important;
   }
 }
 </style>
@@ -35,14 +44,18 @@
   <section class="pricing-section" style="padding-top: 1rem; padding-bottom: 4rem;">
     <div class="pricing-container" style="max-width: 1100px; margin: 0 auto; padding: 0 1.25rem;">
       
-      <!-- TIER 1: 4 CORE SUBSCRIPTION PLANS -->
-      <div class="sub-plans-grid">
-        <% plans.forEach(plan => { %>
-          <div class="plan-card <%= plan.popular ? 'popular' : '' %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+      
+      <!-- PAKET REGULAR -->
+      <h3 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 1.5rem; letter-spacing: -0.02em; text-align: center;">
+        Paket Regular <span style="font-size: 1rem; color: #10b981; vertical-align: middle;">🔥</span>
+      </h3>
+      <div class="sub-plans-grid" style="margin-bottom: 3rem;">
+        <% plans.filter(p => !p.id.includes('ultimate')).forEach(plan => { %>
+          <div class="plan-card <%= plan.popular ? 'popular' : '' %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; min-width: 250px; width: calc(25% - 1rem); flex-grow: 1; max-width: 320px;">
             <div>
               <div class="popular-badge-wrap" style="min-height: 24px; display: flex; align-items: center; margin-bottom: 0.35rem;">
                 <% if (plan.popular) { %>
-                  <div class="popular-badge" style="margin: 0; background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 100px;">⭐ PALING POPULER</div>
+                  <div class="popular-badge" style="margin: 0; background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 100px;">🔥 PALING POPULER</div>
                 <% } %>
               </div>
               
@@ -50,39 +63,72 @@
               <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>" style="font-size: 1.75rem; font-weight: 800; line-height: 1.1; margin-top: 0.15rem;"><%= plan.priceDisplay %></div>
               <div class="plan-period" style="font-size:0.78rem; margin-bottom:0.35rem; color:var(--text-muted);">akses <%= plan.duration %> hari</div>
 
-              <!-- Daily Breakdown Chip -->
-              <% 
-                let dailyCost = Math.round(plan.price / plan.duration);
-                let isUltimate = plan.id.includes('ultimate');
-              %>
-              <div class="daily-chip <%= plan.popular ? 'highlight' : '' %> <%= isUltimate ? 'gold' : '' %>" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.7rem; font-weight:600; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
-                <% if(isUltimate) { %>👑<% } else { %>🔥<% } %> Rp <%= dailyCost.toLocaleString('id-ID') %> / hari
+              <% let dailyCost = Math.round(plan.price / plan.duration); %>
+              <div class="daily-chip <%= plan.popular ? 'highlight' : '' %>" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.7rem; font-weight:600; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
+                🔥 Rp <%= dailyCost.toLocaleString('id-ID') %> / hari
               </div>
 
               <ul class="plan-features" style="gap:0.4rem; margin-bottom:1.1rem;">
-                <% if (plan.id.includes('ultimate')) { %>
-                  <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Akses ratusan game premium & baru</li>
-                  <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Grafis Ultra (Resolusi 4K & 60fps)</li>
-                  <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Prioritas Antrean (VIP Access)</li>
-                  <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Multi-device (HP, PC, Smart TV)</li>
-                  <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Masa aktif <%= plan.duration %> hari</li>
-                <% } else { %>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses katalog game standar</li>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Kualitas HD / 60fps</li>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device (HP & PC)</li>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Tanpa download file game</li>
-                  <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Masa aktif <%= plan.duration %> hari</li>
-                <% } %>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Akses katalog game standar</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Kualitas HD / 60fps</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Multi-device (HP & PC)</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Tanpa download file game</li>
+                <li><i class="fas fa-check-circle" style="color:var(--accent-green)"></i> Masa aktif <%= plan.duration %> hari</li>
               </ul>
             </div>
 
             <% if (typeof user !== 'undefined' && user) { %>
               <a href="/order/<%= plan.id %>?ref_=pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
-                <i class="fas fa-shopping-cart"></i> Pilih Paket
+                <span>Beli Sekarang</span> <i class="fas <%= plan.popular ? 'fa-bolt' : 'fa-arrow-right' %>"></i>
               </a>
             <% } else { %>
-              <a href="/login?ref_=pricing_login" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
-                Login Order
+              <a href="/auth/login?redirect=/order/<%= plan.id %>" class="plan-btn outline" style="font-size:0.82rem; padding:0.65rem 0.75rem;">
+                <i class="fas fa-lock"></i> <span>Login untuk Membeli</span>
+              </a>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+
+      <!-- PAKET ULTIMATE -->
+      <h3 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 1.5rem; letter-spacing: -0.02em; text-align: center;">
+        Paket Ultimate <span style="font-size: 1rem; color: #fbbf24; vertical-align: middle;">👑</span>
+      </h3>
+      <div class="sub-plans-grid">
+        <% plans.filter(p => p.id.includes('ultimate')).forEach(plan => { %>
+          <div class="plan-card <%= plan.popular ? 'popular' : '' %>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; min-width: 250px; width: calc(25% - 1rem); flex-grow: 1; max-width: 320px;">
+            <div>
+              <div class="popular-badge-wrap" style="min-height: 24px; display: flex; align-items: center; margin-bottom: 0.35rem;">
+                <% if (plan.popular) { %>
+                  <div class="popular-badge" style="margin: 0; background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.04em; padding: 0.2rem 0.6rem; border-radius: 100px;">🔥 PALING POPULER</div>
+                <% } %>
+              </div>
+              
+              <div class="plan-name" style="font-size: 1.1rem; font-weight: 700;"><%= plan.name %></div>
+              <div class="plan-price <%= plan.popular ? 'popular-price' : '' %>" style="font-size: 1.75rem; font-weight: 800; line-height: 1.1; margin-top: 0.15rem;"><%= plan.priceDisplay %></div>
+              <div class="plan-period" style="font-size:0.78rem; margin-bottom:0.35rem; color:var(--text-muted);">akses <%= plan.duration %> hari</div>
+
+              <% let dailyCost = Math.round(plan.price / plan.duration); %>
+              <div class="daily-chip <%= plan.popular ? 'highlight' : '' %> gold" style="display:inline-flex; align-items:center; gap:0.25rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.7rem; font-weight:600; padding:0.18rem 0.5rem; border-radius:6px; margin-bottom:0.65rem;">
+                👑 Rp <%= dailyCost.toLocaleString('id-ID') %> / hari
+              </div>
+
+              <ul class="plan-features" style="gap:0.4rem; margin-bottom:1.1rem;">
+                <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Akses ratusan game premium & baru</li>
+                <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Grafis Ultra (Resolusi 4K & 60fps)</li>
+                <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Prioritas Antrean (VIP Access)</li>
+                <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Multi-device (HP, PC, Smart TV)</li>
+                <li><i class="fas fa-check-circle" style="color:#fbbf24;"></i> Masa aktif <%= plan.duration %> hari</li>
+              </ul>
+            </div>
+
+            <% if (typeof user !== 'undefined' && user) { %>
+              <a href="/order/<%= plan.id %>?ref_=pricing_buy" class="plan-btn <%= plan.popular ? 'filled' : 'outline' %>" style="font-size:0.82rem; padding:0.65rem 0.75rem; <%= plan.popular ? 'background: linear-gradient(90deg, #fbbf24, #f59e0b) !important; color: #000 !important; font-weight: 800 !important;' : 'border-color: #fbbf24; color: #fbbf24;' %>">
+                <span>Beli Sekarang</span> <i class="fas <%= plan.popular ? 'fa-crown' : 'fa-crown' %>"></i>
+              </a>
+            <% } else { %>
+              <a href="/auth/login?redirect=/order/<%= plan.id %>" class="plan-btn outline" style="font-size:0.82rem; padding:0.65rem 0.75rem; border-color: #fbbf24; color: #fbbf24;">
+                <i class="fas fa-lock"></i> <span>Login untuk Membeli</span>
               </a>
             <% } %>
           </div>

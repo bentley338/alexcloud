@@ -2091,6 +2091,12 @@ body {
 .nav-user-btn, .btn-nav-cta { min-height: 44px; white-space: nowrap; }
 
 @media (min-width: 901px) {
+  .ax-pricing-grid {
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 1.25rem !important;
+  }
   .nav-links > a[href^="/testimonials"],
   .nav-links > a[href^="/community"],
   .nav-links > a[href^="/network-test"],
@@ -2625,7 +2631,7 @@ input:focus-visible {
   .trust-card,
   .how-step { padding: 1.25rem !important; }
   .ax-royal-vip-grid { grid-template-columns: 1fr !important; gap: 0.85rem !important; }
-  .ax-pricing-grid { display: flex !important; overflow-x: auto !important; scroll-snap-type: x mandatory; padding-bottom: 1.5rem; gap: 1rem !important; margin: 0 -1.25rem 2rem; padding-left: 1.25rem; padding-right: 1.25rem; scrollbar-width: none; }
+  .ax-pricing-grid { display: flex !important; overflow-x: auto !important; scroll-snap-type: x mandatory; padding-bottom: 1.5rem; gap: 1rem !important; margin: 0 -1.25rem 2rem; padding-left: 1.25rem; padding-right: 1.25rem; scrollbar-width: none; justify-content: flex-start !important; }
   .ax-pricing-grid::-webkit-scrollbar { display: none; }
   .ax-pricing-grid > div { min-width: 85%; scroll-snap-align: center; flex-shrink: 0; }
   .ax-plan-card { padding: 1.3rem !important; }
@@ -3269,15 +3275,20 @@ input:focus-visible {
     </div>
 
     <!-- 4 CORE SUBSCRIPTION PLANS (ONLY 1 BULAN / 60K HAS REKOMENDASI BADGE) -->
-    <div class="ax-pricing-grid">
-      <% plans.filter(p => p.id !== 'royal_access' && p.id !== 'custom_royal').forEach((plan, i) => { %>
+    
+    <!-- PAKET REGULAR -->
+    <h3 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 1.5rem; letter-spacing: -0.02em; text-align: center;">
+      Paket Regular <span style="font-size: 1rem; color: #10b981; vertical-align: middle;">🔥</span>
+    </h3>
+    <div class="ax-pricing-grid" style="margin-bottom: 3rem;">
+      <% plans.filter(p => !p.id.includes('ultimate') && p.id !== 'royal_access' && p.id !== 'custom_royal').forEach((plan, i) => { %>
       <div class="ax-plan-card <%= plan.popular ? 'popular' : '' %>">
         <div>
           <!-- Top Badge: ONLY for 60K (1 Bulan / popular) -->
           <div style="min-height: 28px; margin-bottom: 0.6rem;">
             <% if (plan.popular) { %>
               <span style="background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 900; font-size: 0.68rem; padding: 0.25rem 0.75rem; border-radius: 100px; display: inline-block; letter-spacing: 0.5px; box-shadow: 0 2px 12px rgba(251,191,36,0.5);">
-                ⭐ PALING REKOMENDASI
+                🔥 PALING REKOMENDASI
               </span>
             <% } %>
           </div>
@@ -3291,10 +3302,10 @@ input:focus-visible {
           </div>
 
           <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.82rem; color: #cbd5e1;">
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Akses katalog game aktif</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Kualitas menyesuaikan koneksi</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Multi-Device (HP, PC, TV)</span></li>
-            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Panduan aktivasi di dashboard</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Akses katalog game standar</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Kualitas HD / 60fps</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Tanpa download file game</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span>Multi-device (HP & PC)</span></li>
           </ul>
         </div>
 
@@ -3305,6 +3316,52 @@ input:focus-visible {
         <% } else { %>
           <a href="/order/<%= plan.id %>" class="ax-plan-btn-standard">
             <span>Pilih <%= plan.name %></span> <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
+          </a>
+        <% } %>
+      </div>
+      <% }) %>
+    </div>
+
+    <!-- PAKET ULTIMATE -->
+    <h3 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 1.5rem; letter-spacing: -0.02em; text-align: center;">
+      Paket Ultimate <span style="font-size: 1rem; color: #fbbf24; vertical-align: middle;">👑</span>
+    </h3>
+    <div class="ax-pricing-grid">
+      <% plans.filter(p => p.id.includes('ultimate') && p.id !== 'royal_access' && p.id !== 'custom_royal').forEach((plan, i) => { %>
+      <div class="ax-plan-card <%= plan.popular ? 'popular' : '' %>">
+        <div>
+          <!-- Top Badge: ONLY for 60K (1 Bulan / popular) -->
+          <div style="min-height: 28px; margin-bottom: 0.6rem;">
+            <% if (plan.popular) { %>
+              <span style="background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-weight: 900; font-size: 0.68rem; padding: 0.25rem 0.75rem; border-radius: 100px; display: inline-block; letter-spacing: 0.5px; box-shadow: 0 2px 12px rgba(251,191,36,0.5);">
+                🔥 PALING REKOMENDASI
+              </span>
+            <% } %>
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff;"><%= plan.name %></div>
+          <div style="font-size: 2.1rem; font-weight: 900; color: <%= plan.popular ? '#fbbf24' : '#ffffff' %>; margin: 0.35rem 0 0.15rem; letter-spacing: -0.02em;">
+            <%= plan.priceDisplay %>
+          </div>
+          <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 1.25rem; font-weight: 600;">
+            Akses Penuh <%= plan.duration %> Hari
+          </div>
+
+          <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.82rem; color: #cbd5e1;">
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#fbbf24;"></i> <span>Akses ratusan game premium & baru</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#fbbf24;"></i> <span>Grafis Ultra (Resolusi 4K & 60fps)</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#fbbf24;"></i> <span>Prioritas Antrean (VIP Access)</span></li>
+            <li style="display:flex; align-items:center; gap:0.45rem;"><i class="fas fa-check-circle" style="color:#fbbf24;"></i> <span>Multi-device (HP, PC, Smart TV)</span></li>
+          </ul>
+        </div>
+
+        <% if (plan.popular) { %>
+          <a href="/order/<%= plan.id %>" class="ax-plan-btn-popular" style="background: linear-gradient(90deg, #fbbf24, #f59e0b) !important; color: #000 !important; font-weight: 800 !important;">
+            <span>Pilih <%= plan.name %></span> <i class="fas fa-crown" style="font-size: 0.85rem;"></i>
+          </a>
+        <% } else { %>
+          <a href="/order/<%= plan.id %>" class="ax-plan-btn-standard" style="border-color: #fbbf24; color: #fbbf24;">
+            <span>Pilih <%= plan.name %></span> <i class="fas fa-crown" style="font-size: 0.8rem;"></i>
           </a>
         <% } %>
       </div>
